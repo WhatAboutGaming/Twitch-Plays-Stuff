@@ -198,7 +198,7 @@ void setup() {
   serial_rx_buffer_controller[9] = 0x00; //  Delay Byte 2
   serial_rx_buffer_controller[10] = 0x00; // Delay Byte 1
   serial_rx_buffer_controller[11] = 0x01; // Postamble
-
+  //delay(5000); // Wait for the serial program on the computer to startup before sending any data
   //  Count bytes and parse ASCII values to their respective commands, such as buttons and axis
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
     Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
@@ -215,7 +215,7 @@ void setup() {
   sentPing = false;
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_ping_out); serial_rx_buffer_counter++) {
     if (serial_rx_buffer_counter == 0) {
-      Serial.write(0x04);
+      Serial.write(0x03);
     }
     if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4)) {
       Serial.write(0x00);
@@ -227,7 +227,7 @@ void setup() {
       Serial.write(0x00);
     }
     if (serial_rx_buffer_counter == 11) {
-      Serial.write(0x04);
+      Serial.write(0x03);
     }
   }
   Serial.flush();
@@ -598,7 +598,7 @@ void getPong() {
   */
   previousPongDelay = currentMillis;
   lastPongIn = currentMillis;
-  Serial.flush();
+  //Serial.flush();
   /*
   Serial.println("PONG RECEIVED");
   Serial.println("");
@@ -807,7 +807,7 @@ void readMotors() {
     //rightMotorVal = (digitalRead(motorArray[1])); // This is the BIG MOTOR
     rightMotorVal = map(rightMotorVal, 0, 1023, 0, 255);
 
-    // Observed value ~108 when HIGH (LED is OFF), ~85 when LOW (LED is ON)
+    // Observed value ~108 when HIGH (LED is OFF), ~84 when LOW (LED is ON)
     analogLedVal = (analogRead(motorArray[2]));
     //analogLedVal = (digitalRead(motorArray[2])); // If analogLedVal = High, Analog is OFF, else if analogLedVal = Low, Analog is ON
     analogLedVal = map(analogLedVal, 0, 1023, 0, 255);
@@ -857,7 +857,7 @@ void readMotors() {
     //rightMotorVal = (digitalRead(motorArray[1]));
     rightMotorVal = map(rightMotorVal, 0, 1023, 0, 255);
 
-    // Observed value ~108 when HIGH (LED is OFF), ~85 when LOW (LED is ON)
+    // Observed value ~108 when HIGH (LED is OFF), ~84 when LOW (LED is ON)
     analogLedVal = (analogRead(motorArray[2]));
     //analogLedVal = (digitalRead(motorArray[2]));
     analogLedVal = map(analogLedVal, 0, 1023, 0, 255);
@@ -906,7 +906,7 @@ void readMotors() {
     //rightMotorVal = (digitalRead(motorArray[1]));
     rightMotorVal = map(rightMotorVal, 0, 1023, 0, 255);
 
-    // Observed value ~108 when HIGH (LED is OFF), ~85 when LOW (LED is ON)
+    // Observed value ~108 when HIGH (LED is OFF), ~84 when LOW (LED is ON)
     analogLedVal = (analogRead(motorArray[2]));
     //analogLedVal = (digitalRead(motorArray[2]));
     analogLedVal = map(analogLedVal, 0, 1023, 0, 255);
