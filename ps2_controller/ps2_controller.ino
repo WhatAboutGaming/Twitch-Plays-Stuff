@@ -679,6 +679,7 @@ void sendPing() {
       Serial.println(calcPingTimestamp);
       Serial.flush();
     */
+    //readMotors();
     previousPingDelay += pingDelay;
   }
   sentPing = false;
@@ -797,17 +798,20 @@ void readMotors() {
   if ((serial_rx_buffer_motor[0] == 0x02) && (serial_rx_buffer_motor[11] == 0x02))
   {
     // Observed value is ~39 when On , 0 when Off (Reading analog instead of digital, so I can get a threshold of the reading)
+    // ~15 when floating (Controller isn't plugged in to PlayStation or PlayStation2)
     //leftMotorVal = (digitalRead(motorArray[0])); // This is the SMALL MOTOR
     leftMotorVal = (analogRead(motorArray[0]));
     //  map() is used to convert min and max values to desired values, in this case, I need to convert 1023 to 255
     leftMotorVal = map(leftMotorVal, 0, 1023, 0, 255);
 
     // Observed value is ~39 when On , 0 when Off
+    // ~15 when floating (Controller isn't plugged in to PlayStation or PlayStation2)
     rightMotorVal = (analogRead(motorArray[1]));
     //rightMotorVal = (digitalRead(motorArray[1])); // This is the BIG MOTOR
     rightMotorVal = map(rightMotorVal, 0, 1023, 0, 255);
 
     // Observed value ~108 when HIGH (LED is OFF), ~84 when LOW (LED is ON)
+    // ~20 when floating (Controller isn't plugged in to PlayStation or PlayStation2)
     analogLedVal = (analogRead(motorArray[2]));
     //analogLedVal = (digitalRead(motorArray[2])); // If analogLedVal = High, Analog is OFF, else if analogLedVal = Low, Analog is ON
     analogLedVal = map(analogLedVal, 0, 1023, 0, 255);
@@ -847,17 +851,20 @@ void readMotors() {
   if (attentionLevel == HIGH)
   {
     // Observed value is ~39 when On , 0 when Off (Reading analog instead of digital, so I can get a threshold of the reading)
+    // ~15 when floating (Controller isn't plugged in to PlayStation or PlayStation2)
     //leftMotorVal = (digitalRead(motorArray[0]));
     leftMotorVal = (analogRead(motorArray[0]));
     //  map() is used to convert min and max values to desired values, in this case, I need to convert 1023 to 255
     leftMotorVal = map(leftMotorVal, 0, 1023, 0, 255);
 
     // Observed value is ~39 when On , 0 when Off
+    // ~15 when floating (Controller isn't plugged in to PlayStation or PlayStation2)
     rightMotorVal = (analogRead(motorArray[1]));
     //rightMotorVal = (digitalRead(motorArray[1]));
     rightMotorVal = map(rightMotorVal, 0, 1023, 0, 255);
 
     // Observed value ~108 when HIGH (LED is OFF), ~84 when LOW (LED is ON)
+    // ~20 when floating (Controller isn't plugged in to PlayStation or PlayStation2)
     analogLedVal = (analogRead(motorArray[2]));
     //analogLedVal = (digitalRead(motorArray[2]));
     analogLedVal = map(analogLedVal, 0, 1023, 0, 255);
@@ -896,17 +903,20 @@ void readMotors() {
   else if (attentionLevel == LOW)
   {
     // Observed value is ~39 when On , 0 when Off (Reading analog instead of digital, so I can get a threshold of the reading)
+    // ~15 when floating (Controller isn't plugged in to PlayStation or PlayStation2)
     //leftMotorVal = (digitalRead(motorArray[0]));
     leftMotorVal = (analogRead(motorArray[0]));
     //  map() is used to convert min and max values to desired values, in this case, I need to convert 1023 to 255
     leftMotorVal = map(leftMotorVal, 0, 1023, 0, 255);
 
     // Observed value is ~39 when On , 0 when Off
+    // ~15 when floating (Controller isn't plugged in to PlayStation or PlayStation2)
     rightMotorVal = (analogRead(motorArray[1]));
     //rightMotorVal = (digitalRead(motorArray[1]));
     rightMotorVal = map(rightMotorVal, 0, 1023, 0, 255);
 
     // Observed value ~108 when HIGH (LED is OFF), ~84 when LOW (LED is ON)
+    // ~20 when floating (Controller isn't plugged in to PlayStation or PlayStation2)
     analogLedVal = (analogRead(motorArray[2]));
     //analogLedVal = (digitalRead(motorArray[2]));
     analogLedVal = map(analogLedVal, 0, 1023, 0, 255);
