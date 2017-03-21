@@ -277,7 +277,7 @@ void loop() {
   //  The Arduino then sends Reconnect Successful to tell the computer Connection is working as intended
   //  Or:
   //  Computer sends Disconnect to the Arduino in case of PING timeout (The Arduino didn't respond with PONG in time)
-  //  The Arduino then sends Disconnect Ungderstood back to the Computer, both close connections on their ends, then start connection again
+  //  The Arduino then sends Disconnect Understood back to the Computer, both close connections on their ends, then start connection again
   //  The Computer then sends Reconnect Successful to tell the Arduino Connection is working as intended
   if (Serial.available() > 0) {
 
