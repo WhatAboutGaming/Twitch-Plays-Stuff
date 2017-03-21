@@ -198,7 +198,7 @@ void setup() {
   serial_rx_buffer_controller[9] = 0x00; //  Delay Byte 2
   serial_rx_buffer_controller[10] = 0x00; // Delay Byte 1
   serial_rx_buffer_controller[11] = 0x01; // Postamble
-  //delay(5000); // Wait for the serial program on the computer to startup before sending any data
+  delay(5000); // Wait for the serial program on the computer to startup before sending any data
   //  Count bytes and parse ASCII values to their respective commands, such as buttons and axis
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
     Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
@@ -229,7 +229,9 @@ void setup() {
     if (serial_rx_buffer_counter == 11) {
       Serial.write(0x03);
     }
+    sentPing = true;
   }
+  sentPing = false;
   Serial.flush();
   sendPing();
   calculatePing();
@@ -255,7 +257,7 @@ void loop() {
   //  << PING 3000  // This is data sent from the Arduino
   //  >> PONG 3000  // This is data the Arduino received
 
-  //  Preamble/Postamble = 0x04 for PONG for BOTH wayy
+  //  Preamble/Postamble = 0x04 for PONG for BOTH ways
   //  PING/PONG System where PING is sent from the Computer and PONG is sent from the Arduino:
   //  Where ">>" is incoming data and "<<" is outgoing data
   //  >> PING 1487568769420  // This is data the Arduino received
@@ -275,7 +277,7 @@ void loop() {
   //  The Arduino then sends Reconnect Successful to tell the computer Connection is working as intended
   //  Or:
   //  Computer sends Disconnect to the Arduino in case of PING timeout (The Arduino didn't respond with PONG in time)
-  //  The Arduino then sends Disconnect Understood back to the Computer, both close connections on their ends, then start connection again
+  //  The Arduino then sends Disconnect Ungderstood back to the Computer, both close connections on their ends, then start connection again
   //  The Computer then sends Reconnect Successful to tell the Arduino Connection is working as intended
   if (Serial.available() > 0) {
 
@@ -321,7 +323,7 @@ void loop() {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_pong_in); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Pong Input Buffer
         serial_rx_buffer_pong_in[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
-      }
+      }s
       getPong();
     }
     else if ((serial_rx_buffer[0] == 0xA0) && (serial_rx_buffer[11] == 0xA0)) {
@@ -525,7 +527,7 @@ void getPing() {
       Serial.write(0x04);
     }
     if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4)) {
-      Serial.write(0x00);
+      Serial.write(serial_rx_buffer_pong_out[serial_rx_buffer_counter]);
     }
     if ((serial_rx_buffer_counter == 5) || (serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
       Serial.write(serial_rx_buffer_pong_out[serial_rx_buffer_counter]);
