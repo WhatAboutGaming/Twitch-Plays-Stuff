@@ -323,7 +323,7 @@ void loop() {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_pong_in); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Pong Input Buffer
         serial_rx_buffer_pong_in[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
-      }s
+      }
       getPong();
     }
     else if ((serial_rx_buffer[0] == 0xA0) && (serial_rx_buffer[11] == 0xA0)) {
@@ -363,6 +363,7 @@ void arduinoDisconnect() {
   Serial.end();
   isConnected = false;
   disconnectDone = currentMillis;
+  delay(5000); // Wait 5 seconds before reconnecting
   Serial.begin(baudRate);
   serial_rx_buffer_disconnect[0] = 0x0B;
   serial_rx_buffer_disconnect[11] = 0x0B;
@@ -546,28 +547,28 @@ void getPing() {
   lastPongOut = currentMillis;
   Serial.flush();
   /*
-  Serial.print("PONG = ");
-  Serial.println(currentMillis);
-  Serial.flush();
-  Serial.println("PING RECEIVED");
-  Serial.println("");
-  Serial.print("LAST PING TIME IN = ");
-  Serial.println(lastPingIn);
-  Serial.print("LAST PONG TIME IN = ");
-  Serial.println(lastPongIn);
-  Serial.print("LAST PING TIME OUT = ");
-  Serial.println(lastPingOut);
-  Serial.print("LAST PONG TIME OUT = ");
-  Serial.println(lastPongOut);
-  Serial.print("PING TIME OUT = ");
-  Serial.println(pingTimeOut);
-  Serial.print("PONG TIME OUT = ");
-  Serial.println(pongTimeOut);
-  Serial.print("PING TIME IN = ");
-  Serial.println(pingTimeIn);
-  Serial.print("PONG TIME IN= ");
-  Serial.println(pongTimeIn);
-  Serial.flush();
+    Serial.print("PONG = ");
+    Serial.println(currentMillis);
+    Serial.flush();
+    Serial.println("PING RECEIVED");
+    Serial.println("");
+    Serial.print("LAST PING TIME IN = ");
+    Serial.println(lastPingIn);
+    Serial.print("LAST PONG TIME IN = ");
+    Serial.println(lastPongIn);
+    Serial.print("LAST PING TIME OUT = ");
+    Serial.println(lastPingOut);
+    Serial.print("LAST PONG TIME OUT = ");
+    Serial.println(lastPongOut);
+    Serial.print("PING TIME OUT = ");
+    Serial.println(pingTimeOut);
+    Serial.print("PONG TIME OUT = ");
+    Serial.println(pongTimeOut);
+    Serial.print("PING TIME IN = ");
+    Serial.println(pingTimeIn);
+    Serial.print("PONG TIME IN= ");
+    Serial.println(pongTimeIn);
+    Serial.flush();
   */
   sentPong = false;
 }
@@ -575,7 +576,24 @@ void getPing() {
 void getPong() {
   //  This function gets PONG sent from the computer, then stores it in an Unsigned Long Integer
   pongTimeIn = (unsigned long)serial_rx_buffer_pong_in[5] << 24 | (unsigned long)serial_rx_buffer_pong_in[6] << 16 | (unsigned long)serial_rx_buffer_pong_in[7] << 8 | (unsigned long)serial_rx_buffer_pong_in[8];
-  //  This for loop doesn't have to be used, the Arduino doesn't have to respond to PONG with PONG, it doesn't have to respont to PONG at all.
+  //  Respond PONG with PONG for debugging purposes
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_pong_in); serial_rx_buffer_counter++) {
+    if (serial_rx_buffer_counter == 0) {
+      Serial.write(0x05);
+    }
+    if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4)) {
+      Serial.write(serial_rx_buffer_pong_in[serial_rx_buffer_counter]);
+    }
+    if ((serial_rx_buffer_counter == 5) || (serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
+      Serial.write(serial_rx_buffer_pong_in[serial_rx_buffer_counter]);
+    }
+    if ((serial_rx_buffer_counter == 9) || (serial_rx_buffer_counter == 10)) {
+      Serial.write(0x00);
+    }
+    if (serial_rx_buffer_counter == 11) {
+      Serial.write(0x05);
+    }
+  }
   /*
     for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_pong_in); serial_rx_buffer_counter++) {
     serial_rx_buffer_ping_out[serial_rx_buffer_counter] = serial_rx_buffer_pong_in[serial_rx_buffer_counter];
@@ -602,28 +620,28 @@ void getPong() {
   lastPongIn = currentMillis;
   //Serial.flush();
   /*
-  Serial.println("PONG RECEIVED");
-  Serial.println("");
-  Serial.print("CURRENT TIME = ");
-  Serial.println(currentMillis);
-  Serial.flush();
-  Serial.print("LAST PING TIME IN = ");
-  Serial.println(lastPingIn);
-  Serial.print("LAST PONG TIME IN = ");
-  Serial.println(lastPongIn);
-  Serial.print("LAST PING TIME OUT = ");
-  Serial.println(lastPingOut);
-  Serial.print("LAST PONG TIME OUT = ");
-  Serial.println(lastPongOut);
-  Serial.print("PING TIME OUT = ");
-  Serial.println(pingTimeOut);
-  Serial.print("PONG TIME OUT = ");
-  Serial.println(pongTimeOut);
-  Serial.print("PING TIME IN = ");
-  Serial.println(pingTimeIn);
-  Serial.print("PONG TIME IN= ");
-  Serial.println(pongTimeIn);
-  Serial.flush();
+    Serial.println("PONG RECEIVED");
+    Serial.println("");
+    Serial.print("CURRENT TIME = ");
+    Serial.println(currentMillis);
+    Serial.flush();
+    Serial.print("LAST PING TIME IN = ");
+    Serial.println(lastPingIn);
+    Serial.print("LAST PONG TIME IN = ");
+    Serial.println(lastPongIn);
+    Serial.print("LAST PING TIME OUT = ");
+    Serial.println(lastPingOut);
+    Serial.print("LAST PONG TIME OUT = ");
+    Serial.println(lastPongOut);
+    Serial.print("PING TIME OUT = ");
+    Serial.println(pingTimeOut);
+    Serial.print("PONG TIME OUT = ");
+    Serial.println(pongTimeOut);
+    Serial.print("PING TIME IN = ");
+    Serial.println(pingTimeIn);
+    Serial.print("PONG TIME IN= ");
+    Serial.println(pongTimeIn);
+    Serial.flush();
   */
 }
 
