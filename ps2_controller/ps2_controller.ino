@@ -257,11 +257,17 @@ void loop() {
   //  << PING 3000  // This is data sent from the Arduino
   //  >> PONG 3000  // This is data the Arduino received
 
-  //  Preamble/Postamble = 0x04 for PONG for BOTH ways
+  //  Preamble/Postamble = 0x04 for PING for BOTH ways
+  //  PING/PONG System where PING is sent from the Arduino and PONG is sent from the Computer:
+  //  Where ">>" is incoming data and "<<" is outgoing data
+  //  << PING 3000  // This is data sent from the Arduino
+  //  >> PONG 3000  // This is data the Arduino received
+
+  //  Preamble/Postamble = 0x05 for PONG for BOTH ways
   //  PING/PONG System where PING is sent from the Computer and PONG is sent from the Arduino:
   //  Where ">>" is incoming data and "<<" is outgoing data
-  //  >> PING 1487568769420  // This is data the Arduino received
-  //  << PONG 1487568769420  // This is data sent from the Arduino
+  //  << PONG (0x04) 3000  // This is data sent from the Arduino
+  //  >> PONG (0x05) 3000  // This is data the Arduino received
 
   //  NOTE: This is in no way supposed to represent actual communication, it's only a way to making visualizing data traffic more easily
 
@@ -384,6 +390,7 @@ void arduinoReset() {
     Serial.write(serial_rx_buffer_reset[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
   Serial.flush();
+  delay(5000); // Wait 5 seconds before resetting
   asm volatile ("  jmp 0");
   resetDone = currentMillis;
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset); serial_rx_buffer_counter++) {
