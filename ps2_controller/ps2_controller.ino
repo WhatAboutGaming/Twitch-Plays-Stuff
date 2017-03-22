@@ -729,12 +729,14 @@ void calculatePing() {
     Serial.flush();
     //calcPongTimestamp = 0;
     previousPongDelay = currentMillis;
-    //Serial.print("RESET PING = ");
+    //Serial.println("Closing connection");
     //Serial.println(calcPongTimestamp);
     Serial.end();
     isConnected = false;
+    delay(5000); // Wait 5 seconds before starting connection
     //Serial.println("Sending shit after connection has closed");
     Serial.begin(baudRate);
+    //Serial.println("Connection started");
     serial_rx_buffer_disconnect[0] = 0x0B;
     serial_rx_buffer_disconnect[11] = 0x0B;
     isConnected = true;
