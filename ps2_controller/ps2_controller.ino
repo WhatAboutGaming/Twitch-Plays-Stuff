@@ -43,7 +43,7 @@ unsigned long pingTimeOut = 0;
 unsigned long pongTimeOut = 0;
 unsigned long pingTimeIn = 0;
 unsigned long pongTimeIn = 0;
-unsigned long pingDelay = 1000;
+unsigned long pingDelay = 500;
 unsigned long pongDelay = 1000;
 unsigned long previousCalc = 0;
 unsigned long calcDelay = 1000;
@@ -680,6 +680,7 @@ void sendPing() {
       }
     }
     Serial.flush();
+    //readMotors(); //  This is here for debugging reasons.
     sentPing = true;
     /*
       Serial.print("pongTimeByte5 = ");
