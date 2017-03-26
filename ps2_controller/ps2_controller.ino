@@ -212,7 +212,33 @@ void setup() {
   serial_rx_buffer_controller[9] = 0x00; //  Delay Byte 2
   serial_rx_buffer_controller[10] = 0x00; // Delay Byte 1
   serial_rx_buffer_controller[11] = 0x01; // Postamble
+
+  resetCalled = currentMillis;
+  serial_rx_buffer_reset[8] = (byte)((resetCalled & 0xFF));
+  serial_rx_buffer_reset[7] = (byte)((resetCalled >> 8) & 0xFF);
+  serial_rx_buffer_reset[6] = (byte)((resetCalled >> 16) & 0xFF);
+  serial_rx_buffer_reset[5] = (byte)((resetCalled >> 24) & 0xFF);
+  serial_rx_buffer_reset[0] = 0xA0;
+  serial_rx_buffer_reset[11] = 0xA0;
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset); serial_rx_buffer_counter++) {
+    Serial.write(serial_rx_buffer_reset[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
+  }
+  Serial.flush();
+
   delay(5000); // Wait for the serial program on the computer to startup before sending any data
+
+  resetDone = currentMillis;
+  serial_rx_buffer_reset[0] = 0xA1;
+  serial_rx_buffer_reset[11] = 0xA1;
+  serial_rx_buffer_reset[8] = (byte)((resetDone & 0xFF));
+  serial_rx_buffer_reset[7] = (byte)((resetDone >> 8) & 0xFF);
+  serial_rx_buffer_reset[6] = (byte)((resetDone >> 16) & 0xFF);
+  serial_rx_buffer_reset[5] = (byte)((resetDone >> 24) & 0xFF);
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset); serial_rx_buffer_counter++) {
+    Serial.write(serial_rx_buffer_reset[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
+  }
+  Serial.flush();
+
   serial_rx_buffer_disconnect[0] = 0x0B;
   serial_rx_buffer_disconnect[11] = 0x0B;
   isConnected = true;
@@ -424,8 +450,8 @@ void arduinoReset() {
   serial_rx_buffer_reset[7] = (byte)((resetCalled >> 8) & 0xFF);
   serial_rx_buffer_reset[6] = (byte)((resetCalled >> 16) & 0xFF);
   serial_rx_buffer_reset[5] = (byte)((resetCalled >> 24) & 0xFF);
-  serial_rx_buffer_reset[0] = 0xA1;
-  serial_rx_buffer_reset[11] = 0xA1;
+  serial_rx_buffer_reset[0] = 0xA0;
+  serial_rx_buffer_reset[11] = 0xA0;
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset); serial_rx_buffer_counter++) {
     Serial.write(serial_rx_buffer_reset[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
@@ -448,6 +474,8 @@ void arduinoReset() {
   disconnectDone = currentMillis;
   delay(5000); // Wait 5 seconds before resetting
   resetDone = currentMillis;
+  serial_rx_buffer_reset[0] = 0xA1;
+  serial_rx_buffer_reset[11] = 0xA1;
   serial_rx_buffer_reset[8] = (byte)((resetDone & 0xFF));
   serial_rx_buffer_reset[7] = (byte)((resetDone >> 8) & 0xFF);
   serial_rx_buffer_reset[6] = (byte)((resetDone >> 16) & 0xFF);
@@ -788,8 +816,8 @@ void calculatePing() {
     //Serial.println("DISCONNECTING...");
     //Serial.print("DISCONNECTING PING = ");
     //Serial.println(calcPongTimestampIn);
-    serial_rx_buffer_disconnect[0] = 0x0A;
-    serial_rx_buffer_disconnect[11] = 0x0A;
+    serial_rx_buffer_disconnect[0] = 0x09;
+    serial_rx_buffer_disconnect[11] = 0x09;
     for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
       Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
     }
