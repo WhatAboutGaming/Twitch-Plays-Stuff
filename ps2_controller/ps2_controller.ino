@@ -816,12 +816,12 @@ void calculatePing() {
     //Serial.println("DISCONNECTING...");
     //Serial.print("DISCONNECTING PING = ");
     //Serial.println(calcPongTimestampIn);
-    serial_rx_buffer_disconnect[0] = 0x09;
-    serial_rx_buffer_disconnect[11] = 0x09;
+    serial_rx_buffer_disconnect[0] = 0x0A;
+    serial_rx_buffer_disconnect[11] = 0x0A;
     for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
       Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
     }
-    Serial.flush();
+    Serial.flush(); 
     //calcPongTimestamp = 0;
     previousPongDelay = currentMillis;
     //Serial.println("Closing connection");
