@@ -417,8 +417,8 @@ void arduinoDisconnect() {
   serial_rx_buffer_disconnect[5] = (byte)((disconnectCalled >> 24) & 0xFF);
   //Serial.println(disconnectCalled);
   //Serial.println("DISCONNECTING...");
-  serial_rx_buffer_disconnect[0] = 0x0A;
-  serial_rx_buffer_disconnect[11] = 0x0A;
+  serial_rx_buffer_disconnect[0] = 0x09;
+  serial_rx_buffer_disconnect[11] = 0x09; 
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
     Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
