@@ -225,7 +225,7 @@ void setup() {
   }
   Serial.flush();
 
-  delay(5000); // Wait for the serial program on the computer to startup before sending any data
+  delay(2500); // Wait 2.5 seconds for the serial program on the computer to startup before sending any data
 
   resetDone = currentMillis;
   serial_rx_buffer_reset[0] = 0xA1;
@@ -429,7 +429,7 @@ void arduinoDisconnect() {
   serial_rx_buffer_disconnect[7] = (byte)((disconnectDone >> 8) & 0xFF);
   serial_rx_buffer_disconnect[6] = (byte)((disconnectDone >> 16) & 0xFF);
   serial_rx_buffer_disconnect[5] = (byte)((disconnectDone >> 24) & 0xFF);
-  delay(5000); // Wait 5 seconds before reconnecting
+  delay(2500); // Wait 2.5 seconds before reconnecting
   isConnected = true;
   disconnectDone = currentMillis;
   Serial.begin(baudRate);
@@ -472,7 +472,7 @@ void arduinoReset() {
   Serial.end();
   isConnected = false;
   disconnectDone = currentMillis;
-  delay(5000); // Wait 5 seconds before resetting
+  delay(2500); // Wait 2.5 seconds before resetting
   resetDone = currentMillis;
   serial_rx_buffer_reset[0] = 0xA1;
   serial_rx_buffer_reset[11] = 0xA1;
@@ -480,7 +480,7 @@ void arduinoReset() {
   serial_rx_buffer_reset[7] = (byte)((resetDone >> 8) & 0xFF);
   serial_rx_buffer_reset[6] = (byte)((resetDone >> 16) & 0xFF);
   serial_rx_buffer_reset[5] = (byte)((resetDone >> 24) & 0xFF);
-  asm volatile ("  jmp 0");
+  asm volatile ("  jmp 0"); // Reset the Arduino through ASM code
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset); serial_rx_buffer_counter++) {
     Serial.write(serial_rx_buffer_reset[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
@@ -828,7 +828,7 @@ void calculatePing() {
     //Serial.println(calcPongTimestamp);
     Serial.end();
     isConnected = false;
-    delay(5000); // Wait 5 seconds before starting connection
+    delay(2500); // Wait 2.5 seconds before starting connection
     //Serial.println("Sending shit after connection has closed");
     Serial.begin(baudRate);
     //Serial.println("Connection started");
