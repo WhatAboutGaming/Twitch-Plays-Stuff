@@ -806,7 +806,7 @@ void sendPing() {
 void calculatePing() {
   //  Calculate delay since last PONG sent from the computer, If the computer doesn't respond with PONG in 30 seconds since the last PONG sent from the computer, connection is interrupted and the restarted
   calcPingTimestampIn = (currentMillis - previousPingDelay);
-  if ((calcPongTimestampIn - calcPingTimestampIn >= 30000) && (calcPongTimestampIn - calcPingTimestampIn <= currentMillis)) {
+  if ((calcPongTimestampIn - calcPingTimestampIn >= 10000) && (calcPongTimestampIn - calcPingTimestampIn <= currentMillis)) {
     disconnectCalled = currentMillis;
     serial_rx_buffer_disconnect[8] = (byte)((disconnectCalled & 0xFF));
     serial_rx_buffer_disconnect[7] = (byte)((disconnectCalled >> 8) & 0xFF);
@@ -817,7 +817,7 @@ void calculatePing() {
     //Serial.print("DISCONNECTING PING = ");
     //Serial.println(calcPongTimestampIn);
     serial_rx_buffer_disconnect[0] = 0x0A;
-    serial_rx_buffer_disconnect[11] = 0x0A;
+    serial_rx_buffer_disconnect[11] = 0x0A; 
     for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
       Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
     }
@@ -850,7 +850,7 @@ void calculatePing() {
     //disconnectDone = currentMillis;
     //Serial.println(disconnectDone);
   }
-  else if (calcPongTimestampIn - calcPingTimestampIn < 30000) {
+  else if (calcPongTimestampIn - calcPingTimestampIn < 10000) {
     //Serial.println("PONG OK");
     //Serial.println(currentMillis);
   }
