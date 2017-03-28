@@ -793,7 +793,7 @@ void sendPing() {
       Serial.print("CURRENT PONG CALCULATED = ");
       Serial.println(calcPongTimestamp);
       Serial.flush();
-      Serial.print("CURRENT PING CALCULATED = ");
+      Serial.print("CURRENT PING CALCULATED = "); 
       Serial.println(calcPingTimestamp);
       Serial.flush();
     */
