@@ -1,3 +1,15 @@
+/*
+PS2 Controller for Arduino Mega2560 v1.1a by WhatAboutGaming
+For use in the Twitch.TV stream TwitchTriesToPlay.
+https://www.twitch.tv/twitchtriestoplay
+https://github.com/WhatAboutGaming/Twitch-Plays-Stuff
+
+Reference:
+https://gist.github.com/scanlime/5042071
+http://store.curiousinventor.com/guides/PS2/
+http://www.lynxmotion.com/images/files/ps2cmd01.txt
+*/
+
 #define axisLx 2
 #define axisLy 3
 #define axisRy 4
