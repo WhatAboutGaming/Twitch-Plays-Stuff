@@ -1,14 +1,17 @@
 /*
-PS2 Controller for Arduino Mega2560 v1.1a by WhatAboutGaming
-For use in the Twitch.TV stream TwitchTriesToPlay.
-https://www.twitch.tv/twitchtriestoplay
-https://github.com/WhatAboutGaming/Twitch-Plays-Stuff
+  PS2 Controller for Arduino Mega2560 v1.1a by WhatAboutGaming
+  For use in the Twitch.TV stream TwitchTriesToPlay.
+  https://www.twitch.tv/twitchtriestoplay
+  https://github.com/WhatAboutGaming/Twitch-Plays-Stuff
 
-Reference:
-https://gist.github.com/scanlime/5042071
-http://store.curiousinventor.com/guides/PS2/
-http://www.lynxmotion.com/images/files/ps2cmd01.txt
+  Reference:
+  https://gist.github.com/scanlime/5042071
+  http://store.curiousinventor.com/guides/PS2/
+  http://www.lynxmotion.com/images/files/ps2cmd01.txt
 */
+
+//  Todo: Add command to send Neutral controller data and reset controller inputs
+//  Send Neutral Controller data periodically (500ms, maybe?) when there's no input running
 
 #define axisLx 2
 #define axisLy 3
@@ -70,6 +73,9 @@ unsigned long calcPongTimestampIn = 0;
 unsigned long calcPingTimestampOut = 0;
 unsigned long calcPongTimestampOut = 0;
 
+unsigned long resetControllerDataDelay = 500;
+unsigned long previousResetControllerDataDelay = 0;
+
 unsigned int leftMotorVal = 0;
 unsigned int rightMotorVal = 0;
 unsigned int analogLedVal = 0;
@@ -121,6 +127,7 @@ byte serial_rx_buffer_motor[12];
 byte serial_rx_buffer_reset[12];
 byte serial_rx_buffer_disconnect[12];
 byte serial_rx_buffer_inverted_controller[12];
+byte serial_rx_buffer_reset_controller[12];
 unsigned long serial_rx_buffer_counter = 0;
 unsigned long controller = 0;
 
@@ -350,6 +357,9 @@ void loop() {
   //  Computer sends Disconnect to the Arduino in case of PING timeout (The Arduino didn't respond with PONG in time)
   //  The Arduino then sends Disconnect Understood back to the Computer, both close connections on their ends, then start connection again
   //  The Computer then sends Reconnect Successful to tell the Arduino Connection is working as intended
+
+  //  Preamble/Postamble = 0x0C for Reset Controller Data
+  //  This is used when the computer requests Arduino to reset Controller data, Arduino then responds back with a 0x01 Controller Data Command.
   if (Serial.available() > 0) {
 
     controller = Serial.readBytes(serial_rx_buffer, sizeof(serial_rx_buffer)) && 0xFF;
@@ -408,10 +418,19 @@ void loop() {
     else if ((serial_rx_buffer[0] == 0x09) && (serial_rx_buffer[11] == 0x09)) {
       // Disconnect Arduino
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
-        //  Pass Serial Buffer to Disconnect Buffer
+        //  Pass Serial Buffer to Reset Controller Buffer
         serial_rx_buffer_disconnect[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
       }
       arduinoDisconnect();
+    }
+    else if ((serial_rx_buffer[0] == 0x0C) && (serial_rx_buffer[11] == 0x0C)) {
+      // Reset Controller Data
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset_controller); serial_rx_buffer_counter++) {
+        //  Pass Serial Buffer to Reset Controller Data Buffer
+        serial_rx_buffer_reset_controller[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
+        Serial.write(serial_rx_buffer_reset_controller[serial_rx_buffer_counter]);
+      }
+      manualResetControllerData();
     }
   }
   pressButtons();
@@ -419,6 +438,7 @@ void loop() {
   calculatePing();
   calculatePong();
   getAttention();
+  autoResetControllerData();
 } // Close Loop Function
 
 void arduinoDisconnect() {
@@ -656,9 +676,9 @@ void arduinoReset() {
   Serial.end();
   isConnected = false;
   disconnectDone = currentMillis;
-  delay(2500); // Wait 2.5 seconds before resetting 
+  delay(2500); // Wait 2.5 seconds before resetting
   Serial.begin(baudRate);
-  
+
   //  Tell the computer the connection has began succesfully
   serial_rx_buffer_disconnect[0] = 0x0B;
   serial_rx_buffer_disconnect[11] = 0x0B;
@@ -1058,7 +1078,7 @@ void sendPing() {
 }
 
 void calculatePing() {
-  //  Calculate delay since last PONG sent from the computer, If the computer doesn't respond with PONG in 30 seconds since the last PONG sent from the computer, connection is interrupted and the restarted
+  //  Calculate delay since last PONG sent from the computer, If the computer doesn't respond with PONG in 10 seconds since the last PONG sent from the computer, connection is interrupted and the restarted
   calcPingTimestampIn = (currentMillis - previousPingDelay);
   if ((calcPongTimestampIn - calcPingTimestampIn >= 10000) && (calcPongTimestampIn - calcPingTimestampIn <= currentMillis)) {
     disconnectCalled = currentMillis;
@@ -1289,6 +1309,128 @@ void getAttention() {
   }
   }
 */
+
+void manualResetControllerData()
+{
+  //  This function resets controller data when requested by the computer. Can be used for example when something goes wrong on the computer's end.
+  serial_rx_buffer_controller[0] = 0x01; //  Preamble
+  serial_rx_buffer_controller[1] = 0x00; //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
+  serial_rx_buffer_controller[2] = 0x00; //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
+  serial_rx_buffer_controller[3] = 0x7F; //  RX
+  serial_rx_buffer_controller[4] = 0x7F; //  RY
+  serial_rx_buffer_controller[5] = 0x7F; //  LX
+  serial_rx_buffer_controller[6] = 0x7F; //  LY
+  serial_rx_buffer_controller[7] = 0x00; //  Analog button (Used to change between Digital and Analog modes in older games), Buffer Array Element 7  //  All other bits in this Buffer Array Element are unused
+  serial_rx_buffer_controller[8] = 0x00; //  Unused
+  serial_rx_buffer_controller[9] = 0x00; //  Delay Byte 2
+  serial_rx_buffer_controller[10] = 0x00; // Delay Byte 1
+  serial_rx_buffer_controller[11] = 0x01; // Postamble
+
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
+    Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
+    serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]); //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
+  }
+
+  //  First 8 buttons, Buffer Array Element 1
+  //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
+  digitalWrite(commandArray[0], (serial_rx_buffer_inverted_controller[1] & B00000001));
+  digitalWrite(commandArray[1], (serial_rx_buffer_inverted_controller[1] & B00000010));
+  digitalWrite(commandArray[2], (serial_rx_buffer_inverted_controller[1] & B00000100));
+  digitalWrite(commandArray[3], (serial_rx_buffer_inverted_controller[1] & B00001000));
+  digitalWrite(commandArray[4], (serial_rx_buffer_inverted_controller[1] & B00010000));
+  digitalWrite(commandArray[5], (serial_rx_buffer_inverted_controller[1] & B00100000));
+  digitalWrite(commandArray[6], (serial_rx_buffer_inverted_controller[1] & B01000000));
+  digitalWrite(commandArray[7], (serial_rx_buffer_inverted_controller[1] & B10000000));
+
+  //  Second 8 buttons, Buffer Array Element 2
+  //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
+  digitalWrite(commandArray[8], (serial_rx_buffer_inverted_controller[2] & B00000001));
+  digitalWrite(commandArray[9], (serial_rx_buffer_inverted_controller[2] & B00000010));
+  digitalWrite(commandArray[10], (serial_rx_buffer_inverted_controller[2] & B00000100));
+  digitalWrite(commandArray[11], (serial_rx_buffer_inverted_controller[2] & B00001000));
+  digitalWrite(commandArray[12], (serial_rx_buffer_inverted_controller[2] & B00010000));
+  digitalWrite(commandArray[13], (serial_rx_buffer_inverted_controller[2] & B00100000));
+  digitalWrite(commandArray[14], (serial_rx_buffer_inverted_controller[2] & B01000000));
+  digitalWrite(commandArray[15], (serial_rx_buffer_inverted_controller[2] & B10000000));
+
+  //  4 Axis, Buffer Array Elements 3, 4, 5, 6
+  //  RX, RY, LX, LY
+  analogWrite(commandArray[16], serial_rx_buffer_inverted_controller[3]);
+  analogWrite(commandArray[17], serial_rx_buffer_inverted_controller[4]);
+  analogWrite(commandArray[18], serial_rx_buffer_inverted_controller[5]);
+  analogWrite(commandArray[19], serial_rx_buffer_inverted_controller[6]);
+
+  //  Analog button (Used to change between Digital and Analog modes in older games), Buffer Array Element 7
+  //  All other bits in this Buffer Array Element are unused
+  digitalWrite(commandArray[20], (serial_rx_buffer_inverted_controller[7] & B00000001));
+
+  //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
+  Serial.flush();
+}
+
+void autoResetControllerData()
+{
+  //  This function resets controller data when every 500ms, but only when there's no Input being executed.
+  if (currentMillis - previousResetControllerDataDelay >= resetControllerDataDelay) {
+    if (isInputting == false) {
+      //  This function resets contreoller data when requested by the computer. Can be used for example when something goes wrong on the computer's end.
+      serial_rx_buffer_controller[0] = 0x01; //  Preamble
+      serial_rx_buffer_controller[1] = 0x00; //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
+      serial_rx_buffer_controller[2] = 0x00; //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
+      serial_rx_buffer_controller[3] = 0x7F; //  RX
+      serial_rx_buffer_controller[4] = 0x7F; //  RY
+      serial_rx_buffer_controller[5] = 0x7F; //  LX
+      serial_rx_buffer_controller[6] = 0x7F; //  LY
+      serial_rx_buffer_controller[7] = 0x00; //  Analog button (Used to change between Digital and Analog modes in older games), Buffer Array Element 7  //  All other bits in this Buffer Array Element are unused
+      serial_rx_buffer_controller[8] = 0x00; //  Unused
+      serial_rx_buffer_controller[9] = 0x00; //  Delay Byte 2
+      serial_rx_buffer_controller[10] = 0x00; // Delay Byte 1
+      serial_rx_buffer_controller[11] = 0x01; // Postamble
+
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
+        Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
+        serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]); //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
+      }
+
+      //  First 8 buttons, Buffer Array Element 1
+      //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
+      digitalWrite(commandArray[0], (serial_rx_buffer_inverted_controller[1] & B00000001));
+      digitalWrite(commandArray[1], (serial_rx_buffer_inverted_controller[1] & B00000010));
+      digitalWrite(commandArray[2], (serial_rx_buffer_inverted_controller[1] & B00000100));
+      digitalWrite(commandArray[3], (serial_rx_buffer_inverted_controller[1] & B00001000));
+      digitalWrite(commandArray[4], (serial_rx_buffer_inverted_controller[1] & B00010000));
+      digitalWrite(commandArray[5], (serial_rx_buffer_inverted_controller[1] & B00100000));
+      digitalWrite(commandArray[6], (serial_rx_buffer_inverted_controller[1] & B01000000));
+      digitalWrite(commandArray[7], (serial_rx_buffer_inverted_controller[1] & B10000000));
+
+      //  Second 8 buttons, Buffer Array Element 2
+      //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
+      digitalWrite(commandArray[8], (serial_rx_buffer_inverted_controller[2] & B00000001));
+      digitalWrite(commandArray[9], (serial_rx_buffer_inverted_controller[2] & B00000010));
+      digitalWrite(commandArray[10], (serial_rx_buffer_inverted_controller[2] & B00000100));
+      digitalWrite(commandArray[11], (serial_rx_buffer_inverted_controller[2] & B00001000));
+      digitalWrite(commandArray[12], (serial_rx_buffer_inverted_controller[2] & B00010000));
+      digitalWrite(commandArray[13], (serial_rx_buffer_inverted_controller[2] & B00100000));
+      digitalWrite(commandArray[14], (serial_rx_buffer_inverted_controller[2] & B01000000));
+      digitalWrite(commandArray[15], (serial_rx_buffer_inverted_controller[2] & B10000000));
+
+      //  4 Axis, Buffer Array Elements 3, 4, 5, 6
+      //  RX, RY, LX, LY
+      analogWrite(commandArray[16], serial_rx_buffer_inverted_controller[3]);
+      analogWrite(commandArray[17], serial_rx_buffer_inverted_controller[4]);
+      analogWrite(commandArray[18], serial_rx_buffer_inverted_controller[5]);
+      analogWrite(commandArray[19], serial_rx_buffer_inverted_controller[6]);
+
+      //  Analog button (Used to change between Digital and Analog modes in older games), Buffer Array Element 7
+      //  All other bits in this Buffer Array Element are unused
+      digitalWrite(commandArray[20], (serial_rx_buffer_inverted_controller[7] & B00000001));
+
+      //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
+      Serial.flush();
+    }
+    previousResetControllerDataDelay += resetControllerDataDelay;
+  }
+}
 
 void readMotors() {
   if ((serial_rx_buffer_motor[0] == 0x02) && (serial_rx_buffer_motor[11] == 0x02))
