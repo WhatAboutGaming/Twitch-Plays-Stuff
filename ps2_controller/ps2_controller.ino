@@ -127,6 +127,7 @@ byte serial_rx_buffer_motor[12];
 byte serial_rx_buffer_reset[12];
 byte serial_rx_buffer_disconnect[12];
 byte serial_rx_buffer_inverted_controller[12];
+byte serial_rx_buffer_invalid_command[12];
 byte serial_rx_buffer_reset_controller[12];
 unsigned long serial_rx_buffer_counter = 0;
 unsigned long controller = 0;
@@ -360,6 +361,10 @@ void loop() {
 
   //  Preamble/Postamble = 0x0C for Reset Controller Data
   //  This is used when the computer requests Arduino to reset Controller data, Arduino then responds back with a 0x01 Controller Data Command.
+
+  //  Preamble/Postamble = 0x0D for Invalid Data
+  //  When the computer or another host sends an invalid Preamble and Postamble comibination, the Arduino responds with 0x0D Preamble and Postamble bytes,
+  //  and adds the Invalid Preamble and Postamble bytes to the 7th and 8th byte of the Invalid Command 0x0D Command.
   if (Serial.available() > 0) {
 
     controller = Serial.readBytes(serial_rx_buffer, sizeof(serial_rx_buffer)) && 0xFF;
@@ -388,6 +393,7 @@ void loop() {
         Serial.write(serial_rx_buffer[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
         serial_rx_buffer_motor[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
       }
+      Serial.flush();
       readMotors();
     }
     //  Get PING/PONG status
@@ -430,7 +436,28 @@ void loop() {
         serial_rx_buffer_reset_controller[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
         Serial.write(serial_rx_buffer_reset_controller[serial_rx_buffer_counter]);
       }
+      Serial.flush();
       manualResetControllerData();
+    }
+    //  Get Invalid Command
+    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x0C)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x0C))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
+        //  Pass Serial Buffer to Reset Controller Data Buffer
+        serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
+        Serial.write(serial_rx_buffer_invalid_command[serial_rx_buffer_counter]);
+      }
+      Serial.flush();
+      getInvalidCommand();
+    }
+    //  Respond as invalid command when Preamble and Postamble are different
+    else if (serial_rx_buffer[0] != serial_rx_buffer[11]) {
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
+        //  Pass Serial Buffer to Reset Controller Data Buffer
+        serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
+        Serial.write(serial_rx_buffer_invalid_command[serial_rx_buffer_counter]);
+      }
+      Serial.flush();
+      getInvalidCommand();
     }
   }
   pressButtons();
@@ -440,6 +467,35 @@ void loop() {
   getAttention();
   autoResetControllerData();
 } // Close Loop Function
+
+void getInvalidCommand() {
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
+    //  Pass Serial Buffer to Reset Controller Data Buffer
+    if ((serial_rx_buffer_counter == 0) || (serial_rx_buffer_counter == 11)) {
+      //serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = 0x0D;
+      Serial.write(0x0D); // Preamble and Postamble to respond as Invalid Command
+    }
+    if ((serial_rx_buffer_counter >= 1) && (serial_rx_buffer_counter <= 6)) {
+      //serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = 0x00;
+      Serial.write(0x00); // Reset these to 0
+    }
+    if (serial_rx_buffer_counter == 7) {
+      //serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = 0x00;
+      Serial.write(serial_rx_buffer_invalid_command[0]); // Invalid Preamble Byte to Store
+    }
+    if (serial_rx_buffer_counter == 8) {
+      //serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = 0x00;
+      Serial.write(serial_rx_buffer_invalid_command[11]); // Invalid Postamble Byte to Store
+    }
+    if ((serial_rx_buffer_counter == 9) || (serial_rx_buffer_counter == 10)) {
+      //serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = 0x0D;
+      Serial.write(0x00); // Reset these to 0
+    }
+  }
+  Serial.flush();
+  //Serial.println("INVALID COMMAND");
+  //Serial.flush();
+}
 
 void arduinoDisconnect() {
   disconnectCalled = currentMillis;
