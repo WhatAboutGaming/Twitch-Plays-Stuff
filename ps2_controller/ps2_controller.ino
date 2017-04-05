@@ -499,7 +499,6 @@ void changeReadMotorsStatus() {
   
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset_controller); serial_rx_buffer_counter++) {
     //  Write back data as a way to tell the Status changed correctly
-    serial_rx_buffer_change_motors_status[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
     Serial.write(serial_rx_buffer_change_motors_status[serial_rx_buffer_counter]);
   }
   Serial.flush();
