@@ -10,9 +10,6 @@
   http://www.lynxmotion.com/images/files/ps2cmd01.txt
 */
 
-//  Todo: Add command to send Neutral controller data and reset controller inputs
-//  Send Neutral Controller data periodically (500ms, maybe?) when there's no input running
-
 #define axisLx 2
 #define axisLy 3
 #define axisRy 4
@@ -313,7 +310,7 @@ void setup() {
   calculatePong();
   getAttention();
   readMotors();
-  changeReadMotorsStatus();
+  //changeReadMotorsStatus();
   //Serial.println("END OF SETUP");
   //  And we are ready to go
 }
