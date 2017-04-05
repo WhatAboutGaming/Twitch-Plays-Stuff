@@ -108,6 +108,8 @@ unsigned long analogLedLevelHigh = 0;
 unsigned long previousAnalogLedLevelHigh = 0;
 unsigned long previousAnalogLedLevelLow = 0;
 
+unsigned long readMotorsStatus = 0; // 0 = Read Both Low to High and High to Low changes, 1 = Disabled, 2 = Read Low to High changes, 3 = Read High to Low Changes. 0 Means it's enabled by default.
+
 unsigned long resetCalled = 0;
 unsigned long resetDone = 0;
 
@@ -129,6 +131,7 @@ byte serial_rx_buffer_disconnect[12];
 byte serial_rx_buffer_inverted_controller[12];
 byte serial_rx_buffer_invalid_command[12];
 byte serial_rx_buffer_reset_controller[12];
+byte serial_rx_buffer_change_motors_status[12];
 unsigned long serial_rx_buffer_counter = 0;
 unsigned long controller = 0;
 
@@ -310,6 +313,7 @@ void setup() {
   calculatePong();
   getAttention();
   readMotors();
+  changeReadMotorsStatus();
   //Serial.println("END OF SETUP");
   //  And we are ready to go
 }
@@ -365,6 +369,12 @@ void loop() {
   //  Preamble/Postamble = 0x0D for Invalid Data
   //  When the computer or another host sends an invalid Preamble and Postamble comibination, the Arduino responds with 0x0D Preamble and Postamble bytes,
   //  and adds the Invalid Preamble and Postamble bytes to the 7th and 8th byte of the Invalid Command 0x0D Command.
+
+  //  Preamble/Postamble = 0x0E for Change Motor Readings
+  //  Arduino receives data to choose which motor changes to read (0 is disabled)
+
+  //  Preamble/Postamble = 0x0F for Respond Back to Change Motor Readings
+  //  Arduino sends data to tell the computer the change was succesful
   if (Serial.available() > 0) {
 
     controller = Serial.readBytes(serial_rx_buffer, sizeof(serial_rx_buffer)) && 0xFF;
@@ -439,8 +449,18 @@ void loop() {
       Serial.flush();
       manualResetControllerData();
     }
+    else if ((serial_rx_buffer[0] == 0x0E) && (serial_rx_buffer[11] == 0x0E)) {
+      // Change Values for reading motors (To send or not motor readings)
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset_controller); serial_rx_buffer_counter++) {
+        //  Pass Serial Buffer to Change Motors Values Buffer
+        serial_rx_buffer_change_motors_status[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
+        Serial.write(serial_rx_buffer_change_motors_status[serial_rx_buffer_counter]);
+      }
+      Serial.flush();
+      changeReadMotorsStatus();
+    }
     //  Get Invalid Command
-    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x0C)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x0C))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
+    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x0F)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x0F))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Reset Controller Data Buffer
         serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
@@ -467,6 +487,28 @@ void loop() {
   getAttention();
   autoResetControllerData();
 } // Close Loop Function
+
+void changeReadMotorsStatus() {
+  //Serial.println("");
+  //Serial.print("Changing from ");
+  //Serial.print(readMotorsStatus);
+  //Serial.print(" to");
+  readMotorsStatus = serial_rx_buffer_change_motors_status[8];
+  serial_rx_buffer_change_motors_status[0] = 0x0F;
+  serial_rx_buffer_change_motors_status[11] = 0x0F;
+  
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset_controller); serial_rx_buffer_counter++) {
+    //  Write back data as a way to tell the Status changed correctly
+    serial_rx_buffer_change_motors_status[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
+    Serial.write(serial_rx_buffer_change_motors_status[serial_rx_buffer_counter]);
+  }
+  Serial.flush();
+  //Serial.print(readMotorsStatus);
+  //Serial.println(" .");
+  //Serial.flush();
+  getAttention();
+  readMotors();
+}
 
 void getInvalidCommand() {
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
@@ -1314,7 +1356,10 @@ void getAttention() {
     if (attentionLevel == HIGH)
     {
       //Serial.println("HIGH");
-      readMotors();
+      //  Read changes from LOW to HIGH
+      if ((readMotorsStatus == 0) || (readMotorsStatus == 2)) {
+        readMotors();
+      }
       previousAttentionLevelHigh = currentMillis;
       //Serial.println(previousAttentionLevelHigh);
       attentionLevelHigh++;
@@ -1322,7 +1367,10 @@ void getAttention() {
     else if (attentionLevel == LOW)
     {
       //Serial.println("LOW");
-      readMotors();
+      //  Read changes from HIGH to LOW
+      if ((readMotorsStatus == 0) || (readMotorsStatus == 3)) {
+        readMotors();
+      }
       previousAttentionLevelLow = currentMillis;
       //Serial.println(previousAttentionLevelLow);
       attentionLevelLow++;
