@@ -310,7 +310,21 @@ void setup() {
   calculatePong();
   getAttention();
   readMotors();
-  //changeReadMotorsStatus();
+
+  serial_rx_buffer_change_motors_status[0] = 0x0F;
+  serial_rx_buffer_change_motors_status[1] = 0x00;
+  serial_rx_buffer_change_motors_status[2] = 0x00;
+  serial_rx_buffer_change_motors_status[3] = 0x00;
+  serial_rx_buffer_change_motors_status[4] = 0x00;
+  serial_rx_buffer_change_motors_status[5] = 0x00;
+  serial_rx_buffer_change_motors_status[6] = 0x00;
+  serial_rx_buffer_change_motors_status[7] = 0x00;
+  serial_rx_buffer_change_motors_status[8] = 0x00;
+  serial_rx_buffer_change_motors_status[9] = 0x00;
+  serial_rx_buffer_change_motors_status[10] = 0x00;
+  serial_rx_buffer_change_motors_status[11] = 0x0F;
+
+  changeReadMotorsStatus();
   //Serial.println("END OF SETUP");
   //  And we are ready to go
 }
@@ -483,6 +497,7 @@ void loop() {
   calculatePong();
   getAttention();
   autoResetControllerData();
+  //changeReadMotorsStatus();
 } // Close Loop Function
 
 void changeReadMotorsStatus() {
@@ -928,8 +943,8 @@ void pressButtons() {
           serial_rx_buffer_controller[7] = 0x00;
           serial_rx_buffer_controller[8] = 0x00;
           //serial_rx_buffer_controller[9] = 0xFF;
-          //serial_rx_buffer_controller[10] = 0xFF; 
-          
+          //serial_rx_buffer_controller[10] = 0xFF;
+
           for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
             Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
             //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
