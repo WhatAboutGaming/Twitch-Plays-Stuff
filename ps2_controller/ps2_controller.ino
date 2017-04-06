@@ -493,7 +493,7 @@ void changeReadMotorsStatus() {
   readMotorsStatus = serial_rx_buffer_change_motors_status[8];
   serial_rx_buffer_change_motors_status[0] = 0x0F;
   serial_rx_buffer_change_motors_status[11] = 0x0F;
-  
+
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset_controller); serial_rx_buffer_counter++) {
     //  Write back data as a way to tell the Status changed correctly
     Serial.write(serial_rx_buffer_change_motors_status[serial_rx_buffer_counter]);
@@ -927,9 +927,9 @@ void pressButtons() {
           serial_rx_buffer_controller[6] = 0x7F;
           serial_rx_buffer_controller[7] = 0x00;
           serial_rx_buffer_controller[8] = 0x00;
-          serial_rx_buffer_controller[9] = 0x00;
-          serial_rx_buffer_controller[10] = 0x00;
-
+          //serial_rx_buffer_controller[9] = 0xFF;
+          //serial_rx_buffer_controller[10] = 0xFF; 
+          
           for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
             Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
             //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
@@ -1413,6 +1413,7 @@ void getAttention() {
 void manualResetControllerData()
 {
   //  This function resets controller data when requested by the computer. Can be used for example when something goes wrong on the computer's end.
+  inputDelay = 0;
   serial_rx_buffer_controller[0] = 0x01; //  Preamble
   serial_rx_buffer_controller[1] = 0x00; //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
   serial_rx_buffer_controller[2] = 0x00; //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
@@ -1474,6 +1475,7 @@ void autoResetControllerData()
   if (currentMillis - previousResetControllerDataDelay >= resetControllerDataDelay) {
     if (isInputting == false) {
       //  This function resets contreoller data when requested by the computer. Can be used for example when something goes wrong on the computer's end.
+      inputDelay = 0;
       serial_rx_buffer_controller[0] = 0x01; //  Preamble
       serial_rx_buffer_controller[1] = 0x00; //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
       serial_rx_buffer_controller[2] = 0x00; //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
