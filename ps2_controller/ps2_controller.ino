@@ -310,6 +310,7 @@ void setup() {
   calculatePong();
   getAttention();
   readMotors();
+  manualResetControllerData();
 
   serial_rx_buffer_change_motors_status[0] = 0x0F;
   serial_rx_buffer_change_motors_status[1] = 0x00;
@@ -497,7 +498,6 @@ void loop() {
   calculatePong();
   getAttention();
   autoResetControllerData();
-  //changeReadMotorsStatus();
 } // Close Loop Function
 
 void changeReadMotorsStatus() {
