@@ -139,6 +139,10 @@ unsigned int commandArray[] = {buttonSelect, buttonL3, buttonR3, buttonStart, bu
 unsigned int motorArray[] = {leftMotor, rightMotor, analogLed};
 
 void setup() {
+  inputDelay = 0;
+  isInputtingDelayed = false;
+  isInputting = false;
+  
   currentMillis = millis();
   Serial.begin(baudRate);
   isConnected = false;
@@ -327,7 +331,12 @@ void setup() {
   serial_rx_buffer_change_motors_status[10] = 0x00;
   serial_rx_buffer_change_motors_status[11] = 0x0F;
 
+  inputDelay = 0;
+  isInputtingDelayed = false;
+  isInputting = false;
+
   changeReadMotorsStatus();
+  changeAutoResetControllerData();
   //Serial.println("END OF SETUP");
   //  And we are ready to go
 }
@@ -519,6 +528,9 @@ void loop() {
 } // Close Loop Function
 
 void changeAutoResetControllerData() {
+  inputDelay = 0;
+  isInputtingDelayed = false;
+  isInputting = false;
   autoResetControllerData();
   manualResetControllerData();
   //Serial.println("");
@@ -539,6 +551,9 @@ void changeAutoResetControllerData() {
   //Serial.flush();
   autoResetControllerData();
   manualResetControllerData();
+  inputDelay = 0;
+  isInputtingDelayed = false;
+  isInputting = false;
 }
 
 void changeReadMotorsStatus() {
@@ -1490,6 +1505,8 @@ void manualResetControllerData()
 {
   //  This function resets controller data when requested by the computer. Can be used for example when something goes wrong on the computer's end.
   inputDelay = 0;
+  isInputtingDelayed = false;
+  isInputting = false;
   serial_rx_buffer_controller[0] = 0x01; //  Preamble
   serial_rx_buffer_controller[1] = 0x00; //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
   serial_rx_buffer_controller[2] = 0x00; //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
@@ -1543,6 +1560,9 @@ void manualResetControllerData()
 
   //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
   Serial.flush();
+  inputDelay = 0;
+  isInputtingDelayed = false;
+  isInputting = false;
 }
 
 void autoResetControllerData()
@@ -1552,6 +1572,8 @@ void autoResetControllerData()
     if (isInputting == false) {
       //  This function resets contreoller data when requested by the computer. Can be used for example when something goes wrong on the computer's end.
       inputDelay = 0;
+      isInputtingDelayed = false;
+      isInputting = false;
       serial_rx_buffer_controller[0] = 0x01; //  Preamble
       serial_rx_buffer_controller[1] = 0x00; //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
       serial_rx_buffer_controller[2] = 0x00; //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
@@ -1609,6 +1631,9 @@ void autoResetControllerData()
       if (autoResetControllerDataStatus == 0) {
         Serial.flush();
       }
+      inputDelay = 0;
+      isInputtingDelayed = false;
+      isInputting = false;
     }
     previousResetControllerDataDelay += resetControllerDataDelay;
   }
