@@ -1565,11 +1565,11 @@ void autoResetControllerData()
       serial_rx_buffer_controller[10] = 0x00; // Delay Byte 1
       serial_rx_buffer_controller[11] = 0x01; // Postamble
 
-      if (autoResetControllerDataStatus == 0) {
-        for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
+        if (autoResetControllerDataStatus == 0) {
           Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
-          serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]); //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
         }
+        serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]); //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
       }
 
       //  First 8 buttons, Buffer Array Element 1
