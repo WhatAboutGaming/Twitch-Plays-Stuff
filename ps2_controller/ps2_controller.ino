@@ -106,6 +106,7 @@ unsigned long previousAnalogLedLevelHigh = 0;
 unsigned long previousAnalogLedLevelLow = 0;
 
 unsigned long readMotorsStatus = 0; // 0 = Read Both Low to High and High to Low changes, 1 = Disabled, 2 = Read Low to High changes, 3 = Read High to Low Changes. 0 Means it's enabled by default.
+unsigned long autoResetControllerDataStatus = 0; // 0 = Automatic reset is enabled, 1 = Automatic reset is disabled
 
 unsigned long resetCalled = 0;
 unsigned long resetDone = 0;
@@ -129,6 +130,7 @@ byte serial_rx_buffer_inverted_controller[12];
 byte serial_rx_buffer_invalid_command[12];
 byte serial_rx_buffer_reset_controller[12];
 byte serial_rx_buffer_change_motors_status[12];
+byte serial_rx_buffer_change_autoreset_controller_status[12];
 unsigned long serial_rx_buffer_counter = 0;
 unsigned long controller = 0;
 
@@ -387,6 +389,12 @@ void loop() {
 
   //  Preamble/Postamble = 0x0F for Respond Back to Change Motor Readings
   //  Arduino sends data to tell the computer the change was succesful
+
+  //  Preamble/Postamble = 0x10 for Disable or Enable autoResetControllerData()
+  //  Arduino receives data to disable or enable Automatic Controller Reset Data (0 is disabled)
+
+  //  Preamble/Postamble = 0x11 for Respond Back to autoResetControllerData()
+  //  Arduino sends data to tell the computer the change was succesful
   if (Serial.available() > 0) {
 
     controller = Serial.readBytes(serial_rx_buffer, sizeof(serial_rx_buffer)) && 0xFF;
@@ -471,8 +479,18 @@ void loop() {
       Serial.flush();
       changeReadMotorsStatus();
     }
+    else if ((serial_rx_buffer[0] == 0x10) && (serial_rx_buffer[11] == 0x10)) {
+      // Choose to enable or disable Automatic Reset Controller Data
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_change_autoreset_controller_status); serial_rx_buffer_counter++) {
+        //  Pass Serial Buffer to AutoResetControllerData Buffer
+        serial_rx_buffer_change_autoreset_controller_status[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
+        Serial.write(serial_rx_buffer_change_autoreset_controller_status[serial_rx_buffer_counter]);
+      }
+      Serial.flush();
+      changeAutoResetControllerData();
+    }
     //  Get Invalid Command
-    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x0F)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x0F))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
+    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x11)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x11))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Reset Controller Data Buffer
         serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
@@ -500,7 +518,32 @@ void loop() {
   autoResetControllerData();
 } // Close Loop Function
 
+void changeAutoResetControllerData() {
+  autoResetControllerData();
+  manualResetControllerData();
+  //Serial.println("");
+  //Serial.print("Changing from ");
+  //Serial.print(autoResetControllerDataStatus);
+  //Serial.print(" to");
+  autoResetControllerDataStatus = serial_rx_buffer_change_autoreset_controller_status[8];
+  serial_rx_buffer_change_autoreset_controller_status[0] = 0x11;
+  serial_rx_buffer_change_autoreset_controller_status[11] = 0x11;
+
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_change_autoreset_controller_status); serial_rx_buffer_counter++) {
+    //  Write back data as a way to tell the Status changed correctly
+    Serial.write(serial_rx_buffer_change_autoreset_controller_status[serial_rx_buffer_counter]);
+  }
+  Serial.flush();
+  //Serial.print(autoResetControllerDataStatus);
+  //Serial.println(" .");
+  //Serial.flush();
+  autoResetControllerData();
+  manualResetControllerData();
+}
+
 void changeReadMotorsStatus() {
+  getAttention();
+  readMotors();
   //Serial.println("");
   //Serial.print("Changing from ");
   //Serial.print(readMotorsStatus);
@@ -1522,9 +1565,11 @@ void autoResetControllerData()
       serial_rx_buffer_controller[10] = 0x00; // Delay Byte 1
       serial_rx_buffer_controller[11] = 0x01; // Postamble
 
-      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
-        Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
-        serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]); //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
+      if (autoResetControllerDataStatus == 0) {
+        for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
+          Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
+          serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]); //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
+        }
       }
 
       //  First 8 buttons, Buffer Array Element 1
@@ -1561,7 +1606,9 @@ void autoResetControllerData()
       digitalWrite(commandArray[20], (serial_rx_buffer_inverted_controller[7] & B00000001));
 
       //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
-      Serial.flush();
+      if (autoResetControllerDataStatus == 0) {
+        Serial.flush();
+      }
     }
     previousResetControllerDataDelay += resetControllerDataDelay;
   }
