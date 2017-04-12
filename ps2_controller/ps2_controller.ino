@@ -331,6 +331,19 @@ void setup() {
   serial_rx_buffer_change_motors_status[10] = 0x00;
   serial_rx_buffer_change_motors_status[11] = 0x0F;
 
+  serial_rx_buffer_change_autoreset_controller_status[0] = 0x11;
+  serial_rx_buffer_change_autoreset_controller_status[1] = 0x00;
+  serial_rx_buffer_change_autoreset_controller_status[2] = 0x00;
+  serial_rx_buffer_change_autoreset_controller_status[3] = 0x00;
+  serial_rx_buffer_change_autoreset_controller_status[4] = 0x00;
+  serial_rx_buffer_change_autoreset_controller_status[5] = 0x00;
+  serial_rx_buffer_change_autoreset_controller_status[6] = 0x00;
+  serial_rx_buffer_change_autoreset_controller_status[7] = 0x00;
+  serial_rx_buffer_change_autoreset_controller_status[8] = 0x00;
+  serial_rx_buffer_change_autoreset_controller_status[9] = 0x00;
+  serial_rx_buffer_change_autoreset_controller_status[10] = 0x00;
+  serial_rx_buffer_change_autoreset_controller_status[11] = 0x11;
+
   inputDelay = 0;
   isInputtingDelayed = false;
   isInputting = false;
