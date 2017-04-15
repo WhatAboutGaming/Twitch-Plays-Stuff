@@ -107,6 +107,7 @@ unsigned long previousAnalogLedLevelLow = 0;
 
 unsigned long readMotorsStatus = 0; // 0 = Read Both Low to High and High to Low changes, 1 = Disabled, 2 = Read Low to High changes, 3 = Read High to Low Changes. 0 Means it's enabled by default.
 unsigned long autoResetControllerDataStatus = 0; // 0 = Automatic reset is enabled, 1 = Automatic reset is disabled
+unsigned long resetBeforeInputStatus = 0; // 0 = Resetting before inputting is enabled, 1 = Resetting before inputting is disabled
 
 unsigned long resetCalled = 0;
 unsigned long resetDone = 0;
@@ -131,6 +132,7 @@ byte serial_rx_buffer_invalid_command[12];
 byte serial_rx_buffer_reset_controller[12];
 byte serial_rx_buffer_change_motors_status[12];
 byte serial_rx_buffer_change_autoreset_controller_status[12];
+byte serial_rx_buffer_toggle_before_input_reset[12];
 unsigned long serial_rx_buffer_counter = 0;
 unsigned long controller = 0;
 
@@ -142,7 +144,7 @@ void setup() {
   inputDelay = 0;
   isInputtingDelayed = false;
   isInputting = false;
-  
+
   currentMillis = millis();
   Serial.begin(baudRate);
   isConnected = false;
@@ -317,6 +319,7 @@ void setup() {
   getAttention();
   readMotors();
   manualResetControllerData();
+  toggleBeforeInputReset();
 
   serial_rx_buffer_change_motors_status[0] = 0x0F;
   serial_rx_buffer_change_motors_status[1] = 0x00;
@@ -343,6 +346,19 @@ void setup() {
   serial_rx_buffer_change_autoreset_controller_status[9] = 0x00;
   serial_rx_buffer_change_autoreset_controller_status[10] = 0x00;
   serial_rx_buffer_change_autoreset_controller_status[11] = 0x11;
+
+  serial_rx_buffer_toggle_before_input_reset[0] = 0x13;
+  serial_rx_buffer_toggle_before_input_reset[1] = 0x00;
+  serial_rx_buffer_toggle_before_input_reset[2] = 0x00;
+  serial_rx_buffer_toggle_before_input_reset[3] = 0x00;
+  serial_rx_buffer_toggle_before_input_reset[4] = 0x00;
+  serial_rx_buffer_toggle_before_input_reset[5] = 0x00;
+  serial_rx_buffer_toggle_before_input_reset[6] = 0x00;
+  serial_rx_buffer_toggle_before_input_reset[7] = 0x00;
+  serial_rx_buffer_toggle_before_input_reset[8] = 0x00;
+  serial_rx_buffer_toggle_before_input_reset[9] = 0x00;
+  serial_rx_buffer_toggle_before_input_reset[10] = 0x00;
+  serial_rx_buffer_toggle_before_input_reset[11] = 0x13;
 
   inputDelay = 0;
   isInputtingDelayed = false;
@@ -425,6 +441,9 @@ void loop() {
     //  1 == 0x01
     if ((serial_rx_buffer[0] == 0x01) && (serial_rx_buffer[11] == 0x01)) {
 
+      if (resetBeforeInputStatus == 0) {
+        manualResetControllerData();
+      }
       //  Count bytes and parse ASCII values to their respective commands, such as buttons and axis
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
         Serial.write(serial_rx_buffer[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
@@ -511,8 +530,18 @@ void loop() {
       Serial.flush();
       changeAutoResetControllerData();
     }
+    else if ((serial_rx_buffer[0] == 0x12) && (serial_rx_buffer[11] == 0x12)) {
+      // Choose to enable or disable Automatic Reset Controller Data
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_before_input_reset); serial_rx_buffer_counter++) {
+        //  Pass Serial Buffer to toggleBeforeInout Buffer
+        serial_rx_buffer_toggle_before_input_reset[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
+        Serial.write(serial_rx_buffer_toggle_before_input_reset[serial_rx_buffer_counter]);
+      }
+      Serial.flush();
+      toggleBeforeInputReset();
+    }
     //  Get Invalid Command
-    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x11)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x11))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
+    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x13)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x13))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Reset Controller Data Buffer
         serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
@@ -539,6 +568,36 @@ void loop() {
   getAttention();
   autoResetControllerData();
 } // Close Loop Function
+
+void toggleBeforeInputReset() {
+  //  This is where we choose whether or not the Arduino resets the controller data before executing an input
+  //inputDelay = 0;
+  //isInputtingDelayed = false;
+  //isInputting = false;
+  autoResetControllerData();
+  manualResetControllerData();
+  //Serial.println("");
+  //Serial.print("Changing from ");
+  //Serial.print(resetBeforeInputStatus);
+  //Serial.print(" to");
+  resetBeforeInputStatus = serial_rx_buffer_toggle_before_input_reset[8];
+  serial_rx_buffer_toggle_before_input_reset[0] = 0x13;
+  serial_rx_buffer_toggle_before_input_reset[11] = 0x13;
+
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_before_input_reset); serial_rx_buffer_counter++) {
+    //  Write back data as a way to tell the Status changed correctly
+    Serial.write(serial_rx_buffer_toggle_before_input_reset[serial_rx_buffer_counter]);
+  }
+  //Serial.flush();
+  //Serial.print(resetBeforeInputStatus);
+  //Serial.println(" .");
+  //Serial.flush();
+  autoResetControllerData();
+  manualResetControllerData();
+  //inputDelay = 0;
+  //isInputtingDelayed = false;
+  //isInputting = false;
+}
 
 void changeAutoResetControllerData() {
   inputDelay = 0;
