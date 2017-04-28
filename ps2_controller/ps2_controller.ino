@@ -443,6 +443,8 @@ void loop() {
 
       if (resetBeforeInputStatus == 0) {
         manualResetControllerData();
+        getAttention();
+        readMotors();
       }
       //  Count bytes and parse ASCII values to their respective commands, such as buttons and axis
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
@@ -1135,6 +1137,12 @@ void pressButtons() {
           //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
           //Serial.print('\n');
           Serial.flush();
+
+          if (resetBeforeInputStatus == 0) {
+            manualResetControllerData();
+            getAttention();
+            readMotors();
+          }
 
           isInputtingDelayed = false;
           isInputting = false;
