@@ -8,3 +8,4 @@ Reference:
 1) https://gist.github.com/scanlime/5042071
 2) http://store.curiousinventor.com/guides/PS2/
 3) http://www.lynxmotion.com/images/files/ps2cmd01.txt
+4) http://www.billporter.info/2010/06/05/playstation-2-controller-arduino-library-v1-0/
