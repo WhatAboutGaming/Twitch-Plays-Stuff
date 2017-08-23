@@ -41,6 +41,8 @@
 
 #define attentionPin A3
 
+#define relayPin A11
+
 boolean isInputting = false;
 boolean isInputtingDelayed = false;
 boolean sentPing = false;
@@ -109,6 +111,7 @@ unsigned long readMotorsStatus = 0; // 0 = Read Both Low to High and High to Low
 unsigned long autoResetControllerDataStatus = 0; // 0 = Automatic reset is enabled, 1 = Automatic reset is disabled
 unsigned long resetBeforeInputStatus = 0; // 0 = Resetting before inputting is enabled, 1 = Resetting before inputting is disabled
 unsigned long autoDisconnectOnPingTimeout = 0; // 0 = Arduino will disconnect in case of PING time out, that is, when the computer doesn't respond to the Arduino with PONG, 1 = Arduino won't close connection to the computer in case of PING timeout
+unsigned long controllerPowerStatus = 0; // 0 = Controller is ON, 1 = Controller is OFF
 
 unsigned long resetCalled = 0;
 unsigned long resetDone = 0;
@@ -135,6 +138,7 @@ byte serial_rx_buffer_change_motors_status[12];
 byte serial_rx_buffer_change_autoreset_controller_status[12];
 byte serial_rx_buffer_toggle_before_input_reset[12];
 byte serial_rx_buffer_toggle_disconnect_on_ping_timeout[12];
+byte serial_rx_buffer_toggle_controller_pwr[12];
 unsigned long serial_rx_buffer_counter = 0;
 unsigned long controller = 0;
 
@@ -143,6 +147,22 @@ unsigned int commandArray[] = {buttonSelect, buttonL3, buttonR3, buttonStart, bu
 unsigned int motorArray[] = {leftMotor, rightMotor, analogLed};
 
 void setup() {
+
+  serial_rx_buffer_toggle_controller_pwr[0] = 0x17;
+  serial_rx_buffer_toggle_controller_pwr[1] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[2] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[3] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[4] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[5] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[6] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[7] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[8] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[9] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[10] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[11] = 0x17;
+  
+  pinMode(relayPin, OUTPUT);
+  digitalWrite(relayPin, LOW);
   inputDelay = 0;
   isInputtingDelayed = false;
   isInputting = false;
@@ -323,6 +343,7 @@ void setup() {
   manualResetControllerData();
   toggleBeforeInputReset();
   toggleDisconnectOnPingTimeout();
+  toggleControllerPower();
 
   serial_rx_buffer_change_motors_status[0] = 0x0F;
   serial_rx_buffer_change_motors_status[1] = 0x00;
@@ -376,6 +397,19 @@ void setup() {
   serial_rx_buffer_toggle_disconnect_on_ping_timeout[10] = 0x00;
   serial_rx_buffer_toggle_disconnect_on_ping_timeout[11] = 0x15;
 
+  serial_rx_buffer_toggle_controller_pwr[0] = 0x17;
+  serial_rx_buffer_toggle_controller_pwr[1] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[2] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[3] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[4] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[5] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[6] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[7] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[8] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[9] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[10] = 0x00;
+  serial_rx_buffer_toggle_controller_pwr[11] = 0x17;
+
   inputDelay = 0;
   isInputtingDelayed = false;
   isInputting = false;
@@ -384,6 +418,7 @@ void setup() {
   changeAutoResetControllerData();
   //Serial.println("END OF SETUP");
   //  And we are ready to go
+  digitalWrite(relayPin, HIGH);
 }
 
 void loop() {
@@ -460,6 +495,12 @@ void loop() {
   //  Arduino receives data to disable or enable Automatic Disconnection on PING timeout
 
   //  Preamble/Postamble = 0x15 for Respond Back to Auto disconnect on PING timeout
+  //  Arduino sends data to tell the computer the change was succesful
+
+  //  Preamble/Postamble = 0x16 for Toggle Relay Switch to turn controller ON or OFF
+  //  Arduino receives data to turn controller ON or OFF
+
+  //  Preamble/Postamble = 0x17 for Respond Back to Turning controller ON or OFF
   //  Arduino sends data to tell the computer the change was succesful
   if (Serial.available() > 0) {
 
@@ -580,8 +621,19 @@ void loop() {
       Serial.flush();
       toggleDisconnectOnPingTimeout();
     }
+    else if ((serial_rx_buffer[0] == 0x16) && (serial_rx_buffer[11] == 0x16)) {
+      // Choose to Turn the controller ON or OFF
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_controller_pwr); serial_rx_buffer_counter++) {
+
+        serial_rx_buffer_toggle_controller_pwr[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
+        Serial.write(serial_rx_buffer_toggle_controller_pwr[serial_rx_buffer_counter]);
+      }
+      Serial.flush();
+      toggleControllerPower();
+    }
+
     //  Get Invalid Command
-    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x15)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x15))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
+    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x17)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x17))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Reset Controller Data Buffer
         serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
@@ -607,7 +659,53 @@ void loop() {
   calculatePong();
   getAttention();
   autoResetControllerData();
+  toggleControllerPower();
 } // Close Loop Function
+
+void toggleControllerPower() {
+  //  This is where we choose to turn the PS2 controller ON or OFF, through a solid-state low-power relay
+  //inputDelay = 0;
+  //isInputtingDelayed = false;
+  //isInputting = false;
+  //autoResetControllerData();
+  //manualResetControllerData();
+  calculatePing();
+  calculatePong();
+  //Serial.println("");
+  //Serial.print("Changing from ");
+  //Serial.print(autoDisconnectOnPingTimeout);
+  //Serial.print(" to");
+  //Serial.flush();
+  controllerPowerStatus = serial_rx_buffer_toggle_controller_pwr[8];
+  serial_rx_buffer_toggle_controller_pwr[0] = 0x17;
+  serial_rx_buffer_toggle_controller_pwr[11] = 0x17;
+
+  if (controllerPowerStatus == 0)
+  {
+    digitalWrite(relayPin, HIGH);
+  }
+
+  if (controllerPowerStatus != 0)
+  {
+    digitalWrite(relayPin, LOW);
+  }
+
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_controller_pwr); serial_rx_buffer_counter++) {
+    //  Write back data as a way to tell the Status changed correctly
+    Serial.write(serial_rx_buffer_toggle_controller_pwr[serial_rx_buffer_counter]);
+  }
+  Serial.flush();
+  //Serial.print(autoDisconnectOnPingTimeout);
+  //Serial.println(" .");
+  //Serial.flush();
+  //autoResetControllerData();
+  //manualResetControllerData();
+  calculatePing();
+  calculatePong();
+  //inputDelay = 0;
+  //isInputtingDelayed = false;
+  //isInputting = false;
+}
 
 void toggleBeforeInputReset() {
   //  This is where we choose whether or not the Arduino resets the controller data before executing an input
