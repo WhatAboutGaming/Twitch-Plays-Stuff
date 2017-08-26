@@ -41,6 +41,8 @@
 
 #define attentionPin A3
 
+#define vccPin A10 // For reading and checking if the controller is conencted or not
+
 #define relayPin A11
 
 boolean isInputting = false;
@@ -79,6 +81,15 @@ unsigned int leftMotorVal = 0;
 unsigned int rightMotorVal = 0;
 unsigned int analogLedVal = 0;
 
+unsigned int vccReading = 0;
+
+unsigned int vccLevel = 0;
+unsigned int previousVccLevel = 0;
+unsigned long vccLevelLow = 0;
+unsigned long vccLevelHigh = 0;
+unsigned long previousVccLevelHigh = 0;
+unsigned long previousVccLevelLow = 0;
+
 unsigned int attentionLevel = 0;
 unsigned int previousAttentionLevel = 0;
 unsigned long attentionLevelLow = 0;
@@ -112,6 +123,7 @@ unsigned long autoResetControllerDataStatus = 0; // 0 = Automatic reset is enabl
 unsigned long resetBeforeInputStatus = 0; // 0 = Resetting before inputting is enabled, 1 = Resetting before inputting is disabled
 unsigned long autoDisconnectOnPingTimeout = 0; // 0 = Arduino will disconnect in case of PING time out, that is, when the computer doesn't respond to the Arduino with PONG, 1 = Arduino won't close connection to the computer in case of PING timeout
 unsigned long controllerPowerStatus = 0; // 0 = Controller is ON, 1 = Controller is OFF
+unsigned long readMotorsAlongSendPing = 0; // 0 = Read motors and get Attention leves after sending Ping, 1 = Do not read motors and get Attention leves after sending Ping.
 
 unsigned long resetCalled = 0;
 unsigned long resetDone = 0;
@@ -139,6 +151,7 @@ byte serial_rx_buffer_change_autoreset_controller_status[12];
 byte serial_rx_buffer_toggle_before_input_reset[12];
 byte serial_rx_buffer_toggle_disconnect_on_ping_timeout[12];
 byte serial_rx_buffer_toggle_controller_pwr[12];
+byte serial_rx_buffer_toggle_motors_after_ping[12];
 unsigned long serial_rx_buffer_counter = 0;
 unsigned long controller = 0;
 
@@ -160,7 +173,20 @@ void setup() {
   serial_rx_buffer_toggle_controller_pwr[9] = 0x00;
   serial_rx_buffer_toggle_controller_pwr[10] = 0x00;
   serial_rx_buffer_toggle_controller_pwr[11] = 0x17;
-  
+
+  serial_rx_buffer_toggle_motors_after_ping[0] = 0x19;
+  serial_rx_buffer_toggle_motors_after_ping[1] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[2] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[3] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[4] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[5] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[6] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[7] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[8] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[9] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[10] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[11] = 0x19;
+
   pinMode(relayPin, OUTPUT);
   digitalWrite(relayPin, LOW);
   inputDelay = 0;
@@ -245,6 +271,8 @@ void setup() {
   pinMode(leftMotor, INPUT);
   pinMode(rightMotor, INPUT);
   pinMode(analogLed, INPUT);
+
+  pinMode(vccPin, INPUT);
 
   pinMode(attentionPin, INPUT);
 
@@ -344,6 +372,7 @@ void setup() {
   toggleBeforeInputReset();
   toggleDisconnectOnPingTimeout();
   toggleControllerPower();
+  toggleMotorsAfterPing();
 
   serial_rx_buffer_change_motors_status[0] = 0x0F;
   serial_rx_buffer_change_motors_status[1] = 0x00;
@@ -409,6 +438,19 @@ void setup() {
   serial_rx_buffer_toggle_controller_pwr[9] = 0x00;
   serial_rx_buffer_toggle_controller_pwr[10] = 0x00;
   serial_rx_buffer_toggle_controller_pwr[11] = 0x17;
+
+  serial_rx_buffer_toggle_motors_after_ping[0] = 0x19;
+  serial_rx_buffer_toggle_motors_after_ping[1] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[2] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[3] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[4] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[5] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[6] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[7] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[8] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[9] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[10] = 0x00;
+  serial_rx_buffer_toggle_motors_after_ping[11] = 0x19;
 
   inputDelay = 0;
   isInputtingDelayed = false;
@@ -501,6 +543,12 @@ void loop() {
   //  Arduino receives data to turn controller ON or OFF
 
   //  Preamble/Postamble = 0x17 for Respond Back to Turning controller ON or OFF
+  //  Arduino sends data to tell the computer the change was succesful
+
+  //  Preamble/Postamble = 0x18 for Toggle Reading Motor status on or off after sending PING
+  //  Arduino receives data to turn controller ReadMotors on or OFF after PING
+
+  //  Preamble/Postamble = 0x19 for Respond Back to Toggle Reading Motor status on or off after sending PING
   //  Arduino sends data to tell the computer the change was succesful
   if (Serial.available() > 0) {
 
@@ -631,9 +679,18 @@ void loop() {
       Serial.flush();
       toggleControllerPower();
     }
+    else if ((serial_rx_buffer[0] == 0x18) && (serial_rx_buffer[11] == 0x18)) {
+      // Choose to get Motor Readings and Attention line levels after sending PING
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_controller_pwr); serial_rx_buffer_counter++) {
 
+        serial_rx_buffer_toggle_motors_after_ping[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
+        Serial.write(serial_rx_buffer_toggle_motors_after_ping[serial_rx_buffer_counter]);
+      }
+      Serial.flush();
+      toggleMotorsAfterPing();
+    }
     //  Get Invalid Command
-    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x17)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x17))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
+    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x19)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x19))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Reset Controller Data Buffer
         serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
@@ -659,8 +716,43 @@ void loop() {
   calculatePong();
   getAttention();
   autoResetControllerData();
-  toggleControllerPower();
+  //toggleControllerPower();
 } // Close Loop Function
+
+void toggleMotorsAfterPing() {
+  //  This is where we choose to turn the PS2 controller ON or OFF, through a solid-state low-power relay
+  //inputDelay = 0;
+  //isInputtingDelayed = false;
+  //isInputting = false;
+  //autoResetControllerData();
+  //manualResetControllerData();
+  calculatePing();
+  calculatePong();
+  //Serial.println("");
+  //Serial.print("Changing from ");
+  //Serial.print(autoDisconnectOnPingTimeout);
+  //Serial.print(" to");
+  //Serial.flush();
+  readMotorsAlongSendPing = serial_rx_buffer_toggle_motors_after_ping[8];
+  serial_rx_buffer_toggle_motors_after_ping[0] = 0x19;
+  serial_rx_buffer_toggle_motors_after_ping[11] = 0x19;
+
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_motors_after_ping); serial_rx_buffer_counter++) {
+    //  Write back data as a way to tell the Status changed correctly
+    Serial.write(serial_rx_buffer_toggle_motors_after_ping[serial_rx_buffer_counter]);
+  }
+  //Serial.flush();
+  //Serial.print(autoDisconnectOnPingTimeout);
+  //Serial.println(" .");
+  //Serial.flush();
+  //autoResetControllerData();
+  //manualResetControllerData();
+  calculatePing();
+  calculatePong();
+  //inputDelay = 0;
+  //isInputtingDelayed = false;
+  //isInputting = false;
+}
 
 void toggleControllerPower() {
   //  This is where we choose to turn the PS2 controller ON or OFF, through a solid-state low-power relay
@@ -683,11 +775,15 @@ void toggleControllerPower() {
   if (controllerPowerStatus == 0)
   {
     digitalWrite(relayPin, HIGH);
+    //Serial.print("controllerPowerStatus HIGH = ");
+    //Serial.println(controllerPowerStatus);
   }
 
   if (controllerPowerStatus != 0)
   {
     digitalWrite(relayPin, LOW);
+    //Serial.print("controllerPowerStatus LOW = ");
+    //Serial.println(controllerPowerStatus);
   }
 
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_controller_pwr); serial_rx_buffer_counter++) {
@@ -1480,6 +1576,11 @@ void sendPing() {
     Serial.flush();
     //readMotors(); //  This is here for debugging reasons.
     sentPing = true;
+    if (readMotorsAlongSendPing == 0)
+    {
+      getAttention();
+      readMotors();
+    }
     /*
       Serial.print("pongTimeByte5 = ");
       Serial.println(serial_rx_buffer[5]);
@@ -1913,6 +2014,14 @@ void readMotors() {
     analogLedVal = (analogRead(motorArray[2]));
     //analogLedVal = (digitalRead(motorArray[2])); // If analogLedVal = High, Analog is OFF, else if analogLedVal = Low, Analog is ON
     analogLedVal = map(analogLedVal, 0, 1023, 0, 255);
+
+    vccReading = (analogRead(vccPin));
+    //  ~25 when floating (Unplugged from the PlayStation or PlayStation 2)
+    //  ~64 when turned off through the Low-Power Solid-State relay
+    //  ~196 when turned on through the Low-Power Solid-State relay and plugged in to the PS2
+    vccReading = map(vccReading, 0, 1023, 0, 255);
+
+    serial_rx_buffer_motor[5] = vccReading;
     serial_rx_buffer_motor[6] = leftMotorVal;
     serial_rx_buffer_motor[7] = rightMotorVal;
     serial_rx_buffer_motor[8] = analogLedVal;
@@ -1921,10 +2030,10 @@ void readMotors() {
       if (serial_rx_buffer_counter == 0) {
         Serial.write(0x06);
       }
-      if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4) || (serial_rx_buffer_counter == 5)) {
+      if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4)) {
         Serial.write(0x00);
       }
-      if ((serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
+      if ((serial_rx_buffer_counter == 5) || (serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
         Serial.write(serial_rx_buffer_motor[serial_rx_buffer_counter]);
       }
       if ((serial_rx_buffer_counter == 9) || (serial_rx_buffer_counter == 10)) {
@@ -1936,15 +2045,21 @@ void readMotors() {
       serial_rx_buffer_motor[serial_rx_buffer_counter] = 0x00;
     }
     Serial.flush();
+
     /*
-      Serial.print("leftMotorVal = ");
+      Serial.print("vccReading = ");
+      Serial.print(vccReading);
+      Serial.print(", leftMotorVal = ");
       Serial.print(leftMotorVal);
-      Serial.print(" rightMotorVal = ");
+      Serial.print(", rightMotorVal = ");
       Serial.print(rightMotorVal);
-      Serial.print(" analogLedVal = ");
+      Serial.print(", analogLedVal = ");
       Serial.println(analogLedVal);
+      Serial.print("controllerPowerStatus = ");
+      Serial.println(controllerPowerStatus);
       Serial.flush();
     */
+
   }
   if (attentionLevel == HIGH)
   {
@@ -1966,6 +2081,14 @@ void readMotors() {
     analogLedVal = (analogRead(motorArray[2]));
     //analogLedVal = (digitalRead(motorArray[2]));
     analogLedVal = map(analogLedVal, 0, 1023, 0, 255);
+
+    vccReading = (analogRead(vccPin));
+    //  ~25 when floating (Unplugged from the PlayStation or PlayStation 2)
+    //  ~64 when turned off through the Low-Power Solid-State relay
+    //  ~196 when turned on through the Low-Power Solid-State relay and plugged in to the PS2
+    vccReading = map(vccReading, 0, 1023, 0, 255);
+
+    serial_rx_buffer_motor[5] = vccReading;
     serial_rx_buffer_motor[6] = leftMotorVal;
     serial_rx_buffer_motor[7] = rightMotorVal;
     serial_rx_buffer_motor[8] = analogLedVal;
@@ -1974,10 +2097,10 @@ void readMotors() {
       if (serial_rx_buffer_counter == 0) {
         Serial.write(0x08);
       }
-      if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4) || (serial_rx_buffer_counter == 5)) {
+      if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4)) {
         Serial.write(0x00);
       }
-      if ((serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
+      if ((serial_rx_buffer_counter == 5) || (serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
         Serial.write(serial_rx_buffer_motor[serial_rx_buffer_counter]);
       }
       if ((serial_rx_buffer_counter == 9) || (serial_rx_buffer_counter == 10)) {
@@ -1988,15 +2111,21 @@ void readMotors() {
       }
     }
     Serial.flush();
+
     /*
-      Serial.print("leftMotorVal = ");
+      Serial.print("vccReading = ");
+      Serial.print(vccReading);
+      Serial.print(", leftMotorVal = ");
       Serial.print(leftMotorVal);
-      Serial.print(" rightMotorVal = ");
+      Serial.print(", rightMotorVal = ");
       Serial.print(rightMotorVal);
-      Serial.print(" analogLedVal = ");
+      Serial.print(", analogLedVal = ");
       Serial.println(analogLedVal);
+      Serial.print("controllerPowerStatus = ");
+      Serial.println(controllerPowerStatus);
       Serial.flush();
     */
+
   }
   else if (attentionLevel == LOW)
   {
@@ -2018,6 +2147,14 @@ void readMotors() {
     analogLedVal = (analogRead(motorArray[2]));
     //analogLedVal = (digitalRead(motorArray[2]));
     analogLedVal = map(analogLedVal, 0, 1023, 0, 255);
+
+    vccReading = (analogRead(vccPin));
+    //  ~25 when floating (Unplugged from the PlayStation or PlayStation 2)
+    //  ~64 when turned off through the Low-Power Solid-State relay
+    //  ~196 when turned on through the Low-Power Solid-State relay and plugged in to the PS2
+    vccReading = map(vccReading, 0, 1023, 0, 255);
+
+    serial_rx_buffer_motor[5] = vccReading;
     serial_rx_buffer_motor[6] = leftMotorVal;
     serial_rx_buffer_motor[7] = rightMotorVal;
     serial_rx_buffer_motor[8] = analogLedVal;
@@ -2026,10 +2163,10 @@ void readMotors() {
       if (serial_rx_buffer_counter == 0) {
         Serial.write(0x07);
       }
-      if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4) || (serial_rx_buffer_counter == 5)) {
+      if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4)) {
         Serial.write(0x00);
       }
-      if ((serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
+      if ((serial_rx_buffer_counter == 5) || (serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
         Serial.write(serial_rx_buffer_motor[serial_rx_buffer_counter]);
       }
       if ((serial_rx_buffer_counter == 9) || (serial_rx_buffer_counter == 10)) {
@@ -2040,15 +2177,20 @@ void readMotors() {
       }
     }
     Serial.flush();
+
     /*
-      Serial.print("leftMotorVal = ");
+      Serial.print("vccReading = ");
+      Serial.print(vccReading);
+      Serial.print(", leftMotorVal = ");
       Serial.print(leftMotorVal);
-      Serial.print(" rightMotorVal = ");
+      Serial.print(", rightMotorVal = ");
       Serial.print(rightMotorVal);
-      Serial.print(" analogLedVal = ");
+      Serial.print(", analogLedVal = ");
       Serial.println(analogLedVal);
+      Serial.print("controllerPowerStatus = ");
+      Serial.println(controllerPowerStatus);
       Serial.flush();
     */
+
   }
 }
-
