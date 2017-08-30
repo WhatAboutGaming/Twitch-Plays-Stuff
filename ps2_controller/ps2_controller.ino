@@ -124,6 +124,10 @@ unsigned long resetBeforeInputStatus = 0; // 0 = Resetting before inputting is e
 unsigned long autoDisconnectOnPingTimeout = 0; // 0 = Arduino will disconnect in case of PING time out, that is, when the computer doesn't respond to the Arduino with PONG, 1 = Arduino won't close connection to the computer in case of PING timeout
 unsigned long controllerPowerStatus = 0; // 0 = Controller is ON, 1 = Controller is OFF
 unsigned long readMotorsAlongSendPing = 0; // 0 = Read motors and get Attention leves after sending Ping, 1 = Do not read motors and get Attention leves after sending Ping.
+unsigned long sendInputOnce = 0; // 0 = Send only once, 1 = Send for every iteration of Loop
+
+boolean sentInputOnce = false;
+boolean sendInputOnlyOnce = false;
 
 unsigned long resetCalled = 0;
 unsigned long resetDone = 0;
@@ -152,6 +156,7 @@ byte serial_rx_buffer_toggle_before_input_reset[12];
 byte serial_rx_buffer_toggle_disconnect_on_ping_timeout[12];
 byte serial_rx_buffer_toggle_controller_pwr[12];
 byte serial_rx_buffer_toggle_motors_after_ping[12];
+byte serial_rx_buffer_toggle_send_input_back[12];
 unsigned long serial_rx_buffer_counter = 0;
 unsigned long controller = 0;
 
@@ -186,6 +191,19 @@ void setup() {
   serial_rx_buffer_toggle_motors_after_ping[9] = 0x00;
   serial_rx_buffer_toggle_motors_after_ping[10] = 0x00;
   serial_rx_buffer_toggle_motors_after_ping[11] = 0x19;
+
+  serial_rx_buffer_toggle_send_input_back[0] = 0x1B;
+  serial_rx_buffer_toggle_send_input_back[1] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[2] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[3] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[4] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[5] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[6] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[7] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[8] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[9] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[10] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[11] = 0x1B;
 
   pinMode(relayPin, OUTPUT);
   digitalWrite(relayPin, LOW);
@@ -373,6 +391,7 @@ void setup() {
   toggleDisconnectOnPingTimeout();
   toggleControllerPower();
   toggleMotorsAfterPing();
+  toggleSendInputBack();
 
   serial_rx_buffer_change_motors_status[0] = 0x0F;
   serial_rx_buffer_change_motors_status[1] = 0x00;
@@ -451,6 +470,19 @@ void setup() {
   serial_rx_buffer_toggle_motors_after_ping[9] = 0x00;
   serial_rx_buffer_toggle_motors_after_ping[10] = 0x00;
   serial_rx_buffer_toggle_motors_after_ping[11] = 0x19;
+
+  serial_rx_buffer_toggle_send_input_back[0] = 0x1B;
+  serial_rx_buffer_toggle_send_input_back[1] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[2] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[3] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[4] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[5] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[6] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[7] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[8] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[9] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[10] = 0x00;
+  serial_rx_buffer_toggle_send_input_back[11] = 0x1B;
 
   inputDelay = 0;
   isInputtingDelayed = false;
@@ -550,6 +582,12 @@ void loop() {
 
   //  Preamble/Postamble = 0x19 for Respond Back to Toggle Reading Motor status on or off after sending PING
   //  Arduino sends data to tell the computer the change was succesful
+
+  //  Preamble/Postamble = 0x1A for toggle Send Input Once or every iteration of Loop
+  //  Arduino sends data to tell the computer the change was succesful
+
+  //  Preamble/Postamble = 0x1B for respond back to Send Input Once or every iteration of Loop
+  //  Arduino sends data to tell the computer the change was succesful
   if (Serial.available() > 0) {
 
     controller = Serial.readBytes(serial_rx_buffer, sizeof(serial_rx_buffer)) && 0xFF;
@@ -567,13 +605,27 @@ void loop() {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
         Serial.write(serial_rx_buffer[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
         //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
+        //Serial.println("TEST 0");
         serial_rx_buffer_inverted[serial_rx_buffer_counter] = (255 - serial_rx_buffer[serial_rx_buffer_counter]);
         serial_rx_buffer_controller[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
         serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]);
       }
+
+      if (sendInputOnce == 0)
+      {
+        sendInputOnlyOnce = true;
+        sentInputOnce = false;
+      }
+      if (sendInputOnce != 0)
+      {
+        sendInputOnlyOnce = false;
+        sentInputOnce = true;
+      }
+
       //Serial.print('\n');
       Serial.flush();
       // Make the button presses actually work
+      //sentInputOnce = false;
       isInputting = true;
       previousInputDelay = currentMillis;
     }
@@ -689,8 +741,20 @@ void loop() {
       Serial.flush();
       toggleMotorsAfterPing();
     }
+    else if ((serial_rx_buffer[0] == 0x1A) && (serial_rx_buffer[11] == 0x1A)) {
+      //Serial.print("sendInputOnce=");
+      //Serial.println(sendInputOnce);
+      // Choose to Send Input back only once or every iteration of Loop (While inputting)
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_send_input_back); serial_rx_buffer_counter++) {
+
+        serial_rx_buffer_toggle_send_input_back[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
+        Serial.write(serial_rx_buffer_toggle_send_input_back[serial_rx_buffer_counter]);
+      }
+      Serial.flush();
+      toggleSendInputBack();
+    }
     //  Get Invalid Command
-    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x19)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x19))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
+    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x1B)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x1B))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Reset Controller Data Buffer
         serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
@@ -718,6 +782,45 @@ void loop() {
   autoResetControllerData();
   //toggleControllerPower();
 } // Close Loop Function
+
+void toggleSendInputBack() {
+  //  This is where we choose to turn the PS2 controller ON or OFF, through a solid-state low-power relay
+  //inputDelay = 0;
+  //isInputtingDelayed = false;
+  //isInputting = false;
+  //autoResetControllerData();
+  //manualResetControllerData();
+  calculatePing();
+  calculatePong();
+  //Serial.print("sendInputOnce=");
+  //Serial.println(sendInputOnce);
+  //Serial.println("");
+  //Serial.print("Changing from ");
+  //Serial.print(autoDisconnectOnPingTimeout);
+  //Serial.print(" to");
+  //Serial.flush();
+  sendInputOnce = serial_rx_buffer_toggle_send_input_back[8];
+  serial_rx_buffer_toggle_send_input_back[0] = 0x1B;
+  serial_rx_buffer_toggle_send_input_back[11] = 0x1B;
+
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_send_input_back); serial_rx_buffer_counter++) {
+    //  Write back data as a way to tell the Status changed correctly
+    Serial.write(serial_rx_buffer_toggle_send_input_back[serial_rx_buffer_counter]);
+  }
+  //Serial.flush();
+  //Serial.print(autoDisconnectOnPingTimeout);
+  //Serial.println(" .");
+  //Serial.flush();
+  //autoResetControllerData();
+  //manualResetControllerData();
+  calculatePing();
+  calculatePong();
+  //Serial.print("sendInputOnce=");
+  //Serial.println(sendInputOnce);
+  //inputDelay = 0;
+  //isInputtingDelayed = false;
+  //isInputting = false;
+}
 
 void toggleMotorsAfterPing() {
   //  This is where we choose to turn the PS2 controller ON or OFF, through a solid-state low-power relay
@@ -1271,16 +1374,39 @@ void arduinoReset() {
 }
 
 void pressButtons() {
+
   if (isInputtingDelayed == false) {
     //  Define input delay (If Buffer Array Element 9 and 10 !=0)
     inputDelay = (unsigned long)serial_rx_buffer[9] << 8 | (unsigned long)serial_rx_buffer[10];
   }
   if (isInputting == true)
   {
-    for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
-      Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
-      //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
-      serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]);
+    if (sendInputOnlyOnce == true)
+    {
+      if (sentInputOnce == false)
+      {
+        for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
+          Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
+          //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
+          serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]);
+          sentInputOnce = true;
+          //Serial.println("TEST 1A");
+        }
+      }
+    }
+
+    if (sendInputOnlyOnce == false)
+    {
+      if (sentInputOnce == true)
+      {
+        for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
+          Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
+          //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
+          serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]);
+          //sentInputOnce = true;
+          //Serial.println("TEST 1B");
+        }
+      }
     }
     //Serial.print('\n');
     Serial.flush();
@@ -1348,6 +1474,7 @@ void pressButtons() {
             Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
             //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
             serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]);
+            //Serial.println("TEST 2");
           }
 
           //  Reset delay to 0
@@ -1366,6 +1493,7 @@ void pressButtons() {
             Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
             //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
             serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (255 - serial_rx_buffer_controller[serial_rx_buffer_counter]);
+            //Serial.println("TEST 3");
           }
 
           //  First 8 buttons, Buffer Array Element 1
@@ -1413,6 +1541,7 @@ void pressButtons() {
 
           isInputtingDelayed = false;
           isInputting = false;
+          //sentInputOnce = true;
           previousInputDelay += inputDelay;
           inputDelay = 0;
         }
