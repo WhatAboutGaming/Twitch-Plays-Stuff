@@ -150,6 +150,7 @@ byte serial_rx_buffer_toggle_disconnect_on_ping_timeout[12];
 byte serial_rx_buffer_toggle_controller_pwr[12];
 byte serial_rx_buffer_toggle_motors_after_ping[12];
 byte serial_rx_buffer_toggle_send_input_back[12];
+byte serial_rx_buffer_reset_n64_controller[12];
 unsigned long serial_rx_buffer_counter = 0;
 unsigned long controller = 0;
 
@@ -200,6 +201,19 @@ void setup() {
   serial_rx_buffer_toggle_send_input_back[10] = 0x00;
   serial_rx_buffer_toggle_send_input_back[11] = 0x1B;
 
+  serial_rx_buffer_reset_n64_controller[0] = 0x1D;
+  serial_rx_buffer_reset_n64_controller[1] = 0x00;
+  serial_rx_buffer_reset_n64_controller[2] = 0x00;
+  serial_rx_buffer_reset_n64_controller[3] = 0x00;
+  serial_rx_buffer_reset_n64_controller[4] = 0x00;
+  serial_rx_buffer_reset_n64_controller[5] = 0x00;
+  serial_rx_buffer_reset_n64_controller[6] = 0x00;
+  serial_rx_buffer_reset_n64_controller[7] = 0x00;
+  serial_rx_buffer_reset_n64_controller[8] = 0x00;
+  serial_rx_buffer_reset_n64_controller[9] = 0x00;
+  serial_rx_buffer_reset_n64_controller[10] = 0x00;
+  serial_rx_buffer_reset_n64_controller[11] = 0x1D;
+
   inputDelay = 0;
   isInputtingDelayed = false;
   isInputting = false;
@@ -235,7 +249,8 @@ void setup() {
   for (yAxisIndex = 0; yAxisIndex < (sizeof(yAxisPins) / sizeof(unsigned int)); yAxisIndex++) {
     pinMode(yAxisPins[yAxisIndex], OUTPUT);
   }
-  resetController();
+  resetN64Controller();
+  //resetController();
 
   //  Prepare data to sent on startup as a way to tell the controller is in Neutral position
   //  That means, when all buttons and analog stick are reset to their Neutral positions
@@ -411,6 +426,19 @@ void setup() {
   serial_rx_buffer_toggle_send_input_back[10] = 0x00;
   serial_rx_buffer_toggle_send_input_back[11] = 0x1B;
 
+  serial_rx_buffer_reset_n64_controller[0] = 0x1D;
+  serial_rx_buffer_reset_n64_controller[1] = 0x00;
+  serial_rx_buffer_reset_n64_controller[2] = 0x00;
+  serial_rx_buffer_reset_n64_controller[3] = 0x00;
+  serial_rx_buffer_reset_n64_controller[4] = 0x00;
+  serial_rx_buffer_reset_n64_controller[5] = 0x00;
+  serial_rx_buffer_reset_n64_controller[6] = 0x00;
+  serial_rx_buffer_reset_n64_controller[7] = 0x00;
+  serial_rx_buffer_reset_n64_controller[8] = 0x00;
+  serial_rx_buffer_reset_n64_controller[9] = 0x00;
+  serial_rx_buffer_reset_n64_controller[10] = 0x00;
+  serial_rx_buffer_reset_n64_controller[11] = 0x1D;
+
   inputDelay = 0;
   isInputtingDelayed = false;
   isInputting = false;
@@ -444,6 +472,7 @@ void resetController()
 
   buttonArrayIndex = 0;
 
+  //Press L+R+Start to tell the N64 to reset the controller data, which can be used to fix faulty analog stick readings
   delay(133);
   digitalWrite(buttonArray[8], HIGH);
   digitalWrite(buttonArray[9], HIGH);
@@ -631,6 +660,12 @@ void loop() {
 
   //  Preamble/Postamble = 0x1B for respond back to Send Input Once or every iteration of Loop
   //  Arduino sends data to tell the computer the change was succesful
+
+  //  Preamble/Postamble = 0x1C for Reset N64 Controller Data
+  //  Arduino sends data to tell the computer the change was succesful
+
+  //  Preamble/Postamble = 0x1D for respond back to Reset N64 Controller Data
+  //  Arduino sends data to tell the computer the change was succesful
   if (Serial.available() > 0) {
 
     controller = Serial.readBytes(serial_rx_buffer, sizeof(serial_rx_buffer)) && 0xFF;
@@ -752,8 +787,18 @@ void loop() {
       Serial.flush();
       toggleSendInputBack();
     }
+    else if ((serial_rx_buffer[0] == 0x1C) && (serial_rx_buffer[11] == 0x1C)) {
+      // Reset N64 Controller data (Hopefully this will never be used)
+      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset_n64_controller); serial_rx_buffer_counter++) {
+
+        serial_rx_buffer_reset_n64_controller[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
+        Serial.write(serial_rx_buffer_reset_n64_controller[serial_rx_buffer_counter]);
+      }
+      Serial.flush();
+      resetN64Controller();
+    }
     //  Get Invalid Command
-    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x1B)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x1B))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
+    else if ((((serial_rx_buffer[0] < 0x01) || (serial_rx_buffer[0] > 0x1D)) && ((serial_rx_buffer[11] < 0x01) || (serial_rx_buffer[11] > 0x1D))) && (((serial_rx_buffer[0] != 0xA0) && (serial_rx_buffer[0] != 0xA1)) && ((serial_rx_buffer[11] != 0xA0) && (serial_rx_buffer[11] != 0xA1)))) {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Reset Controller Data Buffer
         serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
@@ -779,6 +824,22 @@ void loop() {
   calculatePong();
   autoResetControllerData();
 } // Close Loop Function
+
+void resetN64Controller() {
+  //  This is where the N64 Controller is reset, by pressing L+R+Start
+  calculatePing();
+  calculatePong();
+  serial_rx_buffer_reset_n64_controller[0] = 0x1D;
+  serial_rx_buffer_reset_n64_controller[11] = 0x1D;
+  
+  resetController();
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset_n64_controller); serial_rx_buffer_counter++) {
+    //  Write back data as a way to tell the controller was successfully reset
+    Serial.write(serial_rx_buffer_reset_n64_controller[serial_rx_buffer_counter]);
+  }
+  calculatePing();
+  calculatePong();
+}
 
 void toggleSendInputBack() {
   //  This is where we choose to turn the PS2 controller ON or OFF, through a solid-state low-power relay
