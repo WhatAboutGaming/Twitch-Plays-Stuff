@@ -166,6 +166,10 @@ unsigned int motorArray[] = {leftMotor, rightMotor, analogLed};
 
 void setup() {
 
+  pinMode(relayPin, OUTPUT);
+  delay(0.5); // Wait 0.5 second before turning off controller
+  digitalWrite(relayPin, LOW);
+
   serial_rx_buffer_toggle_controller_pwr[0] = 0x17;
   serial_rx_buffer_toggle_controller_pwr[1] = 0x00;
   serial_rx_buffer_toggle_controller_pwr[2] = 0x00;
@@ -205,8 +209,6 @@ void setup() {
   serial_rx_buffer_toggle_send_input_back[10] = 0x00;
   serial_rx_buffer_toggle_send_input_back[11] = 0x1B;
 
-  pinMode(relayPin, OUTPUT);
-  digitalWrite(relayPin, LOW);
   inputDelay = 0;
   isInputtingDelayed = false;
   isInputting = false;
@@ -492,6 +494,7 @@ void setup() {
   changeAutoResetControllerData();
   //Serial.println("END OF SETUP");
   //  And we are ready to go
+  delay(0.5); // Wait 0.5 second before turning on controller
   digitalWrite(relayPin, HIGH);
 }
 
