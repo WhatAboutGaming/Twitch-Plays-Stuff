@@ -166,9 +166,33 @@ unsigned int motorArray[] = {leftMotor, rightMotor, analogLed};
 
 void setup() {
 
+  int powerRelayDelay = 133;
+  int powerRelayCounter = 3;
   pinMode(relayPin, OUTPUT);
-  delay(0.5); // Wait 0.5 second before turning off controller
-  digitalWrite(relayPin, LOW);
+  pinMode(buttonAnalog, OUTPUT);
+  digitalWrite(buttonAnalog, HIGH);
+  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+  {
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
+  }
+  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+  {
+    delay(powerRelayDelay);
+    digitalWrite(relayPin, HIGH);
+    delay(powerRelayDelay);
+    digitalWrite(relayPin, LOW);
+  }
+  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+  {
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
+  }
+  digitalWrite(buttonAnalog, HIGH);
 
   serial_rx_buffer_toggle_controller_pwr[0] = 0x17;
   serial_rx_buffer_toggle_controller_pwr[1] = 0x00;
@@ -494,8 +518,29 @@ void setup() {
   changeAutoResetControllerData();
   //Serial.println("END OF SETUP");
   //  And we are ready to go
-  delay(0.5); // Wait 0.5 second before turning on controller
-  digitalWrite(relayPin, HIGH);
+  digitalWrite(buttonAnalog, HIGH);
+  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+  {
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
+  }
+  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+  {
+    delay(powerRelayDelay);
+    digitalWrite(relayPin, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(relayPin, HIGH);
+  }
+  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+  {
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
+  }
+  digitalWrite(buttonAnalog, HIGH);
 }
 
 void loop() {
