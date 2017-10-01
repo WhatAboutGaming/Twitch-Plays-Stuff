@@ -541,6 +541,27 @@ void setup() {
     digitalWrite(buttonAnalog, HIGH);
   }
   digitalWrite(buttonAnalog, HIGH);
+
+  //Serial.print("analogLedVal=");
+  //Serial.println(analogLedVal);
+  if (analogLedVal > 108)
+  {
+    //Serial.println("Analog is OFF");
+  }
+  if (analogLedVal < 80)
+  {
+    //Serial.println("Analog is OFF");
+  }
+  if ((analogLedVal >= 80) && (analogLedVal <= 87))
+  {
+    //Serial.println("Analog is ON");
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
+  }
+  //Serial.print("analogLedVal=");
+  //Serial.println(analogLedVal);
 }
 
 void loop() {
