@@ -165,34 +165,99 @@ unsigned int commandArray[] = {buttonSelect, buttonL3, buttonR3, buttonStart, bu
 unsigned int motorArray[] = {leftMotor, rightMotor, analogLed};
 
 void setup() {
+  Serial.begin(baudRate);
+  pinMode(leftMotor, INPUT);
+  pinMode(rightMotor, INPUT);
+  pinMode(analogLed, INPUT);
 
+  pinMode(vccPin, INPUT);
+
+  pinMode(attentionPin, INPUT);
+  readMotors();
   int powerRelayDelay = 133;
-  int powerRelayCounter = 3;
+  //int powerRelayCounter = 3;
   pinMode(relayPin, OUTPUT);
   pinMode(buttonAnalog, OUTPUT);
+  digitalWrite(relayPin, LOW);
   digitalWrite(buttonAnalog, HIGH);
-  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+  delay(powerRelayDelay);
+  digitalWrite(buttonAnalog, LOW);
+  delay(powerRelayDelay);
+  digitalWrite(buttonAnalog, HIGH);
+
+  readMotors();
+  if (analogLedVal > 108)
   {
+    Serial.println("Analog is OFF");
+  }
+  if (analogLedVal < 80)
+  {
+    Serial.println("Analog is OFF");
+  }
+  if ((analogLedVal >= 80) && (analogLedVal <= 87))
+  {
+    Serial.println("Analog is ON");
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, LOW);
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, HIGH);
+    digitalWrite(relayPin, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(relayPin, HIGH);
   }
-  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+  /*
+  digitalWrite(buttonAnalog, HIGH);
+  delay(powerRelayDelay);
+  digitalWrite(buttonAnalog, LOW);
+  delay(powerRelayDelay);
+  digitalWrite(buttonAnalog, HIGH);
+  */
+  readMotors();
+  if (analogLedVal > 108)
   {
+    Serial.println("Analog is OFF");
+  }
+  if (analogLedVal < 80)
+  {
+    Serial.println("Analog is OFF");
+  }
+  if ((analogLedVal >= 80) && (analogLedVal <= 87))
+  {
+    Serial.println("Analog is ON");
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
+    digitalWrite(relayPin, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(relayPin, HIGH);
+  }
+  readMotors();
+
+  /*
+    for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+    {
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
+    }
+    for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+    {
     delay(powerRelayDelay);
     digitalWrite(relayPin, HIGH);
     delay(powerRelayDelay);
     digitalWrite(relayPin, LOW);
-  }
-  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
-  {
+    }
+    for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+    {
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, LOW);
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, HIGH);
-  }
-  digitalWrite(buttonAnalog, HIGH);
+    }
+    digitalWrite(buttonAnalog, HIGH);
+  */
 
   serial_rx_buffer_toggle_controller_pwr[0] = 0x17;
   serial_rx_buffer_toggle_controller_pwr[1] = 0x00;
@@ -238,7 +303,7 @@ void setup() {
   isInputting = false;
 
   currentMillis = millis();
-  Serial.begin(baudRate);
+  //Serial.begin(baudRate);
   isConnected = false;
   disconnectCalled = currentMillis;
   serial_rx_buffer_disconnect[8] = (byte)((disconnectCalled & 0xFF));
@@ -516,50 +581,146 @@ void setup() {
 
   changeReadMotorsStatus();
   changeAutoResetControllerData();
-  //Serial.println("END OF SETUP");
-  //  And we are ready to go
+
   digitalWrite(buttonAnalog, HIGH);
-  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+  delay(powerRelayDelay);
+  digitalWrite(buttonAnalog, LOW);
+  delay(powerRelayDelay);
+  digitalWrite(buttonAnalog, HIGH);
+
+  readMotors();
+  if (analogLedVal > 108)
   {
+    Serial.println("Analog is OFF");
+  }
+  if (analogLedVal < 80)
+  {
+    Serial.println("Analog is OFF");
+  }
+  if ((analogLedVal >= 80) && (analogLedVal <= 87))
+  {
+    Serial.println("Analog is ON");
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, LOW);
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, HIGH);
-  }
-  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
-  {
-    delay(powerRelayDelay);
     digitalWrite(relayPin, LOW);
     delay(powerRelayDelay);
     digitalWrite(relayPin, HIGH);
   }
-  for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
-  {
-    delay(powerRelayDelay);
-    digitalWrite(buttonAnalog, LOW);
-    delay(powerRelayDelay);
-    digitalWrite(buttonAnalog, HIGH);
-  }
+  /*
   digitalWrite(buttonAnalog, HIGH);
-
-  //Serial.print("analogLedVal=");
-  //Serial.println(analogLedVal);
+  delay(powerRelayDelay);
+  digitalWrite(buttonAnalog, LOW);
+  delay(powerRelayDelay);
+  digitalWrite(buttonAnalog, HIGH);
+  */
+  readMotors();
   if (analogLedVal > 108)
   {
-    //Serial.println("Analog is OFF");
+    Serial.println("Analog is OFF");
   }
   if (analogLedVal < 80)
   {
-    //Serial.println("Analog is OFF");
+    Serial.println("Analog is OFF");
   }
   if ((analogLedVal >= 80) && (analogLedVal <= 87))
   {
-    //Serial.println("Analog is ON");
+    Serial.println("Analog is ON");
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, LOW);
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, HIGH);
+    digitalWrite(relayPin, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(relayPin, HIGH);
   }
+  readMotors();
+
+  //Serial.println("END OF SETUP");
+  //  And we are ready to go
+  //digitalWrite(relayPin, HIGH);
+  //digitalWrite(buttonAnalog, HIGH);
+  /*
+    for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+    {
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
+    }
+    for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+    {
+    delay(powerRelayDelay);
+    digitalWrite(relayPin, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(relayPin, HIGH);
+    }
+    for (int relayCounter = 0; relayCounter < powerRelayCounter; relayCounter++)
+    {
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
+    }
+    digitalWrite(buttonAnalog, HIGH);
+  */
+
+  //Serial.print("analogLedVal=");
+  //Serial.println(analogLedVal);
+  readMotors();
+  if (analogLedVal > 108)
+  {
+    Serial.println("Analog is OFF");
+  }
+  if (analogLedVal < 80)
+  {
+    Serial.println("Analog is OFF");
+  }
+  if ((analogLedVal >= 80) && (analogLedVal <= 87))
+  {
+    Serial.println("Analog is ON");
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
+    digitalWrite(relayPin, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(relayPin, HIGH);
+  }
+  /*
+  digitalWrite(buttonAnalog, HIGH);
+  delay(powerRelayDelay);
+  digitalWrite(buttonAnalog, LOW);
+  delay(powerRelayDelay);
+  digitalWrite(buttonAnalog, HIGH);
+  */
+  readMotors();
+  if (analogLedVal > 108)
+  {
+    Serial.println("Analog is OFF");
+  }
+  if (analogLedVal < 80)
+  {
+    Serial.println("Analog is OFF");
+  }
+  if ((analogLedVal >= 80) && (analogLedVal <= 87))
+  {
+    Serial.println("Analog is ON");
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
+    digitalWrite(relayPin, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(relayPin, HIGH);
+  }
+  readMotors();
+  // Why twice? To make sure the analog is unpressed (depressed?) before the controller even connects back to the PS2
+  digitalWrite(buttonAnalog, HIGH);
+  digitalWrite(relayPin, HIGH);
+  digitalWrite(buttonAnalog, HIGH);
+  digitalWrite(relayPin, HIGH);
   //Serial.print("analogLedVal=");
   //Serial.println(analogLedVal);
 }
