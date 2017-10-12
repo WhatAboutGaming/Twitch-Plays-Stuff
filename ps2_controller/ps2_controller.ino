@@ -188,15 +188,15 @@ void setup() {
   readMotors();
   if (analogLedVal > 108)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if (analogLedVal < 80)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if ((analogLedVal >= 80) && (analogLedVal <= 87))
   {
-    Serial.println("Analog is ON");
+    //Serial.println("Analog is ON");
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, LOW);
     delay(powerRelayDelay);
@@ -205,25 +205,23 @@ void setup() {
     delay(powerRelayDelay);
     digitalWrite(relayPin, HIGH);
   }
-  /*
   digitalWrite(buttonAnalog, HIGH);
   delay(powerRelayDelay);
   digitalWrite(buttonAnalog, LOW);
   delay(powerRelayDelay);
   digitalWrite(buttonAnalog, HIGH);
-  */
   readMotors();
   if (analogLedVal > 108)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if (analogLedVal < 80)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if ((analogLedVal >= 80) && (analogLedVal <= 87))
   {
-    Serial.println("Analog is ON");
+    //Serial.println("Analog is ON");
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, LOW);
     delay(powerRelayDelay);
@@ -591,15 +589,15 @@ void setup() {
   readMotors();
   if (analogLedVal > 108)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if (analogLedVal < 80)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if ((analogLedVal >= 80) && (analogLedVal <= 87))
   {
-    Serial.println("Analog is ON");
+    //Serial.println("Analog is ON");
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, LOW);
     delay(powerRelayDelay);
@@ -609,24 +607,24 @@ void setup() {
     digitalWrite(relayPin, HIGH);
   }
   /*
-  digitalWrite(buttonAnalog, HIGH);
-  delay(powerRelayDelay);
-  digitalWrite(buttonAnalog, LOW);
-  delay(powerRelayDelay);
-  digitalWrite(buttonAnalog, HIGH);
+    digitalWrite(buttonAnalog, HIGH);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
   */
   readMotors();
   if (analogLedVal > 108)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if (analogLedVal < 80)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if ((analogLedVal >= 80) && (analogLedVal <= 87))
   {
-    Serial.println("Analog is ON");
+    //Serial.println("Analog is ON");
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, LOW);
     delay(powerRelayDelay);
@@ -671,15 +669,15 @@ void setup() {
   readMotors();
   if (analogLedVal > 108)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if (analogLedVal < 80)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if ((analogLedVal >= 80) && (analogLedVal <= 87))
   {
-    Serial.println("Analog is ON");
+    //Serial.println("Analog is ON");
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, LOW);
     delay(powerRelayDelay);
@@ -689,24 +687,24 @@ void setup() {
     digitalWrite(relayPin, HIGH);
   }
   /*
-  digitalWrite(buttonAnalog, HIGH);
-  delay(powerRelayDelay);
-  digitalWrite(buttonAnalog, LOW);
-  delay(powerRelayDelay);
-  digitalWrite(buttonAnalog, HIGH);
+    digitalWrite(buttonAnalog, HIGH);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, LOW);
+    delay(powerRelayDelay);
+    digitalWrite(buttonAnalog, HIGH);
   */
   readMotors();
   if (analogLedVal > 108)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if (analogLedVal < 80)
   {
-    Serial.println("Analog is OFF");
+    //Serial.println("Analog is OFF");
   }
   if ((analogLedVal >= 80) && (analogLedVal <= 87))
   {
-    Serial.println("Analog is ON");
+    //Serial.println("Analog is ON");
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, LOW);
     delay(powerRelayDelay);
