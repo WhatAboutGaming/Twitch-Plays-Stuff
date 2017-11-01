@@ -205,11 +205,13 @@ void setup() {
     delay(powerRelayDelay);
     digitalWrite(relayPin, HIGH);
   }
+  /*
   digitalWrite(buttonAnalog, HIGH);
   delay(powerRelayDelay);
   digitalWrite(buttonAnalog, LOW);
   delay(powerRelayDelay);
   digitalWrite(buttonAnalog, HIGH);
+  */
   readMotors();
   if (analogLedVal > 108)
   {
