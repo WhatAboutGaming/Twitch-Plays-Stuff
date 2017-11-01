@@ -196,7 +196,7 @@ void setup() {
   }
   if ((analogLedVal >= 80) && (analogLedVal <= 87))
   {
-    //Serial.println("Analog is ON");
+    //Serial.println("Analog is ON"); 
     delay(powerRelayDelay);
     digitalWrite(buttonAnalog, LOW);
     delay(powerRelayDelay);
