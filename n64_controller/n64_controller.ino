@@ -485,7 +485,7 @@ void resetController()
 
   for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++) {
     digitalWrite(buttonArray[buttonArrayIndex], LOW);
-    delay(133);
+    //delay(133);
   }
 }
 
@@ -1893,4 +1893,3 @@ void autoResetControllerData()
     previousResetControllerDataDelay += resetControllerDataDelay;
   }
 }
-
