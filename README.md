@@ -20,3 +20,13 @@ Reference for Nintendo 64 controller:
 6)	https://i.imgur.com/ZMwTdwp.png
 7)	https://dpedu.io/article/2015-03-11/nintendo-64-joystick-pinout-arduino
 8)	https://www.youtube.com/watch?v=0QLZCfqUeg4
+
+Reference for Gamecube controller:
+
+1)	http://www.int03.co.uk/crema/hardware/gamecube/gc-control.html
+2)	http://www.seas.upenn.edu/~gland/gamecube.html
+3)	https://nintenduino.wordpress.com/documentation/controller-reference/
+4)	https://nintenduino.files.wordpress.com/2013/12/untitled.png
+5)	https://nintenduino.files.wordpress.com/2013/12/protocolv1-0.png
+6)	https://github.com/NicoHood/Nintendo
+7)	https://github.com/dekuNukem/gc3ds
