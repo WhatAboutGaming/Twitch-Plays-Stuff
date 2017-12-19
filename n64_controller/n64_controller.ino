@@ -95,7 +95,7 @@ unsigned long pingTimeOut = 0;
 unsigned long pongTimeOut = 0;
 unsigned long pingTimeIn = 0;
 unsigned long pongTimeIn = 0;
-unsigned long pingDelay = 500;
+unsigned long pingDelay = 100;
 unsigned long pongDelay = 1000;
 unsigned long previousCalc = 0;
 unsigned long calcDelay = 1000;
@@ -110,7 +110,7 @@ unsigned long calcPongTimestampIn = 0;
 unsigned long calcPingTimestampOut = 0;
 unsigned long calcPongTimestampOut = 0;
 
-unsigned long resetControllerDataDelay = 500;
+unsigned long resetControllerDataDelay = 100;
 unsigned long previousResetControllerDataDelay = 0;
 
 unsigned long readMotorsStatus = 0; // 0 = Read Both Low to High and High to Low changes, 1 = Disabled, 2 = Read Low to High changes, 3 = Read High to Low Changes. 0 Means it's enabled by default.
