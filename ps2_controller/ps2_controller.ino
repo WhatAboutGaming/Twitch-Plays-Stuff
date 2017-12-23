@@ -59,7 +59,7 @@ unsigned long pingTimeOut = 0;
 unsigned long pongTimeOut = 0;
 unsigned long pingTimeIn = 0;
 unsigned long pongTimeIn = 0;
-unsigned long pingDelay = 100;
+unsigned long pingDelay = 1000;
 unsigned long pongDelay = 1000;
 unsigned long previousCalc = 0;
 unsigned long calcDelay = 1000;
@@ -74,7 +74,7 @@ unsigned long calcPongTimestampIn = 0;
 unsigned long calcPingTimestampOut = 0;
 unsigned long calcPongTimestampOut = 0;
 
-unsigned long resetControllerDataDelay = 100;
+unsigned long resetControllerDataDelay = 1000;
 unsigned long previousResetControllerDataDelay = 0;
 
 unsigned int leftMotorVal = 0;
