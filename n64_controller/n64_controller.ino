@@ -130,7 +130,7 @@ unsigned long resetDone = 0;
 unsigned long disconnectCalled = 0;
 unsigned long disconnectDone = 0;
 
-unsigned long baudRate = 115200;
+unsigned long baudRate = 2000000;
 
 byte serial_rx_buffer[12];
 byte serial_rx_buffer_inverted[12];
@@ -220,6 +220,7 @@ void setup() {
 
   currentMillis = millis();
   Serial.begin(baudRate);
+  Serial.setTimeout(0);
   isConnected = false;
   disconnectCalled = currentMillis;
   serial_rx_buffer_disconnect[8] = (byte)((disconnectCalled & 0xFF));
@@ -1075,6 +1076,7 @@ void arduinoDisconnect() {
   isConnected = true;
   disconnectDone = currentMillis;
   Serial.begin(baudRate);
+  Serial.setTimeout(0);
   serial_rx_buffer_disconnect[0] = 0x0B;
   serial_rx_buffer_disconnect[11] = 0x0B;
   isConnected = true;
@@ -1210,6 +1212,7 @@ void arduinoReset() {
   disconnectDone = currentMillis;
   delay(2500); // Wait 2.5 seconds before resetting
   Serial.begin(baudRate);
+  Serial.setTimeout(0);
 
   //  Tell the computer the connection has began succesfully
   serial_rx_buffer_disconnect[0] = 0x0B;
@@ -1694,6 +1697,7 @@ void calculatePing() {
       delay(2500); // Wait 2.5 seconds before starting connection
       //Serial.println("Sending shit after connection has closed");
       Serial.begin(baudRate);
+      Serial.setTimeout(0);
       //Serial.println("Connection started");
       //  Tell the computer the connection has began succesfully
       serial_rx_buffer_disconnect[0] = 0x0B;
