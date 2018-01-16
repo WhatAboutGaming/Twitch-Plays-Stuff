@@ -196,7 +196,7 @@ void setup() {
   //TCCR0B = (TCCR0B & 0xF8) | 0x02;
   TCCR3B = (TCCR2B & 0xF8) | 0x01;
   Serial.begin(baudRate);
-  Serial.setTimeout(0);
+  Serial.setTimeout(1000);
   for (unsigned int buttonArrayIndex = 0; buttonArrayIndex < (sizeof(commandArray) / sizeof(unsigned int)); buttonArrayIndex++)
   {
     pinMode(commandArray[buttonArrayIndex], OUTPUT);
@@ -1213,7 +1213,7 @@ void arduinoDisconnect() {
   isConnected = true;
   disconnectDone = currentMillis;
   Serial.begin(baudRate);
-  Serial.setTimeout(0);
+  Serial.setTimeout(1000);
   serial_rx_buffer_disconnect[0] = 0x0B;
   serial_rx_buffer_disconnect[11] = 0x0B;
   isConnected = true;
@@ -1369,7 +1369,7 @@ void arduinoReset() {
   disconnectDone = currentMillis;
   //delay(2500); // Wait 2.5 seconds before resetting
   Serial.begin(baudRate);
-  Serial.setTimeout(0);
+  Serial.setTimeout(1000);
 
   //  Tell the computer the connection has began succesfully
   serial_rx_buffer_disconnect[0] = 0x0B;
@@ -1841,7 +1841,7 @@ void calculatePing() {
       //delay(2500); // Wait 2.5 seconds before starting connection
       //Serial.println("Sending shit after connection has closed");
       Serial.begin(baudRate);
-      Serial.setTimeout(0);
+      Serial.setTimeout(1000);
       //Serial.println("Connection started");
       //  Tell the computer the connection has began succesfully
       serial_rx_buffer_disconnect[0] = 0x0B;

@@ -59,13 +59,13 @@ boolean axisYiActive = false;
 boolean axisXiActive = false;
 
 unsigned int buttonArrayIndex = 0;
-unsigned int buttonArray[] = {buttonA, buttonB, buttonZ, buttonStart, buttonDUp, buttonDDown, buttonDLeft, buttonDRight, buttonL, buttonR, buttonCUp, buttonCDown, buttonCLeft, buttonCRight};
+unsigned int buttonArray[] = {buttonA, buttonB, buttonZ, buttonZ, buttonDUp, buttonDDown, buttonDLeft, buttonDRight, buttonL, buttonR, buttonCUp, buttonCDown, buttonCLeft, buttonCRight};
 ////////////////////////////////////////////////////////// ^ Replace with START after finishing
 unsigned int xAxisPins[] = {axisXq, axisXi};
 unsigned int yAxisPins[] = {axisYq, axisYi};
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(2000000);
   // Setup buttons
   //pinMode(7, OUTPUT);
   for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++) {
@@ -223,24 +223,24 @@ void loop() {
   for (int buttonPresses = 0; buttonPresses < 2; buttonPresses++) {
     moveStick(127, 127); // CENTER
     delay(133);
-    moveStick(1, 127); // LEFT
+    moveStick(0, 127); // LEFT
     delay(133);
-    moveStick(1, 1); // LEFT+UP
+    moveStick(0, 0); // LEFT+UP
     delay(133);
-    moveStick(127, 1); // UP
+    moveStick(127, 0); // UP
     delay(133);
-    moveStick(254, 1); // UP+RIGHT
+    moveStick(255, 1); // UP+RIGHT
     delay(133);
-    moveStick(254, 127); // RIGHT
+    moveStick(255, 127); // RIGHT
     delay(133);
-    moveStick(254, 254); // RIGHT+DOWN
+    moveStick(255, 255); // RIGHT+DOWN
     delay(133);
-    moveStick(127, 254); // DOWN
+    moveStick(127, 255); // DOWN
     delay(133);
-    moveStick(1, 254); // DOWN+LEFT
+    moveStick(0, 255); // DOWN+LEFT
     delay(133);
-    //moveStick(0, 127); // LEFT
-    //delay(133);
+    moveStick(0, 127); // LEFT
+    delay(133);
     moveStick(127, 127); // CENTER
     delay(133);
     /*
