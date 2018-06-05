@@ -9,6 +9,7 @@ Reference for PlayStation/PlayStation 2 controller:
 2)	http://store.curiousinventor.com/guides/PS2/
 3)	http://www.lynxmotion.com/images/files/ps2cmd01.txt
 4)	http://www.billporter.info/2010/06/05/playstation-2-controller-arduino-library-v1-0/
+5) http://procrastineering.blogspot.com/2010/12/simulated-ps2-controller-for.html (Autonomous Guitar Hero controller)
 
 Reference for Nintendo 64 controller:
 
