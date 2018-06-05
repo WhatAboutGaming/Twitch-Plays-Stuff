@@ -8,6 +8,7 @@
   https://gist.github.com/scanlime/5042071
   http://store.curiousinventor.com/guides/PS2/
   http://www.lynxmotion.com/images/files/ps2cmd01.txt
+  http://procrastineering.blogspot.com/2010/12/simulated-ps2-controller-for.html
 */
 
 #define axisLx 2
