@@ -110,6 +110,7 @@ void setup()
 
   delay(2500);
 
+  //  Send these on startup so the computer knows the Arduino is ready!
   serial_rx_buffer_controller[1] = 0x00;
   serial_rx_buffer_controller[2] = 0x00;
   serial_rx_buffer_controller[3] = 0x7F;
