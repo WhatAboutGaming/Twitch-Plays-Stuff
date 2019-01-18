@@ -107,6 +107,45 @@ void setup()
     digitalWrite(clockPin, HIGH);
   }
   digitalWrite(latchPin, HIGH);
+
+  delay(2500);
+
+  serial_rx_buffer_controller[1] = 0x00;
+  serial_rx_buffer_controller[2] = 0x00;
+  serial_rx_buffer_controller[3] = 0x7F;
+  serial_rx_buffer_controller[4] = 0x7F;
+  serial_rx_buffer_controller[5] = 0x7F;
+  serial_rx_buffer_controller[6] = 0x7F;
+  serial_rx_buffer_controller[7] = 0x00;
+  serial_rx_buffer_controller[8] = 0x00;
+  //serial_rx_buffer_controller[9] = 0x00;
+  //serial_rx_buffer_controller[10] = 0x00;
+
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
+    Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
+    //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
+    serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
+    //Serial.println("TEST 2");
+  }
+
+  //  Reset delay to 0
+  serial_rx_buffer_controller[1] = 0x00;
+  serial_rx_buffer_controller[2] = 0x00;
+  serial_rx_buffer_controller[3] = 0x7F;
+  serial_rx_buffer_controller[4] = 0x7F;
+  serial_rx_buffer_controller[5] = 0x7F;
+  serial_rx_buffer_controller[6] = 0x7F;
+  serial_rx_buffer_controller[7] = 0x00;
+  serial_rx_buffer_controller[8] = 0x00;
+  serial_rx_buffer_controller[9] = 0x00;
+  serial_rx_buffer_controller[10] = 0x00;
+
+  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
+    Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
+    //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
+    serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
+    //Serial.println("TEST 3");
+  }
 }
 void loop()
 {
@@ -307,7 +346,7 @@ void pressButtons() {
     //  Analog button (Used to change between Digital and Analog modes in older games), Buffer Array Element 7
     //  All other bits in this Buffer Array Element are unused
     inputStatus[24] = (serial_rx_buffer_inverted_controller[7] & B00000001);
-    
+
     digitalWrite(latchPin, LOW);
     for (int i = 31; i >= 0; i--)
     {
