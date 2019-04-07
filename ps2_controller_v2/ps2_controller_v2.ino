@@ -15,7 +15,6 @@
 #define latchPin 2 // HCF4094/74HC595 Latch/Strobe Input
 #define dataPin 3 // HCF4094/74HC595 Data Input
 #define clockPin 4 // HCF4094/74HC595 Clock Input
-#define outputEnable 5 // HCF4094/74HC595 Output Enable Input, the HCF4094 allows output when the output enable input level is HIGH, the 74HC595 allows output when the output enable input level is LOW
 
 #define buttonSelect 0 // Left 10 
 #define buttonL3 1 // Right 9
@@ -59,7 +58,7 @@
 // Right 11 = Right Motor In = A1
 // Right 12 = Analog LED = A2
 bool defaultStatus[] = {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
-bool inputStatus[] = {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
+bool inputStatus[] =   {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
 unsigned int commandArray[] = {buttonSelect, buttonL3, buttonR3, buttonStart, buttonDUp, buttonDRight, buttonDDown, buttonDLeft, buttonL2, buttonR2, buttonL1, buttonR1, buttonTriangle, buttonCircle, buttonCross, buttonSquare, axisRxHalf, axisRxFull, axisRyHalf, axisRyFull, axisLxHalf, axisLxFull, axisLyHalf, axisLyHalf, buttonAnalog, 25, 26, 27, 28, 29, 30, 31};
 unsigned int motorArray[] = {leftMotor, rightMotor, analogLed};
 
@@ -70,18 +69,9 @@ unsigned long inputDelay = 0;
 unsigned long previousInputDelay = 0;
 unsigned long currentMillis = 0;
 
-unsigned long sendInputOnce = 0; // 0 = Send only once, 1 = Send for every iteration of Loop
-
-boolean sentInputOnce = false;
-boolean sendInputOnlyOnce = false;
-
 unsigned long baudRate = 2000000;
 
 byte serial_rx_buffer[12];
-byte serial_rx_buffer_inverted[12];
-byte serial_rx_buffer_controller[12];
-byte serial_rx_buffer_inverted_controller[12];
-unsigned long serial_rx_buffer_counter = 0;
 unsigned long controller = 0;
 
 void setup()
@@ -95,9 +85,6 @@ void setup()
   pinMode(latchPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
-  pinMode(outputEnable, OUTPUT);
-
-  digitalWrite(outputEnable, HIGH);
 
   digitalWrite(latchPin, LOW);
   for (int i = 31; i >= 0; i--)
@@ -108,80 +95,30 @@ void setup()
   }
   digitalWrite(latchPin, HIGH);
 
-  delay(2500);
+  //  Reset everything
+  serial_rx_buffer[1] = 0x00;
+  serial_rx_buffer[2] = 0x00;
+  serial_rx_buffer[3] = 0x7F;
+  serial_rx_buffer[4] = 0x7F;
+  serial_rx_buffer[5] = 0x7F;
+  serial_rx_buffer[6] = 0x7F;
+  serial_rx_buffer[7] = 0x00;
+  serial_rx_buffer[8] = 0x00;
+  serial_rx_buffer[9] = 0x00;
+  serial_rx_buffer[10] = 0x00;
 
-  //  Send these on startup so the computer knows the Arduino is ready!
-  serial_rx_buffer_controller[1] = 0x00;
-  serial_rx_buffer_controller[2] = 0x00;
-  serial_rx_buffer_controller[3] = 0x7F;
-  serial_rx_buffer_controller[4] = 0x7F;
-  serial_rx_buffer_controller[5] = 0x7F;
-  serial_rx_buffer_controller[6] = 0x7F;
-  serial_rx_buffer_controller[7] = 0x00;
-  serial_rx_buffer_controller[8] = 0x00;
-  //serial_rx_buffer_controller[9] = 0x00;
-  //serial_rx_buffer_controller[10] = 0x00;
-
-  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
-    //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
-    serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
-    //Serial.println("TEST 2");
-  }
-
-  //  Reset delay to 0
-  serial_rx_buffer_controller[1] = 0x00;
-  serial_rx_buffer_controller[2] = 0x00;
-  serial_rx_buffer_controller[3] = 0x7F;
-  serial_rx_buffer_controller[4] = 0x7F;
-  serial_rx_buffer_controller[5] = 0x7F;
-  serial_rx_buffer_controller[6] = 0x7F;
-  serial_rx_buffer_controller[7] = 0x00;
-  serial_rx_buffer_controller[8] = 0x00;
-  serial_rx_buffer_controller[9] = 0x00;
-  serial_rx_buffer_controller[10] = 0x00;
-
-  for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
-    //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
-    serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
-    //Serial.println("TEST 3");
-  }
 }
 void loop()
 {
   currentMillis = millis();
   if (Serial.available() > 0) {
-
     controller = Serial.readBytes(serial_rx_buffer, sizeof(serial_rx_buffer)) && 0xFF;
 
     //  Set Start Byte (Preamble Byte) and End Byte (Postamble Byte)
     //  1 == 0x01
-    if ((serial_rx_buffer[0] == 0x01) && (serial_rx_buffer[11] == 0x01)) {
+    if ((serial_rx_buffer[0] == 0x01) && (serial_rx_buffer[11] == 0x01))
+    {
 
-      //  Count bytes and parse ASCII values to their respective commands, such as buttons and axis
-      for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
-        Serial.write(serial_rx_buffer[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
-        //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
-        //Serial.println("TEST 0");
-        serial_rx_buffer_inverted[serial_rx_buffer_counter] = ( serial_rx_buffer[serial_rx_buffer_counter]);
-        serial_rx_buffer_controller[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
-        serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = ( serial_rx_buffer_controller[serial_rx_buffer_counter]);
-      }
-
-      if (sendInputOnce == 0)
-      {
-        sendInputOnlyOnce = true;
-        sentInputOnce = false;
-      }
-      if (sendInputOnce != 0)
-      {
-        sendInputOnlyOnce = false;
-        sentInputOnce = true;
-      }
-
-      //Serial.print('\n');
-      Serial.flush();
       // Make the button presses actually work
       isInputting = true;
       previousInputDelay = currentMillis;
@@ -198,80 +135,49 @@ void pressButtons() {
   }
   if (isInputting == true)
   {
-    if (sendInputOnlyOnce == true)
-    {
-      if (sentInputOnce == false)
-      {
-        for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
-          Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
-          //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
-          serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
-          sentInputOnce = true;
-          //Serial.println("TEST 1A");
-        }
-        //Serial.println("TEST 1C");
-      }
-      //Serial.println("TEST 1D");
-    }
-
-    if (sendInputOnlyOnce == false)
-    {
-      if (sentInputOnce == true)
-      {
-        for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
-          Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
-          //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
-          serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
-          //sentInputOnce = true;
-          //Serial.println("TEST 1B");
-        }
-      }
-    }
-    //Serial.print('\n');
-    Serial.flush();
     //  Press Button
 
     //  First 8 buttons, Buffer Array Element 1
     //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
-    inputStatus[0] = (serial_rx_buffer_inverted_controller[1] & B00000001);
-    inputStatus[1] = (serial_rx_buffer_inverted_controller[1] & B00000010);
-    inputStatus[2] = (serial_rx_buffer_inverted_controller[1] & B00000100);
-    inputStatus[3] = (serial_rx_buffer_inverted_controller[1] & B00001000);
-    inputStatus[4] = (serial_rx_buffer_inverted_controller[1] & B00010000);
-    inputStatus[5] = (serial_rx_buffer_inverted_controller[1] & B00100000);
-    inputStatus[6] = (serial_rx_buffer_inverted_controller[1] & B01000000);
-    inputStatus[7] = (serial_rx_buffer_inverted_controller[1] & B10000000);
+    inputStatus[0] = (serial_rx_buffer[1] & B00000001);
+    inputStatus[1] = (serial_rx_buffer[1] & B00000010);
+    inputStatus[2] = (serial_rx_buffer[1] & B00000100);
+    inputStatus[3] = (serial_rx_buffer[1] & B00001000);
+    inputStatus[4] = (serial_rx_buffer[1] & B00010000);
+    inputStatus[5] = (serial_rx_buffer[1] & B00100000);
+    inputStatus[6] = (serial_rx_buffer[1] & B01000000);
+    inputStatus[7] = (serial_rx_buffer[1] & B10000000);
 
     //  Second 8 buttons, Buffer Array Element 2
     //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
-    inputStatus[8] = (serial_rx_buffer_inverted_controller[2] & B00000001);
-    inputStatus[9] = (serial_rx_buffer_inverted_controller[2] & B00000010);
-    inputStatus[10] = (serial_rx_buffer_inverted_controller[2] & B00000100);
-    inputStatus[11] = (serial_rx_buffer_inverted_controller[2] & B00001000);
-    inputStatus[12] = (serial_rx_buffer_inverted_controller[2] & B00010000);
-    inputStatus[13] = (serial_rx_buffer_inverted_controller[2] & B00100000);
-    inputStatus[14] = (serial_rx_buffer_inverted_controller[2] & B01000000);
-    inputStatus[15] = (serial_rx_buffer_inverted_controller[2] & B10000000);
+    inputStatus[8] = (serial_rx_buffer[2] & B00000001);
+    inputStatus[9] = (serial_rx_buffer[2] & B00000010);
+    inputStatus[10] = (serial_rx_buffer[2] & B00000100);
+    inputStatus[11] = (serial_rx_buffer[2] & B00001000);
+    inputStatus[12] = (serial_rx_buffer[2] & B00010000);
+    inputStatus[13] = (serial_rx_buffer[2] & B00100000);
+    inputStatus[14] = (serial_rx_buffer[2] & B01000000);
+    inputStatus[15] = (serial_rx_buffer[2] & B10000000);
 
     //  4 Axis, Buffer Array Elements 3, 4, 5, 6
     //  RX, RY, LX, LY
 
     //RX STICK
-    if (serial_rx_buffer_inverted_controller[3] > 127)
+    if (serial_rx_buffer[3] > 127)
     {
       // Push RX Stick to Right
       inputStatus[16] = HIGH;
       inputStatus[17] = HIGH;
     }
 
-    if (serial_rx_buffer_inverted_controller[3] < 127)
+    if (serial_rx_buffer[3] < 127)
     {
       // Push RX Stick to Left
       inputStatus[16] = LOW;
       inputStatus[17] = LOW;
     }
 
-    if (serial_rx_buffer_inverted_controller[3] == 127)
+    if (serial_rx_buffer[3] == 127)
     {
       // Keep RX Stick Centered
       inputStatus[16] = HIGH;
@@ -279,21 +185,21 @@ void pressButtons() {
     }
 
     //RY STICK
-    if (serial_rx_buffer_inverted_controller[4] > 127)
+    if (serial_rx_buffer[4] > 127)
     {
       // Push RY Stick to Up
       inputStatus[18] = HIGH;
       inputStatus[19] = HIGH;
     }
 
-    if (serial_rx_buffer_inverted_controller[4] < 127)
+    if (serial_rx_buffer[4] < 127)
     {
       // Push RY Stick to Down
       inputStatus[18] = LOW;
       inputStatus[19] = LOW;
     }
 
-    if (serial_rx_buffer_inverted_controller[4] == 127)
+    if (serial_rx_buffer[4] == 127)
     {
       // Keep RY Stick Centered
       inputStatus[18] = HIGH;
@@ -301,21 +207,21 @@ void pressButtons() {
     }
 
     //LX STICK
-    if (serial_rx_buffer_inverted_controller[5] > 127)
+    if (serial_rx_buffer[5] > 127)
     {
       // Push LX Stick to Right
       inputStatus[20] = HIGH;
       inputStatus[21] = HIGH;
     }
 
-    if (serial_rx_buffer_inverted_controller[5] < 127)
+    if (serial_rx_buffer[5] < 127)
     {
       // Push LX Stick to Left
       inputStatus[20] = LOW;
       inputStatus[21] = LOW;
     }
 
-    if (serial_rx_buffer_inverted_controller[5] == 127)
+    if (serial_rx_buffer[5] == 127)
     {
       // Keep LX Stick Centered
       inputStatus[20] = HIGH;
@@ -323,21 +229,21 @@ void pressButtons() {
     }
 
     //LY STICK
-    if (serial_rx_buffer_inverted_controller[6] > 127)
+    if (serial_rx_buffer[6] > 127)
     {
       // Push LY Stick to Down
       inputStatus[22] = HIGH;
       inputStatus[23] = HIGH;
     }
 
-    if (serial_rx_buffer_inverted_controller[6] < 127)
+    if (serial_rx_buffer[6] < 127)
     {
       // Push LY Stick to Up
       inputStatus[22] = LOW;
       inputStatus[23] = LOW;
     }
 
-    if (serial_rx_buffer_inverted_controller[6] == 127)
+    if (serial_rx_buffer[6] == 127)
     {
       // Keep LY Stick Centered
       inputStatus[22] = HIGH;
@@ -346,7 +252,7 @@ void pressButtons() {
 
     //  Analog button (Used to change between Digital and Analog modes in older games), Buffer Array Element 7
     //  All other bits in this Buffer Array Element are unused
-    inputStatus[24] = (serial_rx_buffer_inverted_controller[7] & B00000001);
+    inputStatus[24] = (serial_rx_buffer[7] & B00000001);
 
     digitalWrite(latchPin, LOW);
     for (int i = 31; i >= 0; i--)
@@ -370,85 +276,59 @@ void pressButtons() {
         if (currentMillis - previousInputDelay >= inputDelay) {
           //  Now we need to stop the Soft Delay
 
-          //  Depress Buttons (Only if Buffer Array Element 9 and 10 != 0x00)
-          serial_rx_buffer_controller[1] = 0x00;
-          serial_rx_buffer_controller[2] = 0x00;
-          serial_rx_buffer_controller[3] = 0x7F;
-          serial_rx_buffer_controller[4] = 0x7F;
-          serial_rx_buffer_controller[5] = 0x7F;
-          serial_rx_buffer_controller[6] = 0x7F;
-          serial_rx_buffer_controller[7] = 0x00;
-          serial_rx_buffer_controller[8] = 0x00;
-          //serial_rx_buffer_controller[9] = 0x00;
-          //serial_rx_buffer_controller[10] = 0x00;
-
-          for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
-            Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
-            //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
-            serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
-            //Serial.println("TEST 2");
-          }
-
-          //  Reset delay to 0
-          serial_rx_buffer_controller[1] = 0x00;
-          serial_rx_buffer_controller[2] = 0x00;
-          serial_rx_buffer_controller[3] = 0x7F;
-          serial_rx_buffer_controller[4] = 0x7F;
-          serial_rx_buffer_controller[5] = 0x7F;
-          serial_rx_buffer_controller[6] = 0x7F;
-          serial_rx_buffer_controller[7] = 0x00;
-          serial_rx_buffer_controller[8] = 0x00;
-          serial_rx_buffer_controller[9] = 0x00;
-          serial_rx_buffer_controller[10] = 0x00;
-
-          for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
-            Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
-            //  Invert 0 to 255 and vice versa to make it easier to determine which commands to enable or not, and their values
-            serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
-            //Serial.println("TEST 3");
-          }
+          //  Reset everything
+          serial_rx_buffer[1] = 0x00;
+          serial_rx_buffer[2] = 0x00;
+          serial_rx_buffer[3] = 0x7F;
+          serial_rx_buffer[4] = 0x7F;
+          serial_rx_buffer[5] = 0x7F;
+          serial_rx_buffer[6] = 0x7F;
+          serial_rx_buffer[7] = 0x00;
+          serial_rx_buffer[8] = 0x00;
+          serial_rx_buffer[9] = 0x00;
+          serial_rx_buffer[10] = 0x00;
 
           //  First 8 buttons, Buffer Array Element 1
           //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
-          inputStatus[0] = (serial_rx_buffer_inverted_controller[1] & B00000001);
-          inputStatus[1] = (serial_rx_buffer_inverted_controller[1] & B00000010);
-          inputStatus[2] = (serial_rx_buffer_inverted_controller[1] & B00000100);
-          inputStatus[3] = (serial_rx_buffer_inverted_controller[1] & B00001000);
-          inputStatus[4] = (serial_rx_buffer_inverted_controller[1] & B00010000);
-          inputStatus[5] = (serial_rx_buffer_inverted_controller[1] & B00100000);
-          inputStatus[6] = (serial_rx_buffer_inverted_controller[1] & B01000000);
-          inputStatus[7] = (serial_rx_buffer_inverted_controller[1] & B10000000);
+          inputStatus[0] = (serial_rx_buffer[1] & B00000001);
+          inputStatus[1] = (serial_rx_buffer[1] & B00000010);
+          inputStatus[2] = (serial_rx_buffer[1] & B00000100);
+          inputStatus[3] = (serial_rx_buffer[1] & B00001000);
+          inputStatus[4] = (serial_rx_buffer[1] & B00010000);
+          inputStatus[5] = (serial_rx_buffer[1] & B00100000);
+          inputStatus[6] = (serial_rx_buffer[1] & B01000000);
+          inputStatus[7] = (serial_rx_buffer[1] & B10000000);
 
           //  Second 8 buttons, Buffer Array Element 2
           //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
-          inputStatus[8] = (serial_rx_buffer_inverted_controller[2] & B00000001);
-          inputStatus[9] = (serial_rx_buffer_inverted_controller[2] & B00000010);
-          inputStatus[10] = (serial_rx_buffer_inverted_controller[2] & B00000100);
-          inputStatus[11] = (serial_rx_buffer_inverted_controller[2] & B00001000);
-          inputStatus[12] = (serial_rx_buffer_inverted_controller[2] & B00010000);
-          inputStatus[13] = (serial_rx_buffer_inverted_controller[2] & B00100000);
-          inputStatus[14] = (serial_rx_buffer_inverted_controller[2] & B01000000);
-          inputStatus[15] = (serial_rx_buffer_inverted_controller[2] & B10000000);
+          inputStatus[8] = (serial_rx_buffer[2] & B00000001);
+          inputStatus[9] = (serial_rx_buffer[2] & B00000010);
+          inputStatus[10] = (serial_rx_buffer[2] & B00000100);
+          inputStatus[11] = (serial_rx_buffer[2] & B00001000);
+          inputStatus[12] = (serial_rx_buffer[2] & B00010000);
+          inputStatus[13] = (serial_rx_buffer[2] & B00100000);
+          inputStatus[14] = (serial_rx_buffer[2] & B01000000);
+          inputStatus[15] = (serial_rx_buffer[2] & B10000000);
 
           //  4 Axis, Buffer Array Elements 3, 4, 5, 6
           //  RX, RY, LX, LY
 
           //RX STICK
-          if (serial_rx_buffer_inverted_controller[3] > 127)
+          if (serial_rx_buffer[3] > 127)
           {
             // Push RX Stick to Right
             inputStatus[16] = HIGH;
             inputStatus[17] = HIGH;
           }
 
-          if (serial_rx_buffer_inverted_controller[3] < 127)
+          if (serial_rx_buffer[3] < 127)
           {
             // Push RX Stick to Left
             inputStatus[16] = LOW;
             inputStatus[17] = LOW;
           }
 
-          if (serial_rx_buffer_inverted_controller[3] == 127)
+          if (serial_rx_buffer[3] == 127)
           {
             // Keep RX Stick Centered
             inputStatus[16] = HIGH;
@@ -456,21 +336,21 @@ void pressButtons() {
           }
 
           //RY STICK
-          if (serial_rx_buffer_inverted_controller[4] > 127)
+          if (serial_rx_buffer[4] > 127)
           {
             // Push RY Stick to Up
             inputStatus[18] = HIGH;
             inputStatus[19] = HIGH;
           }
 
-          if (serial_rx_buffer_inverted_controller[4] < 127)
+          if (serial_rx_buffer[4] < 127)
           {
             // Push RY Stick to Down
             inputStatus[18] = LOW;
             inputStatus[19] = LOW;
           }
 
-          if (serial_rx_buffer_inverted_controller[4] == 127)
+          if (serial_rx_buffer[4] == 127)
           {
             // Keep RY Stick Centered
             inputStatus[18] = HIGH;
@@ -478,21 +358,21 @@ void pressButtons() {
           }
 
           //LX STICK
-          if (serial_rx_buffer_inverted_controller[5] > 127)
+          if (serial_rx_buffer[5] > 127)
           {
             // Push LX Stick to Right
             inputStatus[20] = HIGH;
             inputStatus[21] = HIGH;
           }
 
-          if (serial_rx_buffer_inverted_controller[5] < 127)
+          if (serial_rx_buffer[5] < 127)
           {
             // Push LX Stick to Left
             inputStatus[20] = LOW;
             inputStatus[21] = LOW;
           }
 
-          if (serial_rx_buffer_inverted_controller[5] == 127)
+          if (serial_rx_buffer[5] == 127)
           {
             // Keep LX Stick Centered
             inputStatus[20] = HIGH;
@@ -500,21 +380,21 @@ void pressButtons() {
           }
 
           //LY STICK
-          if (serial_rx_buffer_inverted_controller[6] > 127)
+          if (serial_rx_buffer[6] > 127)
           {
             // Push LY Stick to Down
             inputStatus[22] = HIGH;
             inputStatus[23] = HIGH;
           }
 
-          if (serial_rx_buffer_inverted_controller[6] < 127)
+          if (serial_rx_buffer[6] < 127)
           {
             // Push LY Stick to Up
             inputStatus[22] = LOW;
             inputStatus[23] = LOW;
           }
 
-          if (serial_rx_buffer_inverted_controller[6] == 127)
+          if (serial_rx_buffer[6] == 127)
           {
             // Keep LY Stick Centered
             inputStatus[22] = HIGH;
@@ -523,7 +403,7 @@ void pressButtons() {
 
           //  Analog button (Used to change between Digital and Analog modes in older games), Buffer Array Element 7
           //  All other bits in this Buffer Array Element are unused
-          inputStatus[24] = (serial_rx_buffer_inverted_controller[7] & B00000001);
+          inputStatus[24] = (serial_rx_buffer[7] & B00000001);
 
           digitalWrite(latchPin, LOW);
           for (int i = 31; i >= 0; i--)
@@ -535,12 +415,8 @@ void pressButtons() {
           digitalWrite(latchPin, HIGH);
 
           //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
-          //Serial.print('\n');
-          Serial.flush();
-
           isInputtingDelayed = false;
           isInputting = false;
-          //sentInputOnce = true;
           previousInputDelay += inputDelay;
           inputDelay = 0;
         }
