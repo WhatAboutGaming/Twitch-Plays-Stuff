@@ -60,7 +60,7 @@
 bool defaultStatus[] = {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
 bool inputStatus[] =   {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
 unsigned int commandArray[] = {buttonSelect, buttonL3, buttonR3, buttonStart, buttonDUp, buttonDRight, buttonDDown, buttonDLeft, buttonL2, buttonR2, buttonL1, buttonR1, buttonTriangle, buttonCircle, buttonCross, buttonSquare, axisRxHalf, axisRxFull, axisRyHalf, axisRyFull, axisLxHalf, axisLxFull, axisLyHalf, axisLyHalf, buttonAnalog, 25, 26, 27, 28, 29, 30, 31};
-unsigned int motorArray[] = {leftMotor, rightMotor, analogLed};
+unsigned int motorArray[] = {leftMotor, rightMotor, analogLed}; // Big motor, Small Motor, Analog LED
 
 boolean isInputting = false;
 boolean isInputtingDelayed = false;
