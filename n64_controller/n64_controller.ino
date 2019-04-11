@@ -220,23 +220,17 @@ void setup() {
 
   currentMillis = millis();
   Serial.begin(baudRate);
-  Serial.setTimeout(1000);
   isConnected = false;
   disconnectCalled = currentMillis;
   serial_rx_buffer_disconnect[8] = (byte)((disconnectCalled & 0xFF));
   serial_rx_buffer_disconnect[7] = (byte)((disconnectCalled >> 8) & 0xFF);
   serial_rx_buffer_disconnect[6] = (byte)((disconnectCalled >> 16) & 0xFF);
   serial_rx_buffer_disconnect[5] = (byte)((disconnectCalled >> 24) & 0xFF);
-  //Serial.println(disconnectCalled);
-  //Serial.println("DISCONNECTING...");
   serial_rx_buffer_disconnect[0] = 0x0A;
   serial_rx_buffer_disconnect[11] = 0x0A;
   // Send Disconnect command to tell the computer to wait before sending any commands back to the Arduino
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
-  Serial.flush();
-  //Serial.println("START OF SETUP");
 
   //  Define buttons and axis to neutral state on startup
 
@@ -277,9 +271,7 @@ void setup() {
   serial_rx_buffer_reset[0] = 0xA0;
   serial_rx_buffer_reset[11] = 0xA0;
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_reset[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
-  Serial.flush();
 
   delay(2500); // Wait 2.5 seconds for the serial program on the computer to startup before sending any data
 
@@ -291,9 +283,7 @@ void setup() {
   serial_rx_buffer_reset[6] = (byte)((resetDone >> 16) & 0xFF);
   serial_rx_buffer_reset[5] = (byte)((resetDone >> 24) & 0xFF);
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_reset[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
-  Serial.flush();
 
   serial_rx_buffer_disconnect[0] = 0x0B;
   serial_rx_buffer_disconnect[11] = 0x0B;
@@ -304,15 +294,11 @@ void setup() {
   serial_rx_buffer_disconnect[6] = (byte)((disconnectDone >> 16) & 0xFF);
   serial_rx_buffer_disconnect[5] = (byte)((disconnectDone >> 24) & 0xFF);
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
-  Serial.flush();
   //  Count bytes and parse ASCII values to their respective commands, such as buttons and axis
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
     serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
   }
-  Serial.flush();
   //  Now we send PING to the computer as a way to tell we are connected and ready to receive and send data through the serial port
   //  This will be executed whenever the computer starts serial through the Processing Serial Library, which forces the Arduino to reset, due to DTR line (Data Terminal Ready)
   pingTimeOut = currentMillis;
@@ -323,24 +309,18 @@ void setup() {
   sentPing = false;
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_ping_out); serial_rx_buffer_counter++) {
     if (serial_rx_buffer_counter == 0) {
-      Serial.write(0x03);
     }
     if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4)) {
-      Serial.write(0x00);
     }
     if ((serial_rx_buffer_counter == 5) || (serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
-      Serial.write(serial_rx_buffer_ping_out[serial_rx_buffer_counter]);
     }
     if ((serial_rx_buffer_counter == 9) || (serial_rx_buffer_counter == 10)) {
-      Serial.write(0x00);
     }
     if (serial_rx_buffer_counter == 11) {
-      Serial.write(0x03);
     }
     sentPing = true;
   }
   sentPing = false;
-  Serial.flush();
   sendPing();
   calculatePing();
   calculatePong();
@@ -445,7 +425,6 @@ void setup() {
   isInputting = false;
 
   changeAutoResetControllerData();
-  //Serial.println("END OF SETUP");
   //  And we are ready to go
 }
 
@@ -680,7 +659,6 @@ void loop() {
       }
       //  Count bytes and parse ASCII values to their respective commands, such as buttons and axis
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
-        Serial.write(serial_rx_buffer[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
         serial_rx_buffer_inverted[serial_rx_buffer_counter] = (serial_rx_buffer[serial_rx_buffer_counter]);
         serial_rx_buffer_controller[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
         serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
@@ -697,8 +675,6 @@ void loop() {
         sentInputOnce = true;
       }
 
-      //Serial.print('\n');
-      Serial.flush();
       // Make the button presses actually work
       isInputting = true;
       previousInputDelay = currentMillis;
@@ -741,9 +717,7 @@ void loop() {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset_controller); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Reset Controller Data Buffer
         serial_rx_buffer_reset_controller[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
-        Serial.write(serial_rx_buffer_reset_controller[serial_rx_buffer_counter]);
       }
-      Serial.flush();
       manualResetControllerData();
     }
     else if ((serial_rx_buffer[0] == 0x10) && (serial_rx_buffer[11] == 0x10)) {
@@ -751,9 +725,7 @@ void loop() {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_change_autoreset_controller_status); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to AutoResetControllerData Buffer
         serial_rx_buffer_change_autoreset_controller_status[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
-        Serial.write(serial_rx_buffer_change_autoreset_controller_status[serial_rx_buffer_counter]);
       }
-      Serial.flush();
       changeAutoResetControllerData();
     }
     else if ((serial_rx_buffer[0] == 0x12) && (serial_rx_buffer[11] == 0x12)) {
@@ -761,9 +733,7 @@ void loop() {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_before_input_reset); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to toggleBeforeInout Buffer
         serial_rx_buffer_toggle_before_input_reset[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
-        Serial.write(serial_rx_buffer_toggle_before_input_reset[serial_rx_buffer_counter]);
       }
-      Serial.flush();
       toggleBeforeInputReset();
     }
     else if ((serial_rx_buffer[0] == 0x14) && (serial_rx_buffer[11] == 0x14)) {
@@ -771,21 +741,15 @@ void loop() {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_disconnect_on_ping_timeout); serial_rx_buffer_counter++) {
 
         serial_rx_buffer_toggle_disconnect_on_ping_timeout[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
-        Serial.write(serial_rx_buffer_toggle_disconnect_on_ping_timeout[serial_rx_buffer_counter]);
       }
-      Serial.flush();
       toggleDisconnectOnPingTimeout();
     }
     else if ((serial_rx_buffer[0] == 0x1A) && (serial_rx_buffer[11] == 0x1A)) {
-      //Serial.print("sendInputOnce=");
-      //Serial.println(sendInputOnce);
       // Choose to Send Input back only once or every iteration of Loop (While inputting)
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_send_input_back); serial_rx_buffer_counter++) {
 
         serial_rx_buffer_toggle_send_input_back[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
-        Serial.write(serial_rx_buffer_toggle_send_input_back[serial_rx_buffer_counter]);
       }
-      Serial.flush();
       toggleSendInputBack();
     }
     else if ((serial_rx_buffer[0] == 0x1C) && (serial_rx_buffer[11] == 0x1C)) {
@@ -793,9 +757,7 @@ void loop() {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset_n64_controller); serial_rx_buffer_counter++) {
 
         serial_rx_buffer_reset_n64_controller[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
-        Serial.write(serial_rx_buffer_reset_n64_controller[serial_rx_buffer_counter]);
       }
-      Serial.flush();
       resetN64Controller();
     }
     //  Get Invalid Command
@@ -803,9 +765,7 @@ void loop() {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Reset Controller Data Buffer
         serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
-        Serial.write(serial_rx_buffer_invalid_command[serial_rx_buffer_counter]);
       }
-      Serial.flush();
       getInvalidCommand();
     }
     //  Respond as invalid command when Preamble and Postamble are different
@@ -813,9 +773,7 @@ void loop() {
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_invalid_command); serial_rx_buffer_counter++) {
         //  Pass Serial Buffer to Reset Controller Data Buffer
         serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = serial_rx_buffer[serial_rx_buffer_counter];
-        Serial.write(serial_rx_buffer_invalid_command[serial_rx_buffer_counter]);
       }
-      Serial.flush();
       getInvalidCommand();
     }
   }
@@ -836,7 +794,6 @@ void resetN64Controller() {
   resetController();
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset_n64_controller); serial_rx_buffer_counter++) {
     //  Write back data as a way to tell the controller was successfully reset
-    Serial.write(serial_rx_buffer_reset_n64_controller[serial_rx_buffer_counter]);
   }
   calculatePing();
   calculatePong();
@@ -851,31 +808,17 @@ void toggleSendInputBack() {
   //manualResetControllerData();
   calculatePing();
   calculatePong();
-  //Serial.print("sendInputOnce=");
-  //Serial.println(sendInputOnce);
-  //Serial.println("");
-  //Serial.print("Changing from ");
-  //Serial.print(autoDisconnectOnPingTimeout);
-  //Serial.print(" to");
-  //Serial.flush();
   sendInputOnce = serial_rx_buffer_toggle_send_input_back[8];
   serial_rx_buffer_toggle_send_input_back[0] = 0x1B;
   serial_rx_buffer_toggle_send_input_back[11] = 0x1B;
 
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_send_input_back); serial_rx_buffer_counter++) {
     //  Write back data as a way to tell the Status changed correctly
-    Serial.write(serial_rx_buffer_toggle_send_input_back[serial_rx_buffer_counter]);
   }
-  //Serial.flush();
-  //Serial.print(autoDisconnectOnPingTimeout);
-  //Serial.println(" .");
-  //Serial.flush();
   //autoResetControllerData();
   //manualResetControllerData();
   calculatePing();
   calculatePong();
-  //Serial.print("sendInputOnce=");
-  //Serial.println(sendInputOnce);
   //inputDelay = 0;
   //isInputtingDelayed = false;
   //isInputting = false;
@@ -888,22 +831,13 @@ void toggleBeforeInputReset() {
   //isInputting = false;
   autoResetControllerData();
   manualResetControllerData();
-  //Serial.println("");
-  //Serial.print("Changing from ");
-  //Serial.print(resetBeforeInputStatus);
-  //Serial.print(" to");
   resetBeforeInputStatus = serial_rx_buffer_toggle_before_input_reset[8];
   serial_rx_buffer_toggle_before_input_reset[0] = 0x13;
   serial_rx_buffer_toggle_before_input_reset[11] = 0x13;
 
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_before_input_reset); serial_rx_buffer_counter++) {
     //  Write back data as a way to tell the Status changed correctly
-    Serial.write(serial_rx_buffer_toggle_before_input_reset[serial_rx_buffer_counter]);
   }
-  //Serial.flush();
-  //Serial.print(resetBeforeInputStatus);
-  //Serial.println(" .");
-  //Serial.flush();
   autoResetControllerData();
   manualResetControllerData();
   //inputDelay = 0;
@@ -920,23 +854,13 @@ void toggleDisconnectOnPingTimeout() {
   //manualResetControllerData();
   calculatePing();
   calculatePong();
-  //Serial.println("");
-  //Serial.print("Changing from ");
-  //Serial.print(autoDisconnectOnPingTimeout);
-  //Serial.print(" to");
-  //Serial.flush();
   autoDisconnectOnPingTimeout = serial_rx_buffer_toggle_disconnect_on_ping_timeout[8];
   serial_rx_buffer_toggle_disconnect_on_ping_timeout[0] = 0x15;
   serial_rx_buffer_toggle_disconnect_on_ping_timeout[11] = 0x15;
 
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_toggle_disconnect_on_ping_timeout); serial_rx_buffer_counter++) {
     //  Write back data as a way to tell the Status changed correctly
-    Serial.write(serial_rx_buffer_toggle_disconnect_on_ping_timeout[serial_rx_buffer_counter]);
   }
-  Serial.flush();
-  //Serial.print(autoDisconnectOnPingTimeout);
-  //Serial.println(" .");
-  //Serial.flush();
   //autoResetControllerData();
   //manualResetControllerData();
   calculatePing();
@@ -952,22 +876,13 @@ void changeAutoResetControllerData() {
   isInputting = false;
   autoResetControllerData();
   manualResetControllerData();
-  //Serial.println("");
-  //Serial.print("Changing from ");
-  //Serial.print(autoResetControllerDataStatus);
-  //Serial.print(" to");
   autoResetControllerDataStatus = serial_rx_buffer_change_autoreset_controller_status[8];
   serial_rx_buffer_change_autoreset_controller_status[0] = 0x11;
   serial_rx_buffer_change_autoreset_controller_status[11] = 0x11;
 
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_change_autoreset_controller_status); serial_rx_buffer_counter++) {
     //  Write back data as a way to tell the Status changed correctly
-    Serial.write(serial_rx_buffer_change_autoreset_controller_status[serial_rx_buffer_counter]);
   }
-  Serial.flush();
-  //Serial.print(autoResetControllerDataStatus);
-  //Serial.println(" .");
-  //Serial.flush();
   autoResetControllerData();
   manualResetControllerData();
   inputDelay = 0;
@@ -980,28 +895,20 @@ void getInvalidCommand() {
     //  Pass Serial Buffer to Reset Controller Data Buffer
     if ((serial_rx_buffer_counter == 0) || (serial_rx_buffer_counter == 11)) {
       //serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = 0x0D;
-      Serial.write(0x0D); // Preamble and Postamble to respond as Invalid Command
     }
     if ((serial_rx_buffer_counter >= 1) && (serial_rx_buffer_counter <= 6)) {
       //serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = 0x00;
-      Serial.write(0x00); // Reset these to 0
     }
     if (serial_rx_buffer_counter == 7) {
       //serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = 0x00;
-      Serial.write(serial_rx_buffer_invalid_command[0]); // Invalid Preamble Byte to Store
     }
     if (serial_rx_buffer_counter == 8) {
       //serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = 0x00;
-      Serial.write(serial_rx_buffer_invalid_command[11]); // Invalid Postamble Byte to Store
     }
     if ((serial_rx_buffer_counter == 9) || (serial_rx_buffer_counter == 10)) {
       //serial_rx_buffer_invalid_command[serial_rx_buffer_counter] = 0x0D;
-      Serial.write(0x00); // Reset these to 0
     }
   }
-  Serial.flush();
-  //Serial.println("INVALID COMMAND");
-  //Serial.flush();
 }
 
 void arduinoDisconnect() {
@@ -1022,7 +929,6 @@ void arduinoDisconnect() {
   serial_rx_buffer_controller[11] = 0x01; // Postamble
 
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
     serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
   }
 
@@ -1050,21 +956,16 @@ void arduinoDisconnect() {
   //  Stick X axis, Stick Y Axis
   moveStick(serial_rx_buffer_inverted_controller[3], serial_rx_buffer_inverted_controller[4]);
 
-  Serial.flush();
 
   //  Tell the computer the connection is about to be closed
   serial_rx_buffer_disconnect[8] = (byte)((disconnectCalled & 0xFF));
   serial_rx_buffer_disconnect[7] = (byte)((disconnectCalled >> 8) & 0xFF);
   serial_rx_buffer_disconnect[6] = (byte)((disconnectCalled >> 16) & 0xFF);
   serial_rx_buffer_disconnect[5] = (byte)((disconnectCalled >> 24) & 0xFF);
-  //Serial.println(disconnectCalled);
-  //Serial.println("DISCONNECTING...");
   serial_rx_buffer_disconnect[0] = 0x0A;
   serial_rx_buffer_disconnect[11] = 0x0A;
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
-  Serial.flush();
   Serial.end();
   isConnected = false;
   serial_rx_buffer_disconnect[8] = (byte)((disconnectDone & 0xFF));
@@ -1076,14 +977,11 @@ void arduinoDisconnect() {
   isConnected = true;
   disconnectDone = currentMillis;
   Serial.begin(baudRate);
-  Serial.setTimeout(1000);
   serial_rx_buffer_disconnect[0] = 0x0B;
   serial_rx_buffer_disconnect[11] = 0x0B;
   isConnected = true;
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
-  Serial.flush();
 
   //  Reset all Commands status just to make sure everything is working as intended
   serial_rx_buffer_controller[0] = 0x01; //  Preamble
@@ -1100,7 +998,6 @@ void arduinoDisconnect() {
   serial_rx_buffer_controller[11] = 0x01; // Postamble
 
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
     serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
   }
 
@@ -1128,10 +1025,7 @@ void arduinoDisconnect() {
   //  Stick X axis, Stick Y Axis
   moveStick(serial_rx_buffer_inverted_controller[3], serial_rx_buffer_inverted_controller[4]);
 
-  Serial.flush();
 
-  //Serial.println("RECONNECTED!");
-  //Serial.println(disconnectDone);
 }
 
 void arduinoReset() {
@@ -1152,7 +1046,6 @@ void arduinoReset() {
   serial_rx_buffer_controller[11] = 0x01; // Postamble
 
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
     serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
   }
 
@@ -1180,7 +1073,6 @@ void arduinoReset() {
   //  Stick X axis, Stick Y Axis
   moveStick(serial_rx_buffer_inverted_controller[3], serial_rx_buffer_inverted_controller[4]);
 
-  Serial.flush();
 
   //  Tell the computer the Arduino is about to be Reset
   serial_rx_buffer_reset[8] = (byte)((resetCalled & 0xFF));
@@ -1190,29 +1082,22 @@ void arduinoReset() {
   serial_rx_buffer_reset[0] = 0xA0;
   serial_rx_buffer_reset[11] = 0xA0;
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_reset[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
-  Serial.flush();
   //  Tell the computer the connection is about to be closed
   disconnectCalled = currentMillis;
   serial_rx_buffer_disconnect[8] = (byte)((disconnectCalled & 0xFF));
   serial_rx_buffer_disconnect[7] = (byte)((disconnectCalled >> 8) & 0xFF);
   serial_rx_buffer_disconnect[6] = (byte)((disconnectCalled >> 16) & 0xFF);
   serial_rx_buffer_disconnect[5] = (byte)((disconnectCalled >> 24) & 0xFF);
-  //Serial.println(disconnectCalled);
-  //Serial.println("DISCONNECTING...");
   serial_rx_buffer_disconnect[0] = 0x0A;
   serial_rx_buffer_disconnect[11] = 0x0A;
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
-  Serial.flush();
   Serial.end();
   isConnected = false;
   disconnectDone = currentMillis;
   delay(2500); // Wait 2.5 seconds before resetting
   Serial.begin(baudRate);
-  Serial.setTimeout(1000);
 
   //  Tell the computer the connection has began succesfully
   serial_rx_buffer_disconnect[0] = 0x0B;
@@ -1222,9 +1107,7 @@ void arduinoReset() {
   serial_rx_buffer_disconnect[6] = (byte)((disconnectDone >> 16) & 0xFF);
   serial_rx_buffer_disconnect[5] = (byte)((disconnectDone >> 24) & 0xFF);
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
-  Serial.flush();
 
   //  Reset all commands again just to make sure
   serial_rx_buffer_controller[0] = 0x01; //  Preamble
@@ -1241,7 +1124,6 @@ void arduinoReset() {
   serial_rx_buffer_controller[11] = 0x01; // Postamble
 
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
     serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
   }
 
@@ -1269,7 +1151,6 @@ void arduinoReset() {
   //  Stick X axis, Stick Y Axis
   moveStick(serial_rx_buffer_inverted_controller[3], serial_rx_buffer_inverted_controller[4]);
 
-  Serial.flush();
 
   //  Tell the computer the Arduino has been reset succesfully
   resetDone = currentMillis;
@@ -1281,9 +1162,7 @@ void arduinoReset() {
   serial_rx_buffer_reset[5] = (byte)((resetDone >> 24) & 0xFF);
   asm volatile ("  jmp 0"); // Reset the Arduino through ASM code
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_reset); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_reset[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
   }
-  Serial.flush();
   //  From here on, the setup() function will be called again, the computer then proceeds to reset its variables just like an usual startup routine
 }
 
@@ -1299,7 +1178,6 @@ void pressButtons() {
       if (sentInputOnce == false)
       {
         for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
-          Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
           serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
           sentInputOnce = true;
         }
@@ -1311,14 +1189,11 @@ void pressButtons() {
       if (sentInputOnce == true)
       {
         for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
-          Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
           serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
         }
       }
     }
     
-    //Serial.print('\n');
-    Serial.flush();
     //  Press Button
 
     //  First 8 buttons, Buffer Array Element 1
@@ -1373,7 +1248,6 @@ void pressButtons() {
           //serial_rx_buffer_controller[10] = 0x00;
 
           for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
-            Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
             serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
           }
 
@@ -1388,7 +1262,6 @@ void pressButtons() {
           serial_rx_buffer_controller[8] = 0x00; //  Unused
 
           for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_controller); serial_rx_buffer_counter++) {
-            Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
             serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
           }
 
@@ -1417,8 +1290,6 @@ void pressButtons() {
           moveStick(serial_rx_buffer_inverted_controller[3], serial_rx_buffer_inverted_controller[4]);
 
           //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
-          //Serial.print('\n');
-          Serial.flush();
 
           if (resetBeforeInputStatus == 0) {
             manualResetControllerData();
@@ -1441,50 +1312,21 @@ void getPing() {
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
     serial_rx_buffer_pong_out[serial_rx_buffer_counter] = serial_rx_buffer_ping_in[serial_rx_buffer_counter];
     if (serial_rx_buffer_counter == 0) {
-      Serial.write(0x04);
     }
     if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4)) {
-      Serial.write(serial_rx_buffer_pong_out[serial_rx_buffer_counter]);
     }
     if ((serial_rx_buffer_counter == 5) || (serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
-      Serial.write(serial_rx_buffer_pong_out[serial_rx_buffer_counter]);
     }
     if ((serial_rx_buffer_counter == 9) || (serial_rx_buffer_counter == 10)) {
-      Serial.write(0x00);
     }
     if (serial_rx_buffer_counter == 11) {
-      Serial.write(0x04);
     }
-    //Serial.write(serial_rx_buffer[serial_rx_buffer_counter]); //  Write time back to computer
     sentPong = true;
   }
   //previousPingDelay = currentMillis;
   lastPingIn = currentMillis;
   lastPongOut = currentMillis;
-  Serial.flush();
   /*
-    Serial.print("PONG = ");
-    Serial.println(currentMillis);
-    Serial.flush();
-    Serial.println("PING RECEIVED");
-    Serial.println("");
-    Serial.print("LAST PING TIME IN = ");
-    Serial.println(lastPingIn);
-    Serial.print("LAST PONG TIME IN = ");
-    Serial.println(lastPongIn);
-    Serial.print("LAST PING TIME OUT = ");
-    Serial.println(lastPingOut);
-    Serial.print("LAST PONG TIME OUT = ");
-    Serial.println(lastPongOut);
-    Serial.print("PING TIME OUT = ");
-    Serial.println(pingTimeOut);
-    Serial.print("PONG TIME OUT = ");
-    Serial.println(pongTimeOut);
-    Serial.print("PING TIME IN = ");
-    Serial.println(pingTimeIn);
-    Serial.print("PONG TIME IN= ");
-    Serial.println(pongTimeIn);
-    Serial.flush();
   */
   sentPong = false;
 }
@@ -1495,69 +1337,35 @@ void getPong() {
   //  Respond PONG with PONG for debugging purposes
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_pong_in); serial_rx_buffer_counter++) {
     if (serial_rx_buffer_counter == 0) {
-      Serial.write(0x05);
     }
     if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4)) {
-      Serial.write(serial_rx_buffer_pong_in[serial_rx_buffer_counter]);
     }
     if ((serial_rx_buffer_counter == 5) || (serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
-      Serial.write(serial_rx_buffer_pong_in[serial_rx_buffer_counter]);
     }
     if ((serial_rx_buffer_counter == 9) || (serial_rx_buffer_counter == 10)) {
-      Serial.write(0x00);
     }
     if (serial_rx_buffer_counter == 11) {
-      Serial.write(0x05);
     }
   }
   /*
     for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_pong_in); serial_rx_buffer_counter++) {
     serial_rx_buffer_ping_out[serial_rx_buffer_counter] = serial_rx_buffer_pong_in[serial_rx_buffer_counter];
     if (serial_rx_buffer_counter == 0) {
-      Serial.write(0x04);
     }
     if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4)) {
-      Serial.write(0x00);
     }
     if ((serial_rx_buffer_counter == 5) || (serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
-      Serial.write(serial_rx_buffer_ping_out[serial_rx_buffer_counter]);
     }
     if ((serial_rx_buffer_counter == 9) || (serial_rx_buffer_counter == 10)) {
-      Serial.write(0x00);
     }
     if (serial_rx_buffer_counter == 11) {
-      Serial.write(0x04);
     }
-    //Serial.write(serial_rx_buffer[serial_rx_buffer_counter]); //  Write time back to computer
     sentPong = true;
     }
   */
   previousPongDelay = currentMillis;
   lastPongIn = currentMillis;
-  //Serial.flush();
   /*
-    Serial.println("PONG RECEIVED");
-    Serial.println("");
-    Serial.print("CURRENT TIME = ");
-    Serial.println(currentMillis);
-    Serial.flush();
-    Serial.print("LAST PING TIME IN = ");
-    Serial.println(lastPingIn);
-    Serial.print("LAST PONG TIME IN = ");
-    Serial.println(lastPongIn);
-    Serial.print("LAST PING TIME OUT = ");
-    Serial.println(lastPingOut);
-    Serial.print("LAST PONG TIME OUT = ");
-    Serial.println(lastPongOut);
-    Serial.print("PING TIME OUT = ");
-    Serial.println(pingTimeOut);
-    Serial.print("PONG TIME OUT = ");
-    Serial.println(pongTimeOut);
-    Serial.print("PING TIME IN = ");
-    Serial.println(pingTimeIn);
-    Serial.print("PONG TIME IN= ");
-    Serial.println(pongTimeIn);
-    Serial.flush();
   */
 }
 
@@ -1571,49 +1379,20 @@ void sendPing() {
     serial_rx_buffer_ping_out[5] = (byte)((pingTimeOut >> 24) & 0xFF);
     for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_ping_out); serial_rx_buffer_counter++) {
       if (serial_rx_buffer_counter == 0) {
-        Serial.write(0x03);
       }
       if ((serial_rx_buffer_counter == 1) || (serial_rx_buffer_counter == 2) || (serial_rx_buffer_counter == 3) || (serial_rx_buffer_counter == 4)) {
-        Serial.write(0x00);
       }
       if ((serial_rx_buffer_counter == 5) || (serial_rx_buffer_counter == 6) || (serial_rx_buffer_counter == 7) || (serial_rx_buffer_counter == 8)) {
-        Serial.write(serial_rx_buffer_ping_out[serial_rx_buffer_counter]);
       }
       if ((serial_rx_buffer_counter == 9) || (serial_rx_buffer_counter == 10)) {
-        Serial.write(0x00);
       }
       if (serial_rx_buffer_counter == 11) {
-        Serial.write(0x03);
       }
     }
-    Serial.flush();
     sentPing = true;
     /*
-      Serial.print("pongTimeByte5 = ");
-      Serial.println(serial_rx_buffer[5]);
-      Serial.print("pongTimeByte6 = ");
-      Serial.println(serial_rx_buffer[6]);
-      Serial.print("pongTimeByte7 = ");
-      Serial.println(serial_rx_buffer[7]);
-      Serial.print("pongTimeByte8 = ");
-      Serial.println(serial_rx_buffer[8]);
     */
     /*
-      Serial.println();
-      Serial.print("PING = ");
-      Serial.println(pongTime);
-      Serial.flush();
-      Serial.print("PING PREVIOUS = ");
-      Serial.println(previousPingDelay);
-      Serial.print("PONG PREVIOUS = ");
-      Serial.println(previousPongDelay);
-      Serial.flush();
-      Serial.print("CURRENT PONG CALCULATED = ");
-      Serial.println(calcPongTimestamp);
-      Serial.flush();
-      Serial.print("CURRENT PING CALCULATED = ");
-      Serial.println(calcPingTimestamp);
-      Serial.flush();
     */
     previousPingDelay += pingDelay;
   }
@@ -1642,7 +1421,6 @@ void calculatePing() {
       serial_rx_buffer_controller[11] = 0x01; // Postamble
 
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
-        Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
         serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
       }
 
@@ -1671,34 +1449,22 @@ void calculatePing() {
       moveStick(serial_rx_buffer_inverted_controller[3], serial_rx_buffer_inverted_controller[4]);
 
       //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
-      Serial.flush();
 
       //  Tell the computer the connection is about to be closed
       serial_rx_buffer_disconnect[8] = (byte)((disconnectCalled & 0xFF));
       serial_rx_buffer_disconnect[7] = (byte)((disconnectCalled >> 8) & 0xFF);
       serial_rx_buffer_disconnect[6] = (byte)((disconnectCalled >> 16) & 0xFF);
       serial_rx_buffer_disconnect[5] = (byte)((disconnectCalled >> 24) & 0xFF);
-      //Serial.println(disconnectCalled);
-      //Serial.println("DISCONNECTING...");
-      //Serial.print("DISCONNECTING PING = ");
-      //Serial.println(calcPongTimestampIn);
       serial_rx_buffer_disconnect[0] = 0x09;
       serial_rx_buffer_disconnect[11] = 0x09;
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
-        Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
       }
-      Serial.flush();
       //calcPongTimestamp = 0;
       previousPongDelay = currentMillis;
-      //Serial.println("Closing connection");
-      //Serial.println(calcPongTimestamp);
       Serial.end();
       isConnected = false;
       delay(2500); // Wait 2.5 seconds before starting connection
-      //Serial.println("Sending shit after connection has closed");
       Serial.begin(baudRate);
-      Serial.setTimeout(1000);
-      //Serial.println("Connection started");
       //  Tell the computer the connection has began succesfully
       serial_rx_buffer_disconnect[0] = 0x0B;
       serial_rx_buffer_disconnect[11] = 0x0B;
@@ -1707,9 +1473,7 @@ void calculatePing() {
       serial_rx_buffer_disconnect[6] = (byte)((disconnectDone >> 16) & 0xFF);
       serial_rx_buffer_disconnect[5] = (byte)((disconnectDone >> 24) & 0xFF);
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer_disconnect); serial_rx_buffer_counter++) {
-        Serial.write(serial_rx_buffer_disconnect[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
       }
-      Serial.flush();
 
       //  Reset all Commands status just to make sure everything is working as intended
       serial_rx_buffer_controller[0] = 0x01; //  Preamble
@@ -1726,7 +1490,6 @@ void calculatePing() {
       serial_rx_buffer_controller[11] = 0x01; // Postamble
 
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
-        Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
         serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
       }
 
@@ -1755,20 +1518,13 @@ void calculatePing() {
       moveStick(serial_rx_buffer_inverted_controller[3], serial_rx_buffer_inverted_controller[4]);
 
       //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
-      Serial.flush();
 
       isConnected = true;
       disconnectDone = currentMillis;
-      //Serial.println("Sending shit after connection has began");
-      //Serial.println("RECONNECTED!");
-      //Serial.println(calcPongTimestampIn);
       //disconnectDone = currentMillis;
-      //Serial.println(disconnectDone);
     }
   }
   else if (calcPongTimestampIn - calcPingTimestampIn < 10000) {
-    //Serial.println("PONG OK");
-    //Serial.println(currentMillis);
   }
 }
 
@@ -1798,7 +1554,6 @@ void manualResetControllerData()
   serial_rx_buffer_controller[11] = 0x01; // Postamble
 
   for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
-    Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
     serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
   }
 
@@ -1827,7 +1582,6 @@ void manualResetControllerData()
   moveStick(serial_rx_buffer_inverted_controller[3], serial_rx_buffer_inverted_controller[4]);
 
   //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
-  Serial.flush();
   inputDelay = 0;
   isInputtingDelayed = false;
   isInputting = false;
@@ -1857,7 +1611,6 @@ void autoResetControllerData()
 
       for (serial_rx_buffer_counter = 0; serial_rx_buffer_counter < sizeof(serial_rx_buffer); serial_rx_buffer_counter++) {
         if (autoResetControllerDataStatus == 0) {
-          Serial.write(serial_rx_buffer_controller[serial_rx_buffer_counter]); //  This line writes the serial data back to the computer as a way to check if the Arduino isn't interpreting wrong values
         }
         serial_rx_buffer_inverted_controller[serial_rx_buffer_counter] = (serial_rx_buffer_controller[serial_rx_buffer_counter]);
       }
@@ -1888,7 +1641,6 @@ void autoResetControllerData()
 
       //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
       if (autoResetControllerDataStatus == 0) {
-        Serial.flush();
       }
       inputDelay = 0;
       isInputtingDelayed = false;

@@ -1,22 +1,43 @@
 /*
-  1 2 A
-  8 3 D-Right
-  7 4 D-Left
-  6 5 D-Down
-  5 6 D-Up
-  4 7 Start
-  3 8 Z
-  2 9 B
-  9 10  L
-  10  11  R
-  11  12  C-Up
-  12  13  C-Down
-  13  A0  C-Left
-  17  A1  Analog YQ
-  16  A2  Analog XI
-  18  A3  Analog YI
-  15  A4  Analog XQ
-  14  A5  C-Right
+  N64 Controller for Arduino Uno v1.0 by WhatAboutGamingLive https://www.twitch.tv/whataboutgaminglive/
+  For use in the Twitch.TV stream TwitchTriesToPlay.
+  https://www.twitch.tv/twitchtriestoplay
+  https://github.com/WhatAboutGaming/Twitch-Plays-Stuff
+
+  Reference:
+  http://cnt.at-ninja.jp/n64_dpp/N64%20controller.htm
+  http://svn.navi.cx/misc/trunk/wasabi/devices/cube64/notes/n64-observations
+  http://www.acidmods.com/RDC/NINTENDO/N64/N64_Controller_200010_Top_CLEAN.jpg
+  http://www.acidmods.com/RDC/NINTENDO/N64/N64_Controller_700010_Top.jpg
+  http://slagcoin.com/joystick/pcb_diagrams/n64_diagram1.jpg
+  https://i.imgur.com/ZMwTdwp.png
+  https://dpedu.io/article/2015-03-11/nintendo-64-joystick-pinout-arduino
+  https://www.youtube.com/watch?v=0QLZCfqUeg4
+*/
+
+/*
+  PINOUTS
+
+
+  Protoboard Side Arduino Side  N64 Controller Side
+  1               2             A
+  8               3             D-Right
+  7               4             D-Left
+  6               5             D-Down
+  5               6             D-Up
+  4               7             Start
+  3               8             Z
+  2               9             B
+  9               10            L
+  10              11            R
+  11              12            C-Up
+  12              13            C-Down
+  13              A0            C-Left
+  17              A1            Analog YQ
+  16              A2            Analog XI
+  18              A3            Analog YI
+  15              A4            Analog XQ
+  14              A5            C-Right
 */
 
 #define buttonA 2
@@ -59,7 +80,7 @@ boolean axisYiActive = false;
 boolean axisXiActive = false;
 
 unsigned int buttonArrayIndex = 0;
-unsigned int buttonArray[] = {buttonA, buttonB, buttonZ, buttonZ, buttonDUp, buttonDDown, buttonDLeft, buttonDRight, buttonL, buttonR, buttonCUp, buttonCDown, buttonCLeft, buttonCRight};
+unsigned int buttonArray[] = {buttonA, buttonB, buttonZ, buttonStart, buttonDUp, buttonDDown, buttonDLeft, buttonDRight, buttonL, buttonR, buttonCUp, buttonCDown, buttonCLeft, buttonCRight};
 ////////////////////////////////////////////////////////// ^ Replace with START after finishing
 unsigned int xAxisPins[] = {axisXq, axisXi};
 unsigned int yAxisPins[] = {axisYq, axisYi};
@@ -70,13 +91,16 @@ void setup() {
   //pinMode(7, OUTPUT);
   for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++) {
     pinMode(buttonArray[buttonArrayIndex], OUTPUT);
+    digitalWrite(buttonArray[buttonArrayIndex], LOW);
   }
   // Setup axis
   for (xAxisIndex = 0; xAxisIndex < (sizeof(xAxisPins) / sizeof(unsigned int)); xAxisIndex++) {
     pinMode(xAxisPins[xAxisIndex], OUTPUT);
+    digitalWrite(xAxisPins[xAxisIndex], LOW);
   }
   for (yAxisIndex = 0; yAxisIndex < (sizeof(yAxisPins) / sizeof(unsigned int)); yAxisIndex++) {
     pinMode(yAxisPins[yAxisIndex], OUTPUT);
+    digitalWrite(yAxisPins[yAxisIndex], LOW);
   }
   resetController();
 }
@@ -117,7 +141,6 @@ void resetController()
 
   for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++) {
     digitalWrite(buttonArray[buttonArrayIndex], LOW);
-    delay(133);
   }
 }
 
@@ -130,6 +153,28 @@ void moveStick(unsigned int xAxisPosition, unsigned int yAxisPosition)
     yAxisStepsToMove = yAxisPosition - yAxisCurrentPosition;
     for (yAxisStepCounter = 0; yAxisStepCounter < yAxisStepsToMove; yAxisStepCounter++)
     {
+      //delay(133);
+      /*
+        Serial.print(xAxisStepCounter);
+        Serial.print(",");
+        Serial.print(yAxisStepCounter);
+        Serial.print(",");
+        Serial.print(xAxisIndex);
+        Serial.print(",");
+        Serial.print(yAxisIndex);
+        Serial.print(",");
+        Serial.print(xAxisStepsToMove);
+        Serial.print(",");
+        Serial.print(yAxisStepsToMove);
+        Serial.print(",");
+        Serial.print(xAxisCurrentPosition);
+        Serial.print(",");
+        Serial.print(yAxisCurrentPosition);
+        Serial.print(",");
+        Serial.print(xAxisPreviousPosition);
+        Serial.print(",");
+        Serial.println(yAxisPreviousPosition);
+      */
       if (axisYqActive == axisYiActive)
       {
         axisYiActive = !axisYiActive;
@@ -151,6 +196,28 @@ void moveStick(unsigned int xAxisPosition, unsigned int yAxisPosition)
     yAxisStepsToMove = yAxisCurrentPosition - yAxisPosition;
     for (yAxisStepCounter = 0; yAxisStepCounter < yAxisStepsToMove; yAxisStepCounter++)
     {
+      //delay(133);
+      /*
+        Serial.print(xAxisStepCounter);
+        Serial.print(",");
+        Serial.print(yAxisStepCounter);
+        Serial.print(",");
+        Serial.print(xAxisIndex);
+        Serial.print(",");
+        Serial.print(yAxisIndex);
+        Serial.print(",");
+        Serial.print(xAxisStepsToMove);
+        Serial.print(",");
+        Serial.print(yAxisStepsToMove);
+        Serial.print(",");
+        Serial.print(xAxisCurrentPosition);
+        Serial.print(",");
+        Serial.print(yAxisCurrentPosition);
+        Serial.print(",");
+        Serial.print(xAxisPreviousPosition);
+        Serial.print(",");
+        Serial.println(yAxisPreviousPosition);
+      */
       if (axisYiActive == axisYqActive)
       {
         axisYqActive = !axisYqActive;
@@ -172,6 +239,28 @@ void moveStick(unsigned int xAxisPosition, unsigned int yAxisPosition)
     xAxisStepsToMove = xAxisPosition - xAxisCurrentPosition;
     for (xAxisStepCounter = 0; xAxisStepCounter < xAxisStepsToMove; xAxisStepCounter++)
     {
+      //delay(133);
+      /*
+        Serial.print(xAxisStepCounter);
+        Serial.print(",");
+        Serial.print(yAxisStepCounter);
+        Serial.print(",");
+        Serial.print(xAxisIndex);
+        Serial.print(",");
+        Serial.print(yAxisIndex);
+        Serial.print(",");
+        Serial.print(xAxisStepsToMove);
+        Serial.print(",");
+        Serial.print(yAxisStepsToMove);
+        Serial.print(",");
+        Serial.print(xAxisCurrentPosition);
+        Serial.print(",");
+        Serial.print(yAxisCurrentPosition);
+        Serial.print(",");
+        Serial.print(xAxisPreviousPosition);
+        Serial.print(",");
+        Serial.println(yAxisPreviousPosition);
+      */
       if (axisXqActive == axisXiActive)
       {
         axisXiActive = !axisXiActive;
@@ -193,6 +282,28 @@ void moveStick(unsigned int xAxisPosition, unsigned int yAxisPosition)
     xAxisStepsToMove = xAxisCurrentPosition - xAxisPosition;
     for (xAxisStepCounter = 0; xAxisStepCounter < xAxisStepsToMove; xAxisStepCounter++)
     {
+      //delay(133);
+      /*
+        Serial.print(xAxisStepCounter);
+        Serial.print(",");
+        Serial.print(yAxisStepCounter);
+        Serial.print(",");
+        Serial.print(xAxisIndex);
+        Serial.print(",");
+        Serial.print(yAxisIndex);
+        Serial.print(",");
+        Serial.print(xAxisStepsToMove);
+        Serial.print(",");
+        Serial.print(yAxisStepsToMove);
+        Serial.print(",");
+        Serial.print(xAxisCurrentPosition);
+        Serial.print(",");
+        Serial.print(yAxisCurrentPosition);
+        Serial.print(",");
+        Serial.print(xAxisPreviousPosition);
+        Serial.print(",");
+        Serial.println(yAxisPreviousPosition);
+      */
       if (axisXiActive == axisXqActive)
       {
         axisXqActive = !axisXqActive;
@@ -229,7 +340,7 @@ void loop() {
     delay(133);
     moveStick(127, 0); // UP
     delay(133);
-    moveStick(255, 1); // UP+RIGHT
+    moveStick(255, 0); // UP+RIGHT
     delay(133);
     moveStick(255, 127); // RIGHT
     delay(133);
@@ -244,26 +355,60 @@ void loop() {
     moveStick(127, 127); // CENTER
     delay(133);
     /*
+      Serial.print("START VALUES:");
+      Serial.print(fadeValue);
+      Serial.print(",");
+      Serial.println(fadeValueB);
+      delay(500);
+      Serial.println("STARTING STEP A");
+      delay(500);
       for (fadeValue = 0 ; fadeValue <= 255; fadeValue++)
       {
-      delay(5);
+      //delay(5);
+      Serial.print("STEP A:");
+      Serial.print(fadeValue);
+      Serial.print(",");
+      Serial.println(fadeValueB);
       moveStick(127, fadeValue);
       }
-      for (fadeValue = 255 ; fadeValue >= 0; fadeValue--)
+      Serial.println("STARTING STEP B");
+      delay(500);
+      for (fadeValue = 255 ; fadeValue > 0; fadeValue--)
       {
-      delay(5);
+      //delay(5);
+      Serial.print("STEP B:");
+      Serial.print(fadeValue);
+      Serial.print(",");
+      Serial.println(fadeValueB);
       moveStick(127, fadeValue);
       }
+      Serial.println("STARTING STEP C");
+      delay(500);
       for (fadeValueB = 0 ; fadeValueB <= 255; fadeValueB++)
       {
-      delay(5);
+      //delay(5);
+      Serial.print("STEP C:");
+      Serial.print(fadeValue);
+      Serial.print(",");
+      Serial.println(fadeValueB);
       moveStick(fadeValueB, 127);
       }
-      for (fadeValueB = 255 ; fadeValueB >= 0; fadeValueB--)
+      Serial.println("STARTING STEP D");
+      delay(500);
+      for (fadeValueB = 255 ; fadeValueB > 0; fadeValueB--)
       {
-      delay(5);
+      //delay(5);
+      Serial.print("STEP D:");
+      Serial.print(fadeValue);
+      Serial.print(",");
+      Serial.println(fadeValueB);
       moveStick(fadeValueB, 127);
       }
+      Serial.print("END VALUES:");
+      Serial.print(fadeValue);
+      Serial.print(",");
+      Serial.println(fadeValueB);
+      delay(500);
     */
   }
 }

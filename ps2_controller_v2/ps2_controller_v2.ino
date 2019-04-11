@@ -96,6 +96,7 @@ void setup()
   digitalWrite(latchPin, HIGH);
 
   //  Reset everything
+  serial_rx_buffer[0] = 0x01;
   serial_rx_buffer[1] = 0x00;
   serial_rx_buffer[2] = 0x00;
   serial_rx_buffer[3] = 0x7F;
@@ -106,7 +107,7 @@ void setup()
   serial_rx_buffer[8] = 0x00;
   serial_rx_buffer[9] = 0x00;
   serial_rx_buffer[10] = 0x00;
-
+  serial_rx_buffer[11] = 0x01;
 }
 void loop()
 {
@@ -118,7 +119,6 @@ void loop()
     //  1 == 0x01
     if ((serial_rx_buffer[0] == 0x01) && (serial_rx_buffer[11] == 0x01))
     {
-
       // Make the button presses actually work
       isInputting = true;
       previousInputDelay = currentMillis;
@@ -266,8 +266,6 @@ void pressButtons() {
     //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
 
     //  Buffer Array Elements 9 and 10 are used to tell the Arduino how long commands are executed, on a delay ranging from 1-65535ms
-    //if (serial_rx_buffer[9] != 0x00)
-    //if (serial_rx_buffer[10] != 0x00)
     if (inputDelay != 0) {
       isInputtingDelayed = true;
 
