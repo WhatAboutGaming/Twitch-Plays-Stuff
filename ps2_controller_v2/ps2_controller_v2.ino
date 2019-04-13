@@ -96,7 +96,7 @@ void setup()
   digitalWrite(latchPin, HIGH);
 
   //  Reset everything
-  serial_rx_buffer[0] = 0x01;
+  serial_rx_buffer[0] = 0x00;
   serial_rx_buffer[1] = 0x00;
   serial_rx_buffer[2] = 0x00;
   serial_rx_buffer[3] = 0x7F;
@@ -107,12 +107,13 @@ void setup()
   serial_rx_buffer[8] = 0x00;
   serial_rx_buffer[9] = 0x00;
   serial_rx_buffer[10] = 0x00;
-  serial_rx_buffer[11] = 0x01;
+  serial_rx_buffer[11] = 0x00;
 }
 void loop()
 {
   currentMillis = millis();
-  if (Serial.available() > 0) {
+  if (Serial.available() > 0)
+  {
     controller = Serial.readBytes(serial_rx_buffer, sizeof(serial_rx_buffer)) && 0xFF;
 
     //  Set Start Byte (Preamble Byte) and End Byte (Postamble Byte)
@@ -127,9 +128,10 @@ void loop()
   pressButtons();
 }
 
-void pressButtons() {
-
-  if (isInputtingDelayed == false) {
+void pressButtons()
+{
+  if (isInputtingDelayed == false)
+  {
     //  Define input delay (If Buffer Array Element 9 and 10 !=0)
     inputDelay = (unsigned long)serial_rx_buffer[9] << 8 | (unsigned long)serial_rx_buffer[10];
   }
@@ -266,15 +268,18 @@ void pressButtons() {
     //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
 
     //  Buffer Array Elements 9 and 10 are used to tell the Arduino how long commands are executed, on a delay ranging from 1-65535ms
-    if (inputDelay != 0) {
+    if (inputDelay != 0)
+    {
       isInputtingDelayed = true;
-
       //  The block below executes Soft Delay for holding the buttons down
-      if (isInputtingDelayed == true) {
-        if (currentMillis - previousInputDelay >= inputDelay) {
+      if (isInputtingDelayed == true)
+      {
+        if (currentMillis - previousInputDelay >= inputDelay)
+        {
           //  Now we need to stop the Soft Delay
 
           //  Reset everything
+          serial_rx_buffer[0] = 0x00;
           serial_rx_buffer[1] = 0x00;
           serial_rx_buffer[2] = 0x00;
           serial_rx_buffer[3] = 0x7F;
@@ -285,6 +290,7 @@ void pressButtons() {
           serial_rx_buffer[8] = 0x00;
           serial_rx_buffer[9] = 0x00;
           serial_rx_buffer[10] = 0x00;
+          serial_rx_buffer[11] = 0x00;
 
           //  First 8 buttons, Buffer Array Element 1
           //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT

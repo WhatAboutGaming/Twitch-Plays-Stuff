@@ -85,20 +85,24 @@ unsigned int buttonArray[] = {buttonA, buttonB, buttonZ, buttonStart, buttonDUp,
 unsigned int xAxisPins[] = {axisXq, axisXi};
 unsigned int yAxisPins[] = {axisYq, axisYi};
 
-void setup() {
+void setup()
+{
   Serial.begin(2000000);
   // Setup buttons
   //pinMode(7, OUTPUT);
-  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++) {
+  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++)
+  {
     pinMode(buttonArray[buttonArrayIndex], OUTPUT);
     digitalWrite(buttonArray[buttonArrayIndex], LOW);
   }
   // Setup axis
-  for (xAxisIndex = 0; xAxisIndex < (sizeof(xAxisPins) / sizeof(unsigned int)); xAxisIndex++) {
+  for (xAxisIndex = 0; xAxisIndex < (sizeof(xAxisPins) / sizeof(unsigned int)); xAxisIndex++)
+  {
     pinMode(xAxisPins[xAxisIndex], OUTPUT);
     digitalWrite(xAxisPins[xAxisIndex], LOW);
   }
-  for (yAxisIndex = 0; yAxisIndex < (sizeof(yAxisPins) / sizeof(unsigned int)); yAxisIndex++) {
+  for (yAxisIndex = 0; yAxisIndex < (sizeof(yAxisPins) / sizeof(unsigned int)); yAxisIndex++)
+  {
     pinMode(yAxisPins[yAxisIndex], OUTPUT);
     digitalWrite(yAxisPins[yAxisIndex], LOW);
   }
@@ -139,7 +143,8 @@ void resetController()
   digitalWrite(buttonArray[3], LOW);
   delay(133);
 
-  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++) {
+  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++)
+  {
     digitalWrite(buttonArray[buttonArrayIndex], LOW);
   }
 }
@@ -323,15 +328,18 @@ void moveStick(unsigned int xAxisPosition, unsigned int yAxisPosition)
 void loop() {
   //int fadeValueB = 127;
   //int fadeValue = 127;
-  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++) {
-    for (int buttonPresses = 0; buttonPresses < 2; buttonPresses++) {
+  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++)
+  {
+    for (int buttonPresses = 0; buttonPresses < 2; buttonPresses++)
+    {
       digitalWrite(buttonArray[buttonArrayIndex], HIGH);
       delay(133);
       digitalWrite(buttonArray[buttonArrayIndex], LOW);
       delay(133);
     }
   }
-  for (int buttonPresses = 0; buttonPresses < 2; buttonPresses++) {
+  for (int buttonPresses = 0; buttonPresses < 2; buttonPresses++)
+  {
     moveStick(127, 127); // CENTER
     delay(133);
     moveStick(0, 127); // LEFT

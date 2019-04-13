@@ -104,22 +104,25 @@ void setup()
   Serial.begin(baudRate);
 
   //  Define buttons and axis to neutral state on startup
-  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++) {
+  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++)
+  {
     pinMode(buttonArray[buttonArrayIndex], OUTPUT);
     digitalWrite(buttonArray[buttonArrayIndex], LOW);
   }
   // Setup axis
-  for (xAxisIndex = 0; xAxisIndex < (sizeof(xAxisPins) / sizeof(unsigned int)); xAxisIndex++) {
+  for (xAxisIndex = 0; xAxisIndex < (sizeof(xAxisPins) / sizeof(unsigned int)); xAxisIndex++)
+  {
     pinMode(xAxisPins[xAxisIndex], OUTPUT);
     digitalWrite(xAxisPins[xAxisIndex], LOW);
   }
-  for (yAxisIndex = 0; yAxisIndex < (sizeof(yAxisPins) / sizeof(unsigned int)); yAxisIndex++) {
+  for (yAxisIndex = 0; yAxisIndex < (sizeof(yAxisPins) / sizeof(unsigned int)); yAxisIndex++)
+  {
     pinMode(yAxisPins[yAxisIndex], OUTPUT);
     digitalWrite(yAxisPins[yAxisIndex], LOW);
   }
   //  Prepare data to sent on startup as a way to tell the controller is in Neutral position
   //  That means, when all buttons and analog stick are reset to their Neutral positions
-  serial_rx_buffer[0] = 0x01; //  Preamble
+  serial_rx_buffer[0] = 0x00; //  Preamble
   serial_rx_buffer[1] = 0x00; //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
   serial_rx_buffer[2] = 0x00; //  L, R, CUP, CDOWN, CLEFT, CRIGHT, N/A, N/A
   serial_rx_buffer[3] = 0x7F; //  Control Stick X Axis
@@ -130,7 +133,7 @@ void setup()
   serial_rx_buffer[8] = 0x00; //  Unused
   serial_rx_buffer[9] = 0x00; //  Delay Byte 2
   serial_rx_buffer[10] = 0x00; // Delay Byte 1
-  serial_rx_buffer[11] = 0x01; // Postamble
+  serial_rx_buffer[11] = 0x00; // Postamble
   resetController();
   //  And we are ready to go
 }
@@ -170,7 +173,8 @@ void resetController()
   digitalWrite(buttonArray[3], LOW);
   delay(133);
 
-  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++) {
+  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(unsigned int)); buttonArrayIndex++)
+  {
     digitalWrite(buttonArray[buttonArrayIndex], LOW);
   }
 }
@@ -266,7 +270,8 @@ void moveStick(unsigned int xAxisPosition, unsigned int yAxisPosition)
 void loop()
 {
   currentMillis = millis();
-  if (Serial.available() > 0) {
+  if (Serial.available() > 0)
+  {
     controller = Serial.readBytes(serial_rx_buffer, sizeof(serial_rx_buffer)) && 0xFF;
 
     //  Set Start Byte (Preamble Byte) and End Byte (Postamble Byte)
@@ -281,8 +286,10 @@ void loop()
   pressButtons();
 } // Close Loop Function
 
-void pressButtons() {
-  if (isInputtingDelayed == false) {
+void pressButtons()
+{
+  if (isInputtingDelayed == false)
+  {
     //  Define input delay (If Buffer Array Element 9 and 10 !=0)
     inputDelay = (unsigned long)serial_rx_buffer[9] << 8 | (unsigned long)serial_rx_buffer[10];
   }
@@ -319,11 +326,14 @@ void pressButtons() {
       isInputtingDelayed = true;
 
       //  The block below executes Soft Delay for holding the buttons down
-      if (isInputtingDelayed == true) {
-        if (currentMillis - previousInputDelay >= inputDelay) {
+      if (isInputtingDelayed == true)
+      {
+        if (currentMillis - previousInputDelay >= inputDelay)
+        {
           //  Now we need to stop the Soft Delay
 
           //  Reset everything
+          serial_rx_buffer[0] = 0x00; //  Preamble
           serial_rx_buffer[1] = 0x00; //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
           serial_rx_buffer[2] = 0x00; //  L, R, CUP, CDOWN, CLEFT, CRIGHT, N/A, N/A
           serial_rx_buffer[3] = 0x7F; //  Control Stick X Axis
@@ -334,6 +344,7 @@ void pressButtons() {
           serial_rx_buffer[8] = 0x00; //  Unused
           serial_rx_buffer[9] = 0x00; //  Delay Byte 2
           serial_rx_buffer[10] = 0x00; // Delay Byte 1
+          serial_rx_buffer[11] = 0x00; // Postamble
 
           //  First 8 buttons, Buffer Array Element 1
           //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
