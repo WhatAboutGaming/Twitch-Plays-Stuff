@@ -67,6 +67,8 @@ unsigned int macroIndex = 0;
 unsigned int currentMacroIndexRunning = 0;
 unsigned int macroInputsToRun = 0;
 unsigned int loopMacro = 0; //0 = Don't loop, 1 = loop
+unsigned int timesToLoop = 0; //0 = Loop indefinitely, >0 = loop n times
+unsigned int loopCounter = 0;
 
 unsigned int xAxisStepCounter = 0;
 unsigned int yAxisStepCounter = 0;
@@ -311,6 +313,8 @@ void loop()
       currentMacroIndexRunning = 0;
       macroInputsToRun = 0;
       loopMacro = 0;
+      timesToLoop = 0;
+      loopCounter = 0;
       isInputting = true;
       previousInputDelay = currentMillis;
     }
@@ -324,14 +328,16 @@ void loop()
           currentMacroIndexRunning = 0;
           macroInputsToRun = 0;
           loopMacro = 0;
+          timesToLoop = 0;
+          loopCounter = 0;
           isInputting = false;
           macroIndex = serial_rx_buffer[0] - startingMacroIndex;
           /*
-          Serial.print("Received ");
-          Serial.print(serial_rx_buffer[0]);
+            Serial.print("Received ");
+            Serial.print(serial_rx_buffer[0]);
 
-          Serial.print(" macro index ");
-          Serial.println(macroIndex);
+            Serial.print(" macro index ");
+            Serial.println(macroIndex);
           */
           for (unsigned int macroInputIndex = 0; macroInputIndex < sizeof(serial_rx_buffer); macroInputIndex++) {
             macro_buffer[macroIndex][macroInputIndex] = serial_rx_buffer[macroInputIndex];
@@ -347,11 +353,15 @@ void loop()
       currentMacroIndexRunning = 0;
       macroInputsToRun = 0;
       loopMacro = 0;
+      timesToLoop = 0;
+      loopCounter = 0;
       isInputting = false;
 
       macroInputsToRun = serial_rx_buffer[1];
       loopMacro = serial_rx_buffer[2];
       currentMacroIndexRunning = serial_rx_buffer[3];
+      timesToLoop = serial_rx_buffer[4];
+      loopCounter = serial_rx_buffer[5];
       //isInputting = true;
       //previousInputDelay = currentMillis;
     }
@@ -366,14 +376,15 @@ void runMacro()
     if (macroInputsToRun != 0) {
       if (macroInputsToRun > currentMacroIndexRunning)
       {
-        for (unsigned int currentInputIndex = 0; currentInputIndex < sizeof(serial_rx_buffer); currentInputIndex++) {
-          current_macro_input[currentInputIndex] = macro_buffer[currentMacroIndexRunning][currentInputIndex];
-          //Serial.println(macro_buffer[currentMacroIndexRunning][currentInputIndex]);
+        if (timesToLoop >= loopCounter) {
+          for (unsigned int currentInputIndex = 0; currentInputIndex < sizeof(serial_rx_buffer); currentInputIndex++) {
+            current_macro_input[currentInputIndex] = macro_buffer[currentMacroIndexRunning][currentInputIndex];
+            //Serial.println(macro_buffer[currentMacroIndexRunning][currentInputIndex]);
+          }
+          // Make the button presses actually work
+          isInputting = true;
+          previousInputDelay = currentMillis;
         }
-        // Make the button presses actually work
-        isInputting = true;
-        previousInputDelay = currentMillis;
-        //Serial.println(currentMacroIndexRunning);
       }
       if (currentMacroIndexRunning < macroInputsToRun) {
         currentMacroIndexRunning++;
@@ -381,11 +392,13 @@ void runMacro()
       if (loopMacro != 0) {
         if (currentMacroIndexRunning >= macroInputsToRun) {
           currentMacroIndexRunning = 0;
+          if (timesToLoop <= 0) {
+            //
+          }
+          if (timesToLoop > 0 && timesToLoop >= loopCounter) {
+            loopCounter++;
+          }
         }
-      }
-      if (macroInputsToRun > currentMacroIndexRunning)
-      {
-        //Serial.println(currentMacroIndexRunning);
       }
     }
   }
@@ -401,7 +414,7 @@ void pressButtons()
   if (isInputting == true)
   {
     /*
-    for (unsigned int currentInputIndex = 0; currentInputIndex < sizeof(current_macro_input); currentInputIndex++) {
+      for (unsigned int currentInputIndex = 0; currentInputIndex < sizeof(current_macro_input); currentInputIndex++) {
       if (currentInputIndex != sizeof(current_macro_input) - 1) {
         Serial.print(" ");
         Serial.print(current_macro_input[currentInputIndex]);
@@ -410,7 +423,7 @@ void pressButtons()
         Serial.print(" ");
         Serial.println(current_macro_input[currentInputIndex]);
       }
-    }
+      }
     */
     //  Press Button
 
@@ -477,7 +490,7 @@ void pressButtons()
           current_macro_input[10] = 0x00; // Delay Byte 1
           current_macro_input[11] = 0x00; // Postamble
           /*
-          for (unsigned int currentInputIndex = 0; currentInputIndex < sizeof(current_macro_input); currentInputIndex++) {
+            for (unsigned int currentInputIndex = 0; currentInputIndex < sizeof(current_macro_input); currentInputIndex++) {
             if (currentInputIndex != sizeof(current_macro_input) - 1) {
               Serial.print(current_macro_input[currentInputIndex]);
               Serial.print(" ");
@@ -486,7 +499,7 @@ void pressButtons()
               Serial.print(" ");
               Serial.println(current_macro_input[currentInputIndex]);
             }
-          }
+            }
           */
           //  First 8 buttons, Buffer Array Element 1
           //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
