@@ -31,3 +31,8 @@ Reference for Gamecube controller:
 5)	https://nintenduino.files.wordpress.com/2013/12/protocolv1-0.png
 6)	https://github.com/NicoHood/Nintendo
 7)	https://github.com/dekuNukem/gc3ds
+
+Reference for SNES controller:
+
+1) https://github.com/marcosassis/gamepaduino/wiki/SNES-controller-interface
+2) https://www.repairfaq.org/REPAIR/F_SNES.html
