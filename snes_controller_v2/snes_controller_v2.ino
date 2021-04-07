@@ -129,6 +129,7 @@ void loop()
       timesToLoop = 0;
       loopCounter = 0;
       isInputting = true;
+      isInputtingDelayed = false;
       previousInputDelay = currentMillis;
     }
     if ((serial_rx_buffer[0] >= startingMacroIndex) && (serial_rx_buffer[11] >= startingMacroIndex))
@@ -144,6 +145,7 @@ void loop()
           timesToLoop = 0;
           loopCounter = 0;
           //isInputting = false;
+          isInputtingDelayed = false;
           macroIndex = serial_rx_buffer[0] - startingMacroIndex;
           /*
             Serial.print("Received ");
@@ -169,7 +171,7 @@ void loop()
       timesToLoop = 0;
       loopCounter = 0;
       isInputting = false;
-
+      isInputtingDelayed = false;
       macroInputsToRun = serial_rx_buffer[1];
       loopMacro = serial_rx_buffer[2];
       currentMacroIndexRunning = serial_rx_buffer[3];

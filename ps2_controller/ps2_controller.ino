@@ -166,6 +166,7 @@ unsigned int commandArray[] = {buttonSelect, buttonL3, buttonR3, buttonStart, bu
 unsigned int motorArray[] = {leftMotor, rightMotor, analogLed};
 
 void setup() {
+  TCCR3B = (TCCR2B & 0xF8) | 0x01;
   Serial.begin(baudRate);
   Serial.setTimeout(1000);
   pinMode(leftMotor, INPUT);
@@ -859,6 +860,7 @@ void loop() {
       // Make the button presses actually work
       //sentInputOnce = false;
       isInputting = true;
+      isInputtingDelayed = false;
       previousInputDelay = currentMillis;
     }
     //  Get Motors and Analog status

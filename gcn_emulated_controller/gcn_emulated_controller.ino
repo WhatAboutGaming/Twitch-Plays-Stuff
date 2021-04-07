@@ -130,6 +130,7 @@ void loop()
     {
       // Make the button presses actually work
       isInputting = true;
+      isInputtingDelayed = false;
       previousInputDelay = currentMillis;
     }
   }

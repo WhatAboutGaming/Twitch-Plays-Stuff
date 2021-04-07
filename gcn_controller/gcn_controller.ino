@@ -194,7 +194,7 @@ unsigned int motorArray[] = {motorInput, turboLed, macroLed};
 
 void setup() {
   //TCCR0B = (TCCR0B & 0xF8) | 0x02;
-  TCCR3B = (TCCR2B & 0xF8) | 0x01;
+  //TCCR3B = (TCCR2B & 0xF8) | 0x01;
   Serial.begin(baudRate);
   Serial.setTimeout(1000);
   for (unsigned int buttonArrayIndex = 0; buttonArrayIndex < (sizeof(commandArray) / sizeof(unsigned int)); buttonArrayIndex++)
@@ -646,6 +646,7 @@ void loop() {
       // Make the button presses actually work
       //sentInputOnce = false;
       isInputting = true;
+      isInputtingDelayed = false;
       previousInputDelay = currentMillis;
     }
     //  Get Motors and Analog status

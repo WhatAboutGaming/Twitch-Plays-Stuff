@@ -153,6 +153,7 @@ void loop()
     if ((serial_rx_buffer[0] == 0x01) && (serial_rx_buffer[11] == 0x01))
     {
       isInputting = true;
+      isInputtingDelayed = false;
       previousInputDelay = currentMillis;
     }
   }

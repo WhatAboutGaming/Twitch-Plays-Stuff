@@ -275,6 +275,7 @@ void loop()
       timesToLoop = 0;
       loopCounter = 0;
       isInputting = true;
+      isInputtingDelayed = false;
       previousInputDelay = currentMillis;
     }
     if ((serial_rx_buffer[0] >= startingMacroIndex) && (serial_rx_buffer[11] >= startingMacroIndex))
@@ -290,6 +291,7 @@ void loop()
           timesToLoop = 0;
           loopCounter = 0;
           //isInputting = false;
+          isInputtingDelayed = false;
           macroIndex = serial_rx_buffer[0] - startingMacroIndex;
           for (unsigned int macroInputIndex = 0; macroInputIndex < sizeof(serial_rx_buffer); macroInputIndex++) {
             macro_buffer[macroIndex][macroInputIndex] = serial_rx_buffer[macroInputIndex];
@@ -307,8 +309,9 @@ void loop()
       loopMacro = 0;
       timesToLoop = 0;
       loopCounter = 0;
+      isInputtingDelayed = false;
       isInputting = false;
-
+      
       macroInputsToRun = serial_rx_buffer[1];
       loopMacro = serial_rx_buffer[2];
       currentMacroIndexRunning = serial_rx_buffer[3];
