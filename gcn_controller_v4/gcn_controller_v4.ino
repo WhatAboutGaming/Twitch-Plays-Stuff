@@ -327,7 +327,6 @@ void loop()
       loopCounter = 0;
       isInputtingDelayed = false;
       isInputting = false;
-
       macroInputsToRun = serial_rx_buffer[1];
       loopMacro = serial_rx_buffer[2];
       currentMacroIndexRunning = serial_rx_buffer[3];

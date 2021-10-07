@@ -378,7 +378,7 @@ void loop()
       macroInputsToRun = serial_rx_buffer[1];
       loopMacro = serial_rx_buffer[2];
       currentMacroIndexRunning = serial_rx_buffer[3];
-      timesToLoop = serial_rx_buffer[4];
+      timesToLoop = serial_rx_buffer[4];  // Times to repeat, if == 0, it'll not repeat, if != 0, it'll repeat n times, so in this case, gramatically speaking, timesToLoop and times to repeat are different things (does this make sense?), so the max amount of times it can loop is 256, the amount of times it can repeat is 255, the first iteration is not a repetition (Repeat input? Repeated input?) (Again, does this makes sense?)
       loopCounter = serial_rx_buffer[5];
       //isInputting = true;
       //previousInputDelay = currentMillis;
