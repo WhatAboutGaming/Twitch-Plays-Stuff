@@ -93,6 +93,8 @@ boolean axisXiActive = false;
 boolean isInputting = false;
 boolean isInputtingDelayed = false;
 
+boolean didInputChange = false;
+
 unsigned int buttonArrayIndex = 0;
 
 unsigned long inputDelay = 0;
@@ -103,6 +105,7 @@ unsigned long baudRate = 2000000;
 
 byte serial_rx_buffer[12];
 byte current_macro_input[12];
+byte old_macro_input[12];
 byte macro_buffer[64][12];
 unsigned long controller = 0;
 
@@ -160,6 +163,19 @@ void setup()
   current_macro_input[9] = 0x00; //  Delay Byte 2
   current_macro_input[10] = 0x00; // Delay Byte 1
   current_macro_input[11] = 0x00; // Postamble
+
+  old_macro_input[0] = 0x00; //  Preamble
+  old_macro_input[1] = 0x00; //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
+  old_macro_input[2] = 0x00; //  L, R, CUP, CDOWN, CLEFT, CRIGHT, N/A, N/A
+  old_macro_input[3] = 0x7F; //  Control Stick X Axis
+  old_macro_input[4] = 0x7F; //  Control Stick Y Axis
+  old_macro_input[5] = 0x00; //  N/A (All 8 bits)
+  old_macro_input[6] = 0x00; //  N/A (All 8 bits)
+  old_macro_input[7] = 0x00; //  N/A (All 8 bits)
+  old_macro_input[8] = 0x00; //  Unused
+  old_macro_input[9] = 0x00; //  Delay Byte 2
+  old_macro_input[10] = 0x00; // Delay Byte 1
+  old_macro_input[11] = 0x00; // Postamble
 
   resetController();
   //  And we are ready to go
@@ -415,6 +431,7 @@ void pressButtons()
   }
   if (isInputting == true)
   {
+    didInputChange = false;
     /*
       for (unsigned int currentInputIndex = 0; currentInputIndex < sizeof(current_macro_input); currentInputIndex++) {
       if (currentInputIndex != sizeof(current_macro_input) - 1) {
@@ -427,6 +444,20 @@ void pressButtons()
       }
       }
     */
+    // Send the controller data back so it can be used to display controller information on the overlay
+    for (unsigned int currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
+      if (current_macro_input[currentByteIndex] != old_macro_input[currentByteIndex]) {
+        didInputChange = true;
+      }
+      old_macro_input[currentByteIndex] = current_macro_input[currentByteIndex];
+    }
+    if (didInputChange == true) {
+      for (unsigned int currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
+        // Send only data back if it has changed, I don't know how to do this without having two loops
+        Serial.write(current_macro_input[currentByteIndex]);
+      }
+    }
+    Serial.flush();
     //  Press Button
 
     //  First 8 buttons, Buffer Array Element 1
@@ -491,18 +522,34 @@ void pressButtons()
           current_macro_input[9] = 0x00; //  Delay Byte 2
           current_macro_input[10] = 0x00; // Delay Byte 1
           current_macro_input[11] = 0x00; // Postamble
+
+          didInputChange = false;
           /*
             for (unsigned int currentInputIndex = 0; currentInputIndex < sizeof(current_macro_input); currentInputIndex++) {
             if (currentInputIndex != sizeof(current_macro_input) - 1) {
-              Serial.print(current_macro_input[currentInputIndex]);
-              Serial.print(" ");
+             Serial.print(current_macro_input[currentInputIndex]);
+             Serial.print(" ");
             }
             if (currentInputIndex == sizeof(current_macro_input) - 1) {
-              Serial.print(" ");
-              Serial.println(current_macro_input[currentInputIndex]);
+             Serial.print(" ");
+             Serial.println(current_macro_input[currentInputIndex]);
             }
             }
           */
+          // Send the controller data back so it can be used to display controller information on the overlay
+          for (unsigned int currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
+            if (current_macro_input[currentByteIndex] != old_macro_input[currentByteIndex]) {
+              didInputChange = true;
+            }
+            old_macro_input[currentByteIndex] = current_macro_input[currentByteIndex];
+          }
+          if (didInputChange == true) {
+            for (unsigned int currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
+              // Send only data back if it has changed, I don't know how to do this without having two loops
+              Serial.write(current_macro_input[currentByteIndex]);
+            }
+          }
+          Serial.flush();
           //  First 8 buttons, Buffer Array Element 1
           //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
           digitalWrite(commandArray[0], (current_macro_input[1] & B00000001)); // A

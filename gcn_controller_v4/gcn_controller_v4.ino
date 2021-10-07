@@ -161,6 +161,8 @@ unsigned int motorArray[] = {motorInput, turboLed, macroLed}; // Motor, Turbo LE
 boolean isInputting = false;
 boolean isInputtingDelayed = false;
 
+boolean didInputChange = false;
+
 unsigned long inputDelay = 0;
 unsigned long previousInputDelay = 0;
 unsigned long currentMillis = 0;
@@ -169,6 +171,7 @@ unsigned long baudRate = 2000000;
 
 byte serial_rx_buffer[12];
 byte current_macro_input[12];
+byte old_macro_input[12];
 byte macro_buffer[64][12];
 unsigned long controller = 0;
 
@@ -251,6 +254,19 @@ void setup()
   current_macro_input[9] = 0x00;
   current_macro_input[10] = 0x00;
   current_macro_input[11] = 0x00;
+
+  old_macro_input[0] = 0x00;
+  old_macro_input[1] = 0x00;
+  old_macro_input[2] = 0x00;
+  old_macro_input[3] = 0x7F;
+  old_macro_input[4] = 0x7F;
+  old_macro_input[5] = 0x7F;
+  old_macro_input[6] = 0x7F;
+  old_macro_input[7] = 0x00;
+  old_macro_input[8] = 0x00;
+  old_macro_input[9] = 0x00;
+  old_macro_input[10] = 0x00;
+  old_macro_input[11] = 0x00;
 }
 
 void loop()
@@ -311,11 +327,11 @@ void loop()
       loopCounter = 0;
       isInputtingDelayed = false;
       isInputting = false;
-      
+
       macroInputsToRun = serial_rx_buffer[1];
       loopMacro = serial_rx_buffer[2];
       currentMacroIndexRunning = serial_rx_buffer[3];
-      timesToLoop = serial_rx_buffer[4];
+      timesToLoop = serial_rx_buffer[4]; // Times to repeat, if == 0, it'll not repeat, if != 0, it'll repeat n times, so in this case, gramatically speaking, timesToLoop and times to repeat are different things (does this make sense?), so the max amount of times it can loop is 256, the amount of times it can repeat is 255, the first iteration is not a repetition (Repeat input? Repeated input?) (Again, does this makes sense?)
       loopCounter = serial_rx_buffer[5];
       //isInputting = true;
       //previousInputDelay = currentMillis;
@@ -371,6 +387,21 @@ void pressButtons()
   }
   if (isInputting == true)
   {
+    didInputChange = false;
+    // Send the controller data back so it can be used to display controller information on the overlay
+    for (unsigned int currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
+      if (current_macro_input[currentByteIndex] != old_macro_input[currentByteIndex]) {
+        didInputChange = true;
+      }
+      old_macro_input[currentByteIndex] = current_macro_input[currentByteIndex];
+    }
+    if (didInputChange == true) {
+      for (unsigned int currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
+        // Send only data back if it has changed, I don't know how to do this without having two loops
+        Serial.write(current_macro_input[currentByteIndex]);
+      }
+    }
+    Serial.flush();
     //  Press Button
 
     //  First 8 buttons, Buffer Array Element 1
@@ -540,6 +571,22 @@ void pressButtons()
           current_macro_input[10] = 0x00;
           current_macro_input[11] = 0x00;
 
+          didInputChange = false;
+
+          // Send the controller data back so it can be used to display controller information on the overlay
+          for (unsigned int currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
+            if (current_macro_input[currentByteIndex] != old_macro_input[currentByteIndex]) {
+              didInputChange = true;
+            }
+            old_macro_input[currentByteIndex] = current_macro_input[currentByteIndex];
+          }
+          if (didInputChange == true) {
+            for (unsigned int currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
+              // Send only data back if it has changed, I don't know how to do this without having two loops
+              Serial.write(current_macro_input[currentByteIndex]);
+            }
+          }
+          Serial.flush();
           //  First 8 buttons, Buffer Array Element 1
           //  Digital L Trigger, Digital R Trigger, Z, Start, Y, X, B, A
           inputStatus[buttonLTrigger] = !(current_macro_input[1] & B00000001);
