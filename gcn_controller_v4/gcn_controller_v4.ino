@@ -417,25 +417,20 @@ void pressButtons()
       old_macro_input[currentByteIndex] = current_macro_input[currentByteIndex];
     }
     if (didInputChange == true) {
-      if ((current_macro_input[0] >= startingMacroIndex) && (current_macro_input[11] >= startingMacroIndex))
-      {
-        if ((current_macro_input[0] < endingMacroIndex) && (current_macro_input[11] < endingMacroIndex))
-        {
-          if (current_macro_input[0] == current_macro_input[11]) {
-            Serial.write(endingMacroIndex);
-            Serial.write(macroInputsToRun);
-            Serial.write(loopMacro);
-            Serial.write(currentMacroIndexRunning);
-            Serial.write(timesToLoop);
-            Serial.write(loopCounter);
-            Serial.write(0x00);
-            Serial.write(0x00);
-            Serial.write(0x00);
-            Serial.write(0x00);
-            Serial.write(0x00);
-            Serial.write(endingMacroIndex);
-          }
-        }
+      if (macroInputsToRun != 0) {
+        // This block is used to tell the backend where in the macro chain the current macro input is
+        Serial.write(endingMacroIndex);
+        Serial.write(macroInputsToRun);
+        Serial.write(loopMacro);
+        Serial.write(currentMacroIndexRunning);
+        Serial.write(timesToLoop);
+        Serial.write(loopCounter);
+        Serial.write(0x00);
+        Serial.write(0x00);
+        Serial.write(0x00);
+        Serial.write(0x00);
+        Serial.write(0x00);
+        Serial.write(endingMacroIndex);
       }
       for (unsigned int currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
         // Send only data back if it has changed, I don't know how to do this without having two loops
@@ -622,7 +617,8 @@ void pressButtons()
             old_macro_input[currentByteIndex] = current_macro_input[currentByteIndex];
           }
           if (didInputChange == true) {
-            if (timesToLoop > 0 && loopCounter <= timesToLoop) {
+            if (macroInputsToRun != 0) {
+              // This block is used to tell the backend where in the macro chain the current macro input is
               Serial.write(endingMacroIndex);
               Serial.write(macroInputsToRun);
               Serial.write(loopMacro);
