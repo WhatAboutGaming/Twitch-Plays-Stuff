@@ -316,7 +316,7 @@ void loop()
         }
       }
     }
-    if ((serial_rx_buffer[0] == 0x80) && (serial_rx_buffer[11] == 0x80))
+    if ((serial_rx_buffer[0] == endingMacroIndex) && (serial_rx_buffer[11] == endingMacroIndex))
     {
       // Stop the current loop when we receive a new macro setter (The thing that tells how a macro should be executed, if it should loop, how many inputs it has to iterate through)
       macroIndex = 0;
@@ -366,6 +366,20 @@ void runMacro()
             //
           }
           if (timesToLoop > 0 && loopCounter <= timesToLoop) {
+            /*
+              Serial.write(endingMacroIndex);
+              Serial.write(macroInputsToRun);
+              Serial.write(loopMacro);
+              Serial.write(currentMacroIndexRunning);
+              Serial.write(timesToLoop);
+              Serial.write(loopCounter);
+              Serial.write(0x00);
+              Serial.write(0x00);
+              Serial.write(0x00);
+              Serial.write(0x00);
+              Serial.write(0x00);
+              Serial.write(endingMacroIndex);
+            */
             //Serial.print(loopCounter);
             //Serial.print(" ");
             loopCounter++;
@@ -395,6 +409,26 @@ void pressButtons()
       old_macro_input[currentByteIndex] = current_macro_input[currentByteIndex];
     }
     if (didInputChange == true) {
+      if ((current_macro_input[0] >= startingMacroIndex) && (current_macro_input[11] >= startingMacroIndex))
+      {
+        if ((current_macro_input[0] < endingMacroIndex) && (current_macro_input[11] < endingMacroIndex))
+        {
+          if (current_macro_input[0] == current_macro_input[11]) {
+            Serial.write(endingMacroIndex);
+            Serial.write(macroInputsToRun);
+            Serial.write(loopMacro);
+            Serial.write(currentMacroIndexRunning);
+            Serial.write(timesToLoop);
+            Serial.write(loopCounter);
+            Serial.write(0x00);
+            Serial.write(0x00);
+            Serial.write(0x00);
+            Serial.write(0x00);
+            Serial.write(0x00);
+            Serial.write(endingMacroIndex);
+          }
+        }
+      }
       for (unsigned int currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
         // Send only data back if it has changed, I don't know how to do this without having two loops
         Serial.write(current_macro_input[currentByteIndex]);
@@ -580,6 +614,26 @@ void pressButtons()
             old_macro_input[currentByteIndex] = current_macro_input[currentByteIndex];
           }
           if (didInputChange == true) {
+            if ((current_macro_input[0] >= startingMacroIndex) && (current_macro_input[11] >= startingMacroIndex))
+            {
+              if ((current_macro_input[0] < endingMacroIndex) && (current_macro_input[11] < endingMacroIndex))
+              {
+                if (current_macro_input[0] == current_macro_input[11]) {
+                  Serial.write(endingMacroIndex);
+                  Serial.write(macroInputsToRun);
+                  Serial.write(loopMacro);
+                  Serial.write(currentMacroIndexRunning);
+                  Serial.write(timesToLoop);
+                  Serial.write(loopCounter);
+                  Serial.write(0x00);
+                  Serial.write(0x00);
+                  Serial.write(0x00);
+                  Serial.write(0x00);
+                  Serial.write(0x00);
+                  Serial.write(endingMacroIndex);
+                }
+              }
+            }
             for (unsigned int currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
               // Send only data back if it has changed, I don't know how to do this without having two loops
               Serial.write(current_macro_input[currentByteIndex]);
