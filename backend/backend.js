@@ -1867,7 +1867,7 @@ function getStreamViewerCount(twitchCredentialsObject, twitchAccessTokenObject) 
   req.end();
 }
 
-//setInterval(updateStreamTime, 100);
+setInterval(updateStreamTime, 100);
 
 var currentSecond = 0;
 var currentMinute = 0;
