@@ -1,0 +1,15 @@
+{
+  "name": "thing",
+  "version": "0.0.1",
+  "description": "thing",
+  "dependencies": {
+    "get-audio-duration": "^2.0.3",
+    "get-mp3-duration": "^1.0.0",
+    "mongodb": "^3.6.6",
+    "node-cmd": "^3.0.0",
+    "serialport": "^9.2.4",
+    "socket.io": "^2.3.0",
+    "sound-play": "^1.0.5",
+    "tmi.js": "^1.5.0"
+  }
+}

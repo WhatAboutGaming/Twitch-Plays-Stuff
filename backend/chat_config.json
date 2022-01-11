@@ -1,0 +1,31 @@
+{
+  "options": {
+    "debug": true,
+    "messagesLogLevel": "trace"
+  },
+  "connection": {
+    "reconnect": true,
+    "secure": true
+  },
+  "identity": {
+    "username": "username",
+    "password": "oauth"
+  },
+  "channels": [
+    "channel_name"
+  ],
+  "log_chat_as_moderator": true,
+  "log_chat_as_receiver": true,
+  "send_debug_channel_messages": true,
+  "main_channel": "main_channel_name",
+  "debug_channel": "debug_channel_name",
+  "channel_owner": "channel_owner_name",
+  "resend_whisper_to_channel_owner": true,
+  "resend_whisper_to_debug_channel": true,
+  "channels_to_listen": [
+    "channel_to_listen_userid"
+  ],
+  "trusted_users": [
+    "trusted_user_userid"
+  ]
+}

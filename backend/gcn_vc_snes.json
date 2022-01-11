@@ -1,0 +1,40 @@
+{
+  "com_port": "COM5",
+  "com_port_parameters": {
+    "autoOpen": false,
+    "baudRate": 2000000
+  },
+  "normal_delay": 333,
+  "max_delay": 65535,
+  "held_delay": 0,
+  "stick_minimum": 0,
+  "stick_maximum": 255,
+  "stick_center": 127,
+  "stick_limit": 0,
+  "initial_macro_preamble": 64,
+  "final_macro_preamble": 128,
+  "advanced_input_macros_allowed": 64,
+  "max_duration_per_precision_input_millis": 65535,
+  "default_duration_per_precision_input_millis": 333,
+  "held_duration_per_precision_input_millis": 667,
+  "max_times_to_repeat_macro": 255,
+  "controller_object": "gcn_vc_snes_controller.json",
+  "simultaneous_different_basic_buttons_allowed": 4,
+  "help_message_basic": [
+    "BASIC",
+    "Valid inputs are A, B, X, Y, L, R, Start, Select, Up, Down, Left and Right. Typos work too! Directions can be replaced with cardinal directions (N, S, W, E, North, South, West, East). Up to 3 different buttons can be pressed simultaneously. Example. b+up+right. It is not needed to start your message with ! mark.",
+    "Normal duration of button presses is 333 milliseconds, but you can end your input with - to hold the buttons down indefinitely until the next input comes up: a+z+right-. Commands are NOT case sensitive: Typing left and lEft has the same effect.",
+    "You can type Basic or Advanced to vote to change input styles. It is needed at least 75% of votes on either side to change input styles, votes are removed from the pool after 5 minutes. After that, you'll have to vote again to have your vote readded to the pool.",
+    "Alternatively, you can spam votes to make sure your vote always stays in the pool. You can switch sides whenever you want. Basic is the classic \"anyone can do whatever they want\" mode, it is limited for some tasks, while advanced can be used to do a sequence of very precise inputs. Currently on Basic mode.",
+    "BASIC"
+  ],
+  "simultaneous_different_advanced_buttons_allowed": 4,
+  "help_message_advanced": [
+    "ADVANCED",
+    "Valid inputs are A, B, X, Y, L, R, Start, Select, Up, Down, Left and Right. Typos work too! Directions can be replaced with cardinal directions (N, S, W, E, North, South, West, East). Up to 3 different buttons can be pressed simultaneously. Example: b+up+right. It is not needed to start your message with ! mark.",
+    "Normal duration of button presses is 333 milliseconds, but you can end your input with - to hold the buttons down indefinitely until the next input comes up: a+z+right-. Commands are not case sensitive: Typing left and lEft has the same effect.",
+    "You can type Basic or Advanced to vote to change input styles. It is needed at least 75% of votes on either side to change input styles, votes are removed from the pool after 5 minutes. After that, you'll have to vote again to have your vote readded to the pool.",
+    "Alternatively, you can spam votes to make sure your vote always stays in the pool. You can switch sides whenever you want. Basic is the classic \"anyone can do whatever they want\" mode, it is limited for some tasks, while advanced can be used to do a sequence of very precise inputs. Currently on Advanced mode.",
+    "ADVANCED"
+  ]
+}
