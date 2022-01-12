@@ -2066,11 +2066,17 @@ async function generateTwitchOAuthToken(twitchCredentialsObject) {
   //console.log(twitchJsonEncodedAppAccessToken);
 }
 
+//setInterval(updateStreamTitleTest, 10000);
+
+function updateStreamTitleTest() {
+  updateStreamTitle("TEST", twitchCredentials, twitchJsonEncodedAppAccessToken);
+}
+
 function updateStreamTitle(newStreamTitle, twitchCredentialsObject, twitchAccessTokenObject) {
   console.log("Attempting to update stream title to: " + newStreamTitle);
   let twitchClientId = twitchCredentialsObject.twitch_client_id;
   let twitchChannelId = twitchCredentialsObject.twitch_channel_id;
-  let twitchOauthToken = twitchAccessTokenObject.access_token;
+  let twitchOauthToken = twitchCredentialsObject.twitch_oauth_access_token;
   let streamTitleToUpdate = "{\"title\":\"" + newStreamTitle + "\"}";
   let options = {
     hostname: "api.twitch.tv",
