@@ -529,7 +529,7 @@ parser.on("data", async function(data) {
 
     // The block below should never happen, if it does, something horribly wrong happened
     if (data.length != incomingSerialDataSize) {
-      console.log(new Date().toISOString() + " Invalid data size");
+      //console.log(new Date().toISOString() + " Invalid data size");
       port.flush(function(err, results) {
         if (err) {
           return console.log(err);
@@ -591,7 +591,7 @@ parser.on("data", async function(data) {
                         //console.log(controllerObject[controllerObjectIndex4].input_name);
                         //console.log(digitalInputBitArrayData[bitArrayIndex] + " at index " + bitArrayIndex);
                         if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                          console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                          //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                         }
                         if (inputStateFromArduino[controllerObjectIndex4] == false) {
                           inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
@@ -627,7 +627,7 @@ parser.on("data", async function(data) {
                       //console.log("C " + controllerObject[controllerObjectIndex4].input_name);
                       //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
                       if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                        console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                        //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                       }
                       if (inputStateFromArduino[controllerObjectIndex4] == false) {
                         inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
@@ -655,7 +655,7 @@ parser.on("data", async function(data) {
                           //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
                           //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
                           if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                            console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                           }
                           if (inputStateFromArduino[controllerObjectIndex4] == false) {
                             inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
@@ -671,7 +671,7 @@ parser.on("data", async function(data) {
                           //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
                           //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
                           if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                            console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                           }
                           if (inputStateFromArduino[controllerObjectIndex4] == false) {
                             inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
@@ -705,7 +705,7 @@ parser.on("data", async function(data) {
             if ((inputDurationToDisplay != controllerConfig.normal_delay) && (inputDurationToDisplay != controllerConfig.held_delay)) {
               inputArrayToDisplay = inputArrayToDisplay + " " + inputDurationToDisplay + "ms";
             }
-            console.log(new Date().toISOString() + " " + inputArrayToDisplay);
+            //console.log(new Date().toISOString() + " " + inputArrayToDisplay);
             endInputString = inputArrayToDisplay;
             io.sockets.emit("end_input_string", endInputString);
             io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
@@ -755,7 +755,7 @@ parser.on("data", async function(data) {
                         //console.log(digitalInputBitArrayData[bitArrayIndex] + " at index " + bitArrayIndex);
                         //console.log(inputStateFromArduino[controllerObjectIndex4]);
                         if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                          console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                          //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                         }
                         if (inputStateFromArduino[controllerObjectIndex4] == false) {
                           inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
@@ -791,7 +791,7 @@ parser.on("data", async function(data) {
                       //console.log("C " + controllerObject[controllerObjectIndex4].input_name);
                       //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
                       if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                        console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                        //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                       }
                       if (inputStateFromArduino[controllerObjectIndex4] == false) {
                         inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
@@ -819,7 +819,7 @@ parser.on("data", async function(data) {
                           //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
                           //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
                           if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                            console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                           }
                           if (inputStateFromArduino[controllerObjectIndex4] == false) {
                             inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
@@ -835,7 +835,7 @@ parser.on("data", async function(data) {
                           //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
                           //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
                           if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                            console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                           }
                           if (inputStateFromArduino[controllerObjectIndex4] == false) {
                             inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
@@ -854,7 +854,7 @@ parser.on("data", async function(data) {
           inputArrayToDisplay = inputArrayToDisplay.join("+");
           if (inputArrayToDisplay == "") {
             // Do nothing
-            console.log("Empty String, this shouldn't happen CASE 1");
+            //console.log("Empty String, this shouldn't happen CASE 1");
             basicInputString = inputArrayToDisplay;
             io.sockets.emit("basic_input_string", basicInputString);
             io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
@@ -869,7 +869,7 @@ parser.on("data", async function(data) {
             if ((inputDurationToDisplay != controllerConfig.normal_delay) && (inputDurationToDisplay != controllerConfig.held_delay)) {
               inputArrayToDisplay = inputArrayToDisplay + " " + inputDurationToDisplay + "ms";
             }
-            console.log(new Date().toISOString() + " " + inputArrayToDisplay);
+            //console.log(new Date().toISOString() + " " + inputArrayToDisplay);
             basicInputString = inputArrayToDisplay;
             io.sockets.emit("basic_input_string", basicInputString);
             io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
@@ -913,8 +913,8 @@ parser.on("data", async function(data) {
                     inputCountsObject = dataToInsert;
                     io.sockets.emit("input_counts_object", inputCountsObject);
 
-                    console.log("dataToInsert SERIAL");
-                    console.log(dataToInsert);
+                    //console.log("dataToInsert SERIAL");
+                    //console.log(dataToInsert);
                     // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
                     globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
                       if (err) {
@@ -1060,7 +1060,7 @@ parser.on("data", async function(data) {
                         //console.log(digitalInputBitArrayData[bitArrayIndex] + " at index " + bitArrayIndex);
                         //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
                         if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                          console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                          //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                         }
                         if (inputStateFromArduino[controllerObjectIndex4] == false) {
                           inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
@@ -1096,7 +1096,7 @@ parser.on("data", async function(data) {
                       //console.log("C " + controllerObject[controllerObjectIndex4].input_name);
                       //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
                       if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                        console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                        //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                       }
                       if (inputStateFromArduino[controllerObjectIndex4] == false) {
                         inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
@@ -1124,7 +1124,7 @@ parser.on("data", async function(data) {
                           //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
                           //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
                           if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                            console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                           }
                           if (inputStateFromArduino[controllerObjectIndex4] == false) {
                             inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
@@ -1140,7 +1140,7 @@ parser.on("data", async function(data) {
                           //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
                           //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
                           if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                            console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
                           }
                           if (inputStateFromArduino[controllerObjectIndex4] == false) {
                             inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
@@ -1159,7 +1159,7 @@ parser.on("data", async function(data) {
           inputArrayToDisplay = inputArrayToDisplay.join("+");
           if (inputArrayToDisplay == "") {
             // Do nothing
-            console.log("Empty String, this shouldn't happen CASE 64 - 127");
+            //console.log("Empty String, this shouldn't happen CASE 64 - 127");
           }
           if (inputArrayToDisplay != "") {
             if (inputDurationToDisplay == controllerConfig.default_duration_per_precision_input_millis) {
@@ -1174,7 +1174,7 @@ parser.on("data", async function(data) {
             if ((inputDurationToDisplay != controllerConfig.default_duration_per_precision_input_millis) && (inputDurationToDisplay != controllerConfig.held_duration_per_precision_input_millis)) {
               inputArrayToDisplay = inputArrayToDisplay + " " + inputDurationToDisplay + "ms";
             }
-            console.log(new Date().toISOString() + " " + inputArrayToDisplay);
+            //console.log(new Date().toISOString() + " " + inputArrayToDisplay);
             advancedInputString = inputArrayToDisplay;
             io.sockets.emit("advanced_input_string", advancedInputString);
             io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
@@ -1218,8 +1218,8 @@ parser.on("data", async function(data) {
                     inputCountsObject = dataToInsert;
                     io.sockets.emit("input_counts_object", inputCountsObject);
 
-                    console.log("dataToInsert SERIAL");
-                    console.log(dataToInsert);
+                    //console.log("dataToInsert SERIAL");
+                    //console.log(dataToInsert);
                     // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
                     globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
                       if (err) {
@@ -1348,7 +1348,7 @@ parser.on("data", async function(data) {
       }
       if (data[0] != data[11]) {
         // If this block happens, then the data is invalid format (probably because the serial communication desynced), the serial port will be flushed to clear any desync issues and should hopefully be in sync when the next message is received from the Arduino
-        console.log(new Date().toISOString() + " Invalid data format, data[0] = " + data[0] + " data[11] = " + data[11]);
+        //console.log(new Date().toISOString() + " Invalid data format, data[0] = " + data[0] + " data[11] = " + data[11]);
         //console.log(data);
         port.flush(function(err, results) {
           if (err) {
@@ -1437,7 +1437,7 @@ function onTimeOut(channel, msg, unused, duration, tags) {
   console.log(duration);
   console.log(tags);
   */
-  //client.whisper(msg, "You were timed out for " + duration + " seconds from channel " + channel + ".");
+  client.whisper(msg, "You were timed out for " + duration + " seconds from channel " + channel + ".");
 }
 
 function onBan(channel, msg, unused, tags) {
@@ -1448,7 +1448,7 @@ function onBan(channel, msg, unused, tags) {
   console.log(unused);
   console.log(tags);
   */
-  //client.whisper(msg, "You were permanently banned from channel " + channel +  ".");
+  client.whisper(msg, "You were permanently banned from channel " + channel + ".");
 }
 
 function onClearMsg(channel, username, deletedMessage, tags) {
@@ -1459,7 +1459,7 @@ function onClearMsg(channel, username, deletedMessage, tags) {
   console.log(deletedMessage);
   console.log(tags);
   */
-  //client.whisper(username, "Your message \"" + deletedMessage + "\" was deleted from channel " + channel + ".");
+  client.whisper(username, "Your message \"" + deletedMessage + "\" was deleted from channel " + channel + ".");
 }
 
 function rawMessageLogger(messageCloned, message) {
@@ -1853,7 +1853,7 @@ function getStreamViewerCount(twitchCredentialsObject, twitchAccessTokenObject) 
       */
       //console.log(currentViewerCount);
       //oldViewerCount = currentViewerCount;
-      
+
       //process.stdout.write(d);
       //console.log(d);
     });
@@ -2367,22 +2367,22 @@ async function onMessageHandler(target, tags, message, self) {
       if (singleMessageSpamBots[singleMessageSpamBotsIndex] == true) {
         isSingleMessageSpamBot = true;
         //isFirstMessageSpam = true;
-        console.log("We have a single message spam bot maybe, idk still have to check the database");
+        //console.log("We have a single message spam bot maybe, idk still have to check the database");
       }
     }
     for (let multiMessageSpamBotTypeAIndex = 0; multiMessageSpamBotTypeAIndex < multiMessageSpamBotTypeA.length; multiMessageSpamBotTypeAIndex++) {
       if (multiMessageSpamBotTypeA[multiMessageSpamBotTypeAIndex] == true) {
         isFirstMessageSpam = true;
-        console.log("We have a multimessage spambot type A, we have to check all the messages it sends tho for confirmation");
+        //console.log("We have a multimessage spambot type A, we have to check all the messages it sends tho for confirmation");
       }
     }
     for (let multiMessageSpamBotTypeBIndex = 0; multiMessageSpamBotTypeBIndex < multiMessageSpamBotTypeB.length; multiMessageSpamBotTypeBIndex++) {
       if (multiMessageSpamBotTypeB[multiMessageSpamBotTypeBIndex] == true) {
         isFirstMessageSpam = true;
-        console.log("We have a multimessage spambot type B, we have to check all the messages it sends tho for confirmation");
+        //console.log("We have a multimessage spambot type B, we have to check all the messages it sends tho for confirmation");
       }
     }
-    console.log("isSingleMessageSpamBot = " + isSingleMessageSpamBot);
+    //console.log("isSingleMessageSpamBot = " + isSingleMessageSpamBot);
 
     // The database checks below checks if an user exists
     // MOVE THIS UP TO WHERE THE MESSAGE ISNT MODIFIED
@@ -2665,7 +2665,7 @@ async function onMessageHandler(target, tags, message, self) {
                 shortest_message_sent_at_twitch_timestamp: result.shortest_message_sent_at_twitch_timestamp,
                 shortest_message_sent_at_twitch_iso_timestamp: result.shortest_message_sent_at_twitch_iso_timestamp,
                 shortest_message_length: result.shortest_message_length,
-  
+
                 longest_message_sent_id: result.longest_message_sent_id,
                 longest_message_sent: result.longest_message_sent,
                 longest_message_sent_at_timestamp: result.longest_message_sent_at_timestamp,
@@ -2888,21 +2888,21 @@ async function onMessageHandler(target, tags, message, self) {
         //isDatabaseBusy = false;
       });
     });
-    console.log(new Date().toISOString() + " BEFORE user_color=" + userColor);
+    //console.log(new Date().toISOString() + " BEFORE user_color=" + userColor);
     await sleep(333); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
-    console.log(new Date().toISOString() + " AFTER  user_color=" + userColor);
+    //console.log(new Date().toISOString() + " AFTER  user_color=" + userColor);
     userColorInverted = userColor;
     userColorInverted = userColorInverted.replace(/0x+/ig, "");
     userColorInverted = userColorInverted.replace(/L+/ig, "");
     userColorInverted = userColorInverted.replace(/#+/ig, "");
     userColorInverted = Uint8Array.from(Buffer.from(userColorInverted, "hex"));
-    console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
+    //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
     userColorInverted[0] = 255 - userColorInverted[0];
     userColorInverted[1] = 255 - userColorInverted[1];
     userColorInverted[2] = 255 - userColorInverted[2];
-    console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
+    //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
     userColorInverted = "#" + Buffer.from(userColorInverted).toString("hex").toUpperCase();
-    console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
+    //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
     // Then check if user exists here
     /*
     mongoClient.connect(mongoUrl, {
@@ -3043,14 +3043,14 @@ async function onMessageHandler(target, tags, message, self) {
       }
     }
     if (acceptInputs == false) {
-      console.log(message);
+      //console.log(message);
     }
     if (acceptInputs == true) {
       if (globalConfig.voting_enabled == true) {
         let voteTime = 0;
         if (new Date().getTime() <= votingAllowed) {
-          console.log(modeVotes);
-          console.log("Voting in cooldown " + (votingAllowed - new Date().getTime()));
+          //console.log(modeVotes);
+          //console.log("Voting in cooldown " + (votingAllowed - new Date().getTime()));
         }
         if (new Date().getTime() > votingAllowed) {
           let playerVoteIndex = modeVotes.findIndex(element => element.user_id == userId);
@@ -3060,24 +3060,24 @@ async function onMessageHandler(target, tags, message, self) {
           //console.log(modeVotes.length);
           let checkUptime = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(uptime|uptiem|up\s*time|up\s*tiem)+/ig.test(message);
           if (checkUptime == true) {
-            console.log("Someone requested to get the uptime!");
+            //console.log("Someone requested to get the uptime!");
             //
             let hasRunStarted = false;
             let timeUptimeWasRequested = new Date().getTime();
             let uptimeTotal = timeUptimeWasRequested - serverStartTime;
             let playTimeTotal = timeUptimeWasRequested - runStartTime;
-            console.log("playTimeTotal before " + playTimeTotal);
+            //console.log("playTimeTotal before " + playTimeTotal);
             //
             if (playTimeTotal >= 0) {
-              console.log("Run has started");
+              //console.log("Run has started");
               hasRunStarted = true;
             }
             if (playTimeTotal < 0) {
-              console.log("Run hasn't started yet");
+              //console.log("Run hasn't started yet");
               playTimeTotal = Math.abs(playTimeTotal);
               hasRunStarted = false;
             }
-            console.log("playTimeTotal after " + playTimeTotal);
+            //console.log("playTimeTotal after " + playTimeTotal);
             //
             let uptimeDays = (parseInt(uptimeTotal / 86400000)).toString().padStart(2, "0");
             let uptimeHours = (parseInt(uptimeTotal / 3600000) % 24).toString().padStart(2, "0");
@@ -3122,7 +3122,7 @@ async function onMessageHandler(target, tags, message, self) {
                 expiration_time: voteTime,
                 mode_vote: 0
               });
-              console.log("BASIC 1");
+              //console.log("BASIC 1");
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
               client.action(target, "@" + usernameToPing + " Your mode vote was added as Basic and will expire at " + new Date(voteTime).toISOString() + ".");
@@ -3148,7 +3148,7 @@ async function onMessageHandler(target, tags, message, self) {
               voteTime = new Date().getTime() + globalConfig.vote_expiration_time_millis;
               modeVotes[playerVoteIndex].mode_vote = 0;
               modeVotes[playerVoteIndex].expiration_time = voteTime;
-              console.log("BASIC 2");
+              //console.log("BASIC 2");
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
               client.action(target, "@" + usernameToPing + " Your mode vote was readded as Basic and will expire at " + new Date(modeVotes[playerVoteIndex].expiration_time).toISOString() + ".");
@@ -3188,7 +3188,7 @@ async function onMessageHandler(target, tags, message, self) {
                 mode_vote: 2
               });
               //checkModeVotes();
-              console.log("ADVANCED 1");
+              //console.log("ADVANCED 1");
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
               client.action(target, "@" + usernameToPing + " Your mode vote was added as Advanced and will expire at " + new Date(voteTime).toISOString() + ".");
@@ -3214,7 +3214,7 @@ async function onMessageHandler(target, tags, message, self) {
               modeVotes[playerVoteIndex].mode_vote = 2;
               modeVotes[playerVoteIndex].expiration_time = voteTime;
               //checkModeVotes();
-              console.log("ADVANCED 2");
+              //console.log("ADVANCED 2");
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
               client.action(target, "@" + usernameToPing + " Your mode vote was readded as Advanced and will expire at " + new Date(modeVotes[playerVoteIndex].expiration_time).toISOString() + ".");
@@ -3243,7 +3243,7 @@ async function onMessageHandler(target, tags, message, self) {
       let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(inputs*|set+ings*|help|hel\[|hel\]|com+ands*|cmds*|cmnds*|control+s*|control+ers*|how\s*to\s*play|how\s*do\s*(i|we)\s*play)+/ig.test(message);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
-          console.log("Don't send the help message yet");
+          //console.log("Don't send the help message yet");
         }
         if (helpMessageCooldown < new Date().getTime()) {
           let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -3262,7 +3262,7 @@ async function onMessageHandler(target, tags, message, self) {
       if (acceptInputs == true) {
         if (messageWords.length > 0) {
           let listSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(list\s*macro)+/ig.test(message);
-          console.log("listSettablePrefixCheck = " + listSettablePrefixCheck);
+          //console.log("listSettablePrefixCheck = " + listSettablePrefixCheck);
           if (listSettablePrefixCheck == true) {
             //let tempListableInputArray = messageWords[1].replace(/[\:\/\\\.\;]+/ig, " ");
             //tempListableInputArray = tempListableInputArray.trim();
@@ -3281,22 +3281,22 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log("POGGERS WE GOT A NUMBER");
                 if (parseInt(messageWords[1], 10) >= 0) {
                   if (settableMacroChain.length == 0) {
-                    console.log("There are 0 inputs");
+                    //console.log("There are 0 inputs");
                   }
                   if (settableMacroChain.length > 0) {
-                    console.log("There's at least one input");
+                    //console.log("There's at least one input");
                   }
                   if (parseInt(messageWords[1], 10) <= settableMacroChain.length - 1) {
-                    console.log("Case1 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
+                    //console.log("Case1 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
                     //console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
                     if (settableMacroChain.length - 1 >= parseInt(messageWords[1], 10)) {
-                      console.log("THIS IS WITHIN THE RANGE");
+                      //console.log("THIS IS WITHIN THE RANGE");
                       //console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
                       isValidIndex = true;
                       listablePrecisionInputIndex = parseInt(messageWords[1], 10) + 1;
                     }
                     if (settableMacroChain.length - 1 < parseInt(messageWords[1], 10)) {
-                      console.log("THIS IS BEYOND THE RANGE");
+                      //console.log("THIS IS BEYOND THE RANGE");
                       //console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
                       isValidIndex = false;
                       //settablePrecisionInputIndex = parseInt(messageWords[2], 10);
@@ -3305,7 +3305,7 @@ async function onMessageHandler(target, tags, message, self) {
                     //settablePrecisionInputIndex = parseInt(messageWords[2], 10);
                   }
                   if (parseInt(messageWords[1], 10) > settableMacroChain.length - 1) {
-                    console.log("Case2 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
+                    //console.log("Case2 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
                     isValidIndex = false;
                     //settablePrecisionInputIndex = controllerConfig.max_duration_per_precision_input_millis;
                   }
@@ -3314,7 +3314,7 @@ async function onMessageHandler(target, tags, message, self) {
                   //precisionInputHold = parseInt(testVar[testVarIndex], 10);
                 }
                 if (parseInt(messageWords[1], 10) < 0) {
-                  console.log("Case3 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
+                  //console.log("Case3 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
                   isValidIndex = false;
                   //console.log("WE GOT A NON-POSITIVE INTEGER");
                   //console.log(testVar[testVarIndex]);
@@ -3322,7 +3322,7 @@ async function onMessageHandler(target, tags, message, self) {
                 }
               }
               if (isNaN(parseInt(messageWords[1], 10)) == true) {
-                console.log("Case4 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
+                //console.log("Case4 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
                 isValidIndex = false;
                 // Just add to the next index if this happens?
                 //console.log(testVar[testVarIndex]);
@@ -3332,23 +3332,23 @@ async function onMessageHandler(target, tags, message, self) {
               //
               if (isValidIndex == false) {
                 for (let settableInputsIndex = 0; settableInputsIndex < settableMacroChain.length; settableInputsIndex++) {
-                  console.log(new Date().toISOString() + " [AZ] settableInputsIndex=" + settableInputsIndex + ", settableMacroChain.length=" + settableMacroChain.length + ", listablePrecisionInputIndex=" + listablePrecisionInputIndex);
+                  //console.log(new Date().toISOString() + " [AZ] settableInputsIndex=" + settableInputsIndex + ", settableMacroChain.length=" + settableMacroChain.length + ", listablePrecisionInputIndex=" + listablePrecisionInputIndex);
                   inputsToList = inputsToList + settableMacroChain[settableInputsIndex].processed_macro_input_string + ";" + settableMacroChain[settableInputsIndex].processed_macro_input_delay + "ms,";
                 }
               }
               if (isValidIndex == true) {
                 for (let settableInputsIndex = 0; settableInputsIndex < listablePrecisionInputIndex; settableInputsIndex++) {
-                  console.log(new Date().toISOString() + " [BZ] settableInputsIndex=" + settableInputsIndex + ", settableMacroChain.length=" + settableMacroChain.length + ", listablePrecisionInputIndex=" + listablePrecisionInputIndex);
+                  //console.log(new Date().toISOString() + " [BZ] settableInputsIndex=" + settableInputsIndex + ", settableMacroChain.length=" + settableMacroChain.length + ", listablePrecisionInputIndex=" + listablePrecisionInputIndex);
                   inputsToList = inputsToList + settableMacroChain[settableInputsIndex].processed_macro_input_string + ";" + settableMacroChain[settableInputsIndex].processed_macro_input_delay + "ms,";
                 }
               }
               inputsToList = inputsToList.replace(/[\.\,]+$/ig, "");
-              console.log(inputsToList);
+              //console.log(inputsToList);
               let splitInputsToListInMultipleStrings = [];
               if (inputsToList.length >= 200) {
                 //let splitInputsToListInMultipleStrings = inputsToList.match(/.{100}/ig);
                 splitInputsToListInMultipleStrings = inputsToList.match(/(?:[^\,]+\,){0,15}[^\,]+/ig);
-                console.log(splitInputsToListInMultipleStrings);
+                //console.log(splitInputsToListInMultipleStrings);
                 let randomColorName = Math.floor(Math.random() * defaultColors.length);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
                 for (let splitInputsInMultipleStringsIndex = 0; splitInputsInMultipleStringsIndex < splitInputsToListInMultipleStrings.length; splitInputsInMultipleStringsIndex++) {
@@ -3384,7 +3384,7 @@ async function onMessageHandler(target, tags, message, self) {
             }
           }
           let setSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(set\s*macro)+/ig.test(message);
-          console.log("setSettablePrefixCheck = " + setSettablePrefixCheck);
+          //console.log("setSettablePrefixCheck = " + setSettablePrefixCheck);
           if (setSettablePrefixCheck == true) {
             if (messageWords[1] == undefined) {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -3392,20 +3392,20 @@ async function onMessageHandler(target, tags, message, self) {
               client.action(target, "@" + usernameToPing + " You didn't enter anything.");
             }
             if (messageWords[1] != undefined) {
-              console.log(messageWords);
-              console.log("");
-              console.log(messageWords[0]);
-              console.log(messageWords[1]);
-              console.log(messageWords[2]);
-              console.log(messageWords[3]);
+              //console.log(messageWords);
+              //console.log("");
+              //console.log(messageWords[0]);
+              //console.log(messageWords[1]);
+              //console.log(messageWords[2]);
+              //console.log(messageWords[3]);
               let processedSingleInput = {};
               //settableMacroChain[0] = ["A", "B", "C"];
               //settableMacroChain[1] = ["D", "E", "F"];
               let tempSettableInputArray = messageWords[1].replace(/[\/\\\.\;\*\,]+/ig, " ");
               tempSettableInputArray = tempSettableInputArray.trim();
               tempSettableInputArray = tempSettableInputArray.split(/\s+/ig);
-              console.log(tempSettableInputArray);
-              console.log("SET THIS AS DELAY INSTEAD OF REPEAT MAYBE");
+              //console.log(tempSettableInputArray);
+              //console.log("SET THIS AS DELAY INSTEAD OF REPEAT MAYBE");
               let settablePrecisionInputHold = 0;
               let settablePrecisionInputIndex = 0;
               let isValidIndex = false;
@@ -3437,29 +3437,29 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log("NOT A NUMBER :(");
                 settablePrecisionInputHold = controllerConfig.default_duration_per_precision_input_millis;
               }
-              console.log("settablePrecisionInputHold = " + settablePrecisionInputHold);
+              //console.log("settablePrecisionInputHold = " + settablePrecisionInputHold);
 
               if (isNaN(parseInt(messageWords[2], 10)) == false) {
                 //console.log("POGGERS WE GOT A NUMBER");
                 if (parseInt(messageWords[2], 10) >= 0) {
                   if (settableMacroChain.length == 0) {
-                    console.log("There are 0 inputs");
+                    //console.log("There are 0 inputs");
                   }
                   if (settableMacroChain.length > 0) {
-                    console.log("There's at least one input");
+                    //console.log("There's at least one input");
                   }
                   if (parseInt(messageWords[2], 10) <= settableMacroChain.length) {
-                    console.log("Case1 " + settableMacroChain.length + " " + parseInt(messageWords[2], 10));
-                    console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
+                    //console.log("Case1 " + settableMacroChain.length + " " + parseInt(messageWords[2], 10));
+                    //console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
                     if ((controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble) - 1 >= parseInt(messageWords[2], 10)) {
-                      console.log("THIS IS WITHIN THE RANGE");
-                      console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
+                      //console.log("THIS IS WITHIN THE RANGE");
+                      //console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
                       isValidIndex = true;
                       settablePrecisionInputIndex = parseInt(messageWords[2], 10);
                     }
                     if ((controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble) - 1 < parseInt(messageWords[2], 10)) {
-                      console.log("THIS IS BEYOND THE RANGE");
-                      console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
+                      //console.log("THIS IS BEYOND THE RANGE");
+                      //console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
                       isValidIndex = false;
                       //settablePrecisionInputIndex = parseInt(messageWords[2], 10);
                     }
@@ -3467,7 +3467,7 @@ async function onMessageHandler(target, tags, message, self) {
                     //settablePrecisionInputIndex = parseInt(messageWords[2], 10);
                   }
                   if (parseInt(messageWords[2], 10) > settableMacroChain.length) {
-                    console.log("Case2 " + settableMacroChain.length + " " + parseInt(messageWords[2], 10));
+                    //console.log("Case2 " + settableMacroChain.length + " " + parseInt(messageWords[2], 10));
                     isValidIndex = false;
                     //settablePrecisionInputIndex = controllerConfig.max_duration_per_precision_input_millis;
                   }
@@ -3476,7 +3476,7 @@ async function onMessageHandler(target, tags, message, self) {
                   //precisionInputHold = parseInt(testVar[testVarIndex], 10);
                 }
                 if (parseInt(messageWords[2], 10) < 0) {
-                  console.log("Case3 " + settableMacroChain.length + " " + parseInt(messageWords[2], 10));
+                  //console.log("Case3 " + settableMacroChain.length + " " + parseInt(messageWords[2], 10));
                   isValidIndex = false;
                   //console.log("WE GOT A NON-POSITIVE INTEGER");
                   //console.log(testVar[testVarIndex]);
@@ -3484,34 +3484,34 @@ async function onMessageHandler(target, tags, message, self) {
                 }
               }
               if (isNaN(parseInt(messageWords[2], 10)) == true) {
-                console.log("Case4 " + settableMacroChain.length + " " + parseInt(messageWords[2], 10));
+                //console.log("Case4 " + settableMacroChain.length + " " + parseInt(messageWords[2], 10));
                 isValidIndex = false;
                 // Just add to the next index if this happens?
                 //console.log(testVar[testVarIndex]);
                 //console.log("NOT A NUMBER :(");
                 //settablePrecisionInputIndex = controllerConfig.default_duration_per_precision_input_millis;
               }
-              console.log("settablePrecisionInputIndex = " + settablePrecisionInputIndex);
-              console.log("isValidIndex = " + isValidIndex);
+              //console.log("settablePrecisionInputIndex = " + settablePrecisionInputIndex);
+              //console.log("isValidIndex = " + isValidIndex);
               //console.log("Should be a positive integer");
               //console.log(settableMacroChain);
               //processMacroChain(macroString, macroInputDelay, macroIndex, sendToArduino)
               if (isValidIndex == true) {
                 if (settableMacroChain[settablePrecisionInputIndex] != undefined) {
-                  console.log(settableMacroChain[settablePrecisionInputIndex]);
-                  console.log("Index is already assigned, overwriting");
+                  //console.log(settableMacroChain[settablePrecisionInputIndex]);
+                  //console.log("Index is already assigned, overwriting");
                   processedSingleInput = processMacroChain(tempSettableInputArray[0], settablePrecisionInputHold, settablePrecisionInputIndex, false);
                   if (processedSingleInput.is_valid_input == true) {
-                    console.log("Valid input");
+                    //console.log("Valid input");
                     settableMacroChain[settablePrecisionInputIndex] = processedSingleInput;
-                    console.log(settableMacroChain[settablePrecisionInputIndex]);
+                    //console.log(settableMacroChain[settablePrecisionInputIndex]);
                     //
                     let randomColorName = Math.floor(Math.random() * defaultColors.length);
                     client.say(target, ".color " + defaultColorNames[randomColorName]);
                     client.action(target, "@" + usernameToPing + " Your input was interpreted as " + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_string + ";" + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_delay + "ms and was added to position " + settablePrecisionInputIndex + ".");
                   }
                   if (processedSingleInput.is_valid_input == false) {
-                    console.log("Invalid input, warn user");
+                    //console.log("Invalid input, warn user");
                     //
                     let randomColorName = Math.floor(Math.random() * defaultColors.length);
                     client.say(target, ".color " + defaultColorNames[randomColorName]);
@@ -3519,20 +3519,20 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                 }
                 if (settableMacroChain[settablePrecisionInputIndex] == undefined) {
-                  console.log(settableMacroChain[settablePrecisionInputIndex]);
-                  console.log("Index is empty, but valid");
+                  //console.log(settableMacroChain[settablePrecisionInputIndex]);
+                  //console.log("Index is empty, but valid");
                   processedSingleInput = processMacroChain(tempSettableInputArray[0], settablePrecisionInputHold, settablePrecisionInputIndex, false);
                   if (processedSingleInput.is_valid_input == true) {
-                    console.log("Valid input");
+                    //console.log("Valid input");
                     settableMacroChain.push(processedSingleInput);
-                    console.log(settableMacroChain[settablePrecisionInputIndex]);
+                    //console.log(settableMacroChain[settablePrecisionInputIndex]);
                     //
                     let randomColorName = Math.floor(Math.random() * defaultColors.length);
                     client.say(target, ".color " + defaultColorNames[randomColorName]);
                     client.action(target, "@" + usernameToPing + " Your input was interpreted as " + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_string + ";" + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_delay + "ms and was added to position " + settablePrecisionInputIndex + ".");
                   }
                   if (processedSingleInput.is_valid_input == false) {
-                    console.log("Invalid input, warn user");
+                    //console.log("Invalid input, warn user");
                     //
                     let randomColorName = Math.floor(Math.random() * defaultColors.length);
                     client.say(target, ".color " + defaultColorNames[randomColorName]);
@@ -3542,11 +3542,11 @@ async function onMessageHandler(target, tags, message, self) {
                 //let processedSingleInput = processMacroChain(tempSettableInputArray[0], settablePrecisionInputHold, settablePrecisionInputIndex, false);
                 //settableMacroChain.push(processedSingleInput);
                 //console.log(processedSingleInput);
-                console.log("settableMacroChain.length = " + settableMacroChain.length);
-                console.log(settableMacroChain);
+                //console.log("settableMacroChain.length = " + settableMacroChain.length);
+                //console.log(settableMacroChain);
               }
               if (isValidIndex == false) {
-                console.log("Invalid index, warn user");
+                //console.log("Invalid index, warn user");
                 //
                 let randomColorName = Math.floor(Math.random() * defaultColors.length);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
@@ -3559,7 +3559,7 @@ async function onMessageHandler(target, tags, message, self) {
             }
           }
           let playSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(exec\s*macro)+/ig.test(message);
-          console.log("playSettablePrefixCheck = " + playSettablePrefixCheck);
+          //console.log("playSettablePrefixCheck = " + playSettablePrefixCheck);
           if (playSettablePrefixCheck == true) {
             let playSettableParametersToWrite = [controllerConfig.final_macro_preamble, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
             let playSettableRepeatCount = 0; // How many times to repeat the macro chain
@@ -3570,22 +3570,22 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("POGGERS WE GOT A NUMBER");
               if (parseInt(messageWords[1], 10) >= 0) {
                 if (settableMacroChain.length == 0) {
-                  console.log("There are 0 inputs");
+                  //console.log("There are 0 inputs");
                 }
                 if (settableMacroChain.length > 0) {
-                  console.log("There's at least one input");
+                  //console.log("There's at least one input");
                 }
                 if (parseInt(messageWords[1], 10) <= settableMacroChain.length - 1) {
-                  console.log("Case1 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
+                  //console.log("Case1 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
                   //console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
                   if (settableMacroChain.length - 1 >= parseInt(messageWords[1], 10)) {
-                    console.log("THIS IS WITHIN THE RANGE");
+                    //console.log("THIS IS WITHIN THE RANGE");
                     //console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
                     isValidInputCount = true;
                     playSettableInputCount = parseInt(messageWords[1], 10);
                   }
                   if (settableMacroChain.length - 1 < parseInt(messageWords[1], 10)) {
-                    console.log("THIS IS BEYOND THE RANGE");
+                    //console.log("THIS IS BEYOND THE RANGE");
                     //console.log(controllerConfig.final_macro_preamble - controllerConfig.initial_macro_preamble);
                     isValidInputCount = false;
                     //settablePrecisionInputIndex = parseInt(messageWords[2], 10);
@@ -3594,7 +3594,7 @@ async function onMessageHandler(target, tags, message, self) {
                   //settablePrecisionInputIndex = parseInt(messageWords[2], 10);
                 }
                 if (parseInt(messageWords[1], 10) > settableMacroChain.length - 1) {
-                  console.log("Case2 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
+                  //console.log("Case2 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
                   isValidInputCount = false;
                   //settablePrecisionInputIndex = controllerConfig.max_duration_per_precision_input_millis;
                 }
@@ -3603,7 +3603,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //precisionInputHold = parseInt(testVar[testVarIndex], 10);
               }
               if (parseInt(messageWords[1], 10) < 0) {
-                console.log("Case3 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
+                //console.log("Case3 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
                 isValidInputCount = false;
                 //console.log("WE GOT A NON-POSITIVE INTEGER");
                 //console.log(testVar[testVarIndex]);
@@ -3611,7 +3611,7 @@ async function onMessageHandler(target, tags, message, self) {
               }
             }
             if (isNaN(parseInt(messageWords[1], 10)) == true) {
-              console.log("Case4 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
+              //console.log("Case4 " + settableMacroChain.length + " " + parseInt(messageWords[1], 10));
               isValidInputCount = false;
               // Just add to the next index if this happens?
               //console.log(testVar[testVarIndex]);
@@ -3651,7 +3651,7 @@ async function onMessageHandler(target, tags, message, self) {
             }
             //console.log("isValidInputCount = " + isValidInputCount);
             //console.log("playSettableRepeatCount = " + playSettableRepeatCount);
-            console.log("isValidInputCount = " + isValidInputCount);
+            //console.log("isValidInputCount = " + isValidInputCount);
             if (isValidInputCount == false) {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
@@ -3659,15 +3659,15 @@ async function onMessageHandler(target, tags, message, self) {
             }
             if (isValidInputCount == true) {
               let inputsToListPlayback = "";
-              console.log("playSettableInputCount = " + playSettableInputCount);
-              console.log("playSettableRepeatCount = " + playSettableRepeatCount);
+              //console.log("playSettableInputCount = " + playSettableInputCount);
+              //console.log("playSettableRepeatCount = " + playSettableRepeatCount);
               for (let settableInputsIndex = 0; settableInputsIndex < playSettableInputCount + 1; settableInputsIndex++) {
                 await sleep(0);
-                console.log("");
-                console.log("settableInputsIndex = " + settableInputsIndex);
-                console.log("playSettableInputCount = " + playSettableInputCount);
-                console.log("playSettableInputCount + 1 = " + (playSettableInputCount + 1));
-                console.log(settableMacroChain[settableInputsIndex]);
+                //console.log("");
+                //console.log("settableInputsIndex = " + settableInputsIndex);
+                //console.log("playSettableInputCount = " + playSettableInputCount);
+                //console.log("playSettableInputCount + 1 = " + (playSettableInputCount + 1));
+                //console.log(settableMacroChain[settableInputsIndex]);
                 inputsToListPlayback = inputsToListPlayback + settableMacroChain[settableInputsIndex].processed_macro_input_string + ";" + settableMacroChain[settableInputsIndex].processed_macro_input_delay + "ms,";
                 //
                 port.write(settableMacroChain[settableInputsIndex].input_data, function(err) {
@@ -3701,7 +3701,7 @@ async function onMessageHandler(target, tags, message, self) {
               playSettableParametersToWrite[9] = 0x00; // Unused for pre/postamble controllerConfig.final_macro_preamble
               playSettableParametersToWrite[10] = 0x00; // Unused for pre/postamble controllerConfig.final_macro_preamble
               playSettableParametersToWrite[11] = controllerConfig.final_macro_preamble; // controllerConfig.final_macro_preamble Postamble is used to tell the arduino how an input macro should be executed
-              console.log(playSettableParametersToWrite);
+              //console.log(playSettableParametersToWrite);
               //let macroParametersToWrite = [controllerConfig.final_macro_preamble, currentMacroChainIndex + 1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
               //
               await sleep(0);
@@ -3722,12 +3722,12 @@ async function onMessageHandler(target, tags, message, self) {
               //client.say(target, ".color " + defaultColorNames[randomColorName]);
               //client.action(target, "@" + usernameToPing + " Executing the first " + playSettableInputCount + " inputs (starting position is 0) and repeating " + playSettableRepeatCount + " times. Type Stop or Wait to stop execution of inputs.");
               inputsToListPlayback = inputsToListPlayback.replace(/[\.\,]+$/ig, "");
-              console.log("inputsToListPlayback = " + inputsToListPlayback);
+              //console.log("inputsToListPlayback = " + inputsToListPlayback);
               let splitInputsToListInMultipleStringsPlayback = [];
               if (inputsToListPlayback.length >= 200) {
                 //let splitInputsToListInMultipleStringsPlayback = inputsToListPlayback.match(/.{100}/ig);
                 splitInputsToListInMultipleStringsPlayback = inputsToListPlayback.match(/(?:[^\,]+\,){0,15}[^\,]+/ig);
-                console.log(splitInputsToListInMultipleStringsPlayback);
+                //console.log(splitInputsToListInMultipleStringsPlayback);
                 let randomColorName = Math.floor(Math.random() * defaultColors.length);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
                 for (let splitInputsInMultipleStringsPlaybackIndex = 0; splitInputsInMultipleStringsPlaybackIndex < splitInputsToListInMultipleStringsPlayback.length; splitInputsInMultipleStringsPlaybackIndex++) {
@@ -3767,10 +3767,10 @@ async function onMessageHandler(target, tags, message, self) {
           // up+l
           let macroDelayUsed = 0; // This variable keeps track of how many inputs have custom delay in the macro chain, if it's 0, set the first param in the last input of the macro chain to be repeat, if it's not 0, set the first param in the last input of the macro chain to be delay (only really used on a macro chain that has more than one input)
           precisionInputs = [];
-          console.log("messageWords[0] Before " + messageWords[0]);
+          //console.log("messageWords[0] Before " + messageWords[0]);
           precisionInputs = message.replace(/[\s\.\,]+/ig, " ");
           precisionInputs = precisionInputs.trim();
-          console.log("messageWords[0] NOW " + precisionInputs);
+          //console.log("messageWords[0] NOW " + precisionInputs);
 
           precisionInputs = precisionInputs.split(/\s+/ig);
           //precisionInputs = precisionInputs.trim();
@@ -3806,8 +3806,9 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log("precisionInputs.length - 1 = " + (precisionInputs.length - 1))
                 if (tempInputArrayIndex == 1) {
                   if (precisionInputs.length == 1) {
-                    console.log(new Date().toISOString() + " JUST A SINGLE INPUT CASE A"); {
-                      console.log(new Date().toISOString() + " SET THIS AS DELAY INSTEAD OF REPEAT MAYBE CASE B");
+                    //console.log(new Date().toISOString() + " JUST A SINGLE INPUT CASE A");
+                    {
+                      //console.log(new Date().toISOString() + " SET THIS AS DELAY INSTEAD OF REPEAT MAYBE CASE B");
                       //console.log(isNaN(parseInt(testVar[testVarIndex], 10)));
                       if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
                         //console.log("POGGERS WE GOT A NUMBER");
@@ -3840,11 +3841,11 @@ async function onMessageHandler(target, tags, message, self) {
                     }
                   }
                   if (precisionInputs.length != 1) {
-                    console.log(new Date().toISOString() + " MORE THAN A SINGLE INPUT CASE C");
+                    //console.log(new Date().toISOString() + " MORE THAN A SINGLE INPUT CASE C");
                     if (precisionInputsIndex != precisionInputs.length - 1) {
                       //if (tempInputArray.length != 2)
                       {
-                        console.log(new Date().toISOString() + " SET THIS AS DELAY INSTEAD OF REPEAT MAYBE CASE D");
+                        //console.log(new Date().toISOString() + " SET THIS AS DELAY INSTEAD OF REPEAT MAYBE CASE D");
                         //console.log(isNaN(parseInt(testVar[testVarIndex], 10)));
                         if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
                           //console.log("POGGERS WE GOT A NUMBER");
@@ -3877,10 +3878,10 @@ async function onMessageHandler(target, tags, message, self) {
                         //console.log("Should be a positive integer");
                       }
                     }
-                    console.log(new Date().toISOString() + " macroDelayUsed = " + macroDelayUsed);
+                    //console.log(new Date().toISOString() + " macroDelayUsed = " + macroDelayUsed);
                     if (precisionInputsIndex == precisionInputs.length - 1) {
                       if (macroDelayUsed != 0) {
-                        console.log(new Date().toISOString() + " SET THIS AS DELAY INSTEAD OF REPEAT MAYBE CASE E");
+                        //console.log(new Date().toISOString() + " SET THIS AS DELAY INSTEAD OF REPEAT MAYBE CASE E");
                         //console.log(isNaN(parseInt(testVar[testVarIndex], 10)));
                         if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
                           //console.log("POGGERS WE GOT A NUMBER");
@@ -3913,10 +3914,10 @@ async function onMessageHandler(target, tags, message, self) {
                       }
                       if (macroDelayUsed == 0) {
                         if (tempInputArray.length == 2) {
-                          console.log(new Date().toISOString() + " A SET THIS AS REPEAT INSTEAD OF DELAY MAYBE CASE F");
+                          //console.log(new Date().toISOString() + " A SET THIS AS REPEAT INSTEAD OF DELAY MAYBE CASE F");
                           //console.log(isNaN(parseInt(testVar[testVarIndex], 10)));
                           if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
-                            console.log(new Date().toISOString() + " A POGGERS WE GOT A NUMBER");
+                            //console.log(new Date().toISOString() + " A POGGERS WE GOT A NUMBER");
                             if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
                               if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_times_to_repeat_macro) {
                                 precisionInputRepeat = parseInt(tempInputArray[tempInputArrayIndex], 10);
@@ -3926,26 +3927,26 @@ async function onMessageHandler(target, tags, message, self) {
                                 precisionInputRepeat = controllerConfig.max_times_to_repeat_macro;
                                 isValidPrecisionInputRepeat = true;
                               }
-                              console.log(new Date().toISOString() + " A WE GOT A POSITIVE INTEGER");
+                              //console.log(new Date().toISOString() + " A WE GOT A POSITIVE INTEGER");
                               //console.log(testVar[testVarIndex]);
                               //precisionInputHold = parseInt(testVar[testVarIndex], 10);
                             }
                             if (parseInt(tempInputArray[tempInputArrayIndex], 10) < 0) {
-                              console.log(new Date().toISOString() + " A WE GOT A NON-POSITIVE INTEGER");
+                              //console.log(new Date().toISOString() + " A WE GOT A NON-POSITIVE INTEGER");
                               //console.log(testVar[testVarIndex]);
                               precisionInputRepeat = 0;
                             }
                           }
                           if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == true) {
                             //console.log(testVar[testVarIndex]);
-                            console.log(new Date().toISOString() + " A NOT A NUMBER :(");
+                            //console.log(new Date().toISOString() + " A NOT A NUMBER :(");
                             precisionInputRepeat = 0;
                           }
                           //console.log("Should be a positive integer");
                         }
                       }
                       if (tempInputArray.length != 2) {
-                        console.log(new Date().toISOString() + " SET THIS AS DELAY INSTEAD OF REPEAT MAYBE CASE G");
+                        //console.log(new Date().toISOString() + " SET THIS AS DELAY INSTEAD OF REPEAT MAYBE CASE G");
                         //console.log(isNaN(parseInt(testVar[testVarIndex], 10)));
                         if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
                           //console.log("POGGERS WE GOT A NUMBER");
@@ -3980,10 +3981,10 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                 }
                 if (tempInputArrayIndex == 2) {
-                  console.log(new Date().toISOString() + " B SET THIS AS REPEAT INSTEAD OF DELAY MAYBE CASE H");
+                  //console.log(new Date().toISOString() + " B SET THIS AS REPEAT INSTEAD OF DELAY MAYBE CASE H");
                   //console.log(isNaN(parseInt(testVar[testVarIndex], 10)));
                   if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
-                    console.log(new Date().toISOString() + " B POGGERS WE GOT A NUMBER");
+                    //console.log(new Date().toISOString() + " B POGGERS WE GOT A NUMBER");
                     if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
                       if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_times_to_repeat_macro) {
                         precisionInputRepeat = parseInt(tempInputArray[tempInputArrayIndex], 10);
@@ -3993,19 +3994,19 @@ async function onMessageHandler(target, tags, message, self) {
                         precisionInputRepeat = controllerConfig.max_times_to_repeat_macro;
                         isValidPrecisionInputRepeat = true;
                       }
-                      console.log(new Date().toISOString() + " B WE GOT A NON-NEGATIVE INTEGER");
+                      //console.log(new Date().toISOString() + " B WE GOT A NON-NEGATIVE INTEGER");
                       //console.log(testVar[testVarIndex]);
                       //precisionInputRepeat = parseInt(testVar[testVarIndex], 10);
                     }
                     if (parseInt(tempInputArray[tempInputArrayIndex], 10) < 0) {
-                      console.log(new Date().toISOString() + " B WE GOT A NEGATIVE INTEGER");
+                      //console.log(new Date().toISOString() + " B WE GOT A NEGATIVE INTEGER");
                       //console.log(testVar[testVarIndex]);
                       precisionInputRepeat = 0;
                     }
                   }
                   if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == true) {
                     //console.log(testVar[testVarIndex]);
-                    console.log(new Date().toISOString() + " B NOT A NUMBER :(");
+                    //console.log(new Date().toISOString() + " B NOT A NUMBER :(");
                     precisionInputRepeat = 0;
                   }
                   //console.log("Should be a non-negative integer");
@@ -4048,7 +4049,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("Yes");
             }
           }
-          console.log(new Date().toISOString() + " [PRECISIONINPUTREPEAT] precisionInputRepeat = " + precisionInputRepeat);
+          //console.log(new Date().toISOString() + " [PRECISIONINPUTREPEAT] precisionInputRepeat = " + precisionInputRepeat);
           if (precisionInputsPreProcessed.input_array.length > 0) {
             precisionInputsPreProcessed.input_repeat_count = precisionInputRepeat;
             //console.log(precisionInputsPreProcessed);
@@ -4058,7 +4059,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(new Date().toISOString() + " [HASINVALIDPRECISIONINPUT] hasInvalidPrecisionInput = " + hasInvalidPrecisionInput);
               }
               if (hasInvalidPrecisionInput == false) {
-                console.log(new Date().toISOString() + " [HASINVALIDPRECISIONINPUT] hasInvalidPrecisionInput = " + hasInvalidPrecisionInput);
+                //console.log(new Date().toISOString() + " [HASINVALIDPRECISIONINPUT] hasInvalidPrecisionInput = " + hasInvalidPrecisionInput);
                 //console.log(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"));
                 //console.log("currentMacroChainIndex:" + currentMacroChainIndex)
                 if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
@@ -4066,7 +4067,7 @@ async function onMessageHandler(target, tags, message, self) {
                   let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, true);
                   if (macroChainInputObject.is_valid_input == false) {
                     // idk do the thing to do the replacmenet thing
-                    console.log(new Date().toISOString() + " [ISVALIDPRECISIONINPUTREPEAT] isValidPrecisionInputRepeat = " + isValidPrecisionInputRepeat);
+                    //console.log(new Date().toISOString() + " [ISVALIDPRECISIONINPUTREPEAT] isValidPrecisionInputRepeat = " + isValidPrecisionInputRepeat);
                     hasInvalidPrecisionInput = true;
 
                     if (isValidPrecisionInputRepeat == false) {
@@ -4099,7 +4100,7 @@ async function onMessageHandler(target, tags, message, self) {
                       precisionInputsPreProcessed.input_repeat_count = precisionInputRepeat;
                       //console.log("Should be a non-negative integer");
                       //
-                      console.log(new Date().toISOString() + " [MACRO STRING] precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join(\"+\") = " + precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+") + " preprocessedArrayIndex = " + preprocessedArrayIndex + " precisionInputsPreProcessed.input_repeat_count = " + precisionInputsPreProcessed.input_repeat_count);
+                      //console.log(new Date().toISOString() + " [MACRO STRING] precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join(\"+\") = " + precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+") + " preprocessedArrayIndex = " + preprocessedArrayIndex + " precisionInputsPreProcessed.input_repeat_count = " + precisionInputsPreProcessed.input_repeat_count);
                     }
 
                   }
@@ -4135,7 +4136,7 @@ async function onMessageHandler(target, tags, message, self) {
             //console.log(macroParametersToWrite);
             //console.log("precisionInputsPreProcessed.input_repeat_count: " + precisionInputsPreProcessed.input_repeat_count);
             if (currentMacroChainIndex > 0) {
-              console.log("IS THIS VALID INPUT?");
+              //console.log("IS THIS VALID INPUT?");
               // Get user from userdatabase by using their userid then increment the user's advanced input count
               mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
@@ -4192,7 +4193,7 @@ async function onMessageHandler(target, tags, message, self) {
                     }
                     if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
                       // User's first message is also an input
-                      console.log("NEW USER PogChamp");
+                      //console.log("NEW USER PogChamp");
                       dataToUpdate.$set.is_first_message_basic_input = false;
                       dataToUpdate.$set.is_first_message_advanced_input = true;
                     }
@@ -4486,19 +4487,19 @@ async function onMessageHandler(target, tags, message, self) {
               precisionInputStringToDisplay.repeat_count = precisionInputsPreProcessed.input_repeat_count;
               precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/[\.\,]+$/ig, "");
               precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + "*" + precisionInputsPreProcessed.input_repeat_count;
-              console.log(macroParametersToWrite);
-              console.log(precisionInputStringToDisplay);
+              //console.log(macroParametersToWrite);
+              //console.log(precisionInputStringToDisplay);
               //console.log(precisionInputStringToDisplay.macro_array.join("."));
               //precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + "Repeat " + precisionInputsPreProcessed.input_repeat_count;
-              console.log(precisionInputStringToDisplay2);
+              //console.log(precisionInputStringToDisplay2);
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               //client.say(target, ".color " + defaultColorNames[randomColorName]);
-              console.log(precisionInputStringToDisplay2.length);
+              //console.log(precisionInputStringToDisplay2.length);
               let splitInputsInMultipleStrings = [];
               if (precisionInputStringToDisplay2.length >= 200) {
                 //let splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/.{100}/ig);
                 splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/(?:[^\,]+\,){0,15}[^\,]+/ig);
-                console.log(splitInputsInMultipleStrings);
+                //console.log(splitInputsInMultipleStrings);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
                 for (let splitInputsInMultipleStringsIndex = 0; splitInputsInMultipleStringsIndex < splitInputsInMultipleStrings.length; splitInputsInMultipleStringsIndex++) {
                   if (splitInputsInMultipleStringsIndex == 0) {
@@ -4566,7 +4567,7 @@ async function onMessageHandler(target, tags, message, self) {
       let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(inputs*|set+ings*|help|hel\[|hel\]|com+ands*|cmds*|cmnds*|control+s*|control+ers*|how\s*to\s*play|how\s*do\s*(i|we)\s*play)+/ig.test(message);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
-          console.log("Don't send the help message yet");
+          //console.log("Don't send the help message yet");
         }
         if (helpMessageCooldown < new Date().getTime()) {
           let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -4585,7 +4586,7 @@ async function onMessageHandler(target, tags, message, self) {
       if (acceptInputs == true) {
         //console.log(messageWords);
         if ((messageWords[0].toLowerCase() == "!speak") && (acceptTts == true)) {
-          console.log("isTtsBusy:" + isTtsBusy + ",isControllerBusy:" + isControllerBusy);
+          //console.log("isTtsBusy:" + isTtsBusy + ",isControllerBusy:" + isControllerBusy);
           //var messageToRead = "";
           var messageToRead = message.trim();
           //messageToRead = messageToRead.replace(/(\!speak)+\s+/ig, " ");
@@ -4726,7 +4727,7 @@ async function onMessageHandler(target, tags, message, self) {
                           }
                           if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
                             // User's first message is also an input
-                            console.log("NEW USER PogChamp");
+                            //console.log("NEW USER PogChamp");
                             dataToUpdate.$set.is_first_message_basic_input = true;
                             dataToUpdate.$set.is_first_message_advanced_input = false;
                           }
@@ -4903,8 +4904,8 @@ async function onMessageHandler(target, tags, message, self) {
                             inputCountsObject = dataToInsert;
                             io.sockets.emit("input_counts_object", inputCountsObject);
 
-                            console.log("dataToInsert");
-                            console.log(dataToInsert);
+                            //console.log("dataToInsert");
+                            //console.log(dataToInsert);
                             // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
                             globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
                               if (err) {
@@ -5501,7 +5502,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(inputDelayLow);
                 dataToWrite[9] = inputDelayHigh;
                 dataToWrite[10] = inputDelayLow;
-                console.log("inputDelay = " + inputDelay);
+                //console.log("inputDelay = " + inputDelay);
               }
               if (isValidInputDelay == true) {
                 // Do nothing?
@@ -5515,8 +5516,8 @@ async function onMessageHandler(target, tags, message, self) {
           }
           if (inputsUsed > 0) {
             let isBlacklistedCombo = false;
-            console.log(new Date().toISOString() + " inputsUsed = " + inputsUsed);
-            console.log(controllerConfig.blacklisted_combos.length);
+            //console.log(new Date().toISOString() + " inputsUsed = " + inputsUsed);
+            //console.log(controllerConfig.blacklisted_combos.length);
             for (let blacklistedComboIndex = 0; blacklistedComboIndex < controllerConfig.blacklisted_combos.length; blacklistedComboIndex++) {
               let blacklistedComboInputComponentCount = 0;
               //console.log("controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_size = " + controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_size);
@@ -5582,10 +5583,10 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components.length);
               //console.log(blacklistedComboInputComponentCount);
               if (blacklistedComboInputComponentCount == controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components.length) {
-                console.log("BLACKLISTED COMBO????????????");
-                console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex]);
-                console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components.length);
-                console.log(blacklistedComboInputComponentCount);
+                //console.log("BLACKLISTED COMBO????????????");
+                //console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex]);
+                //console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components.length);
+                //console.log(blacklistedComboInputComponentCount);
                 isBlacklistedCombo = true;
               }
               //console.log(blacklistedComboInputComponentCount);
@@ -5593,7 +5594,7 @@ async function onMessageHandler(target, tags, message, self) {
             //console.log("isBlacklistedCombo = " + isBlacklistedCombo);
             // if (inputsUsed == messageInputs.length)
             if (isBlacklistedCombo == true) {
-              console.log(new Date().toISOString() + " Blacklisted combos detected, dropping input!");
+              //console.log(new Date().toISOString() + " Blacklisted combos detected, dropping input!");
             }
             if (isBlacklistedCombo == false) {
               inputString = inputString.replace(/[\+\_\|\#\[\]\,\.\s]+$/ig, "");
@@ -5682,7 +5683,7 @@ async function onMessageHandler(target, tags, message, self) {
                     }
                     if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
                       // User's first message is also an input
-                      console.log("NEW USER PogChamp");
+                      //console.log("NEW USER PogChamp");
                       dataToUpdate.$set.is_first_message_basic_input = true;
                       dataToUpdate.$set.is_first_message_advanced_input = false;
                     }
@@ -5858,8 +5859,8 @@ async function onMessageHandler(target, tags, message, self) {
                       inputCountsObject = dataToInsert;
                       io.sockets.emit("input_counts_object", inputCountsObject);
 
-                      console.log("dataToInsert");
-                      console.log(dataToInsert);
+                      //console.log("dataToInsert");
+                      //console.log(dataToInsert);
                       // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
                       globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
                         if (err) {
@@ -6004,16 +6005,16 @@ function checkModeVotes() {
         client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
         client.action(chatConfig.main_channel, "@" + item.username_to_display + " Your " + inputModesArray[item.mode_vote].mode_name + " mode vote has expired and was removed!");
       }
-      console.log("Removing vote at index " + index);
+      //console.log("Removing vote at index " + index);
       modeVotes.splice(index, 1);
       if (item.mode_vote == 0) {
         basicVoteCountLocal--;
-        console.log("Removed basic vote at index " + index + " count: " + basicVoteCountLocal);
+        //console.log("Removed basic vote at index " + index + " count: " + basicVoteCountLocal);
         removedVoteCountLocal++;
       }
       if (item.mode_vote == 2) {
         advancedVoteCountLocal--;
-        console.log("Removed advanced vote at index " + index + " count: " + advancedVoteCountLocal);
+        //console.log("Removed advanced vote at index " + index + " count: " + advancedVoteCountLocal);
         removedVoteCountLocal++;
       }
     }
@@ -6048,33 +6049,33 @@ function checkModeVotes() {
     inputMode = 2;
   }
   if (inputMode != inputModePrevious) {
-    console.log("Mode changed, right?");
+    //console.log("Mode changed, right?");
     if (inputMode == 0) {
       if (globalConfig.is_voting_temporary == true) {
-        console.log("Mode change to 0, right?");
+        //console.log("Mode change to 0, right?");
         if (votingAllowed > new Date().getTime()) {
-          console.log("Can't set new votingAllowed time yet, previous time is still ticking");
-          console.log(votingAllowed - new Date().getTime());
+          //console.log("Can't set new votingAllowed time yet, previous time is still ticking");
+          //console.log(votingAllowed - new Date().getTime());
         }
         if (votingAllowed <= new Date().getTime()) {
           votingAllowed = new Date().getTime() + globalConfig.voting_allowed_period_millis;
           modeVotes = [];
-          console.log("Setting new votingAllowed time");
-          console.log(votingAllowed - new Date().getTime());
+          //console.log("Setting new votingAllowed time");
+          //console.log(votingAllowed - new Date().getTime());
         }
       }
     }
     if (inputMode == 2) {
       if (globalConfig.is_advanced_mode_temporary == true) {
-        console.log("Mode change to 2, right?");
+        //console.log("Mode change to 2, right?");
         if (advancedAllowed > new Date().getTime()) {
-          console.log("Can't set new advancedAllowed time yet, previous time is still ticking");
-          console.log(advancedAllowed - new Date().getTime());
+          //console.log("Can't set new advancedAllowed time yet, previous time is still ticking");
+          //console.log(advancedAllowed - new Date().getTime());
         }
         if (advancedAllowed <= new Date().getTime()) {
           advancedAllowed = new Date().getTime() + globalConfig.advanced_allowed_period_millis;
-          console.log("Setting new advancedAllowed time");
-          console.log(advancedAllowed - new Date().getTime());
+          //console.log("Setting new advancedAllowed time");
+          //console.log(advancedAllowed - new Date().getTime());
         }
       }
     }
@@ -6090,7 +6091,7 @@ function checkModeVotes() {
     neutralDataToWrite[8] = neutralController[7];
     // We're writing neutral controller data to the arduino when changing modes becuase we don't want it to keep running inputs from basic in advanced or advanced in basic mode
     inputQueue = []; // We also have to clear the basic input queue so it doesn't continue from where it left off when the mode is changed back from advanced to basic (Unlikely to happen anyway unless chat is going super fast)
-    console.log(neutralDataToWrite);
+    //console.log(neutralDataToWrite);
     port.write(neutralDataToWrite, function(err) {
       if (err) {
         if (client.readyState() === "OPEN") {
@@ -6105,13 +6106,13 @@ function checkModeVotes() {
     });
     if ((basicVoteCount + advancedVoteCount) == 0) {
       if (inputMode == 0) {
-        console.log("If this happened, then that means we got kicked out from a mode");
+        //console.log("If this happened, then that means we got kicked out from a mode");
       }
       if (inputMode == 2) {
-        console.log("If this happened, then that means we got kicked out from a mode");
+        //console.log("If this happened, then that means we got kicked out from a mode");
       }
     }
-    console.log("Switching from " + inputModesArray[inputModePrevious].mode_name + " to " + inputModesArray[inputMode].mode_name + ". Basic mode has " + parseInt(basicVoteCountRatio * 100) + "% of all votes (" + basicVoteCount + " vote(s)) and Advanced mode has " + parseInt(advancedVoteCountRatio * 100) + "% of all votes (" + advancedVoteCount + " vote(s))!");
+    //console.log("Switching from " + inputModesArray[inputModePrevious].mode_name + " to " + inputModesArray[inputMode].mode_name + ". Basic mode has " + parseInt(basicVoteCountRatio * 100) + "% of all votes (" + basicVoteCount + " vote(s)) and Advanced mode has " + parseInt(advancedVoteCountRatio * 100) + "% of all votes (" + advancedVoteCount + " vote(s))!");
     if (client.readyState() === "OPEN") {
       let randomColorName = Math.floor(Math.random() * defaultColors.length);
       client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
@@ -6143,7 +6144,7 @@ function checkModeVotes() {
     io.sockets.emit("vote_data", voteDataObject);
   }
   if ((basicVoteCount != basicVoteCountPrevious) || (advancedVoteCount != advancedVoteCountPrevious) || (totalVotes != totalVotesPrevious)) {
-    console.log("basicVoteCount=" + basicVoteCount + ", basicVoteCountPrevious=" + basicVoteCountPrevious + ", advancedVoteCount=" + advancedVoteCount + ", advancedVoteCountPrevious=" + advancedVoteCountPrevious + ", totalVotes=" + totalVotes + ", totalVotesPrevious=" + totalVotesPrevious);
+    //console.log("basicVoteCount=" + basicVoteCount + ", basicVoteCountPrevious=" + basicVoteCountPrevious + ", advancedVoteCount=" + advancedVoteCount + ", advancedVoteCountPrevious=" + advancedVoteCountPrevious + ", totalVotes=" + totalVotes + ", totalVotesPrevious=" + totalVotesPrevious);
     let voteDataObject = {
       basic_vote_count: basicVoteCount,
       advanced_vote_count: advancedVoteCount,
@@ -6175,7 +6176,7 @@ function checkVotingCooldownTime() {
     if (new Date().getTime() > advancedAllowed) {
       modeVotes = []; // Clear all votes then kick everyone out to basic mode
       inputMode = 0; // Set to basic mode
-      console.log("advancedAllowed time over, going back to basic");
+      //console.log("advancedAllowed time over, going back to basic");
       if (client.readyState() === "OPEN") {
         let randomColorName = Math.floor(Math.random() * defaultColors.length);
         client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
@@ -6568,7 +6569,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
             //console.log("Command at " + messageInputIndex + " " + lowerCaseMessage + " does not match alias at index " + controllerObjectIndex + " " + lowerCaseCommand);
           }
           if (lowerCaseMessage == lowerCaseCommand) {
-            console.log(new Date().toISOString() + " [MACRO INPUT] matched at controllerObjectIndex " + controllerObjectIndex + " messageInputIndex " + messageInputIndex + " controllerAliasIndex " + controllerAliasIndex + " " + controllerObject[controllerObjectIndex].input_alias[controllerAliasIndex]);
+            //console.log(new Date().toISOString() + " [MACRO INPUT] matched at controllerObjectIndex " + controllerObjectIndex + " messageInputIndex " + messageInputIndex + " controllerAliasIndex " + controllerAliasIndex + " " + controllerObject[controllerObjectIndex].input_alias[controllerAliasIndex]);
             didMacroInputMatch = true;
             //console.log("Command at " + messageInputIndex + " " + lowerCaseMessage + " matches alias at index " + controllerObjectIndex + " " + lowerCaseCommand);
             //controllerState[controllerObjectIndex] = true;
@@ -6592,7 +6593,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
             //inputDelay = (setHold == true) ? controllerConfig.held_delay : macroInputDelay;
             //inputDelay = macroInputDelay;
             processedMacroInputDelay = inputDelay;
-            console.log("inputDelay = " + inputDelay);
+            //console.log("inputDelay = " + inputDelay);
 
             //inputDelay = 200;
             inputDelayHigh = (inputDelay & 0x0000ff00) >> 8;
@@ -6645,7 +6646,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
                         let limitedAnalog = (hex[byteIndex] <= controllerConfig.stick_center) ? hex[byteIndex] + controllerConfig.stick_limit : hex[byteIndex] - controllerConfig.stick_limit; // Set to 0 or set to 255 respectively (0 + 0 = 0 OR 255 - 0 = 255)
                         if (adjustableAnalogStickPosition != -1) {
                           // Valid Stick Position
-                          console.log("inputString = " + inputString);
+                          //console.log("inputString = " + inputString);
                           inputString = inputString.replace(/[\+\_\|\#\[\]\,\.\s]+$/ig, "");
                           //console.log("inputString = " + inputString);
                           inputString = inputString + ":" + adjustableAnalogStickPosition + "+";
@@ -6657,8 +6658,8 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
                           // Invalid Stick Position
                           limitedAnalog = (hex[byteIndex] <= controllerConfig.stick_center) ? hex[byteIndex] + controllerConfig.stick_limit : hex[byteIndex] - controllerConfig.stick_limit;
                         }
-                        console.log("limitedAnalog = " + limitedAnalog);
-                        console.log("adjustableAnalogStickPosition = " + adjustableAnalogStickPosition);
+                        //console.log("limitedAnalog = " + limitedAnalog);
+                        //console.log("adjustableAnalogStickPosition = " + adjustableAnalogStickPosition);
                         //let customAnalog = 0;
                         //console.log("limitedAnalog: " + limitedAnalog);
                         //console.log("HOLD ON: " + byteIndex + " " + hex[byteIndex] + " " + neutralController[byteIndex]);
@@ -6705,8 +6706,8 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
     }
     if (inputsUsed > 0) {
       let isBlacklistedCombo = false;
-      console.log(new Date().toISOString() + " inputsUsed = " + inputsUsed);
-      console.log(controllerConfig.blacklisted_combos.length);
+      //console.log(new Date().toISOString() + " inputsUsed = " + inputsUsed);
+      //console.log(controllerConfig.blacklisted_combos.length);
       for (let blacklistedComboIndex = 0; blacklistedComboIndex < controllerConfig.blacklisted_combos.length; blacklistedComboIndex++) {
         let blacklistedComboInputComponentCount = 0;
         //console.log("controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_size = " + controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_size);
@@ -6772,10 +6773,10 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
         //console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components.length);
         //console.log(blacklistedComboInputComponentCount);
         if (blacklistedComboInputComponentCount == controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components.length) {
-          console.log("BLACKLISTED COMBO????????????");
-          console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex]);
-          console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components.length);
-          console.log(blacklistedComboInputComponentCount);
+          //console.log("BLACKLISTED COMBO????????????");
+          //console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex]);
+          //console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components.length);
+          //console.log(blacklistedComboInputComponentCount);
           isBlacklistedCombo = true;
         }
         //console.log(blacklistedComboInputComponentCount);
@@ -6784,7 +6785,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
       // if (inputsUsed == messageInputs.length)
       if (isBlacklistedCombo == true) {
         //isValidInput = false;
-        console.log(new Date().toISOString() + " Blacklisted combos detected, dropping input!");
+        //console.log(new Date().toISOString() + " Blacklisted combos detected, dropping input!");
       }
       // if (inputsUsed == macroStringArray.length)
       //if (isBlacklistedCombo == false)
@@ -6799,8 +6800,8 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
         //inputString = (setHold == true) ? inputString.concat("-") : inputString.concat("");
         //console.log(inputString);
         processedMacroInputString = inputString;
-        console.log(new Date().toISOString() + " [SERIAL PORT] dataToWrite");
-        console.log(dataToWrite);
+        //console.log(new Date().toISOString() + " [SERIAL PORT] dataToWrite");
+        //console.log(dataToWrite);
         //isValidInput = true;
         //
         if (hasInvalidMacroInput == false && isBlacklistedCombo == false) {
@@ -6809,7 +6810,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
         if (hasInvalidMacroInput == true || isBlacklistedCombo == true) {
           isValidInput = false;
         }
-        console.log(new Date().toISOString() + " isValidInput = " + isValidInput);
+        //console.log(new Date().toISOString() + " isValidInput = " + isValidInput);
         if (isValidInput == true) {
           if (sendToArduino == true) {
             port.write(dataToWrite, function(err) {
