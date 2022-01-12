@@ -407,6 +407,7 @@ function draw() {
     strokeWeight(fontStrokeWeight);
     textLeading(textDefaultLeadingToUse);
     text(playTimeString + "\n" + new Date().toISOString(), 768, 551);
+    /*
     recalculateFont(4, 2);
     textSize(textSizeToUse);
     strokeWeight(fontStrokeWeight);
@@ -415,6 +416,7 @@ function draw() {
     fill("#FFFFFFFF");
     textLeading(textDefaultLeadingToUse);
     text(gameTitle + "\nstarts in " + playTimeString, 384, 288);
+    */
   }
   if (playTimeTotal < 0) {
     playTimeTotal = Math.abs(playTimeTotal);
