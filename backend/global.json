@@ -27,13 +27,15 @@
   "run_name": "Paper_Mario_The_Thousand_Year_Door",
   "global_database_name": "twitch_plays_global",
   "inputter_database_name": "twitch_plays_inputters",
+  "discord_url": "https://discord.gg/yHETNuZCUK",
   "run_id": 1,
-  "overlay_header_text": "Twitch Plays (Viewers play\/Chat plays) Paper Mario: The\nThousand-Year Door on an actual Wii",
+  "overlay_header_text": "Twitch Plays (Viewers play\/Chat plays) Paper Mario: The\nThousand-Year Door on an actual Wii | !discord",
   "overlay_text_rotation": [
     "Type !help or !commands to learn how to play",
     "Please, don't delete any files, and please save regularly",
     "Attempting to delete or deleting any file will earn you\nan unappealable permanent ban",
-    "Current goal: Beat Chapter 1",
+    "Current goal: Beat Chapter 2 (Wow very creative goals)",
+    "Type !discord in chat to get a link to the\nstream discord server",
     "If anything breaks, please ping @WhatAboutGamingLive"
   ]
 }
