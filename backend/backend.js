@@ -548,6 +548,9 @@ parser.on("data", async function(data) {
       let inputArrayToDisplay = [];
       let inputDurationToDisplay = 0;
       let inputStateFromArduino = [];
+      endInputString = "";
+      basicInputString = "";
+      advancedInputString = "";
       if (data[0] == data[11]) {
         //
         //console.log(new Date().toISOString() + " Valid data format, data[0] = " + data[0] + " data[11] = " + data[11]);
