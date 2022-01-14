@@ -879,6 +879,7 @@ parser.on("data", async function(data) {
             //console.log(inputArrayToDisplay.join("+"));
             //await sleep(500);
             // The database operations below check the total input count
+            /*
             mongoClient.connect(mongoUrl, {
               useUnifiedTopology: true
             }, function(err, globalDb) {
@@ -956,11 +957,11 @@ parser.on("data", async function(data) {
                     let globalDatabaseToUpdate = databaseToUpdate.db(globalConfig.global_database_name);
                     let dataToQuery = {
                       run_id: result.run_id,
-                      /*
+                      
                       basic_inputs_sent: result.basic_inputs_sent,
                       advanced_inputs_sent: result.advanced_inputs_sent,
                       total_inputs_sent: result.total_inputs_sent,
-                      */
+                      
                       basic_inputs_executed: result.basic_inputs_executed,
                       advanced_inputs_executed: result.advanced_inputs_executed,
                       total_inputs_executed: result.total_inputs_executed
@@ -969,11 +970,11 @@ parser.on("data", async function(data) {
                     let dataToUpdate = {
                       $set: {
                         run_id: result.run_id,
-                        /*
+                        
                         basic_inputs_sent: result.basic_inputs_sent,
                         advanced_inputs_sent: result.advanced_inputs_sent,
                         total_inputs_sent: result.total_inputs_sent,
-                        */
+                        
                         basic_inputs_executed: result.basic_inputs_executed + 1,
                         advanced_inputs_executed: result.advanced_inputs_executed,
                         total_inputs_executed: result.total_inputs_executed + 1
@@ -1019,6 +1020,7 @@ parser.on("data", async function(data) {
                 //isDatabaseBusy = false;
               });
             });
+            */
           }
         }
         if (data[0] >= 64 && data[0] <= 127) {
@@ -1184,6 +1186,7 @@ parser.on("data", async function(data) {
             //console.log(inputArrayToDisplay.join("+"));
             //await sleep(500);
             // The database operations below check the total input count
+            /*
             mongoClient.connect(mongoUrl, {
               useUnifiedTopology: true
             }, function(err, globalDb) {
@@ -1261,11 +1264,11 @@ parser.on("data", async function(data) {
                     let globalDatabaseToUpdate = databaseToUpdate.db(globalConfig.global_database_name);
                     let dataToQuery = {
                       run_id: result.run_id,
-                      /*
+                      
                       basic_inputs_sent: result.basic_inputs_sent,
                       advanced_inputs_sent: result.advanced_inputs_sent,
                       total_inputs_sent: result.total_inputs_sent,
-                      */
+                      
                       basic_inputs_executed: result.basic_inputs_executed,
                       advanced_inputs_executed: result.advanced_inputs_executed,
                       total_inputs_executed: result.total_inputs_executed
@@ -1274,11 +1277,11 @@ parser.on("data", async function(data) {
                     let dataToUpdate = {
                       $set: {
                         run_id: result.run_id,
-                        /*
+                        
                         basic_inputs_sent: result.basic_inputs_sent,
                         advanced_inputs_sent: result.advanced_inputs_sent,
                         total_inputs_sent: result.total_inputs_sent,
-                        */
+                        
                         basic_inputs_executed: result.basic_inputs_executed,
                         advanced_inputs_executed: result.advanced_inputs_executed + 1,
                         total_inputs_executed: result.total_inputs_executed + 1
@@ -1324,6 +1327,7 @@ parser.on("data", async function(data) {
                 //isDatabaseBusy = false;
               });
             });
+            */
           }
         }
         if (data[0] == 128) {
@@ -1425,7 +1429,7 @@ chatLogger.on("raw_message", rawMessageLogger);
 // client.join("channel_name"); // To join a channel?
 
 function onRaid(channel, username, viewers, tags) {
-  systemMsg = tags["system-msg"];
+  let systemMsg = tags["system-msg"];
   systemMsg = systemMsg.replace(/(\\s)+/ig, " ");
   systemMsg = systemMsg.replace(/\s+/ig, " ");
   let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -1820,15 +1824,17 @@ function getStreamViewerCount(twitchCredentialsObject, twitchAccessTokenObject) 
         //console.log(new Date().toISOString() + " [STREAM OFFLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
         if (currentViewerCount != oldViewerCount) {
           // Viewer Count Changed
-          //console.log(new Date().toISOString() + " [VIEWER COUNTS CHANGED ONLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
+          io.sockets.emit("viewer_count", currentViewerCount);
+          //console.log(new Date().toISOString() + " [VIEWER COUNTS CHANGED ONLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
+          /*
           if (client.readyState() === "OPEN") {
             if (chatConfig.send_debug_channel_messages == true) {
-              io.sockets.emit("viewer_count", currentViewerCount);
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
               client.action(chatConfig.debug_channel, new Date().toISOString() + " [VIEWER COUNTS CHANGED ONLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
             }
           }
+          */
         }
       }
       if (dataSize <= 0) {
@@ -1837,15 +1843,17 @@ function getStreamViewerCount(twitchCredentialsObject, twitchAccessTokenObject) 
         //console.log(new Date().toISOString() + " [STREAM OFFLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
         if (currentViewerCount != oldViewerCount) {
           // Viewer Count Changed
-          //console.log(new Date().toISOString() + " [VIEWER COUNTS CHANGED OFFLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
+          io.sockets.emit("viewer_count", currentViewerCount);
+          //console.log(new Date().toISOString() + " [VIEWER COUNTS CHANGED OFFLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
+          /*
           if (client.readyState() === "OPEN") {
             if (chatConfig.send_debug_channel_messages == true) {
-              io.sockets.emit("viewer_count", currentViewerCount);
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
               client.action(chatConfig.debug_channel, new Date().toISOString() + " [VIEWER COUNTS CHANGED OFFLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
             }
           }
+          */
         }
         //oldViewerCount = currentViewerCount;
       }
@@ -3118,7 +3126,7 @@ async function onMessageHandler(target, tags, message, self) {
             }
 
           }
-          let checkBasicVote = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(basic)+/ig.test(originalMessage);
+          let checkBasicVote = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(basic)+\b/ig.test(originalMessage);
           if (checkBasicVote == true) {
             //checkModeVotes();
             if (playerVoteIndex == -1) {
@@ -3183,7 +3191,7 @@ async function onMessageHandler(target, tags, message, self) {
             }
             //checkModeVotes();
           }
-          let checkAdvancedVote = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(advanced|advaced)+/ig.test(originalMessage);
+          let checkAdvancedVote = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(advanced|advaced)+\b/ig.test(originalMessage);
           if (checkAdvancedVote == true) {
             //checkModeVotes();
             if (playerVoteIndex == -1) {
@@ -4440,17 +4448,15 @@ async function onMessageHandler(target, tags, message, self) {
                           run_id: result.run_id,
                           basic_inputs_sent: result.basic_inputs_sent,
                           advanced_inputs_sent: result.advanced_inputs_sent + 1,
-                          total_inputs_sent: result.total_inputs_sent + 1
-                          /*
+                          total_inputs_sent: result.total_inputs_sent + 1,
                           basic_inputs_executed: result.basic_inputs_executed,
                           advanced_inputs_executed: result.advanced_inputs_executed,
                           total_inputs_executed: result.total_inputs_executed
-                          */
                         }
                       };
 
-                      //inputCountsObject = dataToUpdate.$set;
-                      //io.sockets.emit("input_counts_object", inputCountsObject);
+                      inputCountsObject = dataToUpdate.$set;
+                      io.sockets.emit("input_counts_object", inputCountsObject);
 
                       // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
                       //console.log(newvalues);
@@ -4979,16 +4985,14 @@ async function onMessageHandler(target, tags, message, self) {
                                 basic_inputs_sent: result.basic_inputs_sent + 1,
                                 advanced_inputs_sent: result.advanced_inputs_sent,
                                 total_inputs_sent: result.total_inputs_sent + 1,
-                                /*
                                 basic_inputs_executed: result.basic_inputs_executed,
                                 advanced_inputs_executed: result.advanced_inputs_executed,
                                 total_inputs_executed: result.total_inputs_executed
-                                */
                               }
                             };
 
-                            //inputCountsObject = dataToUpdate.$set;
-                            //io.sockets.emit("input_counts_object", inputCountsObject);
+                            inputCountsObject = dataToUpdate.$set;
+                            io.sockets.emit("input_counts_object", inputCountsObject);
 
                             //console.log("dataToUpdate");
                             //console.log(dataToUpdate);
@@ -5933,17 +5937,15 @@ async function onMessageHandler(target, tags, message, self) {
                           run_id: result.run_id,
                           basic_inputs_sent: result.basic_inputs_sent + 1,
                           advanced_inputs_sent: result.advanced_inputs_sent,
-                          total_inputs_sent: result.total_inputs_sent + 1
-                          /*
+                          total_inputs_sent: result.total_inputs_sent + 1,
                           basic_inputs_executed: result.basic_inputs_executed,
                           advanced_inputs_executed: result.advanced_inputs_executed,
                           total_inputs_executed: result.total_inputs_executed
-                          */
                         }
                       };
 
-                      //inputCountsObject = dataToUpdate.$set;
-                      //io.sockets.emit("input_counts_object", inputCountsObject);
+                      inputCountsObject = dataToUpdate.$set;
+                      io.sockets.emit("input_counts_object", inputCountsObject);
 
                       //console.log("dataToUpdate");
                       //console.log(dataToUpdate);

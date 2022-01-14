@@ -564,15 +564,28 @@ function draw() {
   //if (isTtsBusy == false) {
     //inputQueue[currentInputInQueue].tts_message;
     if (helpMessages.length > 0) {
-      recalculateFont(3, 2);
-      textFont(font);
-      textSize(textSizeToUse);
-      strokeWeight(fontStrokeWeight);
-      stroke("#000000FF");
-      textAlign(LEFT, BOTTOM);
-      fill("#FFFFFFFF");
-      textLeading(textDefaultLeadingToUse);
-      text(helpMessages[currentValueToDisplay], 2, 574);
+      if (currentValueToDisplay == 0) {
+        recalculateFont(3, 2);
+        textFont(font);
+        textSize(textSizeToUse);
+        strokeWeight(fontStrokeWeight);
+        stroke("#000000FF");
+        textAlign(LEFT, BOTTOM);
+        fill("#FF0000FF");
+        textLeading(textDefaultLeadingToUse);
+        text(helpMessages[currentValueToDisplay], 2, 574); 
+      }
+      if (currentValueToDisplay != 0) {
+        recalculateFont(3, 2);
+        textFont(font);
+        textSize(textSizeToUse);
+        strokeWeight(fontStrokeWeight);
+        stroke("#000000FF");
+        textAlign(LEFT, BOTTOM);
+        fill("#FFFFFFFF");
+        textLeading(textDefaultLeadingToUse);
+        text(helpMessages[currentValueToDisplay], 2, 574); 
+      }
     }
   //}
 
@@ -677,7 +690,7 @@ function draw() {
     stroke("#000000FF");
     fill("#FFFFFFFF");
     textLeading(textDefaultLeadingToUse);
-    text(inputCountsObject.basic_inputs_executed + " Basic inputs", 768, 328);
+    text(inputCountsObject.basic_inputs_sent + " Basic inputs", 768, 328);
 
     fill("#FF0000FF");
     votingBarSlider = (votingBarLeftEdgePosition + 1) + (votingBarSize * 0.75);
@@ -719,7 +732,7 @@ function draw() {
     stroke("#000000FF");
     fill("#FFFFFFFF");
     textLeading(textDefaultLeadingToUse);
-    text(inputCountsObject.advanced_inputs_executed + " Adv. inputs", 768, 328);
+    text(inputCountsObject.advanced_inputs_sent + " Adv. inputs", 768, 328);
 
     fill("#0000FFFF");
     votingBarSlider = (votingBarLeftEdgePosition + 1) + (votingBarSize * 0.25);
