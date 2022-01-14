@@ -2902,7 +2902,7 @@ async function onMessageHandler(target, tags, message, self) {
       });
     });
     //console.log(new Date().toISOString() + " BEFORE user_color=" + userColor);
-    await sleep(333); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
+    //await sleep(333); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
     //console.log(new Date().toISOString() + " AFTER  user_color=" + userColor);
     userColorInverted = userColor;
     userColorInverted = userColorInverted.replace(/0x+/ig, "");
@@ -3681,7 +3681,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("playSettableInputCount = " + playSettableInputCount);
               //console.log("playSettableRepeatCount = " + playSettableRepeatCount);
               for (let settableInputsIndex = 0; settableInputsIndex < playSettableInputCount + 1; settableInputsIndex++) {
-                await sleep(0);
+                await sleep(1);
                 //console.log("");
                 //console.log("settableInputsIndex = " + settableInputsIndex);
                 //console.log("playSettableInputCount = " + playSettableInputCount);
@@ -3723,7 +3723,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(playSettableParametersToWrite);
               //let macroParametersToWrite = [controllerConfig.final_macro_preamble, currentMacroChainIndex + 1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
               //
-              await sleep(0);
+              await sleep(1);
               port.write(playSettableParametersToWrite, function(err) {
                 if (err) {
                   if (client.readyState() === "OPEN") {
@@ -4082,7 +4082,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"));
                 //console.log("currentMacroChainIndex:" + currentMacroChainIndex)
                 if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
-                  await sleep(0); // Have to sleep here because if we sent messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
+                  await sleep(1); // Have to sleep here because if we sent messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
                   let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, true);
                   if (macroChainInputObject.is_valid_input == false) {
                     // idk do the thing to do the replacmenet thing
