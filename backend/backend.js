@@ -3689,7 +3689,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("playSettableInputCount = " + playSettableInputCount);
               //console.log("playSettableRepeatCount = " + playSettableRepeatCount);
               for (let settableInputsIndex = 0; settableInputsIndex < playSettableInputCount + 1; settableInputsIndex++) {
-                await sleep(1);
+                await sleep(0);
                 //console.log("");
                 //console.log("settableInputsIndex = " + settableInputsIndex);
                 //console.log("playSettableInputCount = " + playSettableInputCount);
@@ -3731,7 +3731,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(playSettableParametersToWrite);
               //let macroParametersToWrite = [controllerConfig.final_macro_preamble, currentMacroChainIndex + 1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
               //
-              await sleep(1);
+              await sleep(0);
               port.write(playSettableParametersToWrite, function(err) {
                 if (err) {
                   if (client.readyState() === "OPEN") {
@@ -4090,7 +4090,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"));
                 //console.log("currentMacroChainIndex:" + currentMacroChainIndex)
                 if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
-                  await sleep(1); // Have to sleep here because if we sent messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
+                  await sleep(0); // Have to sleep here because if we sent messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
                   let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, true);
                   if (macroChainInputObject.is_valid_input == false) {
                     // idk do the thing to do the replacmenet thing
@@ -4528,10 +4528,13 @@ async function onMessageHandler(target, tags, message, self) {
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
                 for (let splitInputsInMultipleStringsIndex = 0; splitInputsInMultipleStringsIndex < splitInputsInMultipleStrings.length; splitInputsInMultipleStringsIndex++) {
                   if (splitInputsInMultipleStringsIndex == 0) {
-                    client.action(target, "@" + usernameToPing + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Type Stop or Wait to stop execution of inputs");
+                    client.action(target, "@" + usernameToPing + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
                   }
                   if (splitInputsInMultipleStringsIndex > 0) {
                     client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                  }
+                  if (splitInputsInMultipleStringsIndex == splitInputsInMultipleStrings.length-1) {
+                    client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Type Stop or Wait to stop execution of inputs");
                   }
                 }
                 //console.log(splitInputsInMultipleStrings);

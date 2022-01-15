@@ -565,7 +565,8 @@ function draw() {
     //inputQueue[currentInputInQueue].tts_message;
     if (helpMessages.length > 0) {
       if (currentValueToDisplay == 0) {
-        recalculateFont(3, 2);
+        // Big red text case
+        recalculateFont(6, 3);
         textFont(font);
         textSize(textSizeToUse);
         strokeWeight(fontStrokeWeight);
@@ -573,9 +574,10 @@ function draw() {
         textAlign(LEFT, BOTTOM);
         fill("#FF0000FF");
         textLeading(textDefaultLeadingToUse);
-        text(helpMessages[currentValueToDisplay], 2, 574); 
+        text(helpMessages[currentValueToDisplay], 3, 573); 
       }
       if (currentValueToDisplay != 0) {
+        // Normal case
         recalculateFont(3, 2);
         textFont(font);
         textSize(textSizeToUse);
