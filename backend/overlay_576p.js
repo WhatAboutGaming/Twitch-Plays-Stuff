@@ -758,7 +758,7 @@ function draw() {
       if (advancedInputMetadata.loop_macro == 1) {
         textAlign(CENTER, TOP);
         textLeading(textDefaultLeadingToUse);
-        text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\n\nLoop\n" + advancedInputMetadata.loop_counter + "/" + advancedInputMetadata.times_to_loop, 896, 100);
+        text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\n\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1), 896, 100);
       }
       if (advancedInputString.length > 12) {
         textAlign(CENTER, TOP);

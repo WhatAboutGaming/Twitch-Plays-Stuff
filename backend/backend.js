@@ -2830,10 +2830,10 @@ async function onMessageHandler(target, tags, message, self) {
                         }
                         if (globalConfig.timeout_if_message_is_long == false) {
                           // For now idk if timeout/delete or not when a message is too long, so I settled for just an in chat warning. It'll obviously happen again and again if the user keeps sending long messages. Not a good way to moderate but it's there just in case.
-                          let randomColorName = Math.floor(Math.random() * defaultColors.length);
-                          client.say(target, ".color " + defaultColorNames[randomColorName]);
+                          //let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                          //client.say(target, ".color " + defaultColorNames[randomColorName]);
                           //client.say(target, ".timeout " + databaseToReadFromResult.last_known_username + " " + globalConfig.long_message_timeout + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!");
-                          client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Your message is too long, please calm down!");
+                          //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Your message is too long, please calm down!");
                         }
                       }
                     }
@@ -2910,7 +2910,7 @@ async function onMessageHandler(target, tags, message, self) {
       });
     });
     //console.log(new Date().toISOString() + " BEFORE user_color=" + userColor);
-    //await sleep(333); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
+    await sleep(400); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
     //console.log(new Date().toISOString() + " AFTER  user_color=" + userColor);
     userColorInverted = userColor;
     userColorInverted = userColorInverted.replace(/0x+/ig, "");
@@ -3374,7 +3374,7 @@ async function onMessageHandler(target, tags, message, self) {
               let splitInputsToListInMultipleStrings = [];
               if (inputsToList.length >= 200) {
                 //let splitInputsToListInMultipleStrings = inputsToList.match(/.{100}/ig);
-                splitInputsToListInMultipleStrings = inputsToList.match(/(?:[^\,]+\,){0,15}[^\,]+/ig);
+                splitInputsToListInMultipleStrings = inputsToList.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
                 //console.log(splitInputsToListInMultipleStrings);
                 let randomColorName = Math.floor(Math.random() * defaultColors.length);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
@@ -3689,7 +3689,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("playSettableInputCount = " + playSettableInputCount);
               //console.log("playSettableRepeatCount = " + playSettableRepeatCount);
               for (let settableInputsIndex = 0; settableInputsIndex < playSettableInputCount + 1; settableInputsIndex++) {
-                await sleep(0);
+                await sleep(1);
                 //console.log("");
                 //console.log("settableInputsIndex = " + settableInputsIndex);
                 //console.log("playSettableInputCount = " + playSettableInputCount);
@@ -3731,7 +3731,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(playSettableParametersToWrite);
               //let macroParametersToWrite = [controllerConfig.final_macro_preamble, currentMacroChainIndex + 1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
               //
-              await sleep(0);
+              await sleep(1);
               port.write(playSettableParametersToWrite, function(err) {
                 if (err) {
                   if (client.readyState() === "OPEN") {
@@ -3753,7 +3753,7 @@ async function onMessageHandler(target, tags, message, self) {
               let splitInputsToListInMultipleStringsPlayback = [];
               if (inputsToListPlayback.length >= 200) {
                 //let splitInputsToListInMultipleStringsPlayback = inputsToListPlayback.match(/.{100}/ig);
-                splitInputsToListInMultipleStringsPlayback = inputsToListPlayback.match(/(?:[^\,]+\,){0,15}[^\,]+/ig);
+                splitInputsToListInMultipleStringsPlayback = inputsToListPlayback.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
                 //console.log(splitInputsToListInMultipleStringsPlayback);
                 let randomColorName = Math.floor(Math.random() * defaultColors.length);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
@@ -4090,7 +4090,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"));
                 //console.log("currentMacroChainIndex:" + currentMacroChainIndex)
                 if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
-                  await sleep(0); // Have to sleep here because if we sent messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
+                  await sleep(1); // Have to sleep here because if we sent messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
                   let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, true);
                   if (macroChainInputObject.is_valid_input == false) {
                     // idk do the thing to do the replacmenet thing
@@ -4137,7 +4137,7 @@ async function onMessageHandler(target, tags, message, self) {
                     //precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_string + ";";
                     precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_string + ";" + macroChainInputObject.processed_macro_input_delay + "ms";
                     if (preprocessedArrayIndex < precisionInputsPreProcessed.input_array.length - 1) {
-                      precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + ",";
+                      precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + " ";
                       //precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_delay + "\n";
                     }
                     if (preprocessedArrayIndex >= precisionInputsPreProcessed.input_array.length - 1) {
@@ -4523,14 +4523,14 @@ async function onMessageHandler(target, tags, message, self) {
               let splitInputsInMultipleStrings = [];
               if (precisionInputStringToDisplay2.length >= 200) {
                 //let splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/.{100}/ig);
-                splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/(?:[^\,]+\,){0,15}[^\,]+/ig);
+                splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
                 //console.log(splitInputsInMultipleStrings);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
                 for (let splitInputsInMultipleStringsIndex = 0; splitInputsInMultipleStringsIndex < splitInputsInMultipleStrings.length; splitInputsInMultipleStringsIndex++) {
                   if (splitInputsInMultipleStringsIndex == 0) {
                     client.action(target, "@" + usernameToPing + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
                   }
-                  if (splitInputsInMultipleStringsIndex > 0) {
+                  if (splitInputsInMultipleStringsIndex > 0 && splitInputsInMultipleStringsIndex != splitInputsInMultipleStrings.length-1) {
                     client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
                   }
                   if (splitInputsInMultipleStringsIndex == splitInputsInMultipleStrings.length-1) {
@@ -4551,6 +4551,35 @@ async function onMessageHandler(target, tags, message, self) {
               //let splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/.{100}/ig);
               //console.log(splitInputsInMultipleStrings);
               //client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2);
+
+              // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
+              port.flush(function(err, results) {
+                if (err) {
+                  if (client.readyState() === "OPEN") {
+                    if (chatConfig.send_debug_channel_messages == true) {
+                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                      client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                    }
+                  }
+                  return console.log(err);
+                }
+                //console.log(new Date().toISOString() + " flush results " + results);
+              });
+              port.drain(function(err, results) {
+                if (err) {
+                  if (client.readyState() === "OPEN") {
+                    if (chatConfig.send_debug_channel_messages == true) {
+                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                      client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                    }
+                  }
+                  return console.log(err);
+                }
+                //console.log(new Date().toISOString() + " drain results " + results);
+              });
+
               port.write(macroParametersToWrite, function(err) {
                 if (err) {
                   if (client.readyState() === "OPEN") {
@@ -6837,6 +6866,35 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
         //console.log(new Date().toISOString() + " isValidInput = " + isValidInput);
         if (isValidInput == true) {
           if (sendToArduino == true) {
+
+            // Clear the incoming serial data from arduino before setting any input in the input chain
+            port.flush(function(err, results) {
+              if (err) {
+                if (client.readyState() === "OPEN") {
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                  }
+                }
+                return console.log(err);
+              }
+              //console.log(new Date().toISOString() + " flush results " + results);
+            });
+            port.drain(function(err, results) {
+              if (err) {
+                if (client.readyState() === "OPEN") {
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                  }
+                }
+                return console.log(err);
+              }
+              //console.log(new Date().toISOString() + " drain results " + results);
+            });
+
             port.write(dataToWrite, function(err) {
               if (err) {
                 if (client.readyState() === "OPEN") {

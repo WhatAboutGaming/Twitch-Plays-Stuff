@@ -9,7 +9,7 @@
   "run_start_time": 1641945600000,
   "initial_accept_inputs": false,
   "initial_accept_tts": false,
-  "initial_input_mode": 0,
+  "initial_input_mode": 2,
   "voting_enabled": true,
   "threshold_to_change_mode": 0.75,
   "is_advanced_mode_temporary": false,
@@ -35,7 +35,7 @@
     "Type !help or !commands to learn how to play",
     "Please, don't delete any files, and please save regularly",
     "Attempting to delete or deleting any file will earn you\nan unappealable permanent ban",
-    "Current goal: Beat Chapter 2 (Wow very creative goals)",
+    "Current goal: Beat Chapter 3!",
     "Type !discord in chat to get a link to the\nstream discord server",
     "If anything breaks, please ping @WhatAboutGamingLive"
   ]
