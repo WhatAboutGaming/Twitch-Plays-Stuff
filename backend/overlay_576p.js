@@ -254,7 +254,7 @@ function recalculateFont(newFontSizeMultiplier, newFontStrokeWeightMultiplier) {
 
 function setup() {
   noSmooth();
-  frameRate(25);
+  frameRate(30);
   createCanvas(1024, 576);
   background("#00000000");
   socket = io.connect();
@@ -385,14 +385,18 @@ function draw() {
   inputToHighlight = currentInputInQueue - inputToHighlight;
   clear();
   background("#00000000");
-  recalculateFont(2, 1);
+  //recalculateFont(2, 1);
   textFont(font);
+  /*
   textSize(textSizeToUse);
   strokeWeight(fontStrokeWeight);
   stroke("#000000FF");
   textAlign(LEFT, TOP);
   textLeading(textDefaultLeadingToUse);
+  text(frameRate(), 320, 240);
   fill("#FFFFFFFF");
+  */
+  
   /*
   recalculateFont(2, 1);
   textSize(textSizeToUse);

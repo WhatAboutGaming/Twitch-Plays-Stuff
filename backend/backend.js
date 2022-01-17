@@ -435,6 +435,35 @@ function writeToPort(inputArray, inputIndex, inputDelay) {
   }
   console.log(inputQueue.length + " " + inputQueue[inputIndex].input_index + " " + inputQueue[inputIndex].username_to_display + " " + inputQueue[inputIndex].input_string);
   //console.log("Writing index " + inputIndex);
+
+  // Clear the incoming serial data from arduino before sending a basic input
+  port.flush(function(err, results) {
+    if (err) {
+      if (client.readyState() === "OPEN") {
+        if (chatConfig.send_debug_channel_messages == true) {
+          let randomColorName = Math.floor(Math.random() * defaultColors.length);
+          client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+          client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+        }
+      }
+      return console.log(err);
+    }
+    //console.log(new Date().toISOString() + " flush results " + results);
+  });
+  port.drain(function(err, results) {
+    if (err) {
+      if (client.readyState() === "OPEN") {
+        if (chatConfig.send_debug_channel_messages == true) {
+          let randomColorName = Math.floor(Math.random() * defaultColors.length);
+          client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+          client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+        }
+      }
+      return console.log(err);
+    }
+    //console.log(new Date().toISOString() + " drain results " + results);
+  });
+
   port.write(inputArray, function(err) {
     if (err) {
       if (client.readyState() === "OPEN") {
@@ -3291,7 +3320,7 @@ async function onMessageHandler(target, tags, message, self) {
           let listSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(list\s*macro)+/ig.test(originalMessage);
           //console.log("listSettablePrefixCheck = " + listSettablePrefixCheck);
           if (listSettablePrefixCheck == true) {
-            //let tempListableInputArray = messageWords[1].replace(/[\:\/\\\.\;]+/ig, " ");
+            //let tempListableInputArray = messageWords[1].replace(/[\:\/\\\.\;\']+/ig, " ");
             //tempListableInputArray = tempListableInputArray.trim();
             //tempListableInputArray = tempListableInputArray.split(/\s+/ig);
             //let listablePrecisionInputHold = 0;
@@ -3428,7 +3457,7 @@ async function onMessageHandler(target, tags, message, self) {
               let processedSingleInput = {};
               //settableMacroChain[0] = ["A", "B", "C"];
               //settableMacroChain[1] = ["D", "E", "F"];
-              let tempSettableInputArray = messageWords[1].replace(/[\/\\\.\;\*\,]+/ig, " ");
+              let tempSettableInputArray = messageWords[1].replace(/[\/\\\.\;\*\,\']+/ig, " ");
               tempSettableInputArray = tempSettableInputArray.trim();
               tempSettableInputArray = tempSettableInputArray.split(/\s+/ig);
               //console.log(tempSettableInputArray);
@@ -3697,6 +3726,35 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(settableMacroChain[settableInputsIndex]);
                 inputsToListPlayback = inputsToListPlayback + settableMacroChain[settableInputsIndex].processed_macro_input_string + ";" + settableMacroChain[settableInputsIndex].processed_macro_input_delay + "ms,";
                 //
+
+                // Clear the incoming serial data from arduino before setting settable advanced input
+                port.flush(function(err, results) {
+                  if (err) {
+                    if (client.readyState() === "OPEN") {
+                      if (chatConfig.send_debug_channel_messages == true) {
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                      }
+                    }
+                    return console.log(err);
+                  }
+                  //console.log(new Date().toISOString() + " flush results " + results);
+                });
+                port.drain(function(err, results) {
+                  if (err) {
+                    if (client.readyState() === "OPEN") {
+                      if (chatConfig.send_debug_channel_messages == true) {
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                      }
+                    }
+                    return console.log(err);
+                  }
+                  //console.log(new Date().toISOString() + " drain results " + results);
+                });
+
                 port.write(settableMacroChain[settableInputsIndex].input_data, function(err) {
                   if (err) {
                     if (client.readyState() === "OPEN") {
@@ -3732,6 +3790,35 @@ async function onMessageHandler(target, tags, message, self) {
               //let macroParametersToWrite = [controllerConfig.final_macro_preamble, currentMacroChainIndex + 1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
               //
               await sleep(1);
+
+              // Clear the incoming serial data from arduino before setting an advanced input to be executed
+              port.flush(function(err, results) {
+                if (err) {
+                  if (client.readyState() === "OPEN") {
+                    if (chatConfig.send_debug_channel_messages == true) {
+                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                      client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                    }
+                  }
+                  return console.log(err);
+                }
+                //console.log(new Date().toISOString() + " flush results " + results);
+              });
+              port.drain(function(err, results) {
+                if (err) {
+                  if (client.readyState() === "OPEN") {
+                    if (chatConfig.send_debug_channel_messages == true) {
+                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                      client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                    }
+                  }
+                  return console.log(err);
+                }
+                //console.log(new Date().toISOString() + " drain results " + results);
+              });
+
               port.write(playSettableParametersToWrite, function(err) {
                 if (err) {
                   if (client.readyState() === "OPEN") {
@@ -3814,7 +3901,7 @@ async function onMessageHandler(target, tags, message, self) {
             }
             if (precisionInputs[precisionInputsIndex] != "") {
               //console.log("VALID INPUT 1");
-              let tempInputArray = precisionInputs[precisionInputsIndex].replace(/[\/\\\;\*]+/ig, " ");
+              let tempInputArray = precisionInputs[precisionInputsIndex].replace(/[\/\\\;\*\']+/ig, " ");
               tempInputArray = tempInputArray.trim();
 
               tempInputArray = tempInputArray.split(/\s+/ig);
@@ -5147,7 +5234,7 @@ async function onMessageHandler(target, tags, message, self) {
                   //console.log(splitToFindCustomAnalogStickPosition[0] + " " + splitToFindCustomAnalogStickPosition[1]);
                   //console.log(splitToFindCustomAnalogStickPosition[1]);
 
-                  let tempInputArray2 = splitToFindCustomAnalogStickPosition[1].replace(/[\/\\\;\*]+/ig, " ");
+                  let tempInputArray2 = splitToFindCustomAnalogStickPosition[1].replace(/[\/\\\;\*\']+/ig, " ");
                   //console.log(new Date().toISOString() + " tempInputArray2 = " + tempInputArray2);
                   tempInputArray2 = tempInputArray2.trim();
                   //console.log(new Date().toISOString() + " tempInputArray2 = " + tempInputArray2);
@@ -5181,7 +5268,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(new Date().toISOString() + " NO WHAT THE FUCK " + splitToFindCustomAnalogStickPosition[0]);
               }
 
-              let tempInputArray = splitToFindCustomAnalogStickPosition[0].replace(/[\/\\\;\*]+/ig, " ");
+              let tempInputArray = splitToFindCustomAnalogStickPosition[0].replace(/[\/\\\;\*\']+/ig, " ");
               //console.log(new Date().toISOString() + " tempInputArray = " + tempInputArray);
               tempInputArray = tempInputArray.trim();
               //console.log(new Date().toISOString() + " tempInputArray = " + tempInputArray);
@@ -6145,6 +6232,35 @@ function checkModeVotes() {
     // We're writing neutral controller data to the arduino when changing modes becuase we don't want it to keep running inputs from basic in advanced or advanced in basic mode
     inputQueue = []; // We also have to clear the basic input queue so it doesn't continue from where it left off when the mode is changed back from advanced to basic (Unlikely to happen anyway unless chat is going super fast)
     //console.log(neutralDataToWrite);
+
+    // Clear the incoming serial data from arduino before setting an advanced input
+    port.flush(function(err, results) {
+      if (err) {
+        if (client.readyState() === "OPEN") {
+          if (chatConfig.send_debug_channel_messages == true) {
+            let randomColorName = Math.floor(Math.random() * defaultColors.length);
+            client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+            client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+          }
+        }
+        return console.log(err);
+      }
+      //console.log(new Date().toISOString() + " flush results " + results);
+    });
+    port.drain(function(err, results) {
+      if (err) {
+        if (client.readyState() === "OPEN") {
+          if (chatConfig.send_debug_channel_messages == true) {
+            let randomColorName = Math.floor(Math.random() * defaultColors.length);
+            client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+            client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+          }
+        }
+        return console.log(err);
+      }
+      //console.log(new Date().toISOString() + " drain results " + results);
+    });
+
     port.write(neutralDataToWrite, function(err) {
       if (err) {
         if (client.readyState() === "OPEN") {
@@ -6529,7 +6645,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
           //console.log(splitToFindCustomAnalogStickPosition[0] + " " + splitToFindCustomAnalogStickPosition[1]);
           //console.log(splitToFindCustomAnalogStickPosition[1]);
 
-          let tempInputArray2 = splitToFindCustomAnalogStickPosition[1].replace(/[\/\\\;\*]+/ig, " ");
+          let tempInputArray2 = splitToFindCustomAnalogStickPosition[1].replace(/[\/\\\;\*\']+/ig, " ");
           //console.log(new Date().toISOString() + " tempInputArray2 = " + tempInputArray2);
           tempInputArray2 = tempInputArray2.trim();
           //console.log(new Date().toISOString() + " tempInputArray2 = " + tempInputArray2);
