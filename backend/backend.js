@@ -2938,8 +2938,9 @@ async function onMessageHandler(target, tags, message, self) {
         //isDatabaseBusy = false;
       });
     });
-    if (inputMode == 0) {
+    //if (inputMode == 0) {
       // There's no need to run this block for advanced mode, only basic mode since names are not displayed in advanced mode
+      // It turns out this sleep is important because the database is used again below, no matter which input mode, so we have to sleep long enough to make sure the database completed any operations above before doing anything to the database below 
       //console.log(new Date().toISOString() + " BEFORE user_color=" + userColor);
       await sleep(400); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
       //console.log(new Date().toISOString() + " AFTER  user_color=" + userColor);
@@ -2955,7 +2956,7 @@ async function onMessageHandler(target, tags, message, self) {
       //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
       userColorInverted = "#" + Buffer.from(userColorInverted).toString("hex").toUpperCase();
       //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
-    }
+    //}
     // Then check if user exists here
     /*
     mongoClient.connect(mongoUrl, {
