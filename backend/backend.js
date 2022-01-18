@@ -2938,21 +2938,24 @@ async function onMessageHandler(target, tags, message, self) {
         //isDatabaseBusy = false;
       });
     });
-    //console.log(new Date().toISOString() + " BEFORE user_color=" + userColor);
-    await sleep(400); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
-    //console.log(new Date().toISOString() + " AFTER  user_color=" + userColor);
-    userColorInverted = userColor;
-    userColorInverted = userColorInverted.replace(/0x+/ig, "");
-    userColorInverted = userColorInverted.replace(/L+/ig, "");
-    userColorInverted = userColorInverted.replace(/#+/ig, "");
-    userColorInverted = Uint8Array.from(Buffer.from(userColorInverted, "hex"));
-    //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
-    userColorInverted[0] = 255 - userColorInverted[0];
-    userColorInverted[1] = 255 - userColorInverted[1];
-    userColorInverted[2] = 255 - userColorInverted[2];
-    //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
-    userColorInverted = "#" + Buffer.from(userColorInverted).toString("hex").toUpperCase();
-    //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
+    if (inputMode == 0) {
+      // There's no need to run this block for advanced mode, only basic mode since names are not displayed in advanced mode
+      //console.log(new Date().toISOString() + " BEFORE user_color=" + userColor);
+      await sleep(400); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
+      //console.log(new Date().toISOString() + " AFTER  user_color=" + userColor);
+      userColorInverted = userColor;
+      userColorInverted = userColorInverted.replace(/0x+/ig, "");
+      userColorInverted = userColorInverted.replace(/L+/ig, "");
+      userColorInverted = userColorInverted.replace(/#+/ig, "");
+      userColorInverted = Uint8Array.from(Buffer.from(userColorInverted, "hex"));
+      //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
+      userColorInverted[0] = 255 - userColorInverted[0];
+      userColorInverted[1] = 255 - userColorInverted[1];
+      userColorInverted[2] = 255 - userColorInverted[2];
+      //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
+      userColorInverted = "#" + Buffer.from(userColorInverted).toString("hex").toUpperCase();
+      //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
+    }
     // Then check if user exists here
     /*
     mongoClient.connect(mongoUrl, {
