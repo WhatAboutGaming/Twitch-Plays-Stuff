@@ -698,8 +698,9 @@ function draw() {
     textLeading(textDefaultLeadingToUse);
     text(inputCountsObject.basic_inputs_sent + " Basic inputs", 768, 328);
 
+    stroke("#FFFFFFFF");
     fill("#FF0000FF");
-    votingBarSlider = (votingBarLeftEdgePosition + 1) + (votingBarSize * 0.75);
+    votingBarSlider = (votingBarLeftEdgePosition + 1) + (votingBarSize * voteDataObject.threshold_to_change_mode);
     textAlign(CENTER, TOP);
     textLeading(textDefaultLeadingToUse);
     text("|\n^", votingBarSlider, 4);
@@ -740,8 +741,9 @@ function draw() {
     textLeading(textDefaultLeadingToUse);
     text(inputCountsObject.advanced_inputs_sent + " Adv. inputs", 768, 328);
 
+    stroke("#FFFFFFFF");
     fill("#0000FFFF");
-    votingBarSlider = (votingBarLeftEdgePosition + 1) + (votingBarSize * 0.25);
+    votingBarSlider = (votingBarLeftEdgePosition + 1) + (votingBarSize * (1 - voteDataObject.threshold_to_change_mode));
     textAlign(CENTER, TOP);
     textLeading(textDefaultLeadingToUse);
     text("|\n^", votingBarSlider, 4);
