@@ -1052,7 +1052,7 @@ parser.on("data", async function(data) {
             */
           }
         }
-        if (data[0] >= 64 && data[0] <= 127) {
+        if (data[0] >= controllerConfig.initial_macro_preamble && data[0] <= (controllerConfig.final_macro_preamble)) {
           for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
             //console.log(inputStateFromArduino[controllerObjectIndex4]);
             inputStateFromArduino.push(false);
@@ -1359,7 +1359,7 @@ parser.on("data", async function(data) {
             */
           }
         }
-        if (data[0] == 128) {
+        if (data[0] == controllerConfig.final_macro_preamble) {
           advancedInputMetadata = {
             loop_macro: data[2],
             macro_inputs_to_run: data[1],
