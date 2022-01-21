@@ -1052,7 +1052,7 @@ parser.on("data", async function(data) {
             */
           }
         }
-        if (data[0] >= controllerConfig.initial_macro_preamble && data[0] <= (controllerConfig.final_macro_preamble)) {
+        if (data[0] >= controllerConfig.initial_macro_preamble && data[0] <= (controllerConfig.final_macro_preamble - 1)) {
           for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
             //console.log(inputStateFromArduino[controllerObjectIndex4]);
             inputStateFromArduino.push(false);
