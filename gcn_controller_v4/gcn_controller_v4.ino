@@ -167,7 +167,7 @@ unsigned long inputDelay = 0;
 unsigned long previousInputDelay = 0;
 unsigned long currentMillis = 0;
 
-unsigned long baudRate = 2000000;
+unsigned long baudRate = 1000000;
 
 byte serial_rx_buffer[12];
 byte current_macro_input[12];
@@ -755,15 +755,31 @@ void pressButtons()
           //  Mode (Bootleg), Buffer Array Element 7
           //  All other bits in this Buffer Array Element are unused
           inputStatus[buttonMode] = !(current_macro_input[7] & B00000001);
-
-          digitalWrite(latchPin, LOW);
-          for (int i = 31; i >= 0; i--)
-          {
-            digitalWrite(clockPin, LOW);
-            digitalWrite(dataPin, inputStatus[i]);
-            digitalWrite(clockPin, HIGH);
+          // Sometimes buttons are considered as released by the console between inputs, the pieces of code below will hopefully make it so buttons are only released at the end of the final iteration of a loopable macro, or released at the final input of a non-loopable macro, or released at the end of a basic input
+          if (loopMacro == 0) {
+            if (currentMacroIndexRunning == macroInputsToRun) {
+              digitalWrite(latchPin, LOW);
+              for (int i = 31; i >= 0; i--)
+              {
+                digitalWrite(clockPin, LOW);
+                digitalWrite(dataPin, inputStatus[i]);
+                digitalWrite(clockPin, HIGH);
+              }
+              digitalWrite(latchPin, HIGH);
+            }
           }
-          digitalWrite(latchPin, HIGH);
+          if (loopMacro == 1) {
+            if (loopCounter > timesToLoop) {
+              digitalWrite(latchPin, LOW);
+              for (int i = 31; i >= 0; i--)
+              {
+                digitalWrite(clockPin, LOW);
+                digitalWrite(dataPin, inputStatus[i]);
+                digitalWrite(clockPin, HIGH);
+              }
+              digitalWrite(latchPin, HIGH);
+            }
+          }
 
           //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
           isInputtingDelayed = false;
