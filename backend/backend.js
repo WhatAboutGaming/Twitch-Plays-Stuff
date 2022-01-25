@@ -33,6 +33,8 @@ var twitchJsonEncodedAppAccessToken = {}; // Object returned from the Twitch API
 //console.log(JSON.stringify(controllerConfig, null, 2));
 var helpMessageCooldown = 0;
 var runStartTime = globalConfig.run_start_time;
+var nextRunStartTime = globalConfig.next_run_start_time;
+var streamEndTime = globalConfig.stream_end_time;
 var currentTime = new Date().getTime();
 var oldTime = new Date().getTime();
 var advancedAllowed = 0; // Advanced mode can be used until the current time in milliseconds is higher than this number
@@ -193,6 +195,8 @@ io.sockets.on('connection',
     twitchCredentials = JSON.parse(fs.readFileSync("twitch_credentials.json", "utf8")); // Contains Twitch Credentials used to generate OAuth 2.0 Tokens as well as the Channel ID, which is used to update channel information such as stream title
 
     runStartTime = globalConfig.run_start_time;
+    nextRunStartTime = globalConfig.next_run_start_time;
+    streamEndTime = globalConfig.stream_end_time;
     //acceptInputs = globalConfig.initial_accept_inputs;
     //acceptTts = globalConfig.initial_accept_tts;
     //inputMode = globalConfig.initial_input_mode;
@@ -231,9 +235,12 @@ io.sockets.on('connection',
     io.to(socket.id).emit("advanced_input_metadata", advancedInputMetadata);
     io.to(socket.id).emit("controller_graphics", controllerConfig.controller_graphics);
     io.to(socket.id).emit("game_title", globalConfig.game_title);
+    io.to(socket.id).emit("next_game_title", globalConfig.next_game_title);
     io.to(socket.id).emit("vote_data", voteDataObject);
     io.to(socket.id).emit("viewer_count", currentViewerCount);
     io.to(socket.id).emit("run_start_time", runStartTime);
+    io.to(socket.id).emit("next_run_start_time", nextRunStartTime);
+    io.to(socket.id).emit("stream_end_time", streamEndTime);
     io.to(socket.id).emit("help_messages", globalConfig.overlay_text_rotation);
     io.to(socket.id).emit("header_text", globalConfig.overlay_header_text);
 
@@ -317,7 +324,7 @@ if (controllerObject.length > 0) {
   }
   */
   var rawInputValue = controllerObject[0].input_value;
-  rawInputValue = rawInputValue.replace(/0x+/ig, "");
+  rawInputValue = rawInputValue.replace(/(0x)+/ig, "");
   rawInputValue = rawInputValue.replace(/L+/ig, "");
   rawInputValue = rawInputValue.replace(/#+/ig, "");
   neutralController = Uint8Array.from(Buffer.from(rawInputValue, "hex"));
@@ -601,13 +608,13 @@ parser.on("data", async function(data) {
                 //console.log(neutralControllerIndex);
                 for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
                   let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/0x+/ig, "");
+                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
                   controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
 
                   let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/0x+/ig, "");
+                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
                   controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
@@ -639,13 +646,13 @@ parser.on("data", async function(data) {
                 //console.log("Analog at index " + neutralControllerIndex);
                 for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
                   let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/0x+/ig, "");
+                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
                   controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
 
                   let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/0x+/ig, "");
+                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
                   controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
@@ -764,13 +771,13 @@ parser.on("data", async function(data) {
                 //console.log(neutralControllerIndex);
                 for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
                   let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/0x+/ig, "");
+                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
                   controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
 
                   let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/0x+/ig, "");
+                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
                   controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
@@ -803,13 +810,13 @@ parser.on("data", async function(data) {
                 //console.log("Analog at index " + neutralControllerIndex);
                 for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
                   let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/0x+/ig, "");
+                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
                   controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
 
                   let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/0x+/ig, "");
+                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
                   controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
@@ -1071,13 +1078,13 @@ parser.on("data", async function(data) {
                 //console.log(neutralControllerIndex);
                 for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
                   let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/0x+/ig, "");
+                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
                   controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
 
                   let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/0x+/ig, "");
+                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
                   controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
@@ -1110,13 +1117,13 @@ parser.on("data", async function(data) {
                 //console.log("Analog at index " + neutralControllerIndex);
                 for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
                   let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/0x+/ig, "");
+                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
                   controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
                   controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
 
                   let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/0x+/ig, "");
+                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
                   controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
                   controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
@@ -2955,7 +2962,7 @@ async function onMessageHandler(target, tags, message, self) {
       await sleep(400); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
       //console.log(new Date().toISOString() + " AFTER  user_color=" + userColor);
       userColorInverted = userColor;
-      userColorInverted = userColorInverted.replace(/0x+/ig, "");
+      userColorInverted = userColorInverted.replace(/(0x)+/ig, "");
       userColorInverted = userColorInverted.replace(/L+/ig, "");
       userColorInverted = userColorInverted.replace(/#+/ig, "");
       userColorInverted = Uint8Array.from(Buffer.from(userColorInverted, "hex"));
@@ -5434,7 +5441,7 @@ async function onMessageHandler(target, tags, message, self) {
                     //console.log("Valid command");
                     //console.log("controllerObjectIndex:" + controllerObjectIndex + " controllerAliasIndex:" + controllerAliasIndex + " " + controllerObject[controllerObjectIndex].input_alias[controllerAliasIndex]);
                     let rawInputValueUsed = controllerObject[controllerObjectIndex].input_value;
-                    rawInputValueUsed = rawInputValueUsed.replace(/0x+/ig, "");
+                    rawInputValueUsed = rawInputValueUsed.replace(/(0x)+/ig, "");
                     rawInputValueUsed = rawInputValueUsed.replace(/L+/ig, "");
                     let hex = Uint8Array.from(Buffer.from(rawInputValueUsed, "hex"));
                     //console.log(hex[0])
@@ -5686,7 +5693,7 @@ async function onMessageHandler(target, tags, message, self) {
                   //console.log("blacklistedComboInputComponentIndex = " + blacklistedComboInputComponentIndex);
                   //console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components[blacklistedComboInputComponentIndex]);
                   let blacklistedComboInputComponentInputValue = controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components[blacklistedComboInputComponentIndex].component_input_value;
-                  blacklistedComboInputComponentInputValue = blacklistedComboInputComponentInputValue.replace(/0x+/ig, "");
+                  blacklistedComboInputComponentInputValue = blacklistedComboInputComponentInputValue.replace(/(0x)+/ig, "");
                   blacklistedComboInputComponentInputValue = blacklistedComboInputComponentInputValue.replace(/L+/ig, "");
                   blacklistedComboInputComponentInputValue = blacklistedComboInputComponentInputValue.replace(/#+/ig, "");
                   //console.log("blacklistedComboInputComponentInputValue = " + blacklistedComboInputComponentInputValue);
@@ -5698,7 +5705,7 @@ async function onMessageHandler(target, tags, message, self) {
                       //console.log("USED INPUT");
                       //console.log(controllerObject[controllerObjectIndex3].input_name);
                       let blacklistedComboInputComponentInputValueToCompareTo = controllerObject[controllerObjectIndex3].input_value;
-                      blacklistedComboInputComponentInputValueToCompareTo = blacklistedComboInputComponentInputValueToCompareTo.replace(/0x+/ig, "");
+                      blacklistedComboInputComponentInputValueToCompareTo = blacklistedComboInputComponentInputValueToCompareTo.replace(/(0x)+/ig, "");
                       blacklistedComboInputComponentInputValueToCompareTo = blacklistedComboInputComponentInputValueToCompareTo.replace(/L+/ig, "");
                       blacklistedComboInputComponentInputValueToCompareTo = blacklistedComboInputComponentInputValueToCompareTo.replace(/#+/ig, "");
                       blacklistedComboInputComponentInputValueToCompareTo = Uint8Array.from(Buffer.from(blacklistedComboInputComponentInputValueToCompareTo, "hex"));
@@ -6760,7 +6767,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
             //console.log("Valid command");
             //console.log("controllerObjectIndex:" + controllerObjectIndex + " controllerAliasIndex:" + controllerAliasIndex + " " + controllerObject[controllerObjectIndex].input_alias[controllerAliasIndex]);
             let rawInputValueUsed = controllerObject[controllerObjectIndex].input_value;
-            rawInputValueUsed = rawInputValueUsed.replace(/0x+/ig, "");
+            rawInputValueUsed = rawInputValueUsed.replace(/(0x)+/ig, "");
             rawInputValueUsed = rawInputValueUsed.replace(/L+/ig, "");
             let hex = Uint8Array.from(Buffer.from(rawInputValueUsed, "hex"));
             //console.log(hex[0])
@@ -6903,7 +6910,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
             //console.log("blacklistedComboInputComponentIndex = " + blacklistedComboInputComponentIndex);
             //console.log(controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components[blacklistedComboInputComponentIndex]);
             let blacklistedComboInputComponentInputValue = controllerConfig.blacklisted_combos[blacklistedComboIndex].blacklisted_combo_input_components[blacklistedComboInputComponentIndex].component_input_value;
-            blacklistedComboInputComponentInputValue = blacklistedComboInputComponentInputValue.replace(/0x+/ig, "");
+            blacklistedComboInputComponentInputValue = blacklistedComboInputComponentInputValue.replace(/(0x)+/ig, "");
             blacklistedComboInputComponentInputValue = blacklistedComboInputComponentInputValue.replace(/L+/ig, "");
             blacklistedComboInputComponentInputValue = blacklistedComboInputComponentInputValue.replace(/#+/ig, "");
             //console.log("blacklistedComboInputComponentInputValue = " + blacklistedComboInputComponentInputValue);
@@ -6915,7 +6922,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
                 //console.log("USED INPUT");
                 //console.log(controllerObject[controllerObjectIndex3].input_name);
                 let blacklistedComboInputComponentInputValueToCompareTo = controllerObject[controllerObjectIndex3].input_value;
-                blacklistedComboInputComponentInputValueToCompareTo = blacklistedComboInputComponentInputValueToCompareTo.replace(/0x+/ig, "");
+                blacklistedComboInputComponentInputValueToCompareTo = blacklistedComboInputComponentInputValueToCompareTo.replace(/(0x)+/ig, "");
                 blacklistedComboInputComponentInputValueToCompareTo = blacklistedComboInputComponentInputValueToCompareTo.replace(/L+/ig, "");
                 blacklistedComboInputComponentInputValueToCompareTo = blacklistedComboInputComponentInputValueToCompareTo.replace(/#+/ig, "");
                 blacklistedComboInputComponentInputValueToCompareTo = Uint8Array.from(Buffer.from(blacklistedComboInputComponentInputValueToCompareTo, "hex"));

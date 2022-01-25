@@ -112,6 +112,8 @@ console.log("fontName = " + fontName);
 //var ttsAudioStatusPrevious = true;
 //var startTimeMillis = 1611211608000;
 var startTimeMillis = new Date().getTime();
+var nextStartTimeMillis = new Date().getTime();
+var streamEndTimeMillis = new Date().getTime();
 var playTimeTotal = 0;
 
 //var helpMessages = ["Type “!speak 《message》” to talk to Pikachu!", "Type “!help” or “!commands” to learn how to play!"];
@@ -147,7 +149,8 @@ var stepsToMoveUp = 0;
 
 var viewerCount = -1;
 
-var gameTitle = "";
+var gameTitle = "Game Title";
+var nextGameTitle = "Super Mario RPG: Legend of the Seven Stars";
 
 var votingBarSize = 200;
 var votingBarCenterPosition = 896;
@@ -319,6 +322,9 @@ function setup() {
   socket.on("game_title", function(data) {
     gameTitle = data;
   });
+  socket.on("next_game_title", function(data) {
+    nextGameTitle = data;
+  });
   socket.on("header_text", function(data) {
     headerText = data;
   });
@@ -332,6 +338,12 @@ function setup() {
   });
   socket.on("run_start_time", function(data) {
     startTimeMillis = data;
+  });
+  socket.on("next_run_start_time", function(data) {
+    nextStartTimeMillis = data;
+  });
+  socket.on("stream_end_time", function(data) {
+    streamEndTimeMillis = data;
   });
   socket.on("viewer_count", function(data) {
     viewerCount = data;
@@ -568,6 +580,31 @@ function draw() {
   //if (isTtsBusy == false) {
     //inputQueue[currentInputInQueue].tts_message;
     if (helpMessages.length > 0) {
+
+      let nextStartTimeISOString = new Date(nextStartTimeMillis).toISOString();
+      let nextStartTimeRemaining = currentTimeMillis - nextStartTimeMillis;
+      nextStartTimeRemaining = Math.abs(nextStartTimeRemaining);
+      let nextStartTimeRemainingDays = (parseInt(nextStartTimeRemaining / 86400000)).toString().padStart(2, "0");
+      let nextStartTimeRemainingHours = (parseInt(nextStartTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
+      let nextStartTimeRemainingMinutes = (parseInt(nextStartTimeRemaining / 60000) % 60).toString().padStart(2, "0");
+      let nextStartTimeRemainingSeconds = (parseInt(nextStartTimeRemaining / 1000) % 60).toString().padStart(2, "0");
+      let nextStartTimeRemainingMillis = (nextStartTimeRemaining % 1000).toString().padStart(3, "0");
+      let nextStartTimeRemainingString = nextStartTimeRemainingDays + "d " + nextStartTimeRemainingHours + "h " + nextStartTimeRemainingMinutes + "m " + nextStartTimeRemainingSeconds + "s " + nextStartTimeRemainingMillis + "ms";
+
+      let streamEndTimeISOString = new Date(streamEndTimeMillis).toISOString();
+      let streamEndTimeRemaining = currentTimeMillis - streamEndTimeMillis;
+      streamEndTimeRemaining = Math.abs(streamEndTimeRemaining);
+      let streamEndTimeRemainingDays = (parseInt(streamEndTimeRemaining / 86400000)).toString().padStart(2, "0");
+      let streamEndTimeRemainingHours = (parseInt(streamEndTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
+      let streamEndTimeRemainingMinutes = (parseInt(streamEndTimeRemaining / 60000) % 60).toString().padStart(2, "0");
+      let streamEndTimeRemainingSeconds = (parseInt(streamEndTimeRemaining / 1000) % 60).toString().padStart(2, "0");
+      let streamEndTimeRemainingMillis = (streamEndTimeRemaining % 1000).toString().padStart(3, "0");
+      let streamEndTimeRemainingString = streamEndTimeRemainingDays + "d " + streamEndTimeRemainingHours + "h " + streamEndTimeRemainingMinutes + "m " + streamEndTimeRemainingSeconds + "s " + streamEndTimeRemainingMillis + "ms";
+
+      var helpMessageToDisplay = helpMessages[currentValueToDisplay];
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title}})+/ig, nextGameTitle);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + " (" + nextStartTimeISOString + ")");
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + " (" + streamEndTimeISOString + ")");
       if (currentValueToDisplay == 0) {
         // Big red text case
         recalculateFont(6, 3);
@@ -578,7 +615,7 @@ function draw() {
         textAlign(LEFT, BOTTOM);
         fill("#FF0000FF");
         textLeading(textDefaultLeadingToUse);
-        text(helpMessages[currentValueToDisplay], 3, 573); 
+        text(helpMessageToDisplay, 3, 573); 
       }
       if (currentValueToDisplay != 0) {
         // Normal case
@@ -590,7 +627,7 @@ function draw() {
         textAlign(LEFT, BOTTOM);
         fill("#FFFFFFFF");
         textLeading(textDefaultLeadingToUse);
-        text(helpMessages[currentValueToDisplay], 2, 574); 
+        text(helpMessageToDisplay, 2, 574); 
       }
     }
   //}
