@@ -3908,7 +3908,7 @@ async function onMessageHandler(target, tags, message, self) {
             //console.log("");
             //console.log("precisionInputsIndex = " + precisionInputsIndex + " precisionInputs[precisionInputsIndex] = " + precisionInputs[precisionInputsIndex]);
             //console.log("precisionInputs[precisionInputsIndex] at index " + precisionInputsIndex + " " + precisionInputs[precisionInputsIndex]);
-            precisionInputs[precisionInputsIndex] = precisionInputs[precisionInputsIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
+            precisionInputs[precisionInputsIndex] = precisionInputs[precisionInputsIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
             //console.log("precisionInputs[precisionInputsIndex] at index " + precisionInputsIndex + " " + precisionInputs[precisionInputsIndex]);
             if (precisionInputs[precisionInputsIndex] == "") {
               //console.log("INVALID INPUT 1");
@@ -5192,7 +5192,7 @@ async function onMessageHandler(target, tags, message, self) {
           for (var messageInputIndex = 0; messageInputIndex < messageInputs.length; messageInputIndex++) {
             if (hasInvalidInput == false) {
               let didInputMatch = false;
-              messageInputs[messageInputIndex] = messageInputs[messageInputIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
+              messageInputs[messageInputIndex] = messageInputs[messageInputIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
 
               let adjustableAnalogStickPosition = -1;
 
@@ -6601,7 +6601,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
   if (isTtsBusy == false) {
     for (var messageInputIndex = 0; messageInputIndex < macroStringArray.length; messageInputIndex++) {
       let didMacroInputMatch = false;
-      macroStringArray[messageInputIndex] = macroStringArray[messageInputIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
+      macroStringArray[messageInputIndex] = macroStringArray[messageInputIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
       //console.log("macroStringArray[messageInputIndex] at index " + messageInputIndex + " = " + macroStringArray[messageInputIndex]);
       processedMessage = macroStringArray[messageInputIndex].toLowerCase();
 
