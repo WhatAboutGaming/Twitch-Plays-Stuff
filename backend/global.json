@@ -23,8 +23,8 @@
   "vote_expiration_time_millis": 300000,
   "help_message_cooldown_millis": 5000,
   "game_title": "Paper Mario: The Thousand-Year Door",
-  "next_game_title": "Super Mario RPG: Legend of the Seven Stars",
   "stream_title": "Twitch Plays (Viewers play\/Chat plays) Paper Mario TTYD on an actual Wii",
+  "next_game_title": "Super Mario RPG: Legend of the Seven Stars",
   "main_database_name": "twitch_plays",
   "chatters_collection_name": "chatters",
   "run_name": "Paper_Mario_The_Thousand_Year_Door",
@@ -45,7 +45,8 @@
     "Chapter 4 beaten: 07d 21h 45m 22s (2022-01-19T21:45:22Z)!",
     "Chapter 5 beaten: 09d 21h 15m 19s (2022-01-21T21:15:19Z)!",
     "Chapter 6 beaten: 12d 00h 33m 22s (2022-01-24T00:33:22Z)!",
-    "Current goal: Beat Chapter 7!",
+    "Chapter 7 beaten: 14d 12h 41m 26s (2022-01-26T12:41:26Z)!",
+    "Current goal: Beat Chapter 8 and beat the game!",
     "Type !discord in chat to get a link to the stream Discord\nserver",
     "If anything breaks, please ping @WhatAboutGamingLive"
   ]
