@@ -437,7 +437,6 @@ let cyrillicsReplacementTable = [{
 
 function writeToPort(inputArray, inputIndex, inputDelay) {
   if (inputMode != 0) {
-
     return;
   }
   console.log(inputQueue.length + " " + inputQueue[inputIndex].input_index + " " + inputQueue[inputIndex].username_to_display + " " + inputQueue[inputIndex].input_string);
@@ -752,353 +751,109 @@ parser.on("data", async function(data) {
           }
         }
         if (data[0] == 1) {
-          for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
-            //console.log(inputStateFromArduino[controllerObjectIndex4]);
-            inputStateFromArduino.push(false);
-            //console.log(inputStateFromArduino[controllerObjectIndex4]);
-          }
-          // Basic Input
-          //console.log(data);
-          //console.log(new Date().toISOString() + " 1 Stick " + data[3] + "," + data[4] + " CStick " + data[5] + "," + data[6]);
-          for (let neutralControllerIndex = 0; neutralControllerIndex < neutralController.length; neutralControllerIndex++) {
-            if (neutralController[neutralControllerIndex] != data[neutralControllerIndex + 1]) {
-              //console.log("neutralControllerIndex = " + neutralControllerIndex);
-              if (neutralController[neutralControllerIndex] == 0) {
-                //Digital Input
-                //console.log("Digital at index " + neutralControllerIndex);
-                let digitalInputBitArrayNeutral = convertByteToBitArray(neutralController[neutralControllerIndex]);
-                let digitalInputBitArrayData = convertByteToBitArray(data[neutralControllerIndex + 1]);
-                //console.log(neutralControllerIndex);
-                for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
-                  let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
-                  controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
-
-                  let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
-                  controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
-
-                  //console.log(controllerDataToCompareTo[neutralControllerIndex]);
-                  //let backToHexString = Buffer.from(controllerDataToCompareTo).toString("hex").toUpperCase();
-                  //console.log("0x" + backToHexString);
-                  let controllerObjectBitArray = convertByteToBitArray(controllerDataToCompareTo[neutralControllerIndex]);
-                  for (let bitArrayIndex = 0; bitArrayIndex < digitalInputBitArrayData.length; bitArrayIndex++) {
-                    //
-                    if (controllerObjectBitArray[bitArrayIndex] == digitalInputBitArrayData[bitArrayIndex]) {
-                      if (digitalInputBitArrayData[bitArrayIndex] == 1) {
-                        //console.log(controllerObject[controllerObjectIndex4].input_name);
-                        //console.log(digitalInputBitArrayData[bitArrayIndex] + " at index " + bitArrayIndex);
-                        //console.log(inputStateFromArduino[controllerObjectIndex4]);
-                        if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                          //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
-                        }
-                        if (inputStateFromArduino[controllerObjectIndex4] == false) {
-                          inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
-                          inputStateFromArduino[controllerObjectIndex4] = true;
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-              if (neutralController[neutralControllerIndex] != 0) {
-                //Analog Input
-                //console.log("Analog at index " + neutralControllerIndex);
-                for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
-                  let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
-                  controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
-
-                  let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
-                  controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
-
-                  //console.log(controllerDataToCompareTo[neutralControllerIndex]);
-                  //let backToHexString = Buffer.from(controllerDataToCompareTo).toString("hex").toUpperCase();
-                  //console.log("0x" + backToHexString);
-                  if (controllerDataToCompareTo[neutralControllerIndex] != neutralController[neutralControllerIndex]) {
-                    if (controllerDataToCompareTo[neutralControllerIndex] == data[neutralControllerIndex + 1]) {
-                      // This part will detect only the correct input
-                      //console.log("C " + controllerObject[controllerObjectIndex4].input_name);
-                      //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
-                      if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                        //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
-                      }
-                      if (inputStateFromArduino[controllerObjectIndex4] == false) {
-                        inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
-                        inputStateFromArduino[controllerObjectIndex4] = true;
-                      }
-                    }
-                    if (controllerDataToCompareTo[neutralControllerIndex] != data[neutralControllerIndex + 1]) {
-                      if (data[neutralControllerIndex + 1] != neutralController[neutralControllerIndex]) {
-                        // This part will detect the correct input as well as the opposite input
-                        /*
-                        console.log("F " + controllerObject[controllerObjectIndex4].input_name);
-                        console.log("neutralControllerIndex = " + neutralControllerIndex);
-                        console.log("controllerObjectIndex4 = " + controllerObjectIndex4);
-                        console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
-                        console.log("controllerDataToCompareTo[neutralControllerIndex] = " + controllerDataToCompareTo[neutralControllerIndex]);
-                        console.log("controllerDataToCompareToOpposite[neutralControllerIndex] = " + controllerDataToCompareToOpposite[neutralControllerIndex]);
-                        console.log("neutralController[neutralControllerIndex] = " + neutralController[neutralControllerIndex]);
-                        */
-                        if ((controllerDataToCompareTo[neutralControllerIndex] == controllerConfig.stick_minimum) && (data[neutralControllerIndex + 1] < neutralController[neutralControllerIndex])) {
-                          //
-                          //console.log("D " + controllerObject[controllerObjectIndex4].input_name);
-                          //console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
-                          //console.log(data[neutralControllerIndex + 1] + controllerConfig.stick_center);
-                          //console.log(data[neutralControllerIndex + 1] - controllerConfig.stick_center);
-                          //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
-                          //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
-                          if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
-                          }
-                          if (inputStateFromArduino[controllerObjectIndex4] == false) {
-                            inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
-                            inputStateFromArduino[controllerObjectIndex4] = true;
-                          }
-                        }
-                        if ((controllerDataToCompareTo[neutralControllerIndex] == controllerConfig.stick_maximum) && (data[neutralControllerIndex + 1] > neutralController[neutralControllerIndex])) {
-                          //
-                          //console.log("E " + controllerObject[controllerObjectIndex4].input_name);
-                          //console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
-                          //console.log(data[neutralControllerIndex + 1] + controllerConfig.stick_center);
-                          //console.log(data[neutralControllerIndex + 1] - controllerConfig.stick_center);
-                          //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
-                          //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
-                          if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
-                          }
-                          if (inputStateFromArduino[controllerObjectIndex4] == false) {
-                            inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
-                            inputStateFromArduino[controllerObjectIndex4] = true;
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-          inputDurationToDisplay = (data[9] << 8) | (data[10]);
-          //console.log("inputDurationToDisplay = " + inputDurationToDisplay);
-          inputArrayToDisplay = inputArrayToDisplay.join("+");
-          if (inputArrayToDisplay == "") {
-            // Do nothing
-            //console.log("Empty String, this shouldn't happen CASE 1");
-            basicInputString = inputArrayToDisplay;
-            io.sockets.emit("basic_input_string", basicInputString);
-            io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
-          }
-          if (inputArrayToDisplay != "") {
-            if (inputDurationToDisplay == controllerConfig.normal_delay) {
-              // Do nothing
-            }
-            if (inputDurationToDisplay == controllerConfig.held_delay) {
-              inputArrayToDisplay = inputArrayToDisplay + "-";
-            }
-            if ((inputDurationToDisplay != controllerConfig.normal_delay) && (inputDurationToDisplay != controllerConfig.held_delay)) {
-              inputArrayToDisplay = inputArrayToDisplay + " " + inputDurationToDisplay + "ms";
-            }
-            //console.log(new Date().toISOString() + " " + inputArrayToDisplay);
-            basicInputString = inputArrayToDisplay;
-            io.sockets.emit("basic_input_string", basicInputString);
-            io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
-            //console.log(inputArrayToDisplay.join("+"));
-            //await sleep(500);
-            // The database operations below check the total input count
-            /*
-            mongoClient.connect(mongoUrl, {
-              useUnifiedTopology: true
-            }, function(err, globalDb) {
-              //isDatabaseBusy = true;
+          if (inputMode != 0) {
+            port.flush(function(err, results) {
               if (err) {
-                throw err;
+                return console.log(err);
               }
-              // Check if the entry for a specific game exists
-              let globalDatabase = globalDb.db(globalConfig.global_database_name);
-              globalDatabase.collection(globalConfig.run_name).findOne({}, function(err, result) {
-                if (err) {
-                  throw err;
-                }
-                //console.log(result);
-                //isNullDatabase = result;
-                if (result === null) {
-                  //console.log("A YES");
-                  mongoClient.connect(mongoUrl, {
-                    useUnifiedTopology: true
-                  }, function(err, databaseToCreate) {
-                    if (err) {
-                      throw err;
-                    }
-                    let globalDatabaseToCreate = databaseToCreate.db(globalConfig.global_database_name);
-                    let dataToInsert = {
-                      run_id: globalConfig.run_id,
-                      basic_inputs_sent: 1,
-                      advanced_inputs_sent: 0,
-                      total_inputs_sent: 1,
-                      basic_inputs_executed: 1,
-                      advanced_inputs_executed: 0,
-                      total_inputs_executed: 1
-                    };
-
-                    inputCountsObject = dataToInsert;
-                    io.sockets.emit("input_counts_object", inputCountsObject);
-
-                    //console.log("dataToInsert SERIAL");
-                    //console.log(dataToInsert);
-                    // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
-                    globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
-                      if (err) {
-                        throw err;
-                      }
-                      //console.log("1 document inserted");
-                      mongoClient.connect(mongoUrl, {
-                        useUnifiedTopology: true
-                      }, function(err, databaseToReadFrom) {
-                        if (err) {
-                          throw err;
-                        }
-                        let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
-                        globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
-                          if (err) {
-                            throw err;
-                          }
-                          databaseToReadFrom.close();
-                          //console.log(databaseToReadFromResult);
-                          //inputsSent = databaseToReadFromResult.input_count;
-                        });
-                      });
-                      databaseToCreate.close();
-                    });
-                  });
-                  //test();
-                }
-                if (result !== null) {
-                  //console.log("A NO");
-                  mongoClient.connect(mongoUrl, {
-                    useUnifiedTopology: true
-                  }, function(err, databaseToUpdate) {
-                    if (err) {
-                      throw err;
-                    }
-                    let globalDatabaseToUpdate = databaseToUpdate.db(globalConfig.global_database_name);
-                    let dataToQuery = {
-                      run_id: result.run_id,
-                      
-                      basic_inputs_sent: result.basic_inputs_sent,
-                      advanced_inputs_sent: result.advanced_inputs_sent,
-                      total_inputs_sent: result.total_inputs_sent,
-                      
-                      basic_inputs_executed: result.basic_inputs_executed,
-                      advanced_inputs_executed: result.advanced_inputs_executed,
-                      total_inputs_executed: result.total_inputs_executed
-                    };
-                    // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
-                    let dataToUpdate = {
-                      $set: {
-                        run_id: result.run_id,
-                        
-                        basic_inputs_sent: result.basic_inputs_sent,
-                        advanced_inputs_sent: result.advanced_inputs_sent,
-                        total_inputs_sent: result.total_inputs_sent,
-                        
-                        basic_inputs_executed: result.basic_inputs_executed + 1,
-                        advanced_inputs_executed: result.advanced_inputs_executed,
-                        total_inputs_executed: result.total_inputs_executed + 1
-                      }
-                    };
-
-                    inputCountsObject = dataToUpdate.$set;
-                    io.sockets.emit("input_counts_object", inputCountsObject);
-
-                    //console.log("dataToUpdate SERIAL");
-                    //console.log(dataToUpdate);
-                    // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
-                    //console.log(newvalues);
-                    globalDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-                      if (err) {
-                        throw err;
-                      }
-                      //console.log(res.result);
-                      //console.log("1 document updated");
-                      mongoClient.connect(mongoUrl, {
-                        useUnifiedTopology: true
-                      }, function(err, databaseToReadFrom) {
-                        if (err) {
-                          throw err;
-                        }
-                        let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
-                        globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
-                          if (err) {
-                            throw err;
-                          }
-                          databaseToReadFrom.close();
-                          //console.log(databaseToReadFromResult);
-                          //inputsSent = databaseToReadFromResult.input_count;
-                        });
-                      });
-                      databaseToUpdate.close();
-                    });
-                  });
-                  //console.log(result.input_count);
-                  //test3(result.input_count);
-                }
-                globalDb.close();
-                //isDatabaseBusy = false;
-              });
+              //console.log(new Date().toISOString() + " flush results " + results);
             });
-            */
+            port.drain(function(err, results) {
+              if (err) {
+                return console.log(err);
+              }
+              //console.log(new Date().toISOString() + " drain results " + results);
+            });
+            data[0] = 0;
+            data[1] = 0;
+            data[2] = 0;
+            data[3] = 0;
+            data[4] = 0;
+            data[5] = 0;
+            data[6] = 0;
+            data[7] = 0;
+            data[8] = 0;
+            data[9] = 0;
+            data[10] = 0;
+            data[11] = 0;
           }
-        }
-        if (data[0] >= controllerConfig.initial_macro_preamble && data[0] <= (controllerConfig.final_macro_preamble - 1)) {
-          for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
-            //console.log(inputStateFromArduino[controllerObjectIndex4]);
-            inputStateFromArduino.push(false);
-            //console.log(inputStateFromArduino[controllerObjectIndex4]);
-          }
-          // Advanced Input
-          //console.log(new Date().toISOString() + " " + data[0] + " Stick " + data[3] + "," + data[4] + " CStick " + data[5] + "," + data[6]);
-          for (let neutralControllerIndex = 0; neutralControllerIndex < neutralController.length; neutralControllerIndex++) {
-            if (neutralController[neutralControllerIndex] != data[neutralControllerIndex + 1]) {
-              //console.log("neutralControllerIndex = " + neutralControllerIndex);
-              if (neutralController[neutralControllerIndex] == 0) {
-                //Digital Input
-                //console.log("Digital at index " + neutralControllerIndex);
-                let digitalInputBitArrayNeutral = convertByteToBitArray(neutralController[neutralControllerIndex]);
-                let digitalInputBitArrayData = convertByteToBitArray(data[neutralControllerIndex + 1]);
-                //console.log(neutralControllerIndex);
-                for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
-                  let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
-                  controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
+          if (inputMode == 0) {
+            for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
+              //console.log(inputStateFromArduino[controllerObjectIndex4]);
+              inputStateFromArduino.push(false);
+              //console.log(inputStateFromArduino[controllerObjectIndex4]);
+            }
+            // Basic Input
+            //console.log(data);
+            //console.log(new Date().toISOString() + " 1 Stick " + data[3] + "," + data[4] + " CStick " + data[5] + "," + data[6]);
+            for (let neutralControllerIndex = 0; neutralControllerIndex < neutralController.length; neutralControllerIndex++) {
+              if (neutralController[neutralControllerIndex] != data[neutralControllerIndex + 1]) {
+                //console.log("neutralControllerIndex = " + neutralControllerIndex);
+                if (neutralController[neutralControllerIndex] == 0) {
+                  //Digital Input
+                  //console.log("Digital at index " + neutralControllerIndex);
+                  let digitalInputBitArrayNeutral = convertByteToBitArray(neutralController[neutralControllerIndex]);
+                  let digitalInputBitArrayData = convertByteToBitArray(data[neutralControllerIndex + 1]);
+                  //console.log(neutralControllerIndex);
+                  for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
+                    let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
+                    controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
 
-                  let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
-                  controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
+                    let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
+                    controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
 
-                  //console.log(controllerDataToCompareTo[neutralControllerIndex]);
-                  //let backToHexString = Buffer.from(controllerDataToCompareTo).toString("hex").toUpperCase();
-                  //console.log("0x" + backToHexString);
-                  let controllerObjectBitArray = convertByteToBitArray(controllerDataToCompareTo[neutralControllerIndex]);
-                  for (let bitArrayIndex = 0; bitArrayIndex < digitalInputBitArrayData.length; bitArrayIndex++) {
-                    //
-                    if (controllerObjectBitArray[bitArrayIndex] == digitalInputBitArrayData[bitArrayIndex]) {
-                      if (digitalInputBitArrayData[bitArrayIndex] == 1) {
-                        //console.log(controllerObject[controllerObjectIndex4].input_name);
-                        //console.log(digitalInputBitArrayData[bitArrayIndex] + " at index " + bitArrayIndex);
+                    //console.log(controllerDataToCompareTo[neutralControllerIndex]);
+                    //let backToHexString = Buffer.from(controllerDataToCompareTo).toString("hex").toUpperCase();
+                    //console.log("0x" + backToHexString);
+                    let controllerObjectBitArray = convertByteToBitArray(controllerDataToCompareTo[neutralControllerIndex]);
+                    for (let bitArrayIndex = 0; bitArrayIndex < digitalInputBitArrayData.length; bitArrayIndex++) {
+                      //
+                      if (controllerObjectBitArray[bitArrayIndex] == digitalInputBitArrayData[bitArrayIndex]) {
+                        if (digitalInputBitArrayData[bitArrayIndex] == 1) {
+                          //console.log(controllerObject[controllerObjectIndex4].input_name);
+                          //console.log(digitalInputBitArrayData[bitArrayIndex] + " at index " + bitArrayIndex);
+                          //console.log(inputStateFromArduino[controllerObjectIndex4]);
+                          if (inputStateFromArduino[controllerObjectIndex4] == true) {
+                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                          }
+                          if (inputStateFromArduino[controllerObjectIndex4] == false) {
+                            inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
+                            inputStateFromArduino[controllerObjectIndex4] = true;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                if (neutralController[neutralControllerIndex] != 0) {
+                  //Analog Input
+                  //console.log("Analog at index " + neutralControllerIndex);
+                  for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
+                    let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
+                    controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
+
+                    let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
+                    controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
+
+                    //console.log(controllerDataToCompareTo[neutralControllerIndex]);
+                    //let backToHexString = Buffer.from(controllerDataToCompareTo).toString("hex").toUpperCase();
+                    //console.log("0x" + backToHexString);
+                    if (controllerDataToCompareTo[neutralControllerIndex] != neutralController[neutralControllerIndex]) {
+                      if (controllerDataToCompareTo[neutralControllerIndex] == data[neutralControllerIndex + 1]) {
+                        // This part will detect only the correct input
+                        //console.log("C " + controllerObject[controllerObjectIndex4].input_name);
                         //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
                         if (inputStateFromArduino[controllerObjectIndex4] == true) {
                           //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
@@ -1108,84 +863,49 @@ parser.on("data", async function(data) {
                           inputStateFromArduino[controllerObjectIndex4] = true;
                         }
                       }
-                    }
-                  }
-                }
-              }
-              if (neutralController[neutralControllerIndex] != 0) {
-                //Analog Input
-                //console.log("Analog at index " + neutralControllerIndex);
-                for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
-                  let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
-                  controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
-                  controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
-
-                  let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
-                  controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
-                  controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
-
-                  //console.log(controllerDataToCompareTo[neutralControllerIndex]);
-                  //let backToHexString = Buffer.from(controllerDataToCompareTo).toString("hex").toUpperCase();
-                  //console.log("0x" + backToHexString);
-                  if (controllerDataToCompareTo[neutralControllerIndex] != neutralController[neutralControllerIndex]) {
-                    if (controllerDataToCompareTo[neutralControllerIndex] == data[neutralControllerIndex + 1]) {
-                      // This part will detect only the correct input
-                      //console.log("C " + controllerObject[controllerObjectIndex4].input_name);
-                      //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
-                      if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                        //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
-                      }
-                      if (inputStateFromArduino[controllerObjectIndex4] == false) {
-                        inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
-                        inputStateFromArduino[controllerObjectIndex4] = true;
-                      }
-                    }
-                    if (controllerDataToCompareTo[neutralControllerIndex] != data[neutralControllerIndex + 1]) {
-                      if (data[neutralControllerIndex + 1] != neutralController[neutralControllerIndex]) {
-                        // This part will detect the correct input as well as the opposite input
-                        /*
-                        console.log("F " + controllerObject[controllerObjectIndex4].input_name);
-                        console.log("neutralControllerIndex = " + neutralControllerIndex);
-                        console.log("controllerObjectIndex4 = " + controllerObjectIndex4);
-                        console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
-                        console.log("controllerDataToCompareTo[neutralControllerIndex] = " + controllerDataToCompareTo[neutralControllerIndex]);
-                        console.log("controllerDataToCompareToOpposite[neutralControllerIndex] = " + controllerDataToCompareToOpposite[neutralControllerIndex]);
-                        console.log("neutralController[neutralControllerIndex] = " + neutralController[neutralControllerIndex]);
-                        */
-                        if ((controllerDataToCompareTo[neutralControllerIndex] == controllerConfig.stick_minimum) && (data[neutralControllerIndex + 1] < neutralController[neutralControllerIndex])) {
-                          //
-                          //console.log("D " + controllerObject[controllerObjectIndex4].input_name);
-                          //console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
-                          //console.log(data[neutralControllerIndex + 1] + controllerConfig.stick_center);
-                          //console.log(data[neutralControllerIndex + 1] - controllerConfig.stick_center);
-                          //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
-                          //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
-                          if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                      if (controllerDataToCompareTo[neutralControllerIndex] != data[neutralControllerIndex + 1]) {
+                        if (data[neutralControllerIndex + 1] != neutralController[neutralControllerIndex]) {
+                          // This part will detect the correct input as well as the opposite input
+                          /*
+                          console.log("F " + controllerObject[controllerObjectIndex4].input_name);
+                          console.log("neutralControllerIndex = " + neutralControllerIndex);
+                          console.log("controllerObjectIndex4 = " + controllerObjectIndex4);
+                          console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
+                          console.log("controllerDataToCompareTo[neutralControllerIndex] = " + controllerDataToCompareTo[neutralControllerIndex]);
+                          console.log("controllerDataToCompareToOpposite[neutralControllerIndex] = " + controllerDataToCompareToOpposite[neutralControllerIndex]);
+                          console.log("neutralController[neutralControllerIndex] = " + neutralController[neutralControllerIndex]);
+                          */
+                          if ((controllerDataToCompareTo[neutralControllerIndex] == controllerConfig.stick_minimum) && (data[neutralControllerIndex + 1] < neutralController[neutralControllerIndex])) {
+                            //
+                            //console.log("D " + controllerObject[controllerObjectIndex4].input_name);
+                            //console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
+                            //console.log(data[neutralControllerIndex + 1] + controllerConfig.stick_center);
+                            //console.log(data[neutralControllerIndex + 1] - controllerConfig.stick_center);
+                            //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
+                            //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
+                            if (inputStateFromArduino[controllerObjectIndex4] == true) {
+                              //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                            }
+                            if (inputStateFromArduino[controllerObjectIndex4] == false) {
+                              inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
+                              inputStateFromArduino[controllerObjectIndex4] = true;
+                            }
                           }
-                          if (inputStateFromArduino[controllerObjectIndex4] == false) {
-                            inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
-                            inputStateFromArduino[controllerObjectIndex4] = true;
-                          }
-                        }
-                        if ((controllerDataToCompareTo[neutralControllerIndex] == controllerConfig.stick_maximum) && (data[neutralControllerIndex + 1] > neutralController[neutralControllerIndex])) {
-                          //
-                          //console.log("E " + controllerObject[controllerObjectIndex4].input_name);
-                          //console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
-                          //console.log(data[neutralControllerIndex + 1] + controllerConfig.stick_center);
-                          //console.log(data[neutralControllerIndex + 1] - controllerConfig.stick_center);
-                          //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
-                          //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
-                          if (inputStateFromArduino[controllerObjectIndex4] == true) {
-                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
-                          }
-                          if (inputStateFromArduino[controllerObjectIndex4] == false) {
-                            inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
-                            inputStateFromArduino[controllerObjectIndex4] = true;
+                          if ((controllerDataToCompareTo[neutralControllerIndex] == controllerConfig.stick_maximum) && (data[neutralControllerIndex + 1] > neutralController[neutralControllerIndex])) {
+                            //
+                            //console.log("E " + controllerObject[controllerObjectIndex4].input_name);
+                            //console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
+                            //console.log(data[neutralControllerIndex + 1] + controllerConfig.stick_center);
+                            //console.log(data[neutralControllerIndex + 1] - controllerConfig.stick_center);
+                            //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
+                            //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
+                            if (inputStateFromArduino[controllerObjectIndex4] == true) {
+                              //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                            }
+                            if (inputStateFromArduino[controllerObjectIndex4] == false) {
+                              inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
+                              inputStateFromArduino[controllerObjectIndex4] = true;
+                            }
                           }
                         }
                       }
@@ -1194,124 +914,110 @@ parser.on("data", async function(data) {
                 }
               }
             }
-          }
-          inputDurationToDisplay = (data[9] << 8) | (data[10]);
-          //console.log("inputDurationToDisplay = " + inputDurationToDisplay);
-          inputArrayToDisplay = inputArrayToDisplay.join("+");
-          if (inputArrayToDisplay == "") {
-            // Do nothing
-            //console.log("Empty String, this shouldn't happen CASE 64 - 127");
-          }
-          if (inputArrayToDisplay != "") {
-            if (inputDurationToDisplay == controllerConfig.default_duration_per_precision_input_millis) {
-              advancedInputString = inputArrayToDisplay;
-              io.sockets.emit("advanced_input_string", advancedInputString);
-              io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
+            inputDurationToDisplay = (data[9] << 8) | (data[10]);
+            //console.log("inputDurationToDisplay = " + inputDurationToDisplay);
+            inputArrayToDisplay = inputArrayToDisplay.join("+");
+            if (inputArrayToDisplay == "") {
               // Do nothing
+              //console.log("Empty String, this shouldn't happen CASE 1");
+              basicInputString = inputArrayToDisplay;
+              io.sockets.emit("basic_input_string", basicInputString);
+              io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
             }
-            if (inputDurationToDisplay == controllerConfig.held_duration_per_precision_input_millis) {
-              inputArrayToDisplay = inputArrayToDisplay + "-";
-            }
-            if ((inputDurationToDisplay != controllerConfig.default_duration_per_precision_input_millis) && (inputDurationToDisplay != controllerConfig.held_duration_per_precision_input_millis)) {
-              inputArrayToDisplay = inputArrayToDisplay + " " + inputDurationToDisplay + "ms";
-            }
-            //console.log(new Date().toISOString() + " " + inputArrayToDisplay);
-            advancedInputString = inputArrayToDisplay;
-            io.sockets.emit("advanced_input_string", advancedInputString);
-            io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
-            //console.log(inputArrayToDisplay.join("+"));
-            //await sleep(500);
-            // The database operations below check the total input count
-            /*
-            mongoClient.connect(mongoUrl, {
-              useUnifiedTopology: true
-            }, function(err, globalDb) {
-              //isDatabaseBusy = true;
-              if (err) {
-                throw err;
+            if (inputArrayToDisplay != "") {
+              if (inputDurationToDisplay == controllerConfig.normal_delay) {
+                // Do nothing
               }
-              // Check if the entry for a specific game exists
-              let globalDatabase = globalDb.db(globalConfig.global_database_name);
-              globalDatabase.collection(globalConfig.run_name).findOne({}, function(err, result) {
+              if (inputDurationToDisplay == controllerConfig.held_delay) {
+                inputArrayToDisplay = inputArrayToDisplay + "-";
+              }
+              if ((inputDurationToDisplay != controllerConfig.normal_delay) && (inputDurationToDisplay != controllerConfig.held_delay)) {
+                inputArrayToDisplay = inputArrayToDisplay + " " + inputDurationToDisplay + "ms";
+              }
+              //console.log(new Date().toISOString() + " " + inputArrayToDisplay);
+              basicInputString = inputArrayToDisplay;
+              io.sockets.emit("basic_input_string", basicInputString);
+              io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
+              //console.log(inputArrayToDisplay.join("+"));
+              //await sleep(500);
+              // The database operations below check the total input count
+              /*
+              mongoClient.connect(mongoUrl, {
+                useUnifiedTopology: true
+              }, function(err, globalDb) {
+                //isDatabaseBusy = true;
                 if (err) {
                   throw err;
                 }
-                //console.log(result);
-                //isNullDatabase = result;
-                if (result === null) {
-                  //console.log("B YES");
-                  mongoClient.connect(mongoUrl, {
-                    useUnifiedTopology: true
-                  }, function(err, databaseToCreate) {
-                    if (err) {
-                      throw err;
-                    }
-                    let globalDatabaseToCreate = databaseToCreate.db(globalConfig.global_database_name);
-                    let dataToInsert = {
-                      run_id: globalConfig.run_id,
-                      basic_inputs_sent: 0,
-                      advanced_inputs_sent: 1,
-                      total_inputs_sent: 1,
-                      basic_inputs_executed: 0,
-                      advanced_inputs_executed: 1,
-                      total_inputs_executed: 1
-                    };
-
-                    inputCountsObject = dataToInsert;
-                    io.sockets.emit("input_counts_object", inputCountsObject);
-
-                    //console.log("dataToInsert SERIAL");
-                    //console.log(dataToInsert);
-                    // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
-                    globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
+                // Check if the entry for a specific game exists
+                let globalDatabase = globalDb.db(globalConfig.global_database_name);
+                globalDatabase.collection(globalConfig.run_name).findOne({}, function(err, result) {
+                  if (err) {
+                    throw err;
+                  }
+                  //console.log(result);
+                  //isNullDatabase = result;
+                  if (result === null) {
+                    //console.log("A YES");
+                    mongoClient.connect(mongoUrl, {
+                      useUnifiedTopology: true
+                    }, function(err, databaseToCreate) {
                       if (err) {
                         throw err;
                       }
-                      //console.log("1 document inserted");
-                      mongoClient.connect(mongoUrl, {
-                        useUnifiedTopology: true
-                      }, function(err, databaseToReadFrom) {
+                      let globalDatabaseToCreate = databaseToCreate.db(globalConfig.global_database_name);
+                      let dataToInsert = {
+                        run_id: globalConfig.run_id,
+                        basic_inputs_sent: 1,
+                        advanced_inputs_sent: 0,
+                        total_inputs_sent: 1,
+                        basic_inputs_executed: 1,
+                        advanced_inputs_executed: 0,
+                        total_inputs_executed: 1
+                      };
+
+                      inputCountsObject = dataToInsert;
+                      io.sockets.emit("input_counts_object", inputCountsObject);
+
+                      //console.log("dataToInsert SERIAL");
+                      //console.log(dataToInsert);
+                      // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
+                      globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
                         if (err) {
                           throw err;
                         }
-                        let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
-                        globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
+                        //console.log("1 document inserted");
+                        mongoClient.connect(mongoUrl, {
+                          useUnifiedTopology: true
+                        }, function(err, databaseToReadFrom) {
                           if (err) {
                             throw err;
                           }
-                          databaseToReadFrom.close();
-                          //console.log(databaseToReadFromResult);
-                          //inputsSent = databaseToReadFromResult.input_count;
+                          let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
+                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
+                            if (err) {
+                              throw err;
+                            }
+                            databaseToReadFrom.close();
+                            //console.log(databaseToReadFromResult);
+                            //inputsSent = databaseToReadFromResult.input_count;
+                          });
                         });
+                        databaseToCreate.close();
                       });
-                      databaseToCreate.close();
                     });
-                  });
-                  //test();
-                }
-                if (result !== null) {
-                  //console.log("B NO");
-                  mongoClient.connect(mongoUrl, {
-                    useUnifiedTopology: true
-                  }, function(err, databaseToUpdate) {
-                    if (err) {
-                      throw err;
-                    }
-                    let globalDatabaseToUpdate = databaseToUpdate.db(globalConfig.global_database_name);
-                    let dataToQuery = {
-                      run_id: result.run_id,
-                      
-                      basic_inputs_sent: result.basic_inputs_sent,
-                      advanced_inputs_sent: result.advanced_inputs_sent,
-                      total_inputs_sent: result.total_inputs_sent,
-                      
-                      basic_inputs_executed: result.basic_inputs_executed,
-                      advanced_inputs_executed: result.advanced_inputs_executed,
-                      total_inputs_executed: result.total_inputs_executed
-                    };
-                    // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
-                    let dataToUpdate = {
-                      $set: {
+                    //test();
+                  }
+                  if (result !== null) {
+                    //console.log("A NO");
+                    mongoClient.connect(mongoUrl, {
+                      useUnifiedTopology: true
+                    }, function(err, databaseToUpdate) {
+                      if (err) {
+                        throw err;
+                      }
+                      let globalDatabaseToUpdate = databaseToUpdate.db(globalConfig.global_database_name);
+                      let dataToQuery = {
                         run_id: result.run_id,
                         
                         basic_inputs_sent: result.basic_inputs_sent,
@@ -1319,51 +1025,400 @@ parser.on("data", async function(data) {
                         total_inputs_sent: result.total_inputs_sent,
                         
                         basic_inputs_executed: result.basic_inputs_executed,
-                        advanced_inputs_executed: result.advanced_inputs_executed + 1,
-                        total_inputs_executed: result.total_inputs_executed + 1
-                      }
-                    };
+                        advanced_inputs_executed: result.advanced_inputs_executed,
+                        total_inputs_executed: result.total_inputs_executed
+                      };
+                      // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
+                      let dataToUpdate = {
+                        $set: {
+                          run_id: result.run_id,
+                          
+                          basic_inputs_sent: result.basic_inputs_sent,
+                          advanced_inputs_sent: result.advanced_inputs_sent,
+                          total_inputs_sent: result.total_inputs_sent,
+                          
+                          basic_inputs_executed: result.basic_inputs_executed + 1,
+                          advanced_inputs_executed: result.advanced_inputs_executed,
+                          total_inputs_executed: result.total_inputs_executed + 1
+                        }
+                      };
 
-                    inputCountsObject = dataToUpdate.$set;
-                    io.sockets.emit("input_counts_object", inputCountsObject);
+                      inputCountsObject = dataToUpdate.$set;
+                      io.sockets.emit("input_counts_object", inputCountsObject);
 
-                    //console.log("dataToUpdate SERIAL");
-                    //console.log(dataToUpdate);
-                    // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
-                    //console.log(newvalues);
-                    globalDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-                      if (err) {
-                        throw err;
-                      }
-                      //console.log(res.result);
-                      //console.log("1 document updated");
-                      mongoClient.connect(mongoUrl, {
-                        useUnifiedTopology: true
-                      }, function(err, databaseToReadFrom) {
+                      //console.log("dataToUpdate SERIAL");
+                      //console.log(dataToUpdate);
+                      // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
+                      //console.log(newvalues);
+                      globalDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
                         if (err) {
                           throw err;
                         }
-                        let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
-                        globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
+                        //console.log(res.result);
+                        //console.log("1 document updated");
+                        mongoClient.connect(mongoUrl, {
+                          useUnifiedTopology: true
+                        }, function(err, databaseToReadFrom) {
                           if (err) {
                             throw err;
                           }
-                          databaseToReadFrom.close();
-                          //console.log(databaseToReadFromResult);
-                          //inputsSent = databaseToReadFromResult.input_count;
+                          let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
+                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
+                            if (err) {
+                              throw err;
+                            }
+                            databaseToReadFrom.close();
+                            //console.log(databaseToReadFromResult);
+                            //inputsSent = databaseToReadFromResult.input_count;
+                          });
                         });
+                        databaseToUpdate.close();
                       });
-                      databaseToUpdate.close();
                     });
-                  });
-                  //console.log(result.input_count);
-                  //test3(result.input_count);
-                }
-                globalDb.close();
-                //isDatabaseBusy = false;
+                    //console.log(result.input_count);
+                    //test3(result.input_count);
+                  }
+                  globalDb.close();
+                  //isDatabaseBusy = false;
+                });
               });
+              */
+            }
+          }
+        }
+        if (data[0] >= controllerConfig.initial_macro_preamble && data[0] <= (controllerConfig.final_macro_preamble - 1)) {
+          if (inputMode != 2) {
+            port.flush(function(err, results) {
+              if (err) {
+                return console.log(err);
+              }
+              //console.log(new Date().toISOString() + " flush results " + results);
             });
-            */
+            port.drain(function(err, results) {
+              if (err) {
+                return console.log(err);
+              }
+              //console.log(new Date().toISOString() + " drain results " + results);
+            });
+            data[0] = 0;
+            data[1] = 0;
+            data[2] = 0;
+            data[3] = 0;
+            data[4] = 0;
+            data[5] = 0;
+            data[6] = 0;
+            data[7] = 0;
+            data[8] = 0;
+            data[9] = 0;
+            data[10] = 0;
+            data[11] = 0;
+          }
+          if (inputMode == 2) {
+            for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
+              //console.log(inputStateFromArduino[controllerObjectIndex4]);
+              inputStateFromArduino.push(false);
+              //console.log(inputStateFromArduino[controllerObjectIndex4]);
+            }
+            // Advanced Input
+            //console.log(new Date().toISOString() + " " + data[0] + " Stick " + data[3] + "," + data[4] + " CStick " + data[5] + "," + data[6]);
+            for (let neutralControllerIndex = 0; neutralControllerIndex < neutralController.length; neutralControllerIndex++) {
+              if (neutralController[neutralControllerIndex] != data[neutralControllerIndex + 1]) {
+                //console.log("neutralControllerIndex = " + neutralControllerIndex);
+                if (neutralController[neutralControllerIndex] == 0) {
+                  //Digital Input
+                  //console.log("Digital at index " + neutralControllerIndex);
+                  let digitalInputBitArrayNeutral = convertByteToBitArray(neutralController[neutralControllerIndex]);
+                  let digitalInputBitArrayData = convertByteToBitArray(data[neutralControllerIndex + 1]);
+                  //console.log(neutralControllerIndex);
+                  for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
+                    let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
+                    controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
+
+                    let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
+                    controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
+
+                    //console.log(controllerDataToCompareTo[neutralControllerIndex]);
+                    //let backToHexString = Buffer.from(controllerDataToCompareTo).toString("hex").toUpperCase();
+                    //console.log("0x" + backToHexString);
+                    let controllerObjectBitArray = convertByteToBitArray(controllerDataToCompareTo[neutralControllerIndex]);
+                    for (let bitArrayIndex = 0; bitArrayIndex < digitalInputBitArrayData.length; bitArrayIndex++) {
+                      //
+                      if (controllerObjectBitArray[bitArrayIndex] == digitalInputBitArrayData[bitArrayIndex]) {
+                        if (digitalInputBitArrayData[bitArrayIndex] == 1) {
+                          //console.log(controllerObject[controllerObjectIndex4].input_name);
+                          //console.log(digitalInputBitArrayData[bitArrayIndex] + " at index " + bitArrayIndex);
+                          //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
+                          if (inputStateFromArduino[controllerObjectIndex4] == true) {
+                            //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                          }
+                          if (inputStateFromArduino[controllerObjectIndex4] == false) {
+                            inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
+                            inputStateFromArduino[controllerObjectIndex4] = true;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                if (neutralController[neutralControllerIndex] != 0) {
+                  //Analog Input
+                  //console.log("Analog at index " + neutralControllerIndex);
+                  for (var controllerObjectIndex4 = 0; controllerObjectIndex4 < controllerObject.length; controllerObjectIndex4++) {
+                    let controllerDataToCompareTo = controllerObject[controllerObjectIndex4].input_value;
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/(0x)+/ig, "");
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/L+/ig, "");
+                    controllerDataToCompareTo = controllerDataToCompareTo.replace(/#+/ig, "");
+                    controllerDataToCompareTo = Uint8Array.from(Buffer.from(controllerDataToCompareTo, "hex"));
+
+                    let controllerDataToCompareToOpposite = controllerObject[controllerObjectIndex4].opposite_input_value;
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/(0x)+/ig, "");
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/L+/ig, "");
+                    controllerDataToCompareToOpposite = controllerDataToCompareToOpposite.replace(/#+/ig, "");
+                    controllerDataToCompareToOpposite = Uint8Array.from(Buffer.from(controllerDataToCompareToOpposite, "hex"));
+
+                    //console.log(controllerDataToCompareTo[neutralControllerIndex]);
+                    //let backToHexString = Buffer.from(controllerDataToCompareTo).toString("hex").toUpperCase();
+                    //console.log("0x" + backToHexString);
+                    if (controllerDataToCompareTo[neutralControllerIndex] != neutralController[neutralControllerIndex]) {
+                      if (controllerDataToCompareTo[neutralControllerIndex] == data[neutralControllerIndex + 1]) {
+                        // This part will detect only the correct input
+                        //console.log("C " + controllerObject[controllerObjectIndex4].input_name);
+                        //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
+                        if (inputStateFromArduino[controllerObjectIndex4] == true) {
+                          //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                        }
+                        if (inputStateFromArduino[controllerObjectIndex4] == false) {
+                          inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name);
+                          inputStateFromArduino[controllerObjectIndex4] = true;
+                        }
+                      }
+                      if (controllerDataToCompareTo[neutralControllerIndex] != data[neutralControllerIndex + 1]) {
+                        if (data[neutralControllerIndex + 1] != neutralController[neutralControllerIndex]) {
+                          // This part will detect the correct input as well as the opposite input
+                          /*
+                          console.log("F " + controllerObject[controllerObjectIndex4].input_name);
+                          console.log("neutralControllerIndex = " + neutralControllerIndex);
+                          console.log("controllerObjectIndex4 = " + controllerObjectIndex4);
+                          console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
+                          console.log("controllerDataToCompareTo[neutralControllerIndex] = " + controllerDataToCompareTo[neutralControllerIndex]);
+                          console.log("controllerDataToCompareToOpposite[neutralControllerIndex] = " + controllerDataToCompareToOpposite[neutralControllerIndex]);
+                          console.log("neutralController[neutralControllerIndex] = " + neutralController[neutralControllerIndex]);
+                          */
+                          if ((controllerDataToCompareTo[neutralControllerIndex] == controllerConfig.stick_minimum) && (data[neutralControllerIndex + 1] < neutralController[neutralControllerIndex])) {
+                            //
+                            //console.log("D " + controllerObject[controllerObjectIndex4].input_name);
+                            //console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
+                            //console.log(data[neutralControllerIndex + 1] + controllerConfig.stick_center);
+                            //console.log(data[neutralControllerIndex + 1] - controllerConfig.stick_center);
+                            //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
+                            //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
+                            if (inputStateFromArduino[controllerObjectIndex4] == true) {
+                              //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                            }
+                            if (inputStateFromArduino[controllerObjectIndex4] == false) {
+                              inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (controllerConfig.stick_center - data[neutralControllerIndex + 1]));
+                              inputStateFromArduino[controllerObjectIndex4] = true;
+                            }
+                          }
+                          if ((controllerDataToCompareTo[neutralControllerIndex] == controllerConfig.stick_maximum) && (data[neutralControllerIndex + 1] > neutralController[neutralControllerIndex])) {
+                            //
+                            //console.log("E " + controllerObject[controllerObjectIndex4].input_name);
+                            //console.log("data[neutralControllerIndex + 1] = " + data[neutralControllerIndex + 1]);
+                            //console.log(data[neutralControllerIndex + 1] + controllerConfig.stick_center);
+                            //console.log(data[neutralControllerIndex + 1] - controllerConfig.stick_center);
+                            //console.log(controllerConfig.stick_center - data[neutralControllerIndex + 1]);
+                            //inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
+                            if (inputStateFromArduino[controllerObjectIndex4] == true) {
+                              //console.log(controllerObject[controllerObjectIndex4].input_name + " was already used!");
+                            }
+                            if (inputStateFromArduino[controllerObjectIndex4] == false) {
+                              inputArrayToDisplay.push(controllerObject[controllerObjectIndex4].input_name + ":" + (data[neutralControllerIndex + 1] - controllerConfig.stick_center));
+                              inputStateFromArduino[controllerObjectIndex4] = true;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            inputDurationToDisplay = (data[9] << 8) | (data[10]);
+            //console.log("inputDurationToDisplay = " + inputDurationToDisplay);
+            inputArrayToDisplay = inputArrayToDisplay.join("+");
+            if (inputArrayToDisplay == "") {
+              // Do nothing
+              //console.log("Empty String, this shouldn't happen CASE 64 - 127");
+            }
+            if (inputArrayToDisplay != "") {
+              if (inputDurationToDisplay == controllerConfig.default_duration_per_precision_input_millis) {
+                advancedInputString = inputArrayToDisplay;
+                io.sockets.emit("advanced_input_string", advancedInputString);
+                io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
+                // Do nothing
+              }
+              if (inputDurationToDisplay == controllerConfig.held_duration_per_precision_input_millis) {
+                inputArrayToDisplay = inputArrayToDisplay + "-";
+              }
+              if ((inputDurationToDisplay != controllerConfig.default_duration_per_precision_input_millis) && (inputDurationToDisplay != controllerConfig.held_duration_per_precision_input_millis)) {
+                inputArrayToDisplay = inputArrayToDisplay + " " + inputDurationToDisplay + "ms";
+              }
+              //console.log(new Date().toISOString() + " " + inputArrayToDisplay);
+              advancedInputString = inputArrayToDisplay;
+              io.sockets.emit("advanced_input_string", advancedInputString);
+              io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
+              //console.log(inputArrayToDisplay.join("+"));
+              //await sleep(500);
+              // The database operations below check the total input count
+              /*
+              mongoClient.connect(mongoUrl, {
+                useUnifiedTopology: true
+              }, function(err, globalDb) {
+                //isDatabaseBusy = true;
+                if (err) {
+                  throw err;
+                }
+                // Check if the entry for a specific game exists
+                let globalDatabase = globalDb.db(globalConfig.global_database_name);
+                globalDatabase.collection(globalConfig.run_name).findOne({}, function(err, result) {
+                  if (err) {
+                    throw err;
+                  }
+                  //console.log(result);
+                  //isNullDatabase = result;
+                  if (result === null) {
+                    //console.log("B YES");
+                    mongoClient.connect(mongoUrl, {
+                      useUnifiedTopology: true
+                    }, function(err, databaseToCreate) {
+                      if (err) {
+                        throw err;
+                      }
+                      let globalDatabaseToCreate = databaseToCreate.db(globalConfig.global_database_name);
+                      let dataToInsert = {
+                        run_id: globalConfig.run_id,
+                        basic_inputs_sent: 0,
+                        advanced_inputs_sent: 1,
+                        total_inputs_sent: 1,
+                        basic_inputs_executed: 0,
+                        advanced_inputs_executed: 1,
+                        total_inputs_executed: 1
+                      };
+
+                      inputCountsObject = dataToInsert;
+                      io.sockets.emit("input_counts_object", inputCountsObject);
+
+                      //console.log("dataToInsert SERIAL");
+                      //console.log(dataToInsert);
+                      // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
+                      globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
+                        if (err) {
+                          throw err;
+                        }
+                        //console.log("1 document inserted");
+                        mongoClient.connect(mongoUrl, {
+                          useUnifiedTopology: true
+                        }, function(err, databaseToReadFrom) {
+                          if (err) {
+                            throw err;
+                          }
+                          let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
+                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
+                            if (err) {
+                              throw err;
+                            }
+                            databaseToReadFrom.close();
+                            //console.log(databaseToReadFromResult);
+                            //inputsSent = databaseToReadFromResult.input_count;
+                          });
+                        });
+                        databaseToCreate.close();
+                      });
+                    });
+                    //test();
+                  }
+                  if (result !== null) {
+                    //console.log("B NO");
+                    mongoClient.connect(mongoUrl, {
+                      useUnifiedTopology: true
+                    }, function(err, databaseToUpdate) {
+                      if (err) {
+                        throw err;
+                      }
+                      let globalDatabaseToUpdate = databaseToUpdate.db(globalConfig.global_database_name);
+                      let dataToQuery = {
+                        run_id: result.run_id,
+                        
+                        basic_inputs_sent: result.basic_inputs_sent,
+                        advanced_inputs_sent: result.advanced_inputs_sent,
+                        total_inputs_sent: result.total_inputs_sent,
+                        
+                        basic_inputs_executed: result.basic_inputs_executed,
+                        advanced_inputs_executed: result.advanced_inputs_executed,
+                        total_inputs_executed: result.total_inputs_executed
+                      };
+                      // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
+                      let dataToUpdate = {
+                        $set: {
+                          run_id: result.run_id,
+                          
+                          basic_inputs_sent: result.basic_inputs_sent,
+                          advanced_inputs_sent: result.advanced_inputs_sent,
+                          total_inputs_sent: result.total_inputs_sent,
+                          
+                          basic_inputs_executed: result.basic_inputs_executed,
+                          advanced_inputs_executed: result.advanced_inputs_executed + 1,
+                          total_inputs_executed: result.total_inputs_executed + 1
+                        }
+                      };
+
+                      inputCountsObject = dataToUpdate.$set;
+                      io.sockets.emit("input_counts_object", inputCountsObject);
+
+                      //console.log("dataToUpdate SERIAL");
+                      //console.log(dataToUpdate);
+                      // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
+                      //console.log(newvalues);
+                      globalDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
+                        if (err) {
+                          throw err;
+                        }
+                        //console.log(res.result);
+                        //console.log("1 document updated");
+                        mongoClient.connect(mongoUrl, {
+                          useUnifiedTopology: true
+                        }, function(err, databaseToReadFrom) {
+                          if (err) {
+                            throw err;
+                          }
+                          let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
+                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
+                            if (err) {
+                              throw err;
+                            }
+                            databaseToReadFrom.close();
+                            //console.log(databaseToReadFromResult);
+                            //inputsSent = databaseToReadFromResult.input_count;
+                          });
+                        });
+                        databaseToUpdate.close();
+                      });
+                    });
+                    //console.log(result.input_count);
+                    //test3(result.input_count);
+                  }
+                  globalDb.close();
+                  //isDatabaseBusy = false;
+                });
+              });
+              */
+            }
           }
         }
         if (data[0] == controllerConfig.final_macro_preamble) {
@@ -1465,7 +1520,7 @@ chatLogger.on("raw_message", rawMessageLogger);
 // client.join("channel_name"); // To join a channel?
 
 function onRaid(channel, username, viewers, tags) {
-  
+
   let systemMsg = tags["system-msg"];
   systemMsg = systemMsg.replace(/(\\s)+/ig, " ");
   systemMsg = systemMsg.replace(/\s+/ig, " ");
@@ -2956,23 +3011,23 @@ async function onMessageHandler(target, tags, message, self) {
       });
     });
     //if (inputMode == 0) {
-      // There's no need to run this block for advanced mode, only basic mode since names are not displayed in advanced mode
-      // It turns out this sleep is important because the database is used again below, no matter which input mode, so we have to sleep long enough to make sure the database completed any operations above before doing anything to the database below 
-      //console.log(new Date().toISOString() + " BEFORE user_color=" + userColor);
-      await sleep(400); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
-      //console.log(new Date().toISOString() + " AFTER  user_color=" + userColor);
-      userColorInverted = userColor;
-      userColorInverted = userColorInverted.replace(/(0x)+/ig, "");
-      userColorInverted = userColorInverted.replace(/L+/ig, "");
-      userColorInverted = userColorInverted.replace(/#+/ig, "");
-      userColorInverted = Uint8Array.from(Buffer.from(userColorInverted, "hex"));
-      //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
-      userColorInverted[0] = 255 - userColorInverted[0];
-      userColorInverted[1] = 255 - userColorInverted[1];
-      userColorInverted[2] = 255 - userColorInverted[2];
-      //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
-      userColorInverted = "#" + Buffer.from(userColorInverted).toString("hex").toUpperCase();
-      //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
+    // There's no need to run this block for advanced mode, only basic mode since names are not displayed in advanced mode
+    // It turns out this sleep is important because the database is used again below, no matter which input mode, so we have to sleep long enough to make sure the database completed any operations above before doing anything to the database below 
+    //console.log(new Date().toISOString() + " BEFORE user_color=" + userColor);
+    await sleep(400); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
+    //console.log(new Date().toISOString() + " AFTER  user_color=" + userColor);
+    userColorInverted = userColor;
+    userColorInverted = userColorInverted.replace(/(0x)+/ig, "");
+    userColorInverted = userColorInverted.replace(/L+/ig, "");
+    userColorInverted = userColorInverted.replace(/#+/ig, "");
+    userColorInverted = Uint8Array.from(Buffer.from(userColorInverted, "hex"));
+    //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
+    userColorInverted[0] = 255 - userColorInverted[0];
+    userColorInverted[1] = 255 - userColorInverted[1];
+    userColorInverted[2] = 255 - userColorInverted[2];
+    //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
+    userColorInverted = "#" + Buffer.from(userColorInverted).toString("hex").toUpperCase();
+    //console.log(new Date().toISOString() + " userColorInverted = " + userColorInverted);
     //}
     // Then check if user exists here
     /*
@@ -4638,10 +4693,10 @@ async function onMessageHandler(target, tags, message, self) {
                   if (splitInputsInMultipleStringsIndex == 0) {
                     client.action(target, "@" + usernameToPing + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
                   }
-                  if (splitInputsInMultipleStringsIndex > 0 && splitInputsInMultipleStringsIndex != splitInputsInMultipleStrings.length-1) {
+                  if (splitInputsInMultipleStringsIndex > 0 && splitInputsInMultipleStringsIndex != splitInputsInMultipleStrings.length - 1) {
                     client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
                   }
-                  if (splitInputsInMultipleStringsIndex == splitInputsInMultipleStrings.length-1) {
+                  if (splitInputsInMultipleStringsIndex == splitInputsInMultipleStrings.length - 1) {
                     client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Type Stop or Wait to stop execution of inputs");
                   }
                 }
