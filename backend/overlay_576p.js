@@ -395,6 +395,27 @@ function draw() {
   //var inputToHighlight = 0;
   inputToHighlight = inputQueueLength - inputQueue.length;
   inputToHighlight = currentInputInQueue - inputToHighlight;
+
+  let nextStartTimeISOString = new Date(nextStartTimeMillis).toISOString();
+  let nextStartTimeRemaining = currentTimeMillis - nextStartTimeMillis;
+  nextStartTimeRemaining = Math.abs(nextStartTimeRemaining);
+  let nextStartTimeRemainingDays = (parseInt(nextStartTimeRemaining / 86400000)).toString().padStart(2, "0");
+  let nextStartTimeRemainingHours = (parseInt(nextStartTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
+  let nextStartTimeRemainingMinutes = (parseInt(nextStartTimeRemaining / 60000) % 60).toString().padStart(2, "0");
+  let nextStartTimeRemainingSeconds = (parseInt(nextStartTimeRemaining / 1000) % 60).toString().padStart(2, "0");
+  let nextStartTimeRemainingMillis = (nextStartTimeRemaining % 1000).toString().padStart(3, "0");
+  let nextStartTimeRemainingString = nextStartTimeRemainingDays + "d " + nextStartTimeRemainingHours + "h " + nextStartTimeRemainingMinutes + "m " + nextStartTimeRemainingSeconds + "s " + nextStartTimeRemainingMillis + "ms";
+
+  let streamEndTimeISOString = new Date(streamEndTimeMillis).toISOString();
+  let streamEndTimeRemaining = currentTimeMillis - streamEndTimeMillis;
+  streamEndTimeRemaining = Math.abs(streamEndTimeRemaining);
+  let streamEndTimeRemainingDays = (parseInt(streamEndTimeRemaining / 86400000)).toString().padStart(2, "0");
+  let streamEndTimeRemainingHours = (parseInt(streamEndTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
+  let streamEndTimeRemainingMinutes = (parseInt(streamEndTimeRemaining / 60000) % 60).toString().padStart(2, "0");
+  let streamEndTimeRemainingSeconds = (parseInt(streamEndTimeRemaining / 1000) % 60).toString().padStart(2, "0");
+  let streamEndTimeRemainingMillis = (streamEndTimeRemaining % 1000).toString().padStart(3, "0");
+  let streamEndTimeRemainingString = streamEndTimeRemainingDays + "d " + streamEndTimeRemainingHours + "h " + streamEndTimeRemainingMinutes + "m " + streamEndTimeRemainingSeconds + "s " + streamEndTimeRemainingMillis + "ms";
+
   clear();
   background("#00000000");
   //recalculateFont(2, 1);
@@ -580,31 +601,10 @@ function draw() {
   //if (isTtsBusy == false) {
     //inputQueue[currentInputInQueue].tts_message;
     if (helpMessages.length > 0) {
-
-      let nextStartTimeISOString = new Date(nextStartTimeMillis).toISOString();
-      let nextStartTimeRemaining = currentTimeMillis - nextStartTimeMillis;
-      nextStartTimeRemaining = Math.abs(nextStartTimeRemaining);
-      let nextStartTimeRemainingDays = (parseInt(nextStartTimeRemaining / 86400000)).toString().padStart(2, "0");
-      let nextStartTimeRemainingHours = (parseInt(nextStartTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
-      let nextStartTimeRemainingMinutes = (parseInt(nextStartTimeRemaining / 60000) % 60).toString().padStart(2, "0");
-      let nextStartTimeRemainingSeconds = (parseInt(nextStartTimeRemaining / 1000) % 60).toString().padStart(2, "0");
-      let nextStartTimeRemainingMillis = (nextStartTimeRemaining % 1000).toString().padStart(3, "0");
-      let nextStartTimeRemainingString = nextStartTimeRemainingDays + "d " + nextStartTimeRemainingHours + "h " + nextStartTimeRemainingMinutes + "m " + nextStartTimeRemainingSeconds + "s " + nextStartTimeRemainingMillis + "ms";
-
-      let streamEndTimeISOString = new Date(streamEndTimeMillis).toISOString();
-      let streamEndTimeRemaining = currentTimeMillis - streamEndTimeMillis;
-      streamEndTimeRemaining = Math.abs(streamEndTimeRemaining);
-      let streamEndTimeRemainingDays = (parseInt(streamEndTimeRemaining / 86400000)).toString().padStart(2, "0");
-      let streamEndTimeRemainingHours = (parseInt(streamEndTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
-      let streamEndTimeRemainingMinutes = (parseInt(streamEndTimeRemaining / 60000) % 60).toString().padStart(2, "0");
-      let streamEndTimeRemainingSeconds = (parseInt(streamEndTimeRemaining / 1000) % 60).toString().padStart(2, "0");
-      let streamEndTimeRemainingMillis = (streamEndTimeRemaining % 1000).toString().padStart(3, "0");
-      let streamEndTimeRemainingString = streamEndTimeRemainingDays + "d " + streamEndTimeRemainingHours + "h " + streamEndTimeRemainingMinutes + "m " + streamEndTimeRemainingSeconds + "s " + streamEndTimeRemainingMillis + "ms";
-
       var helpMessageToDisplay = helpMessages[currentValueToDisplay];
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title}})+/ig, nextGameTitle);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + " (" + nextStartTimeISOString + ")");
-      helpMessageToDisplay = helpMessageToDisplay.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + " (" + streamEndTimeISOString + ")");
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + "\n(" + streamEndTimeISOString + ")");
       if (currentValueToDisplay == 0) {
         // Big red text case
         recalculateFont(6, 3);
@@ -792,6 +792,13 @@ function draw() {
     stroke("#000000FF");
     //textAlign(LEFT, TOP); // 4x5 font isn't kind to CENTER, LEFT, text gets blurry, so I have to do LEFT, TOP and kinda hardcode the text position so it looks like it is centered, ugly hack but it works
     fill("#FFFFFFFF");
+    if (advancedInputString == "") {
+      textAlign(CENTER, TOP);
+      scale(0.5, 1);
+      textLeading(textDefaultLeadingToUse);
+      text("Stream goes offline in\n" + streamEndTimeRemainingString + "\n(" + streamEndTimeISOString  + ")\n(The 31 day mark)", 896 * 2, 150);
+      scale(2, 1);
+    }
     if (advancedInputString != "") {
       if (advancedInputMetadata.loop_macro == 0) {
         textAlign(CENTER, TOP);
