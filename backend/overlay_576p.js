@@ -150,7 +150,7 @@ var stepsToMoveUp = 0;
 var viewerCount = -1;
 
 var gameTitle = "Game Title";
-var nextGameTitle = "Super Mario RPG: Legend of the Seven Stars";
+var nextGameTitle = "Next Game Title";
 
 var votingBarSize = 200;
 var votingBarCenterPosition = 896;
@@ -796,7 +796,7 @@ function draw() {
       textAlign(CENTER, TOP);
       scale(0.5, 1);
       textLeading(textDefaultLeadingToUse);
-      text("Stream goes offline in\n" + streamEndTimeRemainingString + "\n(" + streamEndTimeISOString  + ")\n(The 31 day mark)", 896 * 2, 150);
+      text("Stream goes offline in\n" + streamEndTimeRemainingString + "\n(" + streamEndTimeISOString  + ")\n(The 31 day mark)\n\n Super Mario RPG:\nLegend of the Seven Stars\nStarts in\n" + nextStartTimeRemainingString + "\n(" + nextStartTimeISOString + ")", 896 * 2, 60);
       scale(2, 1);
     }
     if (advancedInputString != "") {
