@@ -2257,7 +2257,7 @@ function getTwitchTokenStatus(twitchAccessTokenObject) {
   req.end();
 }
 
-setInterval(checkChatConnection, 10000);
+setInterval(checkChatConnection, 60000);
 
 function checkChatConnection() {
   //console.log(client.readyState());
