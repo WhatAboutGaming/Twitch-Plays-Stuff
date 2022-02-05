@@ -1545,7 +1545,8 @@ function onRaid(channel, username, viewers, tags) {
   console.log(tags);
   */
   let randomColorName = Math.floor(Math.random() * defaultColors.length);
-  client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+  client.say(channel, ".color " + defaultColorNames[randomColorName]);
+  client.action(chatConfig.debug_channel, systemMsg);
   //client.action(chatConfig.debug_channel, new Date().toISOString() + " [RAID] channel=" + channel + ", username=" + username + ",viewers=" + viewers + ", tags=" + tags);
   //client.whisper(chatConfig.channel_owner, new Date().toISOString() + " [RAID] channel=" + channel + ", username=" + username + ",viewers=" + viewers + ", tags=" + tags);
   //client.action(chatConfig.debug_channel, new Date().toISOString() + " [RAID] channel=" + channel + ", username=" + username + ",viewers=" + viewers + ", tags=" + JSON.stringify(tags));
