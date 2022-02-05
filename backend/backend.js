@@ -2275,10 +2275,16 @@ setInterval(checkChatConnection, 60000);
 function checkChatConnection() {
   //console.log(client.readyState());
   //console.log(new Date().toISOString() + " [checkChatConnection CHAT READY STATES] chatLogger.readyState() = " + chatLogger.readyState() + " client.readyState() = " + client.readyState() + " clientReconnectAttempts = " + clientReconnectAttempts + " chatLoggerReconnectAttempts = " + chatLoggerReconnectAttempts);
+  if (client.readyState() === "OPEN") {
+    client.raw("PING");
+  }
   if (client.readyState() === "CLOSED") {
     clientReconnectAttempts++;
     console.log(new Date().toISOString() + " [checkChatConnection A CHAT READY STATES] chatLogger.readyState() = " + chatLogger.readyState() + " client.readyState() = " + client.readyState() + " clientReconnectAttempts = " + clientReconnectAttempts + " chatLoggerReconnectAttempts = " + chatLoggerReconnectAttempts);
     client.connect();
+  }
+  if (chatLogger.readyState() === "OPEN") {
+    chatLogger.raw("PING");
   }
   if (chatLogger.readyState() === "CLOSED") {
     chatLoggerReconnectAttempts++;
