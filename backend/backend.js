@@ -1509,6 +1509,7 @@ var client = new tmi.client(chatConfig);
 var chatLogger = new tmi.client(chatConfig);
 
 // Register our event handlers (defined below)
+client.on("ping", onPing);
 client.on("raided", onRaid);
 client.on("timeout", onTimeOut);
 client.on("ban", onBan);
@@ -1516,8 +1517,20 @@ client.on("messagedeleted", onClearMsg);
 client.on("message", onMessageHandler);
 client.on("connected", onConnectedHandler);
 client.on("raw_message", onRawMessageHandler);
+chatLogger.on("ping", onChatLoggerPing);
+chatLogger.on("connected", onConnectedChatLoggerHandler);
 chatLogger.on("raw_message", rawMessageLogger);
 // client.join("channel_name"); // To join a channel?
+
+function onChatLoggerPing() {
+  console.log(new Date().toISOString() + " [CHAT LOGGER PING] Received ping from server");
+  chatLogger.raw("PONG");
+}
+
+function onPing() {
+  console.log(new Date().toISOString() + " [MAIN BOT PING] Received ping from server");
+  client.raw("PONG");
+}
 
 function onRaid(channel, username, viewers, tags) {
 
@@ -6451,7 +6464,16 @@ function onConnectedHandler(addr, port) {
   if (chatConfig.send_debug_channel_messages == true) {
     let randomColorName = Math.floor(Math.random() * defaultColors.length);
     client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
-    client.action(chatConfig.debug_channel, new Date().toISOString() + " Connected! PogChamp");
+    client.action(chatConfig.debug_channel, new Date().toISOString() + " Main bot connected! PogChamp");
+  }
+}
+
+function onConnectedChatLoggerHandler(addr, port) {
+  console.log("* Connected to " + addr + ":" + port);
+  if (chatConfig.send_debug_channel_messages == true) {
+    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+    chatLogger.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+    chatLogger.action(chatConfig.debug_channel, new Date().toISOString() + " Chat logger Connected! PogChamp");
   }
 }
 
