@@ -2974,6 +2974,7 @@
     "input_value": "0x00107F7F7F7F0000L",
     "input_name": "D^",
     "input_alias": [
+      "Gear",
       "DForwrddJp",
       "DpadForwrddJp",
       "DForwrdfJp",
@@ -3529,6 +3530,7 @@
     "input_value": "0x00207F7F7F7F0000L",
     "input_name": "Dv",
     "input_alias": [
+      "Journal",
       "DAckwrd",
       "DAckwrds",
       "DpadAckwrd",
@@ -7054,6 +7056,7 @@
     "input_value": "0x00407F7F7F7F0000L",
     "input_name": "D>",
     "input_alias": [
+      "Badges",
       "DRifgt",
       "DpadRifgt",
       "DRifgty",
@@ -7188,6 +7191,7 @@
     "input_value": "0x00807F7F7F7F0000L",
     "input_name": "D<",
     "input_alias": [
+      "Party",
       "DLwftt",
       "DpadLwftt",
       "DLwft",
