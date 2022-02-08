@@ -3271,7 +3271,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("BASIC 1");
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " Your mode vote was added as Basic and will expire at " + new Date(voteTime).toISOString() + ".");
+              client.action(target, "@" + usernameToPing + " Your mode vote was added as Basic and will expire at " + new Date(voteTime).toISOString() + ". The time is " + new Date().toISOString() + ".");
               checkModeVotes();
               //console.log(modeVotes);
               //console.log(modeVotes);
@@ -3297,7 +3297,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("BASIC 2");
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " Your mode vote was readded as Basic and will expire at " + new Date(modeVotes[playerVoteIndex].expiration_time).toISOString() + ".");
+              client.action(target, "@" + usernameToPing + " Your mode vote was readded as Basic and will expire at " + new Date(modeVotes[playerVoteIndex].expiration_time).toISOString() + ". The time is " + new Date().toISOString() + ".");
               checkModeVotes();
               //console.log(modeVotes);
               //console.log(modeVotes);
@@ -3337,7 +3337,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("ADVANCED 1");
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " Your mode vote was added as Advanced and will expire at " + new Date(voteTime).toISOString() + ".");
+              client.action(target, "@" + usernameToPing + " Your mode vote was added as Advanced and will expire at " + new Date(voteTime).toISOString() + ". The time is " + new Date().toISOString() + ".");
               checkModeVotes();
               //console.log(modeVotes);
               //console.log(modeVotes);
@@ -3363,7 +3363,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("ADVANCED 2");
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " Your mode vote was readded as Advanced and will expire at " + new Date(modeVotes[playerVoteIndex].expiration_time).toISOString() + ".");
+              client.action(target, "@" + usernameToPing + " Your mode vote was readded as Advanced and will expire at " + new Date(modeVotes[playerVoteIndex].expiration_time).toISOString() + ". The time is " + new Date().toISOString() + ".");
               checkModeVotes();
               //console.log(modeVotes);
               //console.log(modeVotes);
