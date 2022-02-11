@@ -5340,7 +5340,7 @@ async function onMessageHandler(target, tags, message, self) {
                   if (tempInputArray2[1] === undefined) {
                     //console.log(new Date().toISOString() + " NO WHAT THE FUCK 3 " + tempInputArray2);
                     //splitToFindCustomAnalogStickPosition[0] = splitToFindCustomAnalogStickPosition[0] + " " + tempInputArray2[0];
-                    let inputContainsDashesAtTheEnd2 = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$/ig.test(tempInputArray2[0]);
+                    let inputContainsDashesAtTheEnd2 = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig.test(tempInputArray2[0]);
                     if (inputContainsDashesAtTheEnd2 == true) {
                       splitToFindCustomAnalogStickPosition[0] = splitToFindCustomAnalogStickPosition[0] + "-";
                       //console.log(splitToFindCustomAnalogStickPosition[0] + "-");
@@ -5463,8 +5463,8 @@ async function onMessageHandler(target, tags, message, self) {
 
               //let inputContainsDashes = /[\-\=]+/ig.test(messageInputs[messageInputIndex]);
               //let inputContainsDashesAtTheEnd = /[\-\=]+$/ig.test(messageInputs[messageInputIndex]);
-              let inputContainsDashes = /[\-\=\‒\–\—\­\˗\−\－\̠]+|(h+o+l+d+)+|(h+e+l+d+)+|(r+u+n+)+|(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+|(s+p+r+i+n+t+)+|(k+e+p+)+|(b+i+g+)+|(l+o+n+g+)+|(p+e+r+m+a+n*e*n*t*l*y*)+/ig.test(tempInputArray[0]);
-              let inputContainsDashesAtTheEnd = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$/ig.test(tempInputArray[0]);
+              let inputContainsDashes = /[\-\=\‒\–\—\­\˗\−\－\̠]+|(h+o+l+d+)+|(h+e+l+d+)+|(r+u+n+)+|(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+|(s+p+r+i+n+t+)+|(k+e+p+)+|(b+i+g+)+|(l+o+n+g+)+|(p+e+r+m+a+n*e*n*t*l*y*)+|(h+a+r+d+)+/ig.test(tempInputArray[0]);
+              let inputContainsDashesAtTheEnd = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig.test(tempInputArray[0]);
 
               //var testComparison = inputContainsDashes ? "Message contains dashes " + inputContainsDashes + " " + messageInputs[messageInputIndex] : "Message doesn't contain dashes " + inputContainsDashes + " " + messageInputs[messageInputIndex];
               //var testComparison2 = inputContainsDashesAtTheEnd ? "Message contains dashes at the end " + inputContainsDashesAtTheEnd + " " + messageInputs[messageInputIndex] : "Message doesn't contain dashes at the end " + inputContainsDashesAtTheEnd + " " + messageInputs[messageInputIndex];
@@ -5474,7 +5474,7 @@ async function onMessageHandler(target, tags, message, self) {
 
               if (inputContainsDashes == true) {
                 if (inputContainsDashesAtTheEnd == true) {
-                  removedDashesAtTheEnd = tempInputArray[0].replace(/[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$/ig, "");
+                  removedDashesAtTheEnd = tempInputArray[0].replace(/[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig, "");
                   processedMessage = removedDashesAtTheEnd;
                   setHold = true;
                   //console.log("removedDashesAtTheEnd: " + removedDashesAtTheEnd);
@@ -6760,7 +6760,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
           if (tempInputArray2[1] === undefined) {
             //console.log(new Date().toISOString() + " NO WHAT THE FUCK 3 " + tempInputArray2);
             //splitToFindCustomAnalogStickPosition[0] = splitToFindCustomAnalogStickPosition[0] + " " + tempInputArray2[0];
-            let inputContainsDashesAtTheEnd2 = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$/ig.test(tempInputArray2[0]);
+            let inputContainsDashesAtTheEnd2 = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig.test(tempInputArray2[0]);
             if (inputContainsDashesAtTheEnd2 == true) {
               splitToFindCustomAnalogStickPosition[0] = splitToFindCustomAnalogStickPosition[0] + "-";
               //console.log(splitToFindCustomAnalogStickPosition[0] + "-");
@@ -6796,8 +6796,8 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
       //console.log(new Date().toISOString() + " TEST " + splitToFindCustomAnalogStickPosition);
       //console.log(new Date().toISOString() + " TOAST " + processedMessage);
 
-      var inputContainsDashes = /[\-\=\‒\–\—\­\˗\−\－\̠]+|(h+o+l+d+)+|(h+e+l+d+)+|(r+u+n+)+|(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+|(s+p+r+i+n+t+)+|(k+e+p+)+|(b+i+g+)+|(l+o+n+g+)+|(p+e+r+m+a+n*e*n*t*l*y*)+/ig.test(macroStringArray[messageInputIndex]);
-      var inputContainsDashesAtTheEnd = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$/ig.test(macroStringArray[messageInputIndex]);
+      var inputContainsDashes = /[\-\=\‒\–\—\­\˗\−\－\̠]+|(h+o+l+d+)+|(h+e+l+d+)+|(r+u+n+)+|(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+|(s+p+r+i+n+t+)+|(k+e+p+)+|(b+i+g+)+|(l+o+n+g+)+|(p+e+r+m+a+n*e*n*t*l*y*)+|(h+a+r+d+)+/ig.test(macroStringArray[messageInputIndex]);
+      var inputContainsDashesAtTheEnd = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig.test(macroStringArray[messageInputIndex]);
 
       //var testComparison = inputContainsDashes ? "Message contains dashes " + inputContainsDashes + " " + macroStringArray[messageInputIndex] : "Message doesn't contain dashes " + inputContainsDashes + " " + macroStringArray[messageInputIndex];
       //var testComparison2 = inputContainsDashesAtTheEnd ? "Message contains dashes at the end " + inputContainsDashesAtTheEnd + " " + macroStringArray[messageInputIndex] : "Message doesn't contain dashes at the end " + inputContainsDashesAtTheEnd + " " + macroStringArray[messageInputIndex];
@@ -6807,7 +6807,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
 
       if (inputContainsDashes == true) {
         if (inputContainsDashesAtTheEnd == true) {
-          removedDashesAtTheEnd = macroStringArray[messageInputIndex].replace(/[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$/ig, "");
+          removedDashesAtTheEnd = macroStringArray[messageInputIndex].replace(/[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig, "");
           processedMessage = removedDashesAtTheEnd;
           setHold = true;
           //console.log("removedDashesAtTheEnd: " + removedDashesAtTheEnd);
