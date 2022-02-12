@@ -2013,7 +2013,7 @@ var oldSecond = 0;
 var oldMinute = 0;
 var oldHour = 0;
 
-var secondToCheck = 30;
+var secondToCheck = 40;
 var minuteToCheck = 59;
 var hourToCheckAm = 11;
 var hourToCheckPm = 23;
