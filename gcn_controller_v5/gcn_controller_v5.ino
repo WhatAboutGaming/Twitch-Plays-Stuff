@@ -182,12 +182,13 @@ uint8_t serial_rx_buffer[12];
 uint8_t current_macro_input[12];
 uint8_t old_macro_input[12];
 uint8_t macro_buffer[macroBufferSize][12];
-uint8_t macro_loop_metadata[macroMetadataSize][12]; // Contains informations such as how many times to repeat a portion of a macro, and where to start and end
+uint8_t inner_loop_metadata[macroMetadataSize][12]; // Contains informations such as how many times to repeat a portion of a macro, and where to start and end
 uint32_t controller = 0;
 
 void setup()
 {
   Serial.begin(baudRate);
+  Serial.println("Starting");
 
   pinMode(motorInput, INPUT);
   pinMode(turboLed, INPUT);
@@ -206,7 +207,7 @@ void setup()
   }
   digitalWrite(latchPin, HIGH);
 
-  // Press the buttons X, Y and Start for 2 seconds to reset the controller,
+  // Press the buttons X, Y and Start for 3 seconds to reset the controller,
   // this is a built in controller feature to make it easier to reset analog sticks and
   // triggers without having to unplug the controller, thanks Nintendo, this feature is very useful!
   inputStatus[buttonX] = LOW;
@@ -222,9 +223,9 @@ void setup()
   }
   digitalWrite(latchPin, HIGH);
 
-  delay(2000);
+  delay(3000);
 
-  // Now we release the buttons X, Y and Start after 2 seconds have passed
+  // Now we release the buttons X, Y and Start after 3 seconds have passed
   inputStatus[buttonX] = HIGH;
   inputStatus[buttonY] = HIGH;
   inputStatus[buttonStart] = HIGH;
@@ -284,7 +285,7 @@ void setup()
   Serial.println(startingMacroMetadataIndex);
   Serial.println(endingMacroMetadataIndex);
   Serial.println(macroMetadataSize);
-
+  Serial.println("Ready to go");
 }
 
 void loop()
@@ -351,9 +352,26 @@ void loop()
       macroInputsToRun = serial_rx_buffer[1];
       loopMacro = serial_rx_buffer[2];
       currentMacroIndexRunning = serial_rx_buffer[3];
-      timesToLoop = serial_rx_buffer[4]; // Times to repeat, if == 0, it'll not repeat, if != 0, it'll repeat n times, so in this case, gramatically speaking, timesToLoop and times to repeat are different things (does this make sense?), so the max amount of times it can loop is 256, the amount of times it can repeat is 255, the first iteration is not a repetition (Repeat input? Repeated input?) (Again, does this makes sense?)
+      timesToLoop = serial_rx_buffer[4]; // Times to repeat, if <=0, it'll not repeat, if >0, it'll repeat n times, so in this case, gramatically speaking, timesToLoop and times to repeat are different things (does this make sense?), so the max amount of times it can loop is 256, the amount of times it can repeat is 255, the first iteration is not a repetition (Repeat input? Repeated input?) (Again, does this makes sense?)
       loopCounter = serial_rx_buffer[5];
-      howManyInnerLoopsMacroHas = serial_rx_buffer[6]; // Different than 0 if there are, 0 if there aren't
+      howManyInnerLoopsMacroHas = serial_rx_buffer[6]; // >0 if there are, <=0 if there aren't
+      // The block below resets all inner loop metadata counters
+      if (howManyInnerLoopsMacroHas > 0) {
+        Serial.println("TEST ABC");
+        macroMetadataIndex = 0;
+        if (inner_loop_metadata[0][1] > 0 && inner_loop_metadata[0][3] > 0) {
+          Serial.println("TEST DEF");
+          macroMetadataIndex = 0;
+          for (uint8_t macroMetadataIndexInner = 0; macroMetadataIndexInner < howManyInnerLoopsMacroHas; macroMetadataIndexInner++) {
+            Serial.print("BEFORE macroMetadataIndexInner = ");
+            Serial.println(macroMetadataIndexInner);
+            inner_loop_metadata[macroMetadataIndexInner][2] = 0; // Reset current input index for inner loop
+            inner_loop_metadata[macroMetadataIndexInner][4] = 0; // Reset current repeat counter for inner loop
+            Serial.print("AFTER macroMetadataIndexInner = ");
+            Serial.println(macroMetadataIndexInner);
+          }
+        }
+      }
       //isInputting = true;
       //previousInputDelay = millis();
     }
@@ -374,26 +392,27 @@ void loop()
           isInputtingDelayed = false;
           macroMetadataIndex = serial_rx_buffer[0] - startingMacroMetadataIndex;
           /*
-            macro_loop_metadata[macroMetadataIndex][0] = 0; // Preamble
-            macro_loop_metadata[macroMetadataIndex][1] = 0; // Inputs to execute (number of inputs that should be executed in this inner loop) (Use same logic as [5] here instead?)
-            macro_loop_metadata[macroMetadataIndex][2] = 0; // Current input index
-            macro_loop_metadata[macroMetadataIndex][3] = 0; // Times to repeat (number of times this inner loop should be executed, before going to the next inner loop, if any)
-            macro_loop_metadata[macroMetadataIndex][4] = 0; // Repeat counter (number of times this inner loop was executed)
-            macro_loop_metadata[macroMetadataIndex][5] = 0; // Where is the next inner loop's first input (index 0 input for the next inner loop, aka the index for the input in the macro_buffer array) (Continue normally if value is 0, or do nothing if there are no more inputs to be executed)
-            macro_loop_metadata[macroMetadataIndex][6] = 0; // Where to start (index of the starting input) (Inclusive)
-            macro_loop_metadata[macroMetadataIndex][7] = 0; // Where to end (index of the ending input) (Inclusive)
-            macro_loop_metadata[macroMetadataIndex][8] = 0; // How many inner loops that should be executed after this (if <=0, don't execute inner loops any inner loops after this, and move on as normal, if there are normal inputs to be exeucuted, execute those, if there's nothing else to do, go back to the beginning of the larger loop, if > 0, execute n inner loops after this)
-            macro_loop_metadata[macroMetadataIndex][9] = 0; // Unused?
-            macro_loop_metadata[macroMetadataIndex][10] = 0; // Unused?
-            macro_loop_metadata[macroMetadataIndex][11] = 0; // Postamble
+            inner_loop_metadata[macroMetadataIndex][0] = 0; // Preamble
+            inner_loop_metadata[macroMetadataIndex][1] = 0; // Inputs to execute (number of inputs that should be executed in this inner loop) (Use same logic as [5] here instead?)
+            inner_loop_metadata[macroMetadataIndex][2] = 0; // Current input index
+            inner_loop_metadata[macroMetadataIndex][3] = 0; // Times to repeat (number of times this inner loop should be executed, before going to the next inner loop, if any)
+            inner_loop_metadata[macroMetadataIndex][4] = 0; // Repeat counter (number of times this inner loop was executed)
+            inner_loop_metadata[macroMetadataIndex][5] = 0; // Where is the next inner loop's first input (index 0 input for the next inner loop, aka the index for the input in the macro_buffer array) (Continue normally if value is 0, or do nothing if there are no more inputs to be executed) // Current unused, apply logic to this
+            inner_loop_metadata[macroMetadataIndex][6] = 0; // Where to start (index of the starting input) (Inclusive)
+            inner_loop_metadata[macroMetadataIndex][7] = 0; // Where to end (index of the ending input) (Inclusive)
+            inner_loop_metadata[macroMetadataIndex][8] = 0; // How many inner loops that should be executed after this (if <=0, don't execute inner loops any inner loops after this, and move on as normal, if there are normal inputs to be exeucuted, execute those, if there's nothing else to do, go back to the beginning of the larger loop, if > 0, execute n inner loops after this) // Currently unused, apply logic to this
+            inner_loop_metadata[macroMetadataIndex][9] = 0; // Unused?
+            inner_loop_metadata[macroMetadataIndex][10] = 0; // Unused?
+            inner_loop_metadata[macroMetadataIndex][11] = 0; // Postamble
           */
           for (uint8_t macroInputMetadataIndex = 0; macroInputMetadataIndex < sizeof(serial_rx_buffer); macroInputMetadataIndex++) {
-            macro_loop_metadata[macroMetadataIndex][macroInputMetadataIndex] = serial_rx_buffer[macroInputMetadataIndex];
+            inner_loop_metadata[macroMetadataIndex][macroInputMetadataIndex] = serial_rx_buffer[macroInputMetadataIndex];
             //Serial.print("macroMetadataIndex = ");
             //Serial.println(macroMetadataIndex);
             //Serial.print("macroInputMetadataIndex = ");
             //Serial.println(macroInputMetadataIndex);
-            Serial.println(macro_loop_metadata[macroMetadataIndex][macroInputMetadataIndex]);
+            Serial.println("Toast");
+            Serial.println(inner_loop_metadata[macroMetadataIndex][macroInputMetadataIndex]);
           }
           //Serial.println("");
         }
@@ -444,12 +463,12 @@ void runMacro()
             //Serial.println("\r\nTEST B");
             //
             currentMacroMetadataIndexRunning = currentMacroIndexRunning + startingMacroMetadataIndex;
-            if (macro_loop_metadata[currentMacroIndexRunning][2] == currentMacroMetadataIndexRunning) {
+            if (inner_loop_metadata[currentMacroIndexRunning][2] == currentMacroMetadataIndexRunning) {
               //Serial.println("");
               //Serial.println("YEAH 2");
               //Serial.println("");
             }
-            if (macro_loop_metadata[currentMacroIndexRunning][2] == currentMacroIndexRunning) {
+            if (inner_loop_metadata[currentMacroIndexRunning][2] == currentMacroIndexRunning) {
               //Serial.println("");
               //Serial.print("currentMacroMetadataIndexRunning = ");
               //Serial.println(currentMacroMetadataIndexRunning);
@@ -462,8 +481,8 @@ void runMacro()
               Serial.println(startingMacroMetadataIndex);
               Serial.print("currentMacroIndexRunning = ");
               Serial.println(currentMacroIndexRunning);
-              Serial.print("macro_loop_metadata[currentMacroIndexRunning][2] = ");
-              Serial.println(macro_loop_metadata[currentMacroIndexRunning][2]);
+              Serial.print("inner_loop_metadata[currentMacroIndexRunning][2] = ");
+              Serial.println(inner_loop_metadata[currentMacroIndexRunning][2]);
               Serial.print("currentMacroMetadataIndexRunning = ");
               Serial.println(currentMacroMetadataIndexRunning);
             */
@@ -493,62 +512,73 @@ void runMacro()
         if (howManyInnerLoopsMacroHas > 0) {
           // This is where inner loop logic goes (???)
           Serial.println("This macro has inner loops");
-          if (macro_loop_metadata[macroMetadataIndex][1] > 0 && macro_loop_metadata[macroMetadataIndex][3] > 0) {
+          if (inner_loop_metadata[macroMetadataIndex][1] > 0 && inner_loop_metadata[macroMetadataIndex][3] > 0) {
             // Do something
             Serial.println("This inner loop metadata is valid");
             Serial.print("A currentMacroIndexRunning  = ");
             Serial.println(currentMacroIndexRunning);
-            if (macro_loop_metadata[macroMetadataIndex][3] > 0 && macro_loop_metadata[macroMetadataIndex][4] <= macro_loop_metadata[macroMetadataIndex][3]) {
+            if (inner_loop_metadata[macroMetadataIndex][3] > 0 && inner_loop_metadata[macroMetadataIndex][4] <= inner_loop_metadata[macroMetadataIndex][3]) {
               Serial.println("TEST");
-              if (macro_loop_metadata[macroMetadataIndex][2] < macro_loop_metadata[macroMetadataIndex][6]) {
+              if (inner_loop_metadata[macroMetadataIndex][2] < inner_loop_metadata[macroMetadataIndex][6]) {
                 // Current input index is lower than starting index, fix this
+                // Write inner loop metadata back to PC here
                 Serial.println("Current input index for current inner loop is below what it is supposed to be, fix that!");
                 Serial.print("B currentMacroIndexRunning  = ");
                 Serial.println(currentMacroIndexRunning);
-                macro_loop_metadata[macroMetadataIndex][2] = macro_loop_metadata[macroMetadataIndex][6];
-                currentMacroIndexRunning = macro_loop_metadata[macroMetadataIndex][6];
+                inner_loop_metadata[macroMetadataIndex][2] = inner_loop_metadata[macroMetadataIndex][6];
+                currentMacroIndexRunning = inner_loop_metadata[macroMetadataIndex][6];
                 Serial.print("C currentMacroIndexRunning  = ");
                 Serial.println(currentMacroIndexRunning);
+                // Write inner loop metadata back to PC here
               }
-              if (macro_loop_metadata[macroMetadataIndex][2] >= macro_loop_metadata[macroMetadataIndex][6] && currentMacroIndexRunning <= macro_loop_metadata[macroMetadataIndex][7]) {
-                // Current input index is lower than starting index, fix this
+              if (inner_loop_metadata[macroMetadataIndex][2] >= inner_loop_metadata[macroMetadataIndex][6] && currentMacroIndexRunning <= inner_loop_metadata[macroMetadataIndex][7]) {
+                // Current input index is valid
+                // Write inner loop metadata back to PC here
                 Serial.println("Current input index for current inner loop is in the valid range!");
                 Serial.print("D currentMacroIndexRunning  = ");
                 Serial.println(currentMacroIndexRunning);
                 currentMacroIndexRunning++;
-                macro_loop_metadata[macroMetadataIndex][2]++;
+                inner_loop_metadata[macroMetadataIndex][2]++;
                 Serial.print("E currentMacroIndexRunning  = ");
                 Serial.println(currentMacroIndexRunning);
+                // Write inner loop metadata back to PC here
               }
-              if (macro_loop_metadata[macroMetadataIndex][2] > macro_loop_metadata[macroMetadataIndex][7]) {
+              if (inner_loop_metadata[macroMetadataIndex][2] > inner_loop_metadata[macroMetadataIndex][7]) {
                 // Inner loop ended?
+                // Write inner loop metadata back to PC here
                 Serial.println("Inner loop ended");
                 Serial.print("F currentMacroIndexRunning  = ");
                 Serial.println(currentMacroIndexRunning);
-                currentMacroIndexRunning = macro_loop_metadata[macroMetadataIndex][6];
-                macro_loop_metadata[macroMetadataIndex][2] = macro_loop_metadata[macroMetadataIndex][6];
-                macro_loop_metadata[macroMetadataIndex][4]++;
-                Serial.print("macro_loop_metadata[macroMetadataIndex][4] = ");
-                Serial.println(macro_loop_metadata[macroMetadataIndex][4]);
+                currentMacroIndexRunning = inner_loop_metadata[macroMetadataIndex][6];
+                inner_loop_metadata[macroMetadataIndex][2] = inner_loop_metadata[macroMetadataIndex][6];
+                inner_loop_metadata[macroMetadataIndex][4]++;
+                Serial.print("inner_loop_metadata[macroMetadataIndex][4] = ");
+                Serial.println(inner_loop_metadata[macroMetadataIndex][4]);
                 Serial.print("G currentMacroIndexRunning  = ");
                 Serial.println(currentMacroIndexRunning);
+                // Write inner loop metadata back to PC here
               }
             }
-            if (macro_loop_metadata[macroMetadataIndex][3] > 0 && macro_loop_metadata[macroMetadataIndex][4] > macro_loop_metadata[macroMetadataIndex][3]) {
-              Serial.println("Broke out from inner loop?");
+            if (inner_loop_metadata[macroMetadataIndex][3] > 0 && inner_loop_metadata[macroMetadataIndex][4] > inner_loop_metadata[macroMetadataIndex][3]) {
+              Serial.println("Broke out from inner loop?");
               Serial.print("H currentMacroIndexRunning  = ");
               Serial.println(currentMacroIndexRunning);
-              currentMacroIndexRunning = macro_loop_metadata[macroMetadataIndex][7] + 1;
+              //currentMacroIndexRunning = inner_loop_metadata[macroMetadataIndex][7] + 1;
+              macroMetadataIndex++;
               Serial.print("I currentMacroIndexRunning  = ");
               Serial.println(currentMacroIndexRunning);
             }
             Serial.print("J currentMacroIndexRunning  = ");
             Serial.println(currentMacroIndexRunning);
           }
-          if (macro_loop_metadata[macroMetadataIndex][1] <= 0 || macro_loop_metadata[macroMetadataIndex][3] <= 0) {
+          if (inner_loop_metadata[macroMetadataIndex][1] <= 0 || inner_loop_metadata[macroMetadataIndex][3] <= 0) {
             // Ignore this inner loop, it is not valid
             Serial.println("This inner loop metadata is not valid");
+            Serial.print("K currentMacroIndexRunning  = ");
+            Serial.println(currentMacroIndexRunning);
             currentMacroIndexRunning++;
+            Serial.print("L currentMacroIndexRunning  = ");
+            Serial.println(currentMacroIndexRunning);
           }
         }
         //Serial.print("B AFTER currentMacroIndexRunning = ");
@@ -566,9 +596,26 @@ void runMacro()
             //
             }
           */
+          // The block below resets all inner loop metadata counters
+          if (howManyInnerLoopsMacroHas > 0) {
+            Serial.println("TEST ABC");
+            macroMetadataIndex = 0;
+            if (inner_loop_metadata[0][1] > 0 && inner_loop_metadata[0][3] > 0) {
+              Serial.println("TEST DEF");
+              macroMetadataIndex = 0;
+              for (uint8_t macroMetadataIndexInner = 0; macroMetadataIndexInner < howManyInnerLoopsMacroHas; macroMetadataIndexInner++) {
+                Serial.print("BEFORE macroMetadataIndexInner = ");
+                Serial.println(macroMetadataIndexInner);
+                inner_loop_metadata[macroMetadataIndexInner][2] = 0; // Reset current input index for inner loop
+                inner_loop_metadata[macroMetadataIndexInner][4] = 0; // Reset current repeat counter for inner loop
+                Serial.print("AFTER macroMetadataIndexInner = ");
+                Serial.println(macroMetadataIndexInner);
+              }
+            }
+          }
           if (timesToLoop > 0 && loopCounter <= timesToLoop) {
             // Sending this block for redundancy sake, will comment this block if something goes wrong (it shouldn't)
-            Serial.print("E BEFORE loopCounter = ");
+            Serial.print("M BEFORE loopCounter = ");
             Serial.println(loopCounter);
             Serial.write(endingMacroIndex);
             Serial.write(macroInputsToRun);
@@ -595,7 +642,7 @@ void runMacro()
             Serial.write(0x00);
             Serial.write(0x00);
             Serial.write(endingMacroIndex);
-            Serial.print("F AFTER loopCounter = ");
+            Serial.print("N AFTER loopCounter = ");
             Serial.println(loopCounter);
           }
         }
@@ -644,7 +691,7 @@ void pressButtons()
         //Serial.println("TEST");
       }
       /*
-        if (current_macro_input[2] == macro_loop_metadata[currentMacroIndexRunning][2]) {
+        if (current_macro_input[2] == inner_loop_metadata[currentMacroIndexRunning][2]) {
         //
         //Serial.println("TEST");
         }
