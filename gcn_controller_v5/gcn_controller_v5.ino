@@ -444,13 +444,15 @@ void runMacro()
               for (uint8_t innerLoopMetadataIndex = 0; innerLoopMetadataIndex < sizeof(inner_loop_metadata[macroMetadataIndex]); innerLoopMetadataIndex++) {
                 Serial.write(inner_loop_metadata[macroMetadataIndex][innerLoopMetadataIndex]);
               }
+
               if (inner_loop_metadata[macroMetadataIndex][2] < inner_loop_metadata[macroMetadataIndex][6]) {
                 // Current input index is lower than starting index, fix this
                 // Current input index for current inner loop is below what it is supposed to be, fix that!
                 inner_loop_metadata[macroMetadataIndex][2] = inner_loop_metadata[macroMetadataIndex][6];
                 currentMacroIndexRunning = inner_loop_metadata[macroMetadataIndex][6];
               }
-              if (inner_loop_metadata[macroMetadataIndex][2] >= inner_loop_metadata[macroMetadataIndex][6] && currentMacroIndexRunning <= inner_loop_metadata[macroMetadataIndex][7]) {
+
+              if (inner_loop_metadata[macroMetadataIndex][2] >= inner_loop_metadata[macroMetadataIndex][6] && inner_loop_metadata[macroMetadataIndex][2] <= inner_loop_metadata[macroMetadataIndex][7]) {
                 // Current input index is valid
                 // Current input index for current inner loop is in the valid range!
                 currentMacroIndexRunning++;
