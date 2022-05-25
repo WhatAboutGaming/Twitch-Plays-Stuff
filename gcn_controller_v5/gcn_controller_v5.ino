@@ -441,6 +441,7 @@ void runMacro()
             // Do something
             // This inner loop metadata is valid
             if (inner_loop_metadata[macroMetadataIndex][3] > 0 && inner_loop_metadata[macroMetadataIndex][4] <= inner_loop_metadata[macroMetadataIndex][3]) {
+              bool incrementAgain = true; // This fixes the bug where the first input of the first iteration for each inner loop is skipped, but loops after the first one work as inteded
               for (uint8_t innerLoopMetadataIndex = 0; innerLoopMetadataIndex < sizeof(inner_loop_metadata[macroMetadataIndex]); innerLoopMetadataIndex++) {
                 Serial.write(inner_loop_metadata[macroMetadataIndex][innerLoopMetadataIndex]);
               }
@@ -449,12 +450,15 @@ void runMacro()
                 // Current input index for current inner loop is below what it is supposed to be, fix that!
                 inner_loop_metadata[macroMetadataIndex][2] = inner_loop_metadata[macroMetadataIndex][6];
                 currentMacroIndexRunning = inner_loop_metadata[macroMetadataIndex][6];
+                incrementAgain = false;
               }
-              if (inner_loop_metadata[macroMetadataIndex][2] >= inner_loop_metadata[macroMetadataIndex][6] && inner_loop_metadata[macroMetadataIndex][2] <= inner_loop_metadata[macroMetadataIndex][7]) {
-                // Current input index is valid
-                // Current input index for current inner loop is in the valid range!
-                currentMacroIndexRunning++;
-                inner_loop_metadata[macroMetadataIndex][2]++;
+              if (incrementAgain == true) {
+                if (inner_loop_metadata[macroMetadataIndex][2] >= inner_loop_metadata[macroMetadataIndex][6] && inner_loop_metadata[macroMetadataIndex][2] <= inner_loop_metadata[macroMetadataIndex][7]) {
+                  // Current input index is valid
+                  // Current input index for current inner loop is in the valid range!
+                  currentMacroIndexRunning++;
+                  inner_loop_metadata[macroMetadataIndex][2]++;
+                }
               }
               if (inner_loop_metadata[macroMetadataIndex][2] > inner_loop_metadata[macroMetadataIndex][7]) {
                 // Inner loop ended?
@@ -470,6 +474,7 @@ void runMacro()
             if (inner_loop_metadata[macroMetadataIndex][3] > 0 && inner_loop_metadata[macroMetadataIndex][4] > inner_loop_metadata[macroMetadataIndex][3]) {
               // Broke out from inner loop?
               macroMetadataIndex++;
+              currentMacroIndexRunning++;
             }
           }
           if (inner_loop_metadata[macroMetadataIndex][1] <= 0 || inner_loop_metadata[macroMetadataIndex][3] <= 0) {
