@@ -46,6 +46,8 @@
   12 RIGHT       |A2 (Not SR) |macroLed      |Macro LED (Bootleg Controller Function)
 */
 
+#define bootLed 13
+
 #define latchPin 2 // HCF4094/74HC595 Latch/Strobe Input
 #define dataPin 3 // HCF4094/74HC595 Data Input
 #define clockPin 4 // HCF4094/74HC595 Clock Input
@@ -187,6 +189,8 @@ uint32_t controller = 0;
 
 void setup()
 {
+  pinMode(bootLed, OUTPUT);
+  digitalWrite(bootLed, HIGH);
   Serial.begin(baudRate);
 
   pinMode(motorInput, INPUT);
@@ -277,6 +281,7 @@ void setup()
   old_macro_input[9] = 0x00;
   old_macro_input[10] = 0x00;
   old_macro_input[11] = 0x00;
+  digitalWrite(bootLed, LOW);
 }
 
 void loop()
