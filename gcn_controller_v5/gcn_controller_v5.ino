@@ -136,24 +136,24 @@
 */
 /////////////////////////////////
 
-const uint8_t startingMacroIndex = 0x04;
-const uint8_t endingMacroIndex = 0x64;
-const uint8_t macroBufferSize = endingMacroIndex - startingMacroIndex;
-const uint8_t startingMacroMetadataIndex = endingMacroIndex + 1;
-const uint8_t endingMacroMetadataIndex = startingMacroMetadataIndex + macroBufferSize;
-const uint8_t macroMetadataSize = endingMacroMetadataIndex - startingMacroMetadataIndex; // Using define on these variables for some reason was making it return wrong values
-//const uint8_t macroMetadataSize = macroBufferSize;
+const unsigned int startingMacroIndex = 0x04;
+const unsigned int endingMacroIndex = 0x64;
+const unsigned int macroBufferSize = endingMacroIndex - startingMacroIndex;
+const unsigned int startingMacroMetadataIndex = endingMacroIndex + 1;
+const unsigned int endingMacroMetadataIndex = startingMacroMetadataIndex + macroBufferSize;
+const unsigned int macroMetadataSize = endingMacroMetadataIndex - startingMacroMetadataIndex; // Using define on these variables for some reason was making it return wrong values
+//const unsigned int macroMetadataSize = macroBufferSize;
 
-uint8_t macroIndex = 0;
-uint8_t currentMacroIndexRunning = 0;
-uint8_t macroInputsToRun = 0;
-uint8_t loopMacro = 0; //0 = Don't loop, 1 = loop
-uint8_t timesToLoop = 0; //0 = Loop indefinitely, >0 = loop n times
-uint8_t loopCounter = 0;
-//uint8_t macroHasInnerLoops = 0; //This variable is used to tell if the macro has inner loops (eg: a+b,[wait b]255) // 0 = There are NO inner loops !0 = There is at least one inner loop
-uint8_t howManyInnerLoopsMacroHas = 0; //This variable is used to tell if the macro has inner loops (eg: a+b,[wait b]255) and how many there are // 0 = There are NO inner loops !0 = There are n inner loops, where n is this variable
-uint8_t macroMetadataIndex = 0;
-uint8_t currentMacroMetadataIndexRunning = 0;
+unsigned int macroIndex = 0;
+unsigned int currentMacroIndexRunning = 0;
+unsigned int macroInputsToRun = 0;
+unsigned int loopMacro = 0; //0 = Don't loop, 1 = loop
+unsigned int timesToLoop = 0; //0 = Loop indefinitely, >0 = loop n times
+unsigned int loopCounter = 0;
+//unsigned int macroHasInnerLoops = 0; //This variable is used to tell if the macro has inner loops (eg: a+b,[wait b]255) // 0 = There are NO inner loops !0 = There is at least one inner loop
+unsigned int howManyInnerLoopsMacroHas = 0; //This variable is used to tell if the macro has inner loops (eg: a+b,[wait b]255) and how many there are // 0 = There are NO inner loops !0 = There are n inner loops, where n is this variable
+unsigned int macroMetadataIndex = 0;
+unsigned int currentMacroMetadataIndexRunning = 0;
 
 #define motorInput A0 // Left 9
 #define turboLed A1 // Right 11
@@ -166,8 +166,8 @@ uint8_t currentMacroMetadataIndexRunning = 0;
 const bool defaultStatus[] =        {HIGH,        HIGH,        HIGH,    HIGH,        HIGH,      HIGH,         HIGH,        HIGH,        LOW,          LOW,          HIGH,           HIGH,           HIGH,    HIGH,    HIGH,    HIGH,    HIGH,       LOW,        HIGH,       LOW,        HIGH,      LOW,       HIGH,      LOW,       HIGH,       HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH};
 bool inputStatus[] =          {HIGH,        HIGH,        HIGH,    HIGH,        HIGH,      HIGH,         HIGH,        HIGH,        LOW,          LOW,          HIGH,           HIGH,           HIGH,    HIGH,    HIGH,    HIGH,    HIGH,       LOW,        HIGH,       LOW,        HIGH,      LOW,       HIGH,      LOW,       HIGH,       HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH};
 //uint8_t commandArray[] = {buttonLTrigger, buttonRTrigger, buttonZ, buttonStart, buttonY, buttonX, buttonB, buttonA, axisLTrigger, axisRTrigger, buttonMacro, buttonTurbo, buttonDUp, buttonDDown, buttonDRight, buttonDLeft, axisXHalf, axisXFull, axisYHalf, axisYFull, axisCxHalf, axisCxFull, axisCyHalf, axisCyHalf, buttonMode, 25, 26, 27, 28, 29, 30, 31};
-uint8_t commandArray[] = {buttonTurbo, buttonMacro, buttonZ, buttonStart, buttonDUp, buttonDRight, buttonDLeft, buttonDDown, axisLTrigger, axisRTrigger, buttonLTrigger, buttonRTrigger, buttonY, buttonX, buttonA, buttonB, axisCyHalf, axisCyFull, axisCxHalf, axisCxFull, axisXHalf, axisXFull, axisYHalf, axisYHalf, buttonMode, 25, 26, 27, 28, 29, 30, 31};
-uint8_t motorArray[] = {motorInput, turboLed, macroLed}; // Motor, Turbo LED, Macro LED
+unsigned int commandArray[] = {buttonTurbo, buttonMacro, buttonZ, buttonStart, buttonDUp, buttonDRight, buttonDLeft, buttonDDown, axisLTrigger, axisRTrigger, buttonLTrigger, buttonRTrigger, buttonY, buttonX, buttonA, buttonB, axisCyHalf, axisCyFull, axisCxHalf, axisCxFull, axisXHalf, axisXFull, axisYHalf, axisYHalf, buttonMode, 25, 26, 27, 28, 29, 30, 31};
+unsigned int motorArray[] = {motorInput, turboLed, macroLed}; // Motor, Turbo LED, Macro LED
 
 bool isInputting = false;
 bool isInputtingDelayed = false;
