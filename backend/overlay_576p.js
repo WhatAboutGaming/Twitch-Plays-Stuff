@@ -116,6 +116,8 @@ var nextStartTimeMillis = new Date().getTime();
 var streamEndTimeMillis = new Date().getTime();
 var playTimeTotal = 0;
 
+var acceptInputs = false;
+
 //var helpMessages = ["Type “!speak 《message》” to talk to Pikachu!", "Type “!help” or “!commands” to learn how to play!"];
 //var helpMessages = ["Type “!help” or “!commands” to learn how to play!", "Please, don’t delete any files!", "Please save regularly!"];
 //var helpMessages = ["Type \"!help\" or \"!commands\" to learn how to play!", "Please, don\'t delete any files, and please save regularly!", "Attempting to delete or deleting any file will earn you\na permaban", "If you\'re caught AFK botting, you\'ll be timed out for\none day.", "If anything breaks, please ping @WhatAboutGamingLive", "Paper Mario Main quest took 8d10h01m47s!\nEnded at 2021-01-29T16:48:35Z!", "Congrats to everyone who participated!", "Current goal: Play SM64 until I decide what the next game\nis!"];
@@ -150,6 +152,7 @@ var stepsToMoveUp = 0;
 var viewerCount = -1;
 
 var gameTitle = "Game Title";
+var gameTitleShort = "Game Title Short"
 var nextGameTitle = "Next Game Title";
 
 var votingBarSize = 200;
@@ -322,11 +325,17 @@ function setup() {
   socket.on("game_title", function(data) {
     gameTitle = data;
   });
+  socket.on("game_title_short", function(data) {
+    gameTitleShort = data;
+  });
   socket.on("next_game_title", function(data) {
     nextGameTitle = data;
   });
   socket.on("header_text", function(data) {
     headerText = data;
+  });
+  socket.on("accept_inputs", function(data) {
+    acceptInputs = data;
   });
   socket.on("help_messages", function(data) {
     helpMessages = data;
@@ -438,59 +447,92 @@ function draw() {
   */
   //console.log(new Date().toISOString() + " A " + textDefaultLeadingToUse);
   //text(playTimeString + "\n" + new Date().toISOString(), 768, 551);
-  if (playTimeTotal >= 0) {
-    recalculateFont(2, 1);
+  if (socket.connected == true) {
+    if (playTimeTotal >= 0) {
+      recalculateFont(2, 1);
+      textSize(textSizeToUse);
+      strokeWeight(fontStrokeWeight);
+      textLeading(textDefaultLeadingToUse);
+      text(playTimeString + "\n" + new Date().toISOString(), 768, 551);
+      /*
+      recalculateFont(4, 2);
+      textSize(textSizeToUse);
+      strokeWeight(fontStrokeWeight);
+      stroke("#000000FF");
+      textAlign(CENTER, TOP);
+      fill("#FFFFFFFF");
+      textLeading(textDefaultLeadingToUse);
+      text(gameTitle + "\nstarts in " + playTimeString, 384, 288);
+      */
+    }
+    if (playTimeTotal < 0) {
+      playTimeTotal = Math.abs(playTimeTotal);
+      playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
+      playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+      playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
+      playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
+      playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
+      playTimeString = playTimeDays + "day " + playTimeHours + "hr " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+      playTimeStringShort = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s " + playTimeMillis + "ms";
+      if (acceptInputs == false) {
+        recalculateFont(2, 1);
+        textSize(textSizeToUse);
+        strokeWeight(fontStrokeWeight);
+        textLeading(textDefaultLeadingToUse);
+        text("\n" + new Date().toISOString(), 768, 551);
+        recalculateFont(4, 2);
+        textSize(textSizeToUse);
+        strokeWeight(fontStrokeWeight);
+        stroke("#000000FF");
+        textAlign(CENTER, TOP);
+        fill("#FFFFFFFF");
+        textLeading(textDefaultLeadingToUse);
+        text(gameTitle + "\nstarts in " + playTimeString, 384, 288);
+      }
+      if (acceptInputs == true) {
+        recalculateFont(2, 1);
+        textSize(textSizeToUse);
+        strokeWeight(fontStrokeWeight);
+        textLeading(textDefaultLeadingToUse);
+        text("\n" + new Date().toISOString(), 768, 551);
+        /*
+        recalculateFont(4, 2);
+        textSize(textSizeToUse);
+        strokeWeight(fontStrokeWeight);
+        stroke("#000000FF");
+        textAlign(CENTER, TOP);
+        fill("#FFFFFFFF");
+        textLeading(textDefaultLeadingToUse);
+        text(gameTitle + "\nstarts in " + playTimeString, 384, 288);
+        */
+        if (advancedInputString == "") {
+          if (voteDataObject.input_mode == 2) {
+            recalculateFont(4, 2);
+            textSize(textSizeToUse);
+            strokeWeight(fontStrokeWeight);
+            textAlign(CENTER, TOP);
+            scale(0.5, 1);
+            textLeading(textDefaultLeadingToUse);
+            //text("Stream goes offline in\n" + streamEndTimeRemainingString + "\n(" + streamEndTimeISOString  + ")\n(The 31 day mark)\n\n Super Mario RPG:\nLegend of the Seven Stars\nStarts in\n" + nextStartTimeRemainingString + "\n(" + nextStartTimeISOString + ")", 896 * 2, 60);
+            text(gameTitleShort + "\nstarts in\n" + playTimeStringShort, 896 * 2, 60);
+            scale(2, 1);
+          }
+        }
+      }
+    }
+    //recalculateFont(2, 1);
+    //textSize(textSizeToUse);
+    //strokeWeight(fontStrokeWeight);
+    //text(new Date().toISOString(), 768, 564);
+    recalculateFont(3, 2);
+    textAlign(LEFT, TOP);
     textSize(textSizeToUse);
     strokeWeight(fontStrokeWeight);
     textLeading(textDefaultLeadingToUse);
-    text(playTimeString + "\n" + new Date().toISOString(), 768, 551);
-    /*
-    recalculateFont(4, 2);
-    textSize(textSizeToUse);
-    strokeWeight(fontStrokeWeight);
-    stroke("#000000FF");
-    textAlign(CENTER, TOP);
-    fill("#FFFFFFFF");
-    textLeading(textDefaultLeadingToUse);
-    text(gameTitle + "\nstarts in " + playTimeString, 384, 288);
-    */
+    //console.log(new Date().toISOString() + " B " + textDefaultLeadingToUse);
+    //text("Twitch Plays (Viewers play/Chat plays) Super Mario 64 on a\nreal N64 console, please don\'t delete any files", 2, 2);
+    text(headerText, 2, 2);
   }
-  if (playTimeTotal < 0) {
-    playTimeTotal = Math.abs(playTimeTotal);
-    playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
-    playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
-    playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
-    playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
-    playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
-    playTimeString = playTimeDays + "day " + playTimeHours + "hr " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
-
-    recalculateFont(2, 1);
-    textSize(textSizeToUse);
-    strokeWeight(fontStrokeWeight);
-    textLeading(textDefaultLeadingToUse);
-    text("\n" + new Date().toISOString(), 768, 551);
-    recalculateFont(4, 2);
-    textSize(textSizeToUse);
-    strokeWeight(fontStrokeWeight);
-    stroke("#000000FF");
-    textAlign(CENTER, TOP);
-    fill("#FFFFFFFF");
-    textLeading(textDefaultLeadingToUse);
-    text(gameTitle + "\nstarts in " + playTimeString, 384, 288);
-  }
-  //recalculateFont(2, 1);
-  //textSize(textSizeToUse);
-  //strokeWeight(fontStrokeWeight);
-  //text(new Date().toISOString(), 768, 564);
-  recalculateFont(3, 2);
-  textAlign(LEFT, TOP);
-  textSize(textSizeToUse);
-  strokeWeight(fontStrokeWeight);
-  textLeading(textDefaultLeadingToUse);
-  //console.log(new Date().toISOString() + " B " + textDefaultLeadingToUse);
-  //text("Twitch Plays (Viewers play/Chat plays) Super Mario 64 on a\nreal N64 console, please don\'t delete any files", 2, 2);
-  text(headerText, 2, 2);
-
   //recalculateFont(3, 2);
   //textSize(textSizeToUse);
   //strokeWeight(fontStrokeWeight);
@@ -605,6 +647,7 @@ function draw() {
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title}})+/ig, nextGameTitle);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + " (" + nextStartTimeISOString + ")");
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + "\n(" + streamEndTimeISOString + ")");
+      /*
       if (currentValueToDisplay == 0) {
         // Big red text case
         recalculateFont(6, 3);
@@ -629,6 +672,16 @@ function draw() {
         textLeading(textDefaultLeadingToUse);
         text(helpMessageToDisplay, 2, 574); 
       }
+      */
+      recalculateFont(3, 2);
+      textFont(font);
+      textSize(textSizeToUse);
+      strokeWeight(fontStrokeWeight);
+      stroke("#000000FF");
+      textAlign(LEFT, BOTTOM);
+      fill("#FFFFFFFF");
+      textLeading(textDefaultLeadingToUse);
+      text(helpMessageToDisplay, 2, 574); 
     }
   //}
 
@@ -793,11 +846,14 @@ function draw() {
     //textAlign(LEFT, TOP); // 4x5 font isn't kind to CENTER, LEFT, text gets blurry, so I have to do LEFT, TOP and kinda hardcode the text position so it looks like it is centered, ugly hack but it works
     fill("#FFFFFFFF");
     if (advancedInputString == "") {
-      textAlign(CENTER, TOP);
-      scale(0.5, 1);
-      textLeading(textDefaultLeadingToUse);
-      text("Stream goes offline in\n" + streamEndTimeRemainingString + "\n(" + streamEndTimeISOString  + ")\n(The 31 day mark)\n\n Super Mario RPG:\nLegend of the Seven Stars\nStarts in\n" + nextStartTimeRemainingString + "\n(" + nextStartTimeISOString + ")", 896 * 2, 60);
-      scale(2, 1);
+      if (acceptInputs == true) {
+        textAlign(CENTER, TOP);
+        scale(0.5, 1);
+        textLeading(textDefaultLeadingToUse);
+        //text("Stream goes offline in\n" + streamEndTimeRemainingString + "\n(" + streamEndTimeISOString  + ")\n(The 31 day mark)\n\n Super Mario RPG:\nLegend of the Seven Stars\nStarts in\n" + nextStartTimeRemainingString + "\n(" + nextStartTimeISOString + ")", 896 * 2, 60);
+        text("\n\n\n\n\n!help to learn how to play", 896 * 2, 60);
+        scale(2, 1);
+      }
     }
     if (advancedInputString != "") {
       if (advancedInputMetadata.loop_macro == 0) {

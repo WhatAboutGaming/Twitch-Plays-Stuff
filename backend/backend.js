@@ -57,6 +57,8 @@ var isControllerBusyPrevious = false;
 var isTtsBusyPrevious = false;
 var inputQueue = [];
 
+var waitForArduinoToBeReady = true;
+
 var currentInputInQueue = 0;
 var currentInputInQueuePrevious = 0;
 var inputsAllowed = controllerConfig.simultaneous_different_basic_buttons_allowed;
@@ -70,11 +72,13 @@ var usersWhoDontHaveColor = [];
 //var helpMessage = "Valid inputs are a, b, z, l, r, start, cup, cdown, cleft, cright, dup, ddown, dleft, dright, up, down, left and right. Typos work too! Directions can be replaced with cardinal directions (n, s, w, e, north, south, west, east). Up to 3 buttons can be pressed simultaneously: \"b+up+right\". End your input with \"-\" to hold the buttons down for a longer (hold indefinitely until the next input comes) period than normal (266 milliseconds): \"a+z+right-\". Commands are not case sensitive: Typing \"left\" and \"lEft\" have the same effect."
 var helpMessageBasic = controllerConfig.help_message_basic;
 var helpMessageAdvanced = controllerConfig.help_message_advanced;
+var helpMessageSavingMacros = controllerConfig.help_message_saving_macros; // This help message can only be used in advanced mode
+var currentRunEndgameGoals = globalConfig.current_run_endgame_goals;
 
 var acceptInputs = globalConfig.initial_accept_inputs;
 var acceptTts = globalConfig.initial_accept_tts;
 
-var inputMode = globalConfig.initial_input_mode; // Modes are 0 = anarchy (Normal mode), 1 = democracy (people vote for the next input), 2 = TAS or Advanced Mode (Used for making macros, and doing very precise movements, very precise timings, etc)
+var inputMode = globalConfig.initial_input_mode; // Modes are 0 = anarchy (Normal mode), 1 = democracy (people vote for the next input), 2 = TAS or Advanced Mode (Used for making macros, and doing very precise movements, very precise timings, etc) // Democracy is not implemented, I don't know if I'll ever implement it
 var inputModePrevious = 0;
 var inputModesArray = [{
   mode_name: "Basic",
@@ -182,7 +186,7 @@ var io = require("socket.io").listen(server);
 
 // Register a callback function to run when we have an individual connection
 // This is run for each individual user that connects
-io.sockets.on('connection',
+io.sockets.on("connection",
   // We are given a websocket object in our function
   function(socket) {
 
@@ -235,6 +239,7 @@ io.sockets.on('connection',
     io.to(socket.id).emit("advanced_input_metadata", advancedInputMetadata);
     io.to(socket.id).emit("controller_graphics", controllerConfig.controller_graphics);
     io.to(socket.id).emit("game_title", globalConfig.game_title);
+    io.to(socket.id).emit("game_title_short", globalConfig.game_title_short);
     io.to(socket.id).emit("next_game_title", globalConfig.next_game_title);
     io.to(socket.id).emit("vote_data", voteDataObject);
     io.to(socket.id).emit("viewer_count", currentViewerCount);
@@ -243,8 +248,9 @@ io.sockets.on('connection',
     io.to(socket.id).emit("stream_end_time", streamEndTime);
     io.to(socket.id).emit("help_messages", globalConfig.overlay_text_rotation);
     io.to(socket.id).emit("header_text", globalConfig.overlay_header_text);
+    io.to(socket.id).emit("accept_inputs", acceptInputs);
 
-    socket.on('disconnect', function() {
+    socket.on("disconnect", function() {
       console.log("Client has disconnected: " + socket.id);
     });
   }
@@ -336,6 +342,7 @@ if (controllerObject.length > 0) {
 var port = new SerialPort(controllerConfig.com_port, controllerConfig.com_port_parameters);
 
 port.open(function(err) {
+  console.log(new Date().toISOString() + " 0 [SERIAL PORT] Attempting to open port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
   if (err) {
     if (client.readyState() === "OPEN") {
       if (chatConfig.send_debug_channel_messages == true) {
@@ -344,6 +351,7 @@ port.open(function(err) {
         client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to open port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
       }
     }
+    console.log(new Date().toISOString() + " [SERIAL PORT] Failed to open port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
     return console.log("Error opening port: " + err.message);
   }
   // Because there's no callback to write, write errors will be emitted on the port:
@@ -354,11 +362,11 @@ port.open(function(err) {
       client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Successfully opened port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     }
   }
+  console.log(new Date().toISOString() + " [SERIAL PORT] port.open Successfully opened port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
   console.log("we ready to go");
-  //port.write("main screen turn on");
 });
-
-let cyrillicsReplacementTable = [{
+var shiftCharCode = Δ => c => String.fromCharCode(c.charCodeAt(0) + Δ);
+var cyrillicsReplacementTable = [{
   symbolOriginalString: /А/g,
   symbolReplacementString: "A"
 }, {
@@ -444,6 +452,7 @@ function writeToPort(inputArray, inputIndex, inputDelay) {
 
   // Clear the incoming serial data from arduino before sending a basic input
   port.flush(function(err, results) {
+    console.log(new Date().toISOString() + " 1 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     if (err) {
       if (client.readyState() === "OPEN") {
         if (chatConfig.send_debug_channel_messages == true) {
@@ -452,11 +461,13 @@ function writeToPort(inputArray, inputIndex, inputDelay) {
           client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
         }
       }
+      console.log(new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
       return console.log(err);
     }
     //console.log(new Date().toISOString() + " flush results " + results);
   });
   port.drain(function(err, results) {
+    console.log(new Date().toISOString() + " 2 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     if (err) {
       if (client.readyState() === "OPEN") {
         if (chatConfig.send_debug_channel_messages == true) {
@@ -465,12 +476,14 @@ function writeToPort(inputArray, inputIndex, inputDelay) {
           client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
         }
       }
+      console.log(new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
       return console.log(err);
     }
     //console.log(new Date().toISOString() + " drain results " + results);
   });
 
   port.write(inputArray, function(err) {
+    console.log(new Date().toISOString() + " 3 [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     if (err) {
       if (client.readyState() === "OPEN") {
         if (chatConfig.send_debug_channel_messages == true) {
@@ -479,6 +492,7 @@ function writeToPort(inputArray, inputIndex, inputDelay) {
           client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
         }
       }
+      console.log(new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
       return console.log("Error on write: " + err.message);
     }
     isControllerBusy = true;
@@ -566,13 +580,31 @@ parser.on("data", async function(data) {
     if (data.length != incomingSerialDataSize) {
       //console.log(new Date().toISOString() + " Invalid data size");
       port.flush(function(err, results) {
+        console.log(new Date().toISOString() + " 4 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
+          if (client.readyState() === "OPEN") {
+            if (chatConfig.send_debug_channel_messages == true) {
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+              client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+            }
+          }
+          console.log(new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
           return console.log(err);
         }
         //console.log(new Date().toISOString() + " flush results " + results);
       });
       port.drain(function(err, results) {
+        console.log(new Date().toISOString() + " 5 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
+          if (client.readyState() === "OPEN") {
+            if (chatConfig.send_debug_channel_messages == true) {
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+              client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+            }
+          }
+          console.log(new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
           return console.log(err);
         }
         //console.log(new Date().toISOString() + " drain results " + results);
@@ -753,13 +785,31 @@ parser.on("data", async function(data) {
         if (data[0] == 1) {
           if (inputMode != 0) {
             port.flush(function(err, results) {
+              console.log(new Date().toISOString() + " 6 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
+                if (client.readyState() === "OPEN") {
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                  }
+                }
+                console.log(new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                 return console.log(err);
               }
               //console.log(new Date().toISOString() + " flush results " + results);
             });
             port.drain(function(err, results) {
+              console.log(new Date().toISOString() + " 7 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
+                if (client.readyState() === "OPEN") {
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                  }
+                }
+                console.log(new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                 return console.log(err);
               }
               //console.log(new Date().toISOString() + " drain results " + results);
@@ -1089,13 +1139,31 @@ parser.on("data", async function(data) {
         if (data[0] >= controllerConfig.initial_macro_preamble && data[0] <= (controllerConfig.final_macro_preamble - 1)) {
           if (inputMode != 2) {
             port.flush(function(err, results) {
+              console.log(new Date().toISOString() + " 8 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
+                if (client.readyState() === "OPEN") {
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                  }
+                }
+                console.log(new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                 return console.log(err);
               }
               //console.log(new Date().toISOString() + " flush results " + results);
             });
             port.drain(function(err, results) {
+              console.log(new Date().toISOString() + " 9 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
+                if (client.readyState() === "OPEN") {
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                  }
+                }
+                console.log(new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                 return console.log(err);
               }
               //console.log(new Date().toISOString() + " drain results " + results);
@@ -1449,13 +1517,31 @@ parser.on("data", async function(data) {
         //console.log(new Date().toISOString() + " Invalid data format, data[0] = " + data[0] + " data[11] = " + data[11]);
         //console.log(data);
         port.flush(function(err, results) {
+          console.log(new Date().toISOString() + " A [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
           if (err) {
+            if (client.readyState() === "OPEN") {
+              if (chatConfig.send_debug_channel_messages == true) {
+                let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+              }
+            }
+            console.log(new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
             return console.log(err);
           }
           //console.log(new Date().toISOString() + " flush results " + results);
         });
         port.drain(function(err, results) {
+          console.log(new Date().toISOString() + " B [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
           if (err) {
+            if (client.readyState() === "OPEN") {
+              if (chatConfig.send_debug_channel_messages == true) {
+                let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+              }
+            }
+            console.log(new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
             return console.log(err);
           }
           //console.log(new Date().toISOString() + " drain results " + results);
@@ -1489,7 +1575,8 @@ port.on("error", function(err) {
       client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Port error occurred at port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
     }
   }
-  console.log("Error: ", err.message);
+  console.log(new Date().toISOString() + " [SERIAL PORT] Port error occurred at port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+  console.log("[SERIAL PORT ERROR]: ", err.message);
 });
 // The open event is always emitted
 port.on("open", function() {
@@ -1500,6 +1587,7 @@ port.on("open", function() {
       client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Successfully opened port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     }
   }
+  console.log(new Date().toISOString() + " [SERIAL PORT] port.onOpen Successfully opened port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
   console.log("was the port opened?");
   // open logic
 });
@@ -1911,9 +1999,11 @@ var currentViewerCount = -1;
 var oldViewerCount = -1;
 
 function getStreamViewerCount(twitchCredentialsObject, twitchAccessTokenObject) {
+  let rawOutputData = "";
   let twitchClientId = twitchCredentialsObject.twitch_client_id;
   let twitchChannelId = twitchCredentialsObject.twitch_channel_id;
   let twitchOauthToken = twitchAccessTokenObject.access_token;
+  //console.log(twitchOauthToken);
 
   let options = {
     hostname: "api.twitch.tv",
@@ -1926,16 +2016,19 @@ function getStreamViewerCount(twitchCredentialsObject, twitchAccessTokenObject) 
     }
   };
 
-  let req = https.request(options, res => {
+  let req = https.request(options, function(res) {
     //console.log("statusCode: " + res.statusCode);
-
-    res.on("data", (d) => {
+    res.on("data", function(d) {
       //console.log(JSON.parse(d.toString("utf8")));
-      let dataSize = JSON.parse(d.toString("utf8")).data.length;
+      rawOutputData = rawOutputData + d.toString("utf8");
+    });
+    res.on("end", function() {
+      //console.log(JSON.parse(rawOutputData.toString("utf8")));
+      let dataSize = JSON.parse(rawOutputData.toString("utf8")).data.length;
       //console.log(" dataSize = " + dataSize);
       if (dataSize > 0) {
         // The stream is LIVE!
-        currentViewerCount = JSON.parse(d.toString("utf8")).data[0].viewer_count;
+        currentViewerCount = JSON.parse(rawOutputData.toString("utf8")).data[0].viewer_count;
         //console.log(new Date().toISOString() + " [STREAM OFFLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
         if (currentViewerCount != oldViewerCount) {
           // Viewer Count Changed
@@ -1990,14 +2083,16 @@ function getStreamViewerCount(twitchCredentialsObject, twitchAccessTokenObject) 
       //console.log(currentViewerCount);
       //oldViewerCount = currentViewerCount;
 
-      //process.stdout.write(d);
-      //console.log(d);
+      //process.stdout.write(rawOutputData);
+      //console.log(rawOutputData);
     });
   });
 
-  req.on("error", (error) => {
+  req.on("error", function(error) {
     currentViewerCount = -1;
-    console.log(new Date().toISOString() + " CONNECTION ERROR");
+    //oldViewerCount = -1;
+    io.sockets.emit("viewer_count", currentViewerCount);
+    console.log(new Date().toISOString() + " VIEWER COUNT CONNECTION ERROR");
     console.error(error);
   });
   req.end();
@@ -2087,7 +2182,7 @@ function updateStreamTime() {
             console.log("B Time can be checked here for the start of the run");
             console.log("Day " + (playTimeDays + 1) + " Hour 0 to Hour 12 ");
             console.log("Current Hour " + currentHour + " equals to " + hourToCheckPm);
-            updateStreamTitle(globalConfig.stream_title + " Day " + (playTimeDays + 1) + ", Hour 0 to Hour 12, type !help to learn how to play", twitchCredentials, twitchJsonEncodedAppAccessToken);
+            updateStreamTitle(globalConfig.stream_title + " Day " + playTimeDays + ", Hour 0 to Hour 12, type !help to learn how to play", twitchCredentials, twitchJsonEncodedAppAccessToken);
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
@@ -2152,7 +2247,7 @@ function updateStreamTime() {
   oldHour = currentHour;
 }
 
-//updateStreamTitle("test");
+//updateStreamTitle("Super Mario RPG starts on: https://www.timeanddate.com/countdown/generic?iso=20220601T00&p0=1440&msg=Super+Mario+RPG&font=sanserif&csz=1", twitchCredentials, twitchJsonEncodedAppAccessToken);
 //getTwitchTokenStatus();
 generateTwitchOAuthToken(twitchCredentials);
 //console.log(twitchJsonEncodedAppAccessToken);
@@ -2161,6 +2256,7 @@ async function generateTwitchOAuthToken(twitchCredentialsObject) {
   // This function should only be called when the server starts to generate a new OAuth 2.0 Token
   // According to the Twitch API Documentation, this is the wrong way for refreshing an OAuth 2.0 Token, but it works
   console.log(new Date().toISOString() + " Attempting to generate new Twitch OAuth 2.0 Token!");
+  let rawOutputData = "";
   let twitchClientId = twitchCredentialsObject.twitch_client_id;
   let twitchClientSecret = twitchCredentialsObject.twitch_client_secret;
   let twitchGrantType = "client_credentials";
@@ -2171,15 +2267,19 @@ async function generateTwitchOAuthToken(twitchCredentialsObject) {
     method: "POST"
   };
 
-  let twitchRequest = https.request(httpsOptions, res => {
-    console.log("statusCode: " + res.statusCode);
+  let twitchRequest = https.request(httpsOptions, function(res) {
+    console.log("TWITCH OAUTH TOKEN GENERATION statusCode: " + res.statusCode);
     //console.log(res);
 
-    res.on("data", (d) => {
+    res.on("data", function(d) {
       console.log(new Date().toISOString() + " Did it work?");
+      rawOutputData = rawOutputData + d.toString("utf8");
+    });
+    res.on("end", function() {
+      console.log(JSON.parse(rawOutputData.toString("utf8")));
       //console.log("BODY: " + d);
       //console.log(d);
-      let outputData = JSON.parse(d.toString("utf8"));
+      let outputData = JSON.parse(rawOutputData.toString("utf8"));
       twitchJsonEncodedAppAccessToken = outputData;
       setInterval(getStreamViewerCount, 5000, twitchCredentials, twitchJsonEncodedAppAccessToken);
       //console.log(outputData);
@@ -2189,8 +2289,8 @@ async function generateTwitchOAuthToken(twitchCredentialsObject) {
     });
   });
 
-  twitchRequest.on("error", (error) => {
-    console.log(new Date().toISOString() + " Did it fail?");
+  twitchRequest.on("error", function(error) {
+    console.log(new Date().toISOString() + " TWITCH OAUTH TOKEN GENERATION CONNECTION ERROR");
     console.error(error);
   });
 
@@ -2210,6 +2310,7 @@ function updateStreamTitleTest() {
 
 function updateStreamTitle(newStreamTitle, twitchCredentialsObject, twitchAccessTokenObject) {
   console.log("Attempting to update stream title to: " + newStreamTitle);
+  let rawOutputData = "";
   let twitchClientId = twitchCredentialsObject.twitch_client_id;
   let twitchChannelId = twitchCredentialsObject.twitch_channel_id;
   let twitchOauthToken = twitchCredentialsObject.twitch_oauth_access_token;
@@ -2225,27 +2326,36 @@ function updateStreamTitle(newStreamTitle, twitchCredentialsObject, twitchAccess
     }
   };
 
-  let req = https.request(options, res => {
-    console.log("statusCode: " + res.statusCode);
+  let req = https.request(options, function(res) {
+    console.log("STREAM TITLE statusCode: " + res.statusCode);
 
-    res.on("data", (d) => {
-      console.log(JSON.parse(d.toString("utf8")));
+    res.on("data", function(d) {
+      console.log("STREAM TITLE DATA RECEIVED");
+      console.log(d.toString("utf8"));
+      rawOutputData = rawOutputData + d.toString("utf8");
+      //console.log(JSON.parse(d.toString("utf8")));
       //process.stdout.write(d);
       //console.log(d);
     });
+    res.on("end", function() {
+      console.log("STREAM TITLE END");
+      //console.log(JSON.parse(rawOutputData.toString("utf8")));
+      console.log(rawOutputData.toString("utf8"));
+      console.log("I'm not sure if the stream title was updated or not, look above for any error messages!");
+      getTwitchTokenStatus(twitchCredentialsObject);
+    });
   });
-
-  req.on("error", (error) => {
+  req.on("error", function(error) {
+    console.log(new Date().toISOString() + " STREAM TITLE CONNECTION ERROR");
     console.error(error);
   });
   req.write(streamTitleToUpdate);
   req.end();
-  console.log("I'm not sure if the stream title was updated or not, look above for any error messages!");
-  getTwitchTokenStatus(twitchAccessTokenObject);
 }
 
 function getTwitchTokenStatus(twitchAccessTokenObject) {
-  let twitchOauthToken = twitchAccessTokenObject.access_token;
+  let rawOutputData = "";
+  let twitchOauthToken = twitchAccessTokenObject.twitch_oauth_access_token;
   let options = {
     hostname: "id.twitch.tv",
     path: "/oauth2/validate",
@@ -2255,23 +2365,29 @@ function getTwitchTokenStatus(twitchAccessTokenObject) {
     }
   };
 
-  let req = https.request(options, res => {
-    console.log("statusCode: " + res.statusCode);
+  let req = https.request(options, function(res) {
+    console.log("TWITCH OAUTH TOKEN STATUS statusCode: " + res.statusCode);
 
-    res.on("data", (d) => {
-      console.log(JSON.parse(d.toString("utf8")));
+    res.on("data", function(d) {
+      rawOutputData = rawOutputData + d.toString("utf8");
+      //console.log(JSON.parse(d.toString("utf8")));
       //process.stdout.write(d);
       //console.log(d);
     });
+    res.on("end", function() {
+      //console.log(twitchAccessTokenObject);
+      console.log(JSON.parse(rawOutputData.toString("utf8")));
+    });
   });
 
-  req.on("error", (error) => {
+  req.on("error", function(error) {
+    console.log(new Date().toISOString() + " TWITCH OAUTH TOKEN STATUS CONNECTION ERROR");
     console.error(error);
   });
   req.end();
 }
 
-setInterval(checkChatConnection, 60000);
+setInterval(checkChatConnection, 60000); // I wanted to change the delay to 5000 but I don't know if that's a good idea, it'll probably break stuff
 
 function checkChatConnection() {
   //console.log(client.readyState());
@@ -2352,6 +2468,11 @@ async function onMessageHandler(target, tags, message, self) {
   let messageId = tags["id"];
   let twitchMessageTimestamp = tags["tmi-sent-ts"];
   let twitchMessageTimestampIsoString = "";
+  let originalMessageWords = originalMessage.split(/\s+/ig);
+  let isExecutingSavedMacro = false;
+  let savedMacroNameToExecute = "";
+  let savedMacroContentsToExecute = "";
+  let savedMacroTimesWasUsed = 0;
   //console.log(messageType);
   //console.log(JSON.stringify(tags));
   if (isNaN(parseInt(twitchMessageTimestamp, 10)) == false) {
@@ -2459,7 +2580,9 @@ async function onMessageHandler(target, tags, message, self) {
     //  /([^\n\s]+)+\s+(s+u+\w+e+r+\w*)+\s+(p+r+i+m+e+)+\s+(s+u+b+\w*)+\s+([^\n\s]+)+/ig.test(message.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig))
     //];
     let replaceCyrillicsWithLatin = message;
+    replaceCyrillicsWithLatin = replaceCyrillicsWithLatin.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
     replaceCyrillicsWithLatin = replaceCyrillicsWithLatin.normalize("NFD");
+    replaceCyrillicsWithLatin = replaceCyrillicsWithLatin.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
 
     for (let cyrillicsReplacementTableIndex = 0; cyrillicsReplacementTableIndex < cyrillicsReplacementTable.length; cyrillicsReplacementTableIndex++) {
       replaceCyrillicsWithLatin = replaceCyrillicsWithLatin.replace(cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolOriginalString, cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolReplacementString);
@@ -2470,19 +2593,19 @@ async function onMessageHandler(target, tags, message, self) {
     }
     //console.log("replaceCyrillicsWithLatin");
     //console.log(replaceCyrillicsWithLatin);
-
-    let singleMessageSpamBots = [/(b+u+y+)+\s+(f+o+l+o+w+\w*)+\W*\s*(p*r*i*m*e*\w*)*\s+(a+n+d+)+\s+(v+i+e+w+\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+    replaceCyrillicsWithLatin = replaceCyrillicsWithLatin.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+    let singleMessageSpamBots = [/((b+u+y+)|(b+e+s+t+)|(g+e+t+))+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+\W*\s*((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))*\s+(a+n+d+)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       ///(w+a+n+\w+)+\s*(t*o*)*\s+(b+e+c+o+m+e)+\s+(f+a+m+o+u+s+\W*)+\s+(b+u+y+)+\s+(f+o+l+o+w+\w*)+\W*\s*(p*r*i*m*e*\w*)*\s+(a+n+d+)+\s+(v+i+e+w+\w*)+\s+(\w*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(t+w+\w*t+c+h+)+\s+(v+i+e+w+\w*\s*b+o+t+\w*)+\s+(s+o+f+t+w+a+r+e+\w*\W*)+\s*(d+o+)+\s+(a+n+y+)+\s*(o+n+l+i+n+e+)*\s+(\w*)\s+(a+n+y+)+\s+(s+t+r+e+a+m+[^\s]*)+\s+([^\s]*)\s*(d+i+s+c+o+r+d+)+\s+([^\s]*)\s+([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(t+w+\w*t+c+h+)+\s+(((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))\s*b+o+t+\w*)+\s+(s+o+f+t+w+a+r+e+\w*\W*)+\s*(d+o+)+\s+(a+n+y+)+\s*(o+n+l+i+n+e+)*\s+(\w*)\s+(a+n+y+)+\s+(s+t+r+e+a+m+[^\s]*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(h+e+y+[^\s]*)+\s+(n+i+c+e+)+\s+(s+t+r+e+a+m+[^\s]*)+\s+(y+\w*)+\s+(s+h+\w*)+\s+(f+o+r+)+\s+(s+u+r+e+)+\s+(j+o+i+n+)+\s+(\w*)\s+(s+t+r+e+a+m+[^\s]*)+\s+(c+o+m+u+n+i+t+y+)+\s+(\w*)\s+(j+u+s+t+)+\s+(f+o+u+n+d+)+\s+(\w*)\s+(d+i+s+c+o+r+d+)+\s+(y+e+s+t+e+r+d+a+y+)+\s+([^\s]*)\s+(c+h+e+c+k+)+\s+(i+t+)+\s+(o+u+t+)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(d+o+)+\s+(y+o+\w*)+\s+(w+a+n+\w+)+\s*(t*o*)*\s*(b*e*c*o*m*e*)*\s+(p+o+p+u+l+a+r+\w*[^\s]*)+\s+(b+u+y+)+\s+(f+o+l+o+w+\w*)+\s+(a+n+d+)+\s+(v+i+e+w+\w*)+\s+(\w+)\s+([^\s]+)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(d+o+)+\s+(y+o+\w*)+\s+(w+a+n+\w+)+\s*(t*o*)*\s*(b*e*c*o*m*e*)*\s+(p+o+p+u+l+a+r+\w*[^\s]*|f+a+m+o+u+s+\W*[^\s]*)+\s+(b+u+y+)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+\s+(a+n+d+)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+\s+(\w+)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(a+f+i+l+i+a+t+e+)+\s+(f+o+\w*)+\s+(f+r+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       ///([^\s]*)\s*([^\s]+)\s+(a+f+i+l+i+a+t+e+)+\s+(f+o+\w*)+\s+(f+r+e+)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /([^\s]+)\s+(s+u+\w+e+r+\w*)+\s+(p+r+i+m+e+)+\s+(s+u+b+\w*)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /([^\s]*)\s*(h+e+l+o+[^\s]*)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(r+e+a+l+)\s+(f+r+e+)+\s+(a+n+d+)+\s+(h+i+g+h+)+\s+(q+u+a+l+i+t+y+)+\s+(s+e+r+v+i+c+e+s*)+\s+(t+\w*)+\s+(i+n+c+r+e+a+s+e+)+\s+(y+o+u+\w*)+\s+(v+i+e+w+\w*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(s+u+\w+e+r+\w*)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+\s+(s+u+b+\w*)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /([^\s]*)\s*(h+e+l+o+[^\s]*)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(r+e+a+l+)\s+(f+r+e+)+\s+(a+n+d+)+\s+(h+i+g+h+)+\s+(q+u+a+l+i+t+y+)+\s+(s+e+r+v+i+c+e+s*)+\s+(t+\w*)+\s+(i+n+c+r+e+a+s+e+)+\s+(y+o+u+\w*)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(c+u+t+)+\s*(\.+|d+o+t+)*\s*(l+y+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(b+i+g+)+\s*(\.+|d+o+t+)*\s*(f+o+l+o+w+\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(c+h+i+l+p+|b+i+g+\s*f+o+l+o+w+\w*)+\s*(\.+|d+o+t+)*\s*(c+o+m+|i+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(b+i+g+)+\s*(\.+|d+o+t+)*\s*((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(c+h+i+l+p+|b+i+g+\s*((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+)+\s*(\.+|d+o+t+)*\s*(c+o+m+|i+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       ///(b+i+g+\s*f+o+l+o+w+\w*)+\s*(\.+|d+o+t+)*\s*(c+o+m+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(h+e+l+o+[^\s]*)+\s+(i+)+\s+(d+o+)+\s+(g+r+a+p+h+i+c+)+\s+(d+e+s+i+g+n+)+\s+(\w+o+)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(w+o+r+k+)+\s+(d+o+n+e+)+\s+(l+i+k+e+)+\s+(\w+)+\s+(l+o+g+o+[^\s]*)+\s+(b+a+n+e+r+[^\s]*)+\s+(p+a+n+e+l+[^\s]*)+\s+(o+v+e+r+l+a+y+[^\s]*)+\s+(e+t+c+[^\s]*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
@@ -2531,17 +2654,17 @@ async function onMessageHandler(target, tags, message, self) {
     // LIKE HERE
     mongoClient.connect(mongoUrl, {
       useUnifiedTopology: true
-    }, function(err, userDb) {
+    }, function(userDbError, userDb) {
       //isDatabaseBusy = true;
-      if (err) {
-        throw err;
+      if (userDbError) {
+        throw userDbError;
       }
       let userDatabase = userDb.db(globalConfig.main_database_name);
       userDatabase.collection(globalConfig.chatters_collection_name).findOne({
         user_id: userId
-      }, function(err, result) {
-        if (err) {
-          throw err;
+      }, function(resultError, result) {
+        if (resultError) {
+          throw resultError;
         }
         //console.log(result);
         //isNullDatabase = result;
@@ -2550,9 +2673,9 @@ async function onMessageHandler(target, tags, message, self) {
           //
           mongoClient.connect(mongoUrl, {
             useUnifiedTopology: true
-          }, function(err, databaseToCreate) {
-            if (err) {
-              throw err;
+          }, function(databaseToCreateError, databaseToCreate) {
+            if (databaseToCreateError) {
+              throw databaseToCreateError;
             }
             let userDatabaseToCreate = databaseToCreate.db(globalConfig.main_database_name);
             let dataToInsert = {
@@ -2671,23 +2794,23 @@ async function onMessageHandler(target, tags, message, self) {
               };
             }
             */
-            userDatabaseToCreate.collection(globalConfig.chatters_collection_name).insertOne(dataToInsert, function(err, res) {
-              if (err) {
-                throw err;
+            userDatabaseToCreate.collection(globalConfig.chatters_collection_name).insertOne(dataToInsert, function(resError, res) {
+              if (resError) {
+                throw resError;
               }
               //console.log("1 document inserted");
               mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
-              }, function(err, databaseToReadFrom) {
-                if (err) {
-                  throw err;
+              }, function(databaseToReadFromError, databaseToReadFrom) {
+                if (databaseToReadFromError) {
+                  throw databaseToReadFromError;
                 }
                 let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.main_database_name);
                 userDatabaseToReadFrom.collection(globalConfig.chatters_collection_name).findOne({
                   user_id: userId
-                }, function(err, databaseToReadFromResult) {
-                  if (err) {
-                    throw err;
+                }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                  if (databaseToReadFromResultError) {
+                    throw databaseToReadFromResultError;
                   }
                   databaseToReadFrom.close();
                   //console.log("databaseToReadFromResult");
@@ -2769,9 +2892,9 @@ async function onMessageHandler(target, tags, message, self) {
           //console.log(result);
           mongoClient.connect(mongoUrl, {
             useUnifiedTopology: true
-          }, function(err, databaseToUpdate) {
-            if (err) {
-              throw err;
+          }, function(databaseToUpdateError, databaseToUpdate) {
+            if (databaseToUpdateError) {
+              throw databaseToUpdateError;
             }
             let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name);
             let dataToQuery = {
@@ -2890,24 +3013,24 @@ async function onMessageHandler(target, tags, message, self) {
             //console.log("dataToUpdate");
             //console.log(dataToUpdate);
             //console.log(newvalues);
-            userDatabaseToUpdate.collection(globalConfig.chatters_collection_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-              if (err) {
-                throw err;
+            userDatabaseToUpdate.collection(globalConfig.chatters_collection_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+              if (resError) {
+                throw resError;
               }
               //console.log(res.result);
               //console.log("1 document updated");
               mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
-              }, function(err, databaseToReadFrom) {
-                if (err) {
-                  throw err;
+              }, function(databaseToReadFromError, databaseToReadFrom) {
+                if (databaseToReadFromError) {
+                  throw databaseToReadFromError;
                 }
                 let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.main_database_name);
                 userDatabaseToReadFrom.collection(globalConfig.chatters_collection_name).findOne({
                   user_id: userId
-                }, function(err, databaseToReadFromResult) {
-                  if (err) {
-                    throw err;
+                }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                  if (databaseToReadFromResultError) {
+                    throw databaseToReadFromResultError;
                   }
                   databaseToReadFrom.close();
                   //console.log("databaseToReadFromResult");
@@ -3102,13 +3225,14 @@ async function onMessageHandler(target, tags, message, self) {
     message = message.replace(/\s*\_+\s*/ig, "+");
     message = message.replace(/\s*\|+\s*/ig, "+");
     message = message.replace(/\s*\#+\s*/ig, "+");
-    message = message.replace(/\s*\[+\s*/ig, "+");
-    message = message.replace(/\s*\]+\s*/ig, "+");
+    //message = message.replace(/\s*\[+\s*/ig, "+");
+    //message = message.replace(/\s*\]+\s*/ig, "+");
     message = message.replace(/\s*(and)+\s*/ig, "+");
     message = message.replace(/\s*(adn)+\s*/ig, "+");
     message = message.replace(/\s*(then)+\s*/ig, ",");
     message = message.replace(/\s*[\.\,]+\s*/ig, ",");
-    message = message.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "");
+    //message = message.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "");
+    message = message.normalize("NFD");
     //console.log("NORMALIZED " + message);
     //console.log("message now " + message);
     let messageWords = message.split(/\s+/ig);
@@ -3204,7 +3328,7 @@ async function onMessageHandler(target, tags, message, self) {
           //console.log(playerVoteIndex);
           //console.log(modeVotes);
           //console.log(modeVotes.length);
-          let checkUptime = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(uptime|uptiem|up\s*time|up\s*tiem)+/ig.test(originalMessage);
+          let checkUptime = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(uptime|uptiem|up\s*time|up\s*tiem|time|tiem)+/ig.test(originalMessage);
           if (checkUptime == true) {
             //console.log("Someone requested to get the uptime!");
             //
@@ -3251,7 +3375,7 @@ async function onMessageHandler(target, tags, message, self) {
             }
 
           }
-          let checkBasicVote = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(basic)+\b/ig.test(originalMessage);
+          let checkBasicVote = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(basic)+\b/ig.test(originalMessage);
           if (checkBasicVote == true) {
             //checkModeVotes();
             if (playerVoteIndex == -1) {
@@ -3316,7 +3440,7 @@ async function onMessageHandler(target, tags, message, self) {
             }
             //checkModeVotes();
           }
-          let checkAdvancedVote = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(advanced|advaced)+\b/ig.test(originalMessage);
+          let checkAdvancedVote = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(advanced|advaced)+\b/ig.test(originalMessage);
           if (checkAdvancedVote == true) {
             //checkModeVotes();
             if (playerVoteIndex == -1) {
@@ -3385,14 +3509,27 @@ async function onMessageHandler(target, tags, message, self) {
         }
       }
     }
-    let discordPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(discord)+/ig.test(originalMessage);
+    let currentRunEndgameGoalsPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((run\s*end\s*game\s*goals)+|(ends\*game\s*goals)+)+/ig.test(originalMessage);
+    if (currentRunEndgameGoalsPrefixCheck == true) {
+      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+      client.say(target, ".color " + defaultColorNames[randomColorName]);
+      for (let helpMessageIndex = 0; helpMessageIndex < currentRunEndgameGoals.length; helpMessageIndex++) {
+        if (helpMessageIndex == 0) {
+          client.action(target, "@" + usernameToPing + " " + currentRunEndgameGoals[helpMessageIndex]);
+        }
+        if (helpMessageIndex != 0) {
+          client.action(target, currentRunEndgameGoals[helpMessageIndex]);
+        }
+      }
+    }
+    let discordPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(discord)+/ig.test(originalMessage);
     if (discordPrefixCheck == true) {
       let randomColorName = Math.floor(Math.random() * defaultColors.length);
       client.say(target, ".color " + defaultColorNames[randomColorName]);
       client.action(target, "@" + usernameToPing + " Discord: " + globalConfig.discord_url);
     }
     if (inputMode == 2) {
-      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(com+ands*)+|(cmds*)+|(cmnds*)+|(control+s*)+|(control+ers*)+|((chat)*\s*how\s*(can|do|to)\s*play\s*(chat)*\s*\?*)+|((chat)*\s*how\s*(can|do|to)\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
+      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(com+ands*)+|(cmds*)+|(cmnds*)+|(control+s*)+|(control+ers*)+|((chat)*\s*how\s*(can|do|to)\s*play\s*(chat)*\s*\?*)+|((chat)*\s*how\s*(can|do|to)\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
           //console.log("Don't send the help message yet");
@@ -3411,10 +3548,2073 @@ async function onMessageHandler(target, tags, message, self) {
           helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
         }
       }
+      let savedMacroHelpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((saving\s*macro\s*help)+|(saving\s*macros\s*help)+)+/ig.test(originalMessage);
+      if (savedMacroHelpPrefixCheck == true) {
+        if (helpMessageCooldown >= new Date().getTime()) {
+          //console.log("Don't send the help message yet");
+        }
+        if (helpMessageCooldown < new Date().getTime()) {
+          let randomColorName = Math.floor(Math.random() * defaultColors.length);
+          client.say(target, ".color " + defaultColorNames[randomColorName]);
+          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageSavingMacros.length; helpMessageIndex++) {
+            if (helpMessageIndex == 0) {
+              client.action(target, "@" + usernameToPing + " " + helpMessageSavingMacros[helpMessageIndex]);
+            }
+            if (helpMessageIndex != 0) {
+              client.action(target, helpMessageSavingMacros[helpMessageIndex]);
+            }
+          }
+          helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
+        }
+      }
       if (acceptInputs == true) {
         if (messageWords.length > 0) {
-          let listSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(list\s*macro)+/ig.test(originalMessage);
+          let renameMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((rename\s*macro)+|(update\s*macro\s*name)+|(edit\s*macro\s*name)+|(update\s*name)+|(edit\s*name)+)+/ig.test(originalMessage); // 2 Parameters: Old Macro Name and New Macro Name
+          let createMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((create\s*macro)+|(save\s*macro)+|(store\s*macro)+|(update\s*macro)+|(edit\s*macro)+|(make\s*macro)+|(new\s*macro)+|(set\s*macro)+)+/ig.test(originalMessage);// 2 Parameters: Macro Name and Inputs
+          let toggleMacroEditabilityPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((toggle\s*macro\s*editability)+|(toggle\s*editability)+)+/ig.test(originalMessage); // Used to toggle can_macro_be_edited_by_anyone between true and false // 0 Parameters
+          let listAllMacrosSavedPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((list\s*all\s*macros)+|(show\s*all\s*macros)+|(view\s*all\s*macros)+|(display\s*all\s*macros)+|(all\s*macros)+|(list\s*saved\s*macros)+|(list\s*stored\s*macros)+|(show\s*saved\s*macros)+|(show\s*stored\s*macros)+|(view\s*saved\s*macros)+|(view\s*stored\s*macros)+|(display\s*saved\s*macros)+|(display\s*stored\s*macros)+|(saved\s*macros)+|(stored\s*macros)+|(list\s*all\s*saved\s*macros)+|(list\s*all\s*stored\s*macros)+|(show\s*all\s*saved\s*macros)+|(show\s*all\s*stored\s*macros)+|(view\s*all\s*saved\s*macros)+|(view\s*all\s*stored\s*macros)+|(display\s*all\s*saved\s*macros)+|(display\s*all\s*stored\s*macros)+|(all\s*saved\s*macros)+|(all\s*stored\s*macros)+|(list\s*all\s*macros\s*saved)+|(list\s*all\s*macros\s*stored)+|(show\s*all\s*macros\s*saved)+|(show\s*all\s*macros\s*stored)+|(view\s*all\s*macros\s*saved)+|(view\s*all\s*macros\s*stored)+|(display\s*all\s*macros\s*saved)+|(display\s*all\s*macros\s*stored)+|(all\s*macros\s*saved)+|(all\s*macros\s*stored)+)+/ig.test(originalMessage); // Used to list all macros saved // 0 Parameters
+          let showContentsOfSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((list\s*macro)+|(show\s*macro)+|(view\s*macro)+|(display\s*macro)+|(macro)+)+/ig.test(originalMessage); // 1 Parameter: Macro Name
+          let executeSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((exec\s*saved\s*macro)+|(execute\s*saved\s*macro)+|(play\s*saved\s*macro)+|(run\s*saved\s*macro)+|(exec\s*stored\s*macro)+|(execute\s*stored\s*macro)+|(play\s*stored\s*macro)+|(run\s*stored\s*macro)+|(exec\s*macro)+|(execute\s*macro)+|(play\s*macro)+|(run\s*macro)+)+/ig.test(originalMessage); // 2 Parameters: Macro Name and Times To Repeat (Times To Repeat is optional)
+          let listSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(list\s*settable\s*macro)+/ig.test(originalMessage);
           //console.log("listSettablePrefixCheck = " + listSettablePrefixCheck);
+          if (createMacroPrefixCheck == true) {
+            // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
+            if (originalMessageWords[1] === "" || originalMessageWords[1] === undefined || originalMessageWords[1] === null || originalMessageWords[1].toLowerCase() === "null" || originalMessageWords[1].toLowerCase() === "undefined") {
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(target, ".color " + defaultColorNames[randomColorName]);
+              client.action(target, "@" + usernameToPing + " You didn't enter the macro name!");
+            }
+            if (originalMessageWords[1] !== "" && originalMessageWords[1] !== undefined && originalMessageWords[1] !== null && originalMessageWords[1].toLowerCase() !== "null" && originalMessageWords[1].toLowerCase() !== "undefined") {
+              let macroNameToLookup = originalMessageWords[1];
+              macroNameToLookup = macroNameToLookup.toLowerCase();
+              // Cleanup garbage from macro name, allow only letters, numbers, hyphens, underscores, can't be case sensitive
+              console.log("BEFORE Looks like someone is trying to create or update the macro " + macroNameToLookup);
+              macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+              for (let cyrillicsReplacementTableIndex = 0; cyrillicsReplacementTableIndex < cyrillicsReplacementTable.length; cyrillicsReplacementTableIndex++) {
+                macroNameToLookup = macroNameToLookup.replace(cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolOriginalString, cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolReplacementString);
+              }
+              macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+              macroNameToLookup = macroNameToLookup.toLowerCase();
+              console.log("AFTER  Looks like someone is trying to create or update the macro " + macroNameToLookup);
+              let shortestMacroNameLengthAllowed = 4;
+              let longestMacroNameLengthAllowed = 25;
+              if (macroNameToLookup.length < shortestMacroNameLengthAllowed || macroNameToLookup.length > longestMacroNameLengthAllowed) {
+                // Macro name too short or too long
+                if (macroNameToLookup.length < shortestMacroNameLengthAllowed) {
+                  // Macro name too short
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered is too short! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                }
+                if (macroNameToLookup.length > longestMacroNameLengthAllowed) {
+                  // Macro name too long
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered is too long! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                }
+              }
+              if (macroNameToLookup.length >= shortestMacroNameLengthAllowed && macroNameToLookup.length <= longestMacroNameLengthAllowed) {
+                // Macro name has acceptable length
+                let checkIfMacroNameHasIllegalCharacters = /[^A-Za-z0-9\-\_]+/ig.test(macroNameToLookup);
+                if (checkIfMacroNameHasIllegalCharacters == true) {
+                  // Add last edited by and actual usernames in the macro entries (DONE the first part, no need to add usernames, just compare the user id with the user ids stored in the main user database)
+                  // Add a way to transfer ownership of macro (this is gonna be hard ????? idk)
+                  // Add created at and last edited at (DONE)
+                  // Use count? (DONE)
+                  // Limit macro name to 32 characters? (Done between 4 and 25) (DONE)
+                  // Add a way to rename (and delete?) macros (DONE RENAME, better not delete stuff)
+                  // Use the function to tidy up and make the macro contents "advanced input compliant" before saving and after reading it (DONE)
+                  // Make it so the flag can_macro_be_edited_by_anyone can be edited by the owner ONLY (Needs another command to do this) (DONE)
+                  // Add command to execute saved macro (DONE)
+                  console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                }
+                if (checkIfMacroNameHasIllegalCharacters == false) {
+                  console.log("The macro name you entered is valid");
+                  let macroContentsToEnter = originalMessageWords;
+                  //console.log(macroContentsToEnter);
+                  macroContentsToEnter.splice(0, 2);
+                  //console.log(macroContentsToEnter);
+                  macroContentsToEnter = macroContentsToEnter.join(" ");
+                  macroContentsToEnter = macroContentsToEnter.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+                  for (let cyrillicsReplacementTableIndex = 0; cyrillicsReplacementTableIndex < cyrillicsReplacementTable.length; cyrillicsReplacementTableIndex++) {
+                    macroContentsToEnter = macroContentsToEnter.replace(cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolOriginalString, cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolReplacementString);
+                  }
+                  macroContentsToEnter = macroContentsToEnter.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+                  macroContentsToEnter = macroContentsToEnter.toLowerCase();
+                  //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                  //console.log("macroContentsToEnter = ");
+                  //console.log(macroContentsToEnter);
+                  let macroContentsProcessed = tidyUpAdvancedInputString(macroContentsToEnter);
+                  //console.log(macroContentsProcessed);
+                  macroContentsToEnter = macroContentsProcessed;
+                  macroContentsToEnter = macroContentsToEnter.replace(/(\s*\*\d*)+$/ig, "*0");
+                  //console.log(macroContentsToEnter);
+                  if (macroContentsToEnter === "" || macroContentsToEnter === undefined || macroContentsToEnter === null || macroContentsToEnter.toLowerCase() === "null" || macroContentsToEnter.toLowerCase() === "undefined") {
+                    console.log("You didn't enter anything to create or update");
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(target, ".color " + defaultColorNames[randomColorName]);
+                    client.action(target, "@" + usernameToPing + " You didn't enter anything to create or update!");
+                  }
+                  if (macroContentsToEnter !== "" && macroContentsToEnter !== undefined && macroContentsToEnter !== null && macroContentsToEnter.toLowerCase() !== "null" && macroContentsToEnter.toLowerCase() !== "undefined") {
+                    console.log("You entered " + macroContentsToEnter + " to create or update");
+                    // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
+                    mongoClient.connect(mongoUrl, {
+                      useUnifiedTopology: true
+                    }, function(macroDbError, macroDb) {
+                      if (macroDbError) {
+                        throw macroDbError;
+                      }
+                      // Check if the macro entry for a specific game exists
+                      let macroDatabase = macroDb.db(globalConfig.macro_database_name);
+                      macroDatabase.collection(globalConfig.run_name).findOne({
+                        macro_name: macroNameToLookup
+                      }, function(resultError, result) {
+                        if (resultError) {
+                          throw resultError;
+                        }
+                        if (result === null) {
+                          console.log("Looks like this macro database entry does not exist");
+                          mongoClient.connect(mongoUrl, {
+                            useUnifiedTopology: true
+                          }, function(databaseToCreateError, databaseToCreate) {
+                            if (databaseToCreateError) {
+                              throw databaseToCreateError;
+                            }
+                            let macroDatabaseToCreate = databaseToCreate.db(globalConfig.macro_database_name);
+                            let dataToInsert = {
+                              macro_creator_user_id: userId,
+                              macro_owner_user_id: userId,
+                              macro_name: macroNameToLookup,
+                              macro_contents: macroContentsToEnter,
+
+                              macro_created_at_timestamp: internalMessageTimestamp,
+                              macro_created_at_iso_timestamp: internalMessageTimestampIsoString,
+                              macro_created_at_twitch_timestamp: twitchMessageTimestamp,
+                              macro_created_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+
+                              macro_last_edited_at_timestamp: internalMessageTimestamp,
+                              macro_last_edited_at_iso_timestamp: internalMessageTimestampIsoString,
+                              macro_last_edited_at_twitch_timestamp: twitchMessageTimestamp,
+                              macro_last_edited_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+
+                              macro_last_used_at_timestamp: internalMessageTimestamp,
+                              macro_last_used_at_iso_timestamp: internalMessageTimestampIsoString,
+                              macro_last_used_at_twitch_timestamp: twitchMessageTimestamp,
+                              macro_last_used_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+
+                              times_macro_was_edited: 0,
+                              times_macro_was_used: 0,
+
+                              macro_last_edited_by: userId,
+                              macro_last_used_by: userId,
+
+                              can_macro_be_edited_by_anyone: false
+                            };
+                            macroDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(resError, res) {
+                              if (resError) {
+                                throw resError;
+                              }
+                              //console.log("1 document inserted");
+                              mongoClient.connect(mongoUrl, {
+                                useUnifiedTopology: true
+                              }, function(databaseToReadFromError, databaseToReadFrom) {
+                                if (databaseToReadFromError) {
+                                  throw databaseToReadFromError;
+                                }
+                                let macroDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.macro_database_name);
+                                macroDatabaseToReadFrom.collection(globalConfig.run_name).findOne({
+                                  macro_name: macroNameToLookup
+                                }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                                  if (databaseToReadFromResultError) {
+                                    throw databaseToReadFromResultError;
+                                  }
+                                  databaseToReadFrom.close();
+                                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                  //console.log("BEFORE databaseToReadFromResult.macro_contents = ");
+                                  //console.log(databaseToReadFromResult.macro_contents);
+                                  let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(databaseToReadFromResult.macro_contents);
+                                  //console.log("A advancedInputCleanedUpFromDatabase = ");
+                                  //console.log(advancedInputCleanedUpFromDatabase);
+                                  //console.log("AFTER databaseToReadFromResult.macro_contents = ");
+                                  //console.log(databaseToReadFromResult.macro_contents);
+                                  advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
+                                  //console.log("B advancedInputCleanedUpFromDatabase = ");
+                                  //console.log(advancedInputCleanedUpFromDatabase);
+                                  let advancedInputSplitInMultipleStrings = [];
+                                  //console.log("advancedInputSplitInMultipleStrings = ");
+                                  //console.log(advancedInputSplitInMultipleStrings);
+                                  if (advancedInputCleanedUpFromDatabase.length >= 200) {
+                                    // Split in multiple messages
+                                    advancedInputSplitInMultipleStrings = advancedInputCleanedUpFromDatabase.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
+                                    for (let advancedInputSplitInMultipleStringsIndex = 0; advancedInputSplitInMultipleStringsIndex < advancedInputSplitInMultipleStrings.length; advancedInputSplitInMultipleStringsIndex++) {
+                                      if (advancedInputSplitInMultipleStringsIndex <= 0) {
+                                        // Send first message here, the message that pings the user
+                                        client.action(target, "@" + usernameToPing + " Created macro " + databaseToReadFromResult.macro_name + " as " + advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                      }
+                                      if (advancedInputSplitInMultipleStringsIndex > 0) {
+                                        // Send the rest of the messages but without pinging
+                                        client.action(target, advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                      }
+                                    }
+                                    client.action(target, "@" + usernameToPing + " by default, only you, the owner can edit this macro. Type !togglemacroeditability " + databaseToReadFromResult.macro_name + " to let anyone edit this macro, and type !togglemacroeditability " + databaseToReadFromResult.macro_name + " again to make it so only you can edit this macro.");
+                                  }
+                                  if (advancedInputCleanedUpFromDatabase.length < 200) {
+                                    // Do not split, send as it is
+                                    client.action(target, "@" + usernameToPing + " Created macro " + databaseToReadFromResult.macro_name + " as " + advancedInputCleanedUpFromDatabase);
+                                    client.action(target, "@" + usernameToPing + " by default, only you, the owner can edit this macro. Type !togglemacroeditability " + databaseToReadFromResult.macro_name + " to let anyone edit this macro, and type !togglemacroeditability " + databaseToReadFromResult.macro_name + " again to make it so only you can edit this macro.");
+                                  }
+                                  console.log("Macro database entry created and read from successfully!");
+                                  console.log(databaseToReadFromResult);
+                                });
+                              });
+                              databaseToCreate.close();
+                            });
+                          });
+                        }
+                        if (result !== null) {
+                          console.log("Looks like this macro database entry already exists");
+                          mongoClient.connect(mongoUrl, {
+                            useUnifiedTopology: true
+                          }, function(databaseToUpdateError, databaseToUpdate) {
+                            if (databaseToUpdateError) {
+                              throw databaseToUpdateError;
+                            }
+                            let macroDatabaseToUpdate = databaseToUpdate.db(globalConfig.macro_database_name);
+                            let dataToQuery = {
+                              macro_creator_user_id: result.macro_creator_user_id,
+                              macro_owner_user_id: result.macro_owner_user_id,
+                              macro_name: result.macro_name,
+                              macro_contents: result.macro_contents,
+
+                              macro_created_at_timestamp: result.macro_created_at_timestamp,
+                              macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                              macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                              macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                              macro_last_edited_at_timestamp: result.macro_last_edited_at_timestamp,
+                              macro_last_edited_at_iso_timestamp: result.macro_last_edited_at_iso_timestamp,
+                              macro_last_edited_at_twitch_timestamp: result.macro_last_edited_at_twitch_timestamp,
+                              macro_last_edited_at_twitch_iso_timestamp: result.macro_last_edited_at_twitch_iso_timestamp,
+
+                              macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                              macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                              macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                              macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                              times_macro_was_edited: result.times_macro_was_edited,
+                              times_macro_was_used: result.times_macro_was_used,
+
+                              macro_last_edited_by: result.macro_last_edited_by,
+                              macro_last_used_by: result.macro_last_used_by,
+
+                              can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                            };
+                            let dataToUpdate = {
+                              $set: {
+                                macro_creator_user_id: result.macro_creator_user_id,
+                                macro_owner_user_id: result.macro_owner_user_id,
+                                macro_name: result.macro_name,
+                                macro_contents: result.macro_contents,
+
+                                macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                macro_last_edited_at_timestamp: result.macro_last_edited_at_timestamp,
+                                macro_last_edited_at_iso_timestamp: result.macro_last_edited_at_iso_timestamp,
+                                macro_last_edited_at_twitch_timestamp: result.macro_last_edited_at_twitch_timestamp,
+                                macro_last_edited_at_twitch_iso_timestamp: result.macro_last_edited_at_twitch_iso_timestamp,
+
+                                macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                times_macro_was_edited: result.times_macro_was_edited,
+                                times_macro_was_used: result.times_macro_was_used,
+
+                                macro_last_edited_by: result.macro_last_edited_by,
+                                macro_last_used_by: result.macro_last_used_by,
+
+                                can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                              }
+                            };
+                            // But only update if user id is the same as the user id who created the macro
+                            if (result.macro_owner_user_id != userId) {
+                              // User id of sender is NOT the same as user id of owner
+                              if (result.can_macro_be_edited_by_anyone == false) {
+                                // Macro canNOT be edited by anyone
+                                console.log("You're NOT the owner and only the owner can edit/update this macro!");
+                                dataToUpdate = {
+                                  $set: {
+                                    macro_creator_user_id: result.macro_creator_user_id,
+                                    macro_owner_user_id: result.macro_owner_user_id,
+                                    macro_name: result.macro_name,
+                                    macro_contents: result.macro_contents,
+
+                                    macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                    macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                    macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                    macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                    macro_last_edited_at_timestamp: result.macro_last_edited_at_timestamp,
+                                    macro_last_edited_at_iso_timestamp: result.macro_last_edited_at_iso_timestamp,
+                                    macro_last_edited_at_twitch_timestamp: result.macro_last_edited_at_twitch_timestamp,
+                                    macro_last_edited_at_twitch_iso_timestamp: result.macro_last_edited_at_twitch_iso_timestamp,
+
+                                    macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                    macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                    macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                    macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                    times_macro_was_edited: result.times_macro_was_edited,
+                                    times_macro_was_used: result.times_macro_was_used,
+
+                                    macro_last_edited_by: result.macro_last_edited_by,
+                                    macro_last_used_by: result.macro_last_used_by,
+
+                                    can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                                  }
+                                };
+                                // Check if an user exists in the chatters database
+                                mongoClient.connect(mongoUrl, {
+                                  useUnifiedTopology: true
+                                }, function(userDbError, userDb) {
+                                  if (userDbError) {
+                                    throw userDbError;
+                                  }
+                                  // Check if the user id exists
+                                  let userDatabase = userDb.db(globalConfig.main_database_name);
+                                  userDatabase.collection(globalConfig.chatters_collection_name).findOne({
+                                    user_id: dataToUpdate.$set.macro_owner_user_id
+                                  }, function(userDbResultError, userDbResult) {
+                                    if (userDbResultError) {
+                                      throw userDbResultError;
+                                    }
+                                    if (userDbResult === null) {
+                                      // uhhhhhhhhh user unknown dont do anything
+                                      console.log("This user doesn't exist, wtf bruh");
+                                      console.log(userDbResult);
+                                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                      client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                      client.action(target, "@" + usernameToPing + " You're not the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " and only the owner of this macro can edit/update this macro!");
+                                    }
+                                    if (userDbResult !== null) {
+                                      // known user, let user know that user exists in the database
+                                      console.log("This user exists lets fucking gooooooooooooo");
+                                      console.log(userDbResult);
+                                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                      client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                      client.action(target, "@" + usernameToPing + " You're not the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " and only the owner of this macro can edit/update this macro!");
+                                    }
+                                    userDb.close();
+                                  });
+                                });
+                              }
+                              if (result.can_macro_be_edited_by_anyone == true) {
+                                // Macro can be edited by anyone
+                                console.log("You're NOT the owner and anyone can edit/update this macro!");
+                                dataToUpdate = {
+                                  $set: {
+                                    macro_creator_user_id: result.macro_creator_user_id,
+                                    macro_owner_user_id: result.macro_owner_user_id,
+                                    macro_name: result.macro_name,
+                                    macro_contents: macroContentsToEnter,
+
+                                    macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                    macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                    macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                    macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                    macro_last_edited_at_timestamp: internalMessageTimestamp,
+                                    macro_last_edited_at_iso_timestamp: internalMessageTimestampIsoString,
+                                    macro_last_edited_at_twitch_timestamp: twitchMessageTimestamp,
+                                    macro_last_edited_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+
+                                    macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                    macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                    macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                    macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                    times_macro_was_edited: result.times_macro_was_edited + 1,
+                                    times_macro_was_used: result.times_macro_was_used,
+
+                                    macro_last_edited_by: userId,
+                                    macro_last_used_by: result.macro_last_used_by,
+
+                                    can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                                  }
+                                };
+                                // Check if an user exists in the chatters database
+                                mongoClient.connect(mongoUrl, {
+                                  useUnifiedTopology: true
+                                }, function(userDbError, userDb) {
+                                  if (userDbError) {
+                                    throw userDbError;
+                                  }
+                                  // Check if the user id exists
+                                  let userDatabase = userDb.db(globalConfig.main_database_name);
+                                  userDatabase.collection(globalConfig.chatters_collection_name).findOne({
+                                    user_id: dataToUpdate.$set.macro_owner_user_id
+                                  }, function(userDbResultError, userDbResult) {
+                                    if (userDbResultError) {
+                                      throw userDbResultError;
+                                    }
+                                    if (userDbResult === null) {
+                                      // uhhhhhhhhh user unknown dont do anything
+                                      console.log("This user doesn't exist, wtf bruh");
+                                      console.log(userDbResult);
+                                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                      client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
+                                      let advancedInputSplitInMultipleStrings = [];
+                                      if (advancedInputCleanedUpFromDatabase.length >= 200) {
+                                        // Split in multiple messages
+                                        advancedInputSplitInMultipleStrings = advancedInputCleanedUpFromDatabase.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
+                                        for (let advancedInputSplitInMultipleStringsIndex = 0; advancedInputSplitInMultipleStringsIndex < advancedInputSplitInMultipleStrings.length; advancedInputSplitInMultipleStringsIndex++) {
+                                          if (advancedInputSplitInMultipleStringsIndex <= 0) {
+                                            // Send first message here, the message that pings the user
+                                            client.action(target, "@" + usernameToPing + " You're not the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                          if (advancedInputSplitInMultipleStringsIndex > 0) {
+                                            // Send the rest of the messages but without pinging
+                                            client.action(target, advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                        }
+                                      }
+                                      if (advancedInputCleanedUpFromDatabase.length < 200) {
+                                        // Do not split, send as it is
+                                        client.action(target, "@" + usernameToPing + " You're not the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputCleanedUpFromDatabase);
+                                      }
+                                    }
+                                    if (userDbResult !== null) {
+                                      // known user, let user know that user exists in the database
+                                      console.log("This user exists lets fucking gooooooooooooo");
+                                      console.log(userDbResult);
+                                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                      client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
+                                      let advancedInputSplitInMultipleStrings = [];
+                                      if (advancedInputCleanedUpFromDatabase.length >= 200) {
+                                        // Split in multiple messages
+                                        advancedInputSplitInMultipleStrings = advancedInputCleanedUpFromDatabase.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
+                                        for (let advancedInputSplitInMultipleStringsIndex = 0; advancedInputSplitInMultipleStringsIndex < advancedInputSplitInMultipleStrings.length; advancedInputSplitInMultipleStringsIndex++) {
+                                          if (advancedInputSplitInMultipleStringsIndex <= 0) {
+                                            // Send first message here, the message that pings the user
+                                            client.action(target, "@" + usernameToPing + " You're not the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                          if (advancedInputSplitInMultipleStringsIndex > 0) {
+                                            // Send the rest of the messages but without pinging
+                                            client.action(target, advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                        }
+                                      }
+                                      if (advancedInputCleanedUpFromDatabase.length < 200) {
+                                        // Do not split, send as it is
+                                        client.action(target, "@" + usernameToPing + " You're not the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputCleanedUpFromDatabase);
+                                      }
+                                    }
+                                    userDb.close();
+                                  });
+                                });
+                              }
+                            }
+                            if (result.macro_owner_user_id == userId) {
+                              // User id of sender is the same as user id of owner
+                              if (result.can_macro_be_edited_by_anyone == false) {
+                                // Macro canNOT be edited by anyone
+                                console.log("You're the owner and only you can edit/update this macro!");
+                                dataToUpdate = {
+                                  $set: {
+                                    macro_creator_user_id: result.macro_creator_user_id,
+                                    macro_owner_user_id: result.macro_owner_user_id,
+                                    macro_name: result.macro_name,
+                                    macro_contents: macroContentsToEnter,
+
+                                    macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                    macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                    macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                    macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                    macro_last_edited_at_timestamp: internalMessageTimestamp,
+                                    macro_last_edited_at_iso_timestamp: internalMessageTimestampIsoString,
+                                    macro_last_edited_at_twitch_timestamp: twitchMessageTimestamp,
+                                    macro_last_edited_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+
+                                    macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                    macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                    macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                    macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                    times_macro_was_edited: result.times_macro_was_edited + 1,
+                                    times_macro_was_used: result.times_macro_was_used,
+
+                                    macro_last_edited_by: userId,
+                                    macro_last_used_by: result.macro_last_used_by,
+
+                                    can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                                  }
+                                };
+                                // Check if an user exists in the chatters database
+                                mongoClient.connect(mongoUrl, {
+                                  useUnifiedTopology: true
+                                }, function(userDbError, userDb) {
+                                  if (userDbError) {
+                                    throw userDbError;
+                                  }
+                                  // Check if the user id exists
+                                  let userDatabase = userDb.db(globalConfig.main_database_name);
+                                  userDatabase.collection(globalConfig.chatters_collection_name).findOne({
+                                    user_id: dataToUpdate.$set.macro_owner_user_id
+                                  }, function(userDbResultError, userDbResult) {
+                                    if (userDbResultError) {
+                                      throw userDbResultError;
+                                    }
+                                    if (userDbResult === null) {
+                                      // uhhhhhhhhh user unknown dont do anything
+                                      console.log("This user doesn't exist, wtf bruh");
+                                      console.log(userDbResult);
+                                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                      client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
+                                      let advancedInputSplitInMultipleStrings = [];
+                                      if (advancedInputCleanedUpFromDatabase.length >= 200) {
+                                        // Split in multiple messages
+                                        advancedInputSplitInMultipleStrings = advancedInputCleanedUpFromDatabase.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
+                                        for (let advancedInputSplitInMultipleStringsIndex = 0; advancedInputSplitInMultipleStringsIndex < advancedInputSplitInMultipleStrings.length; advancedInputSplitInMultipleStringsIndex++) {
+                                          if (advancedInputSplitInMultipleStringsIndex <= 0) {
+                                            // Send first message here, the message that pings the user
+                                            client.action(target, "@" + usernameToPing + " You're the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) and only you can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                          if (advancedInputSplitInMultipleStringsIndex > 0) {
+                                            // Send the rest of the messages but without pinging
+                                            client.action(target, advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                        }
+                                        client.action(target, "@" + usernameToPing + " currently, only you, the owner (Unknown User) can edit this macro. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " to let anyone edit this macro, and type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to make it so only you can edit this macro.");
+                                      }
+                                      if (advancedInputCleanedUpFromDatabase.length < 200) {
+                                        // Do not split, send as it is
+                                        client.action(target, "@" + usernameToPing + " You're the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) and only you can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputCleanedUpFromDatabase);
+                                        client.action(target, "@" + usernameToPing + " currently, only you, the owner (Unknown User) can edit this macro. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " to let anyone edit this macro, and type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to make it so only you can edit this macro.");
+                                      }
+                                    }
+                                    if (userDbResult !== null) {
+                                      // known user, let user know that user exists in the database
+                                      console.log("This user exists lets fucking gooooooooooooo");
+                                      console.log(userDbResult);
+                                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                      client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
+                                      let advancedInputSplitInMultipleStrings = [];
+                                      if (advancedInputCleanedUpFromDatabase.length >= 200) {
+                                        // Split in multiple messages
+                                        advancedInputSplitInMultipleStrings = advancedInputCleanedUpFromDatabase.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
+                                        for (let advancedInputSplitInMultipleStringsIndex = 0; advancedInputSplitInMultipleStringsIndex < advancedInputSplitInMultipleStrings.length; advancedInputSplitInMultipleStringsIndex++) {
+                                          if (advancedInputSplitInMultipleStringsIndex <= 0) {
+                                            // Send first message here, the message that pings the user
+                                            client.action(target, "@" + usernameToPing + " You're the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) and only you can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                          if (advancedInputSplitInMultipleStringsIndex > 0) {
+                                            // Send the rest of the messages but without pinging
+                                            client.action(target, advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                        }
+                                        client.action(target, "@" + usernameToPing + " currently, only you, the owner (" + userDbResult.last_username_to_ping + ") can edit this macro. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " to let anyone edit this macro, and type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to make it so only you can edit this macro.");
+                                      }
+                                      if (advancedInputCleanedUpFromDatabase.length < 200) {
+                                        // Do not split, send as it is
+                                        client.action(target, "@" + usernameToPing + " You're the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) and only you can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputCleanedUpFromDatabase);
+                                        client.action(target, "@" + usernameToPing + " currently, only you, the owner (" + userDbResult.last_username_to_ping + ") can edit this macro. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " to let anyone edit this macro, and type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to make it so only you can edit this macro.");
+                                      }
+                                    }
+                                    userDb.close();
+                                  });
+                                });
+                              }
+                              if (result.can_macro_be_edited_by_anyone == true) {
+                                // Macro can be edited by anyone
+                                console.log("You're the owner and anyone can edit/update this macro!");
+                                dataToUpdate = {
+                                  $set: {
+                                    macro_creator_user_id: result.macro_creator_user_id,
+                                    macro_owner_user_id: result.macro_owner_user_id,
+                                    macro_name: result.macro_name,
+                                    macro_contents: macroContentsToEnter,
+
+                                    macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                    macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                    macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                    macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                    macro_last_edited_at_timestamp: internalMessageTimestamp,
+                                    macro_last_edited_at_iso_timestamp: internalMessageTimestampIsoString,
+                                    macro_last_edited_at_twitch_timestamp: twitchMessageTimestamp,
+                                    macro_last_edited_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+
+                                    macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                    macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                    macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                    macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                    times_macro_was_edited: result.times_macro_was_edited + 1,
+                                    times_macro_was_used: result.times_macro_was_used,
+
+                                    macro_last_edited_by: userId,
+                                    macro_last_used_by: result.macro_last_used_by,
+
+                                    can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                                  }
+                                };
+                                // Check if an user exists in the chatters database
+                                mongoClient.connect(mongoUrl, {
+                                  useUnifiedTopology: true
+                                }, function(userDbError, userDb) {
+                                  if (userDbError) {
+                                    throw userDbError;
+                                  }
+                                  // Check if the user id exists
+                                  let userDatabase = userDb.db(globalConfig.main_database_name);
+                                  userDatabase.collection(globalConfig.chatters_collection_name).findOne({
+                                    user_id: dataToUpdate.$set.macro_owner_user_id
+                                  }, function(userDbResultError, userDbResult) {
+                                    if (userDbResultError) {
+                                      throw userDbResultError;
+                                    }
+                                    if (userDbResult === null) {
+                                      // uhhhhhhhhh user unknown dont do anything
+                                      console.log("This user doesn't exist, wtf bruh");
+                                      console.log(userDbResult);
+                                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                      client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
+                                      let advancedInputSplitInMultipleStrings = [];
+                                      if (advancedInputCleanedUpFromDatabase.length >= 200) {
+                                        // Split in multiple messages
+                                        advancedInputSplitInMultipleStrings = advancedInputCleanedUpFromDatabase.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
+                                        for (let advancedInputSplitInMultipleStringsIndex = 0; advancedInputSplitInMultipleStringsIndex < advancedInputSplitInMultipleStrings.length; advancedInputSplitInMultipleStringsIndex++) {
+                                          if (advancedInputSplitInMultipleStringsIndex <= 0) {
+                                            // Send first message here, the message that pings the user
+                                            client.action(target, "@" + usernameToPing + " You're the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                          if (advancedInputSplitInMultipleStringsIndex > 0) {
+                                            // Send the rest of the messages but without pinging
+                                            client.action(target, advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                        }
+                                        client.action(target, "@" + usernameToPing + " currently, anyone can edit this macro. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " to make it so only you can edit this macro, and type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to let anyone edit this macro.");
+                                      }
+                                      if (advancedInputCleanedUpFromDatabase.length < 200) {
+                                        // Do not split, send as it is
+                                        client.action(target, "@" + usernameToPing + " You're the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputCleanedUpFromDatabase);
+                                        client.action(target, "@" + usernameToPing + " currently, anyone can edit this macro. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " to make it so only you can edit this macro, and type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to let anyone edit this macro.");
+                                      }
+                                    }
+                                    if (userDbResult !== null) {
+                                      // known user, let user know that user exists in the database
+                                      console.log("This user exists lets fucking gooooooooooooo");
+                                      console.log(userDbResult);
+                                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                      client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
+                                      let advancedInputSplitInMultipleStrings = [];
+                                      if (advancedInputCleanedUpFromDatabase.length >= 200) {
+                                        // Split in multiple messages
+                                        advancedInputSplitInMultipleStrings = advancedInputCleanedUpFromDatabase.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
+                                        for (let advancedInputSplitInMultipleStringsIndex = 0; advancedInputSplitInMultipleStringsIndex < advancedInputSplitInMultipleStrings.length; advancedInputSplitInMultipleStringsIndex++) {
+                                          if (advancedInputSplitInMultipleStringsIndex <= 0) {
+                                            // Send first message here, the message that pings the user
+                                            client.action(target, "@" + usernameToPing + " You're the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                          if (advancedInputSplitInMultipleStringsIndex > 0) {
+                                            // Send the rest of the messages but without pinging
+                                            client.action(target, advancedInputSplitInMultipleStrings[advancedInputSplitInMultipleStringsIndex]);
+                                          }
+                                        }
+                                        client.action(target, "@" + usernameToPing + " currently, anyone can edit this macro. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " to make it so only you can edit this macro, and type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to let anyone edit this macro.");
+                                      }
+                                      if (advancedInputCleanedUpFromDatabase.length < 200) {
+                                        // Do not split, send as it is
+                                        client.action(target, "@" + usernameToPing + " You're the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can edit/update this macro. Updated macro " + dataToUpdate.$set.macro_name + " to " + advancedInputCleanedUpFromDatabase);
+                                        client.action(target, "@" + usernameToPing + " currently, anyone can edit this macro. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " to make it so only you can edit this macro, and type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to let anyone edit this macro.");
+                                      }
+                                    }
+                                    userDb.close();
+                                  });
+                                });
+                              }
+                            }
+                            macroDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                              if (resError) {
+                                throw resError;
+                              }
+                              //console.log(res.result);
+                              //console.log("1 document updated");
+                              mongoClient.connect(mongoUrl, {
+                                useUnifiedTopology: true
+                              }, function(databaseToReadFromError, databaseToReadFrom) {
+                                if (databaseToReadFromError) {
+                                  throw databaseToReadFromError;
+                                }
+                                let macroDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.macro_database_name);
+                                macroDatabaseToReadFrom.collection(globalConfig.run_name).findOne({
+                                  macro_name: result.macro_name
+                                }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                                  if (databaseToReadFromResultError) {
+                                    throw databaseToReadFromResultError;
+                                  }
+                                  databaseToReadFrom.close();
+                                  console.log("Macro database entry updated and read from successfully!");
+                                  console.log(databaseToReadFromResult);
+                                });
+                              });
+                              databaseToUpdate.close();
+                            });
+                          });
+                        }
+                        macroDb.close();
+                      });
+                    });
+                  }
+                }
+              }
+            }
+          }
+          if (renameMacroPrefixCheck == true) {
+            // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
+            if (originalMessageWords[1] === "" || originalMessageWords[1] === undefined || originalMessageWords[1] === null || originalMessageWords[1].toLowerCase() === "null" || originalMessageWords[1].toLowerCase() === "undefined") {
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(target, ".color " + defaultColorNames[randomColorName]);
+              client.action(target, "@" + usernameToPing + " You didn't enter the macro name!");
+            }
+            if (originalMessageWords[1] !== "" && originalMessageWords[1] !== undefined && originalMessageWords[1] !== null && originalMessageWords[1].toLowerCase() !== "null" && originalMessageWords[1].toLowerCase() !== "undefined") {
+              let macroNameToLookup = originalMessageWords[1];
+              macroNameToLookup = macroNameToLookup.toLowerCase();
+              // Cleanup garbage from macro name, allow only letters, numbers, hyphens, underscores, can't be case sensitive
+              console.log("A BEFORE Looks like someone is trying to rename the macro " + macroNameToLookup);
+              macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+              for (let cyrillicsReplacementTableIndex = 0; cyrillicsReplacementTableIndex < cyrillicsReplacementTable.length; cyrillicsReplacementTableIndex++) {
+                macroNameToLookup = macroNameToLookup.replace(cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolOriginalString, cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolReplacementString);
+              }
+              macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+              macroNameToLookup = macroNameToLookup.toLowerCase();
+              console.log("A AFTER  Looks like someone is trying to rename the macro " + macroNameToLookup);
+              let shortestMacroNameLengthAllowed = 4;
+              let longestMacroNameLengthAllowed = 25;
+              if (macroNameToLookup.length < shortestMacroNameLengthAllowed || macroNameToLookup.length > longestMacroNameLengthAllowed) {
+                // Macro name too short or too long
+                if (macroNameToLookup.length < shortestMacroNameLengthAllowed) {
+                  // Macro name too short
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered is too short! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                }
+                if (macroNameToLookup.length > longestMacroNameLengthAllowed) {
+                  // Macro name too long
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered is too long! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                }
+              }
+              if (macroNameToLookup.length >= shortestMacroNameLengthAllowed && macroNameToLookup.length <= longestMacroNameLengthAllowed) {
+                // Macro name has acceptable length
+                let checkIfMacroNameHasIllegalCharacters = /[^A-Za-z0-9\-\_]+/ig.test(macroNameToLookup);
+                if (checkIfMacroNameHasIllegalCharacters == true) {
+                  console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                }
+                if (checkIfMacroNameHasIllegalCharacters == false) {
+                  console.log("The macro name you entered is valid");
+                  if (originalMessageWords[2] === "" || originalMessageWords[2] === undefined || originalMessageWords[2] === null || originalMessageWords[2].toLowerCase() === "null" || originalMessageWords[2].toLowerCase() === "undefined") {
+                    console.log("You didn't enter anything to create or update");
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(target, ".color " + defaultColorNames[randomColorName]);
+                    client.action(target, "@" + usernameToPing + " You didn't enter the new macro name!");
+                  }
+                  if (originalMessageWords[2] !== "" && originalMessageWords[2] !== undefined && originalMessageWords[2] !== null && originalMessageWords[2].toLowerCase() !== "null" && originalMessageWords[2].toLowerCase() !== "undefined") {
+                    let newMacroNameToEnter = originalMessageWords[2];
+                    //console.log(newMacroNameToEnter);
+                    //newMacroNameToEnter.splice(0, 2);
+                    //console.log(newMacroNameToEnter);
+                    //newMacroNameToEnter = newMacroNameToEnter.join(" ");
+                    //console.log(newMacroNameToEnter);
+                    newMacroNameToEnter = newMacroNameToEnter.toLowerCase();
+                    console.log("B BEFORE Looks like someone is trying to rename the macro " + newMacroNameToEnter);
+                    newMacroNameToEnter = newMacroNameToEnter.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+                    for (let cyrillicsReplacementTableIndex = 0; cyrillicsReplacementTableIndex < cyrillicsReplacementTable.length; cyrillicsReplacementTableIndex++) {
+                      newMacroNameToEnter = newMacroNameToEnter.replace(cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolOriginalString, cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolReplacementString);
+                    }
+                    newMacroNameToEnter = newMacroNameToEnter.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+                    newMacroNameToEnter = newMacroNameToEnter.toLowerCase();
+                    console.log("B AFTER  Looks like someone is trying to rename the macro " + newMacroNameToEnter);
+                    if (newMacroNameToEnter.length < shortestMacroNameLengthAllowed || newMacroNameToEnter.length > longestMacroNameLengthAllowed) {
+                      // Macro name too short or too long
+                      if (newMacroNameToEnter.length < shortestMacroNameLengthAllowed) {
+                        // Macro name too short
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(target, ".color " + defaultColorNames[randomColorName]);
+                        client.action(target, "@" + usernameToPing + " The new macro name you entered is too short! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                      }
+                      if (newMacroNameToEnter.length > longestMacroNameLengthAllowed) {
+                        // Macro name too long
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(target, ".color " + defaultColorNames[randomColorName]);
+                        client.action(target, "@" + usernameToPing + " The new macro name you entered is too long! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                      }
+                    }
+                    if (newMacroNameToEnter.length >= shortestMacroNameLengthAllowed && newMacroNameToEnter.length <= longestMacroNameLengthAllowed) {
+                      // New Macro name has acceptable length
+                      let checkIfNewMacroNameHasIllegalCharacters = /[^A-Za-z0-9\-\_]+/ig.test(newMacroNameToEnter);
+                      if (checkIfNewMacroNameHasIllegalCharacters == true) {
+                        console.log("The new macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(target, ".color " + defaultColorNames[randomColorName]);
+                        client.action(target, "@" + usernameToPing + " The new macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                      }
+                      if (checkIfNewMacroNameHasIllegalCharacters == false) {
+                        console.log("The new macro name you entered is valid");
+                        console.log("You entered " + newMacroNameToEnter + " to rename");
+                        // Check if the new macro name entered already exists
+                        mongoClient.connect(mongoUrl, {
+                          useUnifiedTopology: true
+                        }, function(newMacroDbError, newMacroDb) {
+                          if (newMacroDbError) {
+                            throw newMacroDbError;
+                          }
+                          // Check if the newMacro id exists
+                          let newMacroDatabase = newMacroDb.db(globalConfig.macro_database_name);
+                          newMacroDatabase.collection(globalConfig.run_name).findOne({
+                            macro_name: newMacroNameToEnter
+                          }, function(newMacroDbResultError, newMacroDbResult) {
+                            if (newMacroDbResultError) {
+                              throw newMacroDbResultError;
+                            }
+                            if (newMacroDbResult === null) {
+                              // this macro name is not used, nice
+                              console.log("this macro name is not used, nice");
+                              console.log(newMacroDbResult);
+                              // New macro name not in use, Rename macro here
+                              // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
+                              mongoClient.connect(mongoUrl, {
+                                useUnifiedTopology: true
+                              }, function(macroDbError, macroDb) {
+                                if (macroDbError) {
+                                  throw macroDbError;
+                                }
+                                // Check if the macro entry for a specific game exists
+                                let macroDatabase = macroDb.db(globalConfig.macro_database_name);
+                                macroDatabase.collection(globalConfig.run_name).findOne({
+                                  macro_name: macroNameToLookup
+                                }, function(resultError, result) {
+                                  if (resultError) {
+                                    throw resultError;
+                                  }
+                                  if (result === null) {
+                                    console.log("Looks like this macro database entry does not exist");
+                                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                    client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                    client.action(target, "@" + usernameToPing + " The macro " + macroNameToLookup + " doesn't exist. Make sure you entered the name correctly!");
+                                  }
+                                  if (result !== null) {
+                                    console.log("Looks like this macro database entry already exists");
+                                    mongoClient.connect(mongoUrl, {
+                                      useUnifiedTopology: true
+                                    }, function(databaseToUpdateError, databaseToUpdate) {
+                                      if (databaseToUpdateError) {
+                                        throw databaseToUpdateError;
+                                      }
+                                      let macroDatabaseToUpdate = databaseToUpdate.db(globalConfig.macro_database_name);
+                                      let dataToQuery = {
+                                        macro_creator_user_id: result.macro_creator_user_id,
+                                        macro_owner_user_id: result.macro_owner_user_id,
+                                        macro_name: result.macro_name,
+                                        macro_contents: result.macro_contents,
+
+                                        macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                        macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                        macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                        macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                        macro_last_edited_at_timestamp: result.macro_last_edited_at_timestamp,
+                                        macro_last_edited_at_iso_timestamp: result.macro_last_edited_at_iso_timestamp,
+                                        macro_last_edited_at_twitch_timestamp: result.macro_last_edited_at_twitch_timestamp,
+                                        macro_last_edited_at_twitch_iso_timestamp: result.macro_last_edited_at_twitch_iso_timestamp,
+
+                                        macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                        macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                        macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                        macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                        times_macro_was_edited: result.times_macro_was_edited,
+                                        times_macro_was_used: result.times_macro_was_used,
+
+                                        macro_last_edited_by: result.macro_last_edited_by,
+                                        macro_last_used_by: result.macro_last_used_by,
+
+                                        can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                                      };
+                                      let dataToUpdate = {
+                                        $set: {
+                                          macro_creator_user_id: result.macro_creator_user_id,
+                                          macro_owner_user_id: result.macro_owner_user_id,
+                                          macro_name: result.macro_name,
+                                          macro_contents: result.macro_contents,
+
+                                          macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                          macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                          macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                          macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                          macro_last_edited_at_timestamp: result.macro_last_edited_at_timestamp,
+                                          macro_last_edited_at_iso_timestamp: result.macro_last_edited_at_iso_timestamp,
+                                          macro_last_edited_at_twitch_timestamp: result.macro_last_edited_at_twitch_timestamp,
+                                          macro_last_edited_at_twitch_iso_timestamp: result.macro_last_edited_at_twitch_iso_timestamp,
+
+                                          macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                          macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                          macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                          macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                          times_macro_was_edited: result.times_macro_was_edited,
+                                          times_macro_was_used: result.times_macro_was_used,
+
+                                          macro_last_edited_by: result.macro_last_edited_by,
+                                          macro_last_used_by: result.macro_last_used_by,
+
+                                          can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                                        }
+                                      };
+                                      // But only update if user id is the same as the user id who created the macro
+                                      if (result.macro_owner_user_id != userId) {
+                                        // User id of sender is NOT the same as user id of owner
+                                        if (result.can_macro_be_edited_by_anyone == false) {
+                                          // Macro canNOT be edited by anyone
+                                          console.log("You're NOT the owner and only the owner can rename this macro!");
+                                          dataToUpdate = {
+                                            $set: {
+                                              macro_creator_user_id: result.macro_creator_user_id,
+                                              macro_owner_user_id: result.macro_owner_user_id,
+                                              macro_name: result.macro_name,
+                                              macro_contents: result.macro_contents,
+
+                                              macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                              macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                              macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                              macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                              macro_last_edited_at_timestamp: result.macro_last_edited_at_timestamp,
+                                              macro_last_edited_at_iso_timestamp: result.macro_last_edited_at_iso_timestamp,
+                                              macro_last_edited_at_twitch_timestamp: result.macro_last_edited_at_twitch_timestamp,
+                                              macro_last_edited_at_twitch_iso_timestamp: result.macro_last_edited_at_twitch_iso_timestamp,
+
+                                              macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                              macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                              macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                              macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                              times_macro_was_edited: result.times_macro_was_edited,
+                                              times_macro_was_used: result.times_macro_was_used,
+
+                                              macro_last_edited_by: result.macro_last_edited_by,
+                                              macro_last_used_by: result.macro_last_used_by,
+
+                                              can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                                            }
+                                          };
+                                          // Check if an user exists in the chatters database
+                                          mongoClient.connect(mongoUrl, {
+                                            useUnifiedTopology: true
+                                          }, function(userDbError, userDb) {
+                                            if (userDbError) {
+                                              throw userDbError;
+                                            }
+                                            // Check if the user id exists
+                                            let userDatabase = userDb.db(globalConfig.main_database_name);
+                                            userDatabase.collection(globalConfig.chatters_collection_name).findOne({
+                                              user_id: dataToUpdate.$set.macro_owner_user_id
+                                            }, function(userDbResultError, userDbResult) {
+                                              if (userDbResultError) {
+                                                throw userDbResultError;
+                                              }
+                                              if (userDbResult === null) {
+                                                // uhhhhhhhhh user unknown dont do anything
+                                                console.log("This user doesn't exist, wtf bruh");
+                                                console.log(userDbResult);
+                                                let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                                client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                                client.action(target, "@" + usernameToPing + " You're not the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " and only the owner of this macro can rename this macro!");
+                                              }
+                                              if (userDbResult !== null) {
+                                                // known user, let user know that user exists in the database
+                                                console.log("This user exists lets fucking gooooooooooooo");
+                                                console.log(userDbResult);
+                                                let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                                client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                                client.action(target, "@" + usernameToPing + " You're not the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " and only the owner of this macro can rename this macro!");
+                                              }
+                                              userDb.close();
+                                            });
+                                          });
+                                        }
+                                        if (result.can_macro_be_edited_by_anyone == true) {
+                                          // Macro can be edited by anyone
+                                          console.log("You're NOT the owner and anyone can rename this macro!");
+                                          dataToUpdate = {
+                                            $set: {
+                                              macro_creator_user_id: result.macro_creator_user_id,
+                                              macro_owner_user_id: result.macro_owner_user_id,
+                                              macro_name: newMacroNameToEnter,
+                                              macro_contents: result.macro_contents,
+
+                                              macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                              macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                              macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                              macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                              macro_last_edited_at_timestamp: internalMessageTimestamp,
+                                              macro_last_edited_at_iso_timestamp: internalMessageTimestampIsoString,
+                                              macro_last_edited_at_twitch_timestamp: twitchMessageTimestamp,
+                                              macro_last_edited_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+
+                                              macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                              macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                              macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                              macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                              times_macro_was_edited: result.times_macro_was_edited + 1,
+                                              times_macro_was_used: result.times_macro_was_used,
+
+                                              macro_last_edited_by: userId,
+                                              macro_last_used_by: result.macro_last_used_by,
+
+                                              can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                                            }
+                                          };
+                                          // Check if an user exists in the chatters database
+                                          mongoClient.connect(mongoUrl, {
+                                            useUnifiedTopology: true
+                                          }, function(userDbError, userDb) {
+                                            if (userDbError) {
+                                              throw userDbError;
+                                            }
+                                            // Check if the user id exists
+                                            let userDatabase = userDb.db(globalConfig.main_database_name);
+                                            userDatabase.collection(globalConfig.chatters_collection_name).findOne({
+                                              user_id: dataToUpdate.$set.macro_owner_user_id
+                                            }, function(userDbResultError, userDbResult) {
+                                              if (userDbResultError) {
+                                                throw userDbResultError;
+                                              }
+                                              if (userDbResult === null) {
+                                                // uhhhhhhhhh user unknown dont do anything
+                                                console.log("This user doesn't exist, wtf bruh");
+                                                console.log(userDbResult);
+                                                let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                                client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                                client.action(target, "@" + usernameToPing + " You're not the owner (Unknown User) of the macro " + macroNameToLookup + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can rename this macro. Renamed macro " + macroNameToLookup + " to " + dataToUpdate.$set.macro_name);
+                                              }
+                                              if (userDbResult !== null) {
+                                                // known user, let user know that user exists in the database
+                                                console.log("This user exists lets fucking gooooooooooooo");
+                                                console.log(userDbResult);
+                                                let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                                client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                                client.action(target, "@" + usernameToPing + " You're not the owner (" + userDbResult.last_username_to_ping + ") of the macro " + macroNameToLookup + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can rename this macro. Renamed macro " + macroNameToLookup + " to " + dataToUpdate.$set.macro_name);
+                                              }
+                                              userDb.close();
+                                            });
+                                          });
+                                        }
+                                      }
+                                      if (result.macro_owner_user_id == userId) {
+                                        // User id of sender is the same as user id of owner
+                                        if (result.can_macro_be_edited_by_anyone == false) {
+                                          // Macro canNOT be edited by anyone
+                                          console.log("You're the owner and only you can rename this macro!");
+                                          dataToUpdate = {
+                                            $set: {
+                                              macro_creator_user_id: result.macro_creator_user_id,
+                                              macro_owner_user_id: result.macro_owner_user_id,
+                                              macro_name: newMacroNameToEnter,
+                                              macro_contents: result.macro_contents,
+
+                                              macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                              macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                              macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                              macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                              macro_last_edited_at_timestamp: internalMessageTimestamp,
+                                              macro_last_edited_at_iso_timestamp: internalMessageTimestampIsoString,
+                                              macro_last_edited_at_twitch_timestamp: twitchMessageTimestamp,
+                                              macro_last_edited_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+
+                                              macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                              macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                              macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                              macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                              times_macro_was_edited: result.times_macro_was_edited + 1,
+                                              times_macro_was_used: result.times_macro_was_used,
+
+                                              macro_last_edited_by: userId,
+                                              macro_last_used_by: result.macro_last_used_by,
+
+                                              can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                                            }
+                                          };
+                                          // Check if an user exists in the chatters database
+                                          mongoClient.connect(mongoUrl, {
+                                            useUnifiedTopology: true
+                                          }, function(userDbError, userDb) {
+                                            if (userDbError) {
+                                              throw userDbError;
+                                            }
+                                            // Check if the user id exists
+                                            let userDatabase = userDb.db(globalConfig.main_database_name);
+                                            userDatabase.collection(globalConfig.chatters_collection_name).findOne({
+                                              user_id: dataToUpdate.$set.macro_owner_user_id
+                                            }, function(userDbResultError, userDbResult) {
+                                              if (userDbResultError) {
+                                                throw userDbResultError;
+                                              }
+                                              if (userDbResult === null) {
+                                                // uhhhhhhhhh user unknown dont do anything
+                                                console.log("This user doesn't exist, wtf bruh");
+                                                console.log(userDbResult);
+                                                let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                                client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                                client.action(target, "@" + usernameToPing + " You're the owner (Unknown User) of the macro " + macroNameToLookup + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) and only you can rename this macro. Renamed macro " + macroNameToLookup + " to " + dataToUpdate.$set.macro_name);
+                                              }
+                                              if (userDbResult !== null) {
+                                                // known user, let user know that user exists in the database
+                                                console.log("This user exists lets fucking gooooooooooooo");
+                                                console.log(userDbResult);
+                                                let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                                client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                                client.action(target, "@" + usernameToPing + " You're the owner (" + userDbResult.last_username_to_ping + ") of the macro " + macroNameToLookup + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) and only you can rename this macro. Renamed macro " + macroNameToLookup + " to " + dataToUpdate.$set.macro_name);
+                                              }
+                                              userDb.close();
+                                            });
+                                          });
+                                        }
+                                        if (result.can_macro_be_edited_by_anyone == true) {
+                                          // Macro can be edited by anyone
+                                          console.log("You're the owner and anyone can rename this macro!");
+                                          dataToUpdate = {
+                                            $set: {
+                                              macro_creator_user_id: result.macro_creator_user_id,
+                                              macro_owner_user_id: result.macro_owner_user_id,
+                                              macro_name: newMacroNameToEnter,
+                                              macro_contents: result.macro_contents,
+
+                                              macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                              macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                              macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                              macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                              macro_last_edited_at_timestamp: internalMessageTimestamp,
+                                              macro_last_edited_at_iso_timestamp: internalMessageTimestampIsoString,
+                                              macro_last_edited_at_twitch_timestamp: twitchMessageTimestamp,
+                                              macro_last_edited_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+
+                                              macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                              macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                              macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                              macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                              times_macro_was_edited: result.times_macro_was_edited + 1,
+                                              times_macro_was_used: result.times_macro_was_used,
+
+                                              macro_last_edited_by: userId,
+                                              macro_last_used_by: result.macro_last_used_by,
+
+                                              can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                                            }
+                                          };
+                                          // Check if an user exists in the chatters database
+                                          mongoClient.connect(mongoUrl, {
+                                            useUnifiedTopology: true
+                                          }, function(userDbError, userDb) {
+                                            if (userDbError) {
+                                              throw userDbError;
+                                            }
+                                            // Check if the user id exists
+                                            let userDatabase = userDb.db(globalConfig.main_database_name);
+                                            userDatabase.collection(globalConfig.chatters_collection_name).findOne({
+                                              user_id: dataToUpdate.$set.macro_owner_user_id
+                                            }, function(userDbResultError, userDbResult) {
+                                              if (userDbResultError) {
+                                                throw userDbResultError;
+                                              }
+                                              if (userDbResult === null) {
+                                                // uhhhhhhhhh user unknown dont do anything
+                                                console.log("This user doesn't exist, wtf bruh");
+                                                console.log(userDbResult);
+                                                let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                                client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                                client.action(target, "@" + usernameToPing + " You're the owner (Unknown User) of the macro " + macroNameToLookup + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can rename this macro. Renamed macro " + macroNameToLookup + " to " + dataToUpdate.$set.macro_name);
+                                              }
+                                              if (userDbResult !== null) {
+                                                // known user, let user know that user exists in the database
+                                                console.log("This user exists lets fucking gooooooooooooo");
+                                                console.log(userDbResult);
+                                                let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                                client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                                client.action(target, "@" + usernameToPing + " You're the owner (" + userDbResult.last_username_to_ping + ") of the macro " + macroNameToLookup + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) however anyone can rename this macro. Renamed macro " + macroNameToLookup + " to " + dataToUpdate.$set.macro_name);
+                                              }
+                                              userDb.close();
+                                            });
+                                          });
+                                        }
+                                      }
+                                      macroDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                                        if (resError) {
+                                          throw resError;
+                                        }
+                                        //console.log(res.result);
+                                        //console.log("1 document updated");
+                                        mongoClient.connect(mongoUrl, {
+                                          useUnifiedTopology: true
+                                        }, function(databaseToReadFromError, databaseToReadFrom) {
+                                          if (databaseToReadFromError) {
+                                            throw databaseToReadFromError;
+                                          }
+                                          let macroDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.macro_database_name);
+                                          macroDatabaseToReadFrom.collection(globalConfig.run_name).findOne({
+                                            macro_name: result.macro_name
+                                          }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                                            if (databaseToReadFromResultError) {
+                                              throw databaseToReadFromResultError;
+                                            }
+                                            databaseToReadFrom.close();
+                                            console.log("Macro database entry updated and read from successfully!");
+                                            console.log(databaseToReadFromResult);
+                                          });
+                                        });
+                                        databaseToUpdate.close();
+                                      });
+                                    });
+                                  }
+                                  macroDb.close();
+                                });
+                              });
+                            }
+                            if (newMacroDbResult !== null) {
+                              // New macro name already in use, Don't rename
+                              console.log("This new macro name is already taken");
+                              console.log(newMacroDbResult);
+                              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                              client.say(target, ".color " + defaultColorNames[randomColorName]);
+                              client.action(target, "@" + usernameToPing + " The macro name " + newMacroDbResult.macro_name + " is already in use. Please enter a different macro name.");
+                            }
+                            newMacroDb.close();
+                          });
+                        });
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          if (toggleMacroEditabilityPrefixCheck == true) {
+            // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, let the user know it doesn't exist
+            if (originalMessageWords[1] === "" || originalMessageWords[1] === undefined || originalMessageWords[1] === null || originalMessageWords[1].toLowerCase() === "null" || originalMessageWords[1].toLowerCase() === "undefined") {
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(target, ".color " + defaultColorNames[randomColorName]);
+              client.action(target, "@" + usernameToPing + " You didn't enter the macro name!");
+            }
+            if (originalMessageWords[1] !== "" && originalMessageWords[1] !== undefined && originalMessageWords[1] !== null && originalMessageWords[1].toLowerCase() !== "null" && originalMessageWords[1].toLowerCase() !== "undefined") {
+              let macroNameToLookup = originalMessageWords[1];
+              macroNameToLookup = macroNameToLookup.toLowerCase();
+              // Cleanup garbage from macro name, allow only letters, numbers, hyphens, underscores, can't be case sensitive
+              console.log("BEFORE Looks like someone is trying to create or update the macro " + macroNameToLookup);
+              macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+              for (let cyrillicsReplacementTableIndex = 0; cyrillicsReplacementTableIndex < cyrillicsReplacementTable.length; cyrillicsReplacementTableIndex++) {
+                macroNameToLookup = macroNameToLookup.replace(cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolOriginalString, cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolReplacementString);
+              }
+              macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+              macroNameToLookup = macroNameToLookup.toLowerCase();
+              console.log("AFTER  Looks like someone is trying to create or update the macro " + macroNameToLookup);
+              let shortestMacroNameLengthAllowed = 4;
+              let longestMacroNameLengthAllowed = 25;
+              if (macroNameToLookup.length < shortestMacroNameLengthAllowed || macroNameToLookup.length > longestMacroNameLengthAllowed) {
+                // Macro name too short or too long
+                if (macroNameToLookup.length < shortestMacroNameLengthAllowed) {
+                  // Macro name too short
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered is too short! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                }
+                if (macroNameToLookup.length > longestMacroNameLengthAllowed) {
+                  // Macro name too long
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered is too long! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                }
+              }
+              if (macroNameToLookup.length >= shortestMacroNameLengthAllowed && macroNameToLookup.length <= longestMacroNameLengthAllowed) {
+                // Macro name has acceptable length
+                let checkIfMacroNameHasIllegalCharacters = /[^A-Za-z0-9\-\_]+/ig.test(macroNameToLookup);
+                if (checkIfMacroNameHasIllegalCharacters == true) {
+                  console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                }
+                if (checkIfMacroNameHasIllegalCharacters == false) {
+                  console.log("The macro name you entered is valid");
+                  // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
+                  mongoClient.connect(mongoUrl, {
+                    useUnifiedTopology: true
+                  }, function(macroDbError, macroDb) {
+                    if (macroDbError) {
+                      throw macroDbError;
+                    }
+                    // Check if the macro entry for a specific game exists
+                    let macroDatabase = macroDb.db(globalConfig.macro_database_name);
+                    macroDatabase.collection(globalConfig.run_name).findOne({
+                      macro_name: macroNameToLookup
+                    }, function(resultError, result) {
+                      if (resultError) {
+                        throw resultError;
+                      }
+                      if (result === null) {
+                        console.log("Looks like this macro database entry does not exist");
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(target, ".color " + defaultColorNames[randomColorName]);
+                        client.action(target, "@" + usernameToPing + " The macro " + macroNameToLookup + " doesn't exist. Make sure you entered the name correctly!");
+                      }
+                      if (result !== null) {
+                        console.log("Looks like this macro database entry already exists");
+                        mongoClient.connect(mongoUrl, {
+                          useUnifiedTopology: true
+                        }, function(databaseToUpdateError, databaseToUpdate) {
+                          if (databaseToUpdateError) {
+                            throw databaseToUpdateError;
+                          }
+                          let macroDatabaseToUpdate = databaseToUpdate.db(globalConfig.macro_database_name);
+                          let dataToQuery = {
+                            macro_creator_user_id: result.macro_creator_user_id,
+                            macro_owner_user_id: result.macro_owner_user_id,
+                            macro_name: result.macro_name,
+                            macro_contents: result.macro_contents,
+
+                            macro_created_at_timestamp: result.macro_created_at_timestamp,
+                            macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                            macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                            macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                            macro_last_edited_at_timestamp: result.macro_last_edited_at_timestamp,
+                            macro_last_edited_at_iso_timestamp: result.macro_last_edited_at_iso_timestamp,
+                            macro_last_edited_at_twitch_timestamp: result.macro_last_edited_at_twitch_timestamp,
+                            macro_last_edited_at_twitch_iso_timestamp: result.macro_last_edited_at_twitch_iso_timestamp,
+
+                            macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                            macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                            macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                            macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                            times_macro_was_edited: result.times_macro_was_edited,
+                            times_macro_was_used: result.times_macro_was_used,
+
+                            macro_last_edited_by: result.macro_last_edited_by,
+                            macro_last_used_by: result.macro_last_used_by,
+
+                            can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                          };
+                          let dataToUpdate = {
+                            $set: {
+                              macro_creator_user_id: result.macro_creator_user_id,
+                              macro_owner_user_id: result.macro_owner_user_id,
+                              macro_name: result.macro_name,
+                              macro_contents: result.macro_contents,
+
+                              macro_created_at_timestamp: result.macro_created_at_timestamp,
+                              macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                              macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                              macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                              macro_last_edited_at_timestamp: result.macro_last_edited_at_timestamp,
+                              macro_last_edited_at_iso_timestamp: result.macro_last_edited_at_iso_timestamp,
+                              macro_last_edited_at_twitch_timestamp: result.macro_last_edited_at_twitch_timestamp,
+                              macro_last_edited_at_twitch_iso_timestamp: result.macro_last_edited_at_twitch_iso_timestamp,
+
+                              macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                              macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                              macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                              macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                              times_macro_was_edited: result.times_macro_was_edited,
+                              times_macro_was_used: result.times_macro_was_used,
+
+                              macro_last_edited_by: result.macro_last_edited_by,
+                              macro_last_used_by: result.macro_last_used_by,
+
+                              can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                            }
+                          };
+                          // But only update if user id is the same as the user id who created the macro
+                          if (result.macro_owner_user_id != userId) {
+                            // User id of sender is NOT the same as user id of owner
+                            console.log("You're NOT the owner and only the owner can toggle its editability!");
+                            dataToUpdate = {
+                              $set: {
+                                macro_creator_user_id: result.macro_creator_user_id,
+                                macro_owner_user_id: result.macro_owner_user_id,
+                                macro_name: result.macro_name,
+                                macro_contents: result.macro_contents,
+
+                                macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                macro_last_edited_at_timestamp: result.macro_last_edited_at_timestamp,
+                                macro_last_edited_at_iso_timestamp: result.macro_last_edited_at_iso_timestamp,
+                                macro_last_edited_at_twitch_timestamp: result.macro_last_edited_at_twitch_timestamp,
+                                macro_last_edited_at_twitch_iso_timestamp: result.macro_last_edited_at_twitch_iso_timestamp,
+
+                                macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                times_macro_was_edited: result.times_macro_was_edited,
+                                times_macro_was_used: result.times_macro_was_used,
+
+                                macro_last_edited_by: result.macro_last_edited_by,
+                                macro_last_used_by: result.macro_last_used_by,
+
+                                can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                              }
+                            };
+                            // Check if an user exists in the chatters database
+                            mongoClient.connect(mongoUrl, {
+                              useUnifiedTopology: true
+                            }, function(userDbError, userDb) {
+                              if (userDbError) {
+                                throw userDbError;
+                              }
+                              // Check if the user id exists
+                              let userDatabase = userDb.db(globalConfig.main_database_name);
+                              userDatabase.collection(globalConfig.chatters_collection_name).findOne({
+                                user_id: dataToUpdate.$set.macro_owner_user_id
+                              }, function(userDbResultError, userDbResult) {
+                                if (userDbResultError) {
+                                  throw userDbResultError;
+                                }
+                                if (userDbResult === null) {
+                                  // uhhhhhhhhh user unknown dont do anything
+                                  console.log("This user doesn't exist, wtf bruh");
+                                  console.log(userDbResult);
+                                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                  if (dataToUpdate.$set.can_macro_be_edited_by_anyone == true) {
+                                    // Let the sender know that this macro can be edited by anyone
+                                    client.action(target, "@" + usernameToPing + " You're not the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " and only the owner of this macro can toggle its editability! " + dataToUpdate.$set.macro_name + " can be edited by anyone!");
+                                  }
+                                  if (dataToUpdate.$set.can_macro_be_edited_by_anyone == false) {
+                                    // Let the sender know that this macro can be edited by the owner ONLY
+                                    client.action(target, "@" + usernameToPing + " You're not the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " and only the owner of this macro can toggle its editability! " + dataToUpdate.$set.macro_name + " can be edited by the owner ONLY!");
+                                  }
+                                }
+                                if (userDbResult !== null) {
+                                  // known user, let user know that user exists in the database
+                                  console.log("This user exists lets fucking gooooooooooooo");
+                                  console.log(userDbResult);
+                                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                  if (dataToUpdate.$set.can_macro_be_edited_by_anyone == true) {
+                                    // Let the sender know that this macro can be edited by anyone
+                                    client.action(target, "@" + usernameToPing + " You're not the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " and only the owner of this macro can toggle its editability! " + dataToUpdate.$set.macro_name + " can be edited by anyone!");
+                                  }
+                                  if (dataToUpdate.$set.can_macro_be_edited_by_anyone == false) {
+                                    // Let the sender know that this macro can be edited by the owner ONLY
+                                    client.action(target, "@" + usernameToPing + " You're not the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " and only the owner of this macro can toggle its editability! " + dataToUpdate.$set.macro_name + " can be edited by the owner ONLY!");
+                                  }
+                                }
+                                userDb.close();
+                              });
+                            });
+                          }
+                          if (result.macro_owner_user_id == userId) {
+                            // User id of sender is the same as user id of owner
+                            console.log("You're the owner and only you can toggle its editability!");
+                            dataToUpdate = {
+                              $set: {
+                                macro_creator_user_id: result.macro_creator_user_id,
+                                macro_owner_user_id: result.macro_owner_user_id,
+                                macro_name: result.macro_name,
+                                macro_contents: result.macro_contents,
+
+                                macro_created_at_timestamp: result.macro_created_at_timestamp,
+                                macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                                macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                                macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                                macro_last_edited_at_timestamp: internalMessageTimestamp,
+                                macro_last_edited_at_iso_timestamp: internalMessageTimestampIsoString,
+                                macro_last_edited_at_twitch_timestamp: twitchMessageTimestamp,
+                                macro_last_edited_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+
+                                macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                                macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                                macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                                macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                                times_macro_was_edited: result.times_macro_was_edited + 1,
+                                times_macro_was_used: result.times_macro_was_used,
+
+                                macro_last_edited_by: userId,
+                                macro_last_used_by: result.macro_last_used_by,
+
+                                can_macro_be_edited_by_anyone: !result.can_macro_be_edited_by_anyone
+                              }
+                            };
+                            // Check if an user exists in the chatters database
+                            mongoClient.connect(mongoUrl, {
+                              useUnifiedTopology: true
+                            }, function(userDbError, userDb) {
+                              if (userDbError) {
+                                throw userDbError;
+                              }
+                              // Check if the user id exists
+                              let userDatabase = userDb.db(globalConfig.main_database_name);
+                              userDatabase.collection(globalConfig.chatters_collection_name).findOne({
+                                user_id: dataToUpdate.$set.macro_owner_user_id
+                              }, function(userDbResultError, userDbResult) {
+                                if (userDbResultError) {
+                                  throw userDbResultError;
+                                }
+                                if (userDbResult === null) {
+                                  // uhhhhhhhhh user unknown dont do anything
+                                  console.log("This user doesn't exist, wtf bruh");
+                                  console.log(userDbResult);
+                                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                  if (dataToUpdate.$set.can_macro_be_edited_by_anyone == true) {
+                                    // Let the macro owner know that this macro can now be edited by anyone
+                                    client.action(target, "@" + usernameToPing + " You're the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) and only you can toggle its editability! " + dataToUpdate.$set.macro_name + " can now be edited by anyone. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to make it so only you can edit this macro.");
+                                  }
+                                  if (dataToUpdate.$set.can_macro_be_edited_by_anyone == false) {
+                                    // Let the macro owner know that this macro can now be edited by the owner ONLY
+                                    client.action(target, "@" + usernameToPing + " You're the owner (Unknown User) of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) and only you can toggle its editability! " + dataToUpdate.$set.macro_name + " can now be edited by you ONLY. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to to let anyone edit this macro.");
+                                  }
+                                }
+                                if (userDbResult !== null) {
+                                  // known user, let user know that user exists in the database
+                                  console.log("This user exists lets fucking gooooooooooooo");
+                                  console.log(userDbResult);
+                                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                                  if (dataToUpdate.$set.can_macro_be_edited_by_anyone == true) {
+                                    // Let the macro owner know that this macro can now be edited by anyone
+                                    client.action(target, "@" + usernameToPing + " You're the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) and only you can toggle its editability! " + dataToUpdate.$set.macro_name + " can now be edited by anyone. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to make it so only you can edit this macro.");
+                                  }
+                                  if (dataToUpdate.$set.can_macro_be_edited_by_anyone == false) {
+                                    // Let the macro owner know that this macro can now be edited by the owner ONLY
+                                    client.action(target, "@" + usernameToPing + " You're the owner (" + userDbResult.last_username_to_ping + ") of the macro " + dataToUpdate.$set.macro_name + " (edited " + dataToUpdate.$set.times_macro_was_edited + " times) and only you can toggle its editability! " + dataToUpdate.$set.macro_name + " can now be edited by you ONLY. Type !togglemacroeditability " + dataToUpdate.$set.macro_name + " again to to let anyone edit this macro.");
+                                  }
+                                }
+                                userDb.close();
+                              });
+                            });
+                          }
+                          macroDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                            if (resError) {
+                              throw resError;
+                            }
+                            //console.log(res.result);
+                            //console.log("1 document updated");
+                            mongoClient.connect(mongoUrl, {
+                              useUnifiedTopology: true
+                            }, function(databaseToReadFromError, databaseToReadFrom) {
+                              if (databaseToReadFromError) {
+                                throw databaseToReadFromError;
+                              }
+                              let macroDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.macro_database_name);
+                              macroDatabaseToReadFrom.collection(globalConfig.run_name).findOne({
+                                macro_name: result.macro_name
+                              }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                                if (databaseToReadFromResultError) {
+                                  throw databaseToReadFromResultError;
+                                }
+                                databaseToReadFrom.close();
+                                console.log("Macro database entry updated and read from successfully!");
+                                console.log(databaseToReadFromResult);
+                              });
+                            });
+                            databaseToUpdate.close();
+                          });
+                        });
+                      }
+                      macroDb.close();
+                    });
+                  });
+                }
+              }
+            }
+          }
+          if (listAllMacrosSavedPrefixCheck == true) {
+            console.log("Someone wants to see the list of macros");
+            mongoClient.connect(mongoUrl, {
+              useUnifiedTopology: true
+            }, function(macroDbError, macroDb) {
+              if (macroDbError) {
+                throw macroDbError;
+              }
+              // Check if the user id exists
+              let macroDatabase = macroDb.db(globalConfig.macro_database_name);
+              macroDatabase.collection(globalConfig.run_name).find({}).toArray(function(macroDbResultError, macroDbResult) {
+                if (macroDbResultError) {
+                  throw macroDbResultError;
+                }
+                let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                client.say(target, ".color " + defaultColorNames[randomColorName]);
+                //console.log(macroDbResult);
+                //console.log(macroDbResult[0]);
+                if (macroDbResult === null || macroDbResult === undefined || macroDbResult === "" || macroDbResult === [] || macroDbResult === "[]") {
+                  console.log("There are no macros saved");
+                  //let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  //client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " There are no macros saved");
+                }
+                if (macroDbResult !== null && macroDbResult !== undefined && macroDbResult !== "" && macroDbResult !== [] && macroDbResult !== "[]") {
+                  //console.log("macroDbResult.length = " + macroDbResult.length);
+                  if (macroDbResult.length <= 0) {
+                    console.log("There are no macros saved");
+                    //let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    //client.say(target, ".color " + defaultColorNames[randomColorName]);
+                    client.action(target, "@" + usernameToPing + " There are no macros saved");
+                  }
+                  if (macroDbResult.length > 0) {
+                    let savedMacrosToList = [];
+                    console.log("There are macros saved");
+                    for (let savedMacroIndex = 0; savedMacroIndex < macroDbResult.length; savedMacroIndex++) {
+                      savedMacrosToList.push(macroDbResult[savedMacroIndex].macro_name);savedMacrosToList
+                      //console.log(macroDbResult[savedMacroIndex].macro_name + " at index " + savedMacroIndex);
+                    }
+                    //console.log("A savedMacrosToList.length = " + savedMacrosToList.length);
+                    if (savedMacrosToList.length <= 0) {
+                      console.log("There are no macros saved");
+                      //let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                      //client.say(target, ".color " + defaultColorNames[randomColorName]);
+                      client.action(target, "@" + usernameToPing + " There are no macros saved");
+                    }
+                    if (savedMacrosToList.length > 0) {
+                      //let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                      //client.say(target, ".color " + defaultColorNames[randomColorName]);
+                      console.log("There are macros saved STILL");
+                      savedMacrosToList = savedMacrosToList.join(", ");
+                      //console.log("B savedMacrosToList.length = " + savedMacrosToList.length);
+                      if (savedMacrosToList.length < 200) {
+                        // Send message as it is
+                        //console.log("Send message as it is");
+                        //console.log("Here's a list of all saved macros: " + savedMacrosToList);
+                        client.action(target, "@" + usernameToPing + " Here's a list of all saved macros: " + savedMacrosToList);
+                      }
+                      if (savedMacrosToList.length >= 200) {
+                        // Split list of saved macros every 15 spaces then send multiple messages
+                        //console.log("Split message in multiple parts because it might be too long");
+                        let savedMacrosToListArray = savedMacrosToList.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
+                        //console.log("Here's a list of all saved macros: " + savedMacrosToList);
+                        for (let savedMacrosToListArrayIndex = 0; savedMacrosToListArrayIndex < savedMacrosToListArray.length; savedMacrosToListArrayIndex++) {
+                          //console.log("savedMacrosToListArrayIndex = " + savedMacrosToListArrayIndex);
+                          //console.log("savedMacrosToListArray[savedMacrosToListArrayIndex].length = " + savedMacrosToListArray[savedMacrosToListArrayIndex].length);
+                          if (savedMacrosToListArrayIndex <= 0) {
+                            // First message which is where the sender is pinged
+                            //console.log("Here's a list of all saved macros: " + savedMacrosToListArray[savedMacrosToListArrayIndex]);
+                            client.action(target, "@" + usernameToPing + " Here's a list of all saved macros: " + savedMacrosToListArray[savedMacrosToListArrayIndex]);
+                          }
+                          if (savedMacrosToListArrayIndex > 0) {
+                            // Messages that are not the first message will not ping the sender
+                            //console.log(savedMacrosToListArray[savedMacrosToListArrayIndex]);
+                            client.action(target, savedMacrosToListArray[savedMacrosToListArrayIndex]);
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                macroDb.close();
+              });
+            });
+          }
+          if (showContentsOfSavedMacroPrefixCheck == true) {
+            // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
+            if (originalMessageWords[1] === "" || originalMessageWords[1] === undefined || originalMessageWords[1] === null || originalMessageWords[1].toLowerCase() === "null" || originalMessageWords[1].toLowerCase() === "undefined") {
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(target, ".color " + defaultColorNames[randomColorName]);
+              client.action(target, "@" + usernameToPing + " You didn't enter the macro name!");
+            }
+            if (originalMessageWords[1] !== "" && originalMessageWords[1] !== undefined && originalMessageWords[1] !== null && originalMessageWords[1].toLowerCase() !== "null" && originalMessageWords[1].toLowerCase() !== "undefined") {
+              let macroNameToLookup = originalMessageWords[1];
+              macroNameToLookup = macroNameToLookup.toLowerCase();
+              // Cleanup garbage from macro name, allow only letters, numbers, hyphens, underscores, can't be case sensitive
+              console.log("BEFORE Looks like someone is trying to view the macro " + macroNameToLookup);
+              macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+              for (let cyrillicsReplacementTableIndex = 0; cyrillicsReplacementTableIndex < cyrillicsReplacementTable.length; cyrillicsReplacementTableIndex++) {
+                macroNameToLookup = macroNameToLookup.replace(cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolOriginalString, cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolReplacementString);
+              }
+              macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+              macroNameToLookup = macroNameToLookup.toLowerCase();
+              console.log("AFTER  Looks like someone is trying to view the macro " + macroNameToLookup);
+              let shortestMacroNameLengthAllowed = 4;
+              let longestMacroNameLengthAllowed = 25;
+              if (macroNameToLookup.length < shortestMacroNameLengthAllowed || macroNameToLookup.length > longestMacroNameLengthAllowed) {
+                // Macro name too short or too long
+                if (macroNameToLookup.length < shortestMacroNameLengthAllowed) {
+                  // Macro name too short
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered is too short! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                }
+                if (macroNameToLookup.length > longestMacroNameLengthAllowed) {
+                  // Macro name too long
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered is too long! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                }
+              }
+              if (macroNameToLookup.length >= shortestMacroNameLengthAllowed && macroNameToLookup.length <= longestMacroNameLengthAllowed) {
+                // Macro name has acceptable length
+                let checkIfMacroNameHasIllegalCharacters = /[^A-Za-z0-9\-\_]+/ig.test(macroNameToLookup);
+                if (checkIfMacroNameHasIllegalCharacters == true) {
+                  console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                }
+                if (checkIfMacroNameHasIllegalCharacters == false) {
+                  console.log("The macro name you entered is valid");
+                  // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
+                  mongoClient.connect(mongoUrl, {
+                    useUnifiedTopology: true
+                  }, function(macroDbError, macroDb) {
+                    if (macroDbError) {
+                      throw macroDbError;
+                    }
+                    // Check if the macro entry for a specific game exists
+                    let macroDatabase = macroDb.db(globalConfig.macro_database_name);
+                    macroDatabase.collection(globalConfig.run_name).findOne({
+                      macro_name: macroNameToLookup
+                    }, function(resultError, result) {
+                      if (resultError) {
+                        throw resultError;
+                      }
+                      if (result === null) {
+                        console.log("Looks like this macro database entry does not exist");
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(target, ".color " + defaultColorNames[randomColorName]);
+                        client.action(target, "@" + usernameToPing + " The macro " + macroNameToLookup + " doesn't exist. Make sure you entered the name correctly!");
+                      }
+                      if (result !== null) {
+                        console.log("Looks like this macro database entry exists, nice");
+                        //console.log(result);
+                        //console.log(result.macro_contents);
+                        let advancedInputToShow = tidyUpAdvancedInputString(result.macro_contents);
+                        let advancedInputToShowArray = [];
+                        advancedInputToShow = advancedInputToShow.replace(/(\s*\*\d*)+$/ig, "*0");
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(target, ".color " + defaultColorNames[randomColorName]);
+                        if (advancedInputToShow.length >= 200) {
+                          // Split in multiple messages
+                          advancedInputToShowArray = advancedInputToShow.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
+                          for (let advancedInputToShowArrayIndex = 0; advancedInputToShowArrayIndex < advancedInputToShowArray.length; advancedInputToShowArrayIndex++) {
+                            if (advancedInputToShowArrayIndex <= 0) {
+                              // Send first message here, the message that pings the user
+                              client.action(target, "@" + usernameToPing + " " + result.macro_name + " = " + advancedInputToShowArray[advancedInputToShowArrayIndex]);
+                            }
+                            if (advancedInputToShowArrayIndex > 0) {
+                              // Send the rest of the messages but without pinging
+                              client.action(target, advancedInputToShowArray[advancedInputToShowArrayIndex]);
+                            }
+                          }
+                        }
+                        if (advancedInputToShow.length < 200) {
+                          // Do not split, send as it is
+                          client.action(target, "@" + usernameToPing + " " + result.macro_name + " = " + advancedInputToShow);
+                        }
+                      }
+                      macroDb.close();
+                    });
+                  });
+                }
+              }
+            }
+          }
+          if (executeSavedMacroPrefixCheck == true) {
+            // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
+            if (originalMessageWords[1] === "" || originalMessageWords[1] === undefined || originalMessageWords[1] === null || originalMessageWords[1].toLowerCase() === "null" || originalMessageWords[1].toLowerCase() === "undefined") {
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(target, ".color " + defaultColorNames[randomColorName]);
+              client.action(target, "@" + usernameToPing + " You didn't enter the macro name!");
+            }
+            if (originalMessageWords[1] !== "" && originalMessageWords[1] !== undefined && originalMessageWords[1] !== null && originalMessageWords[1].toLowerCase() !== "null" && originalMessageWords[1].toLowerCase() !== "undefined") {
+              let macroNameToLookup = originalMessageWords[1];
+              macroNameToLookup = macroNameToLookup.toLowerCase();
+              // Cleanup garbage from macro name, allow only letters, numbers, hyphens, underscores, can't be case sensitive
+              console.log("BEFORE Looks like someone is trying to view the macro " + macroNameToLookup);
+              macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+              for (let cyrillicsReplacementTableIndex = 0; cyrillicsReplacementTableIndex < cyrillicsReplacementTable.length; cyrillicsReplacementTableIndex++) {
+                macroNameToLookup = macroNameToLookup.replace(cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolOriginalString, cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolReplacementString);
+              }
+              macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+              macroNameToLookup = macroNameToLookup.toLowerCase();
+              console.log("AFTER  Looks like someone is trying to view the macro " + macroNameToLookup);
+              let shortestMacroNameLengthAllowed = 4;
+              let longestMacroNameLengthAllowed = 25;
+              if (macroNameToLookup.length < shortestMacroNameLengthAllowed || macroNameToLookup.length > longestMacroNameLengthAllowed) {
+                // Macro name too short or too long
+                if (macroNameToLookup.length < shortestMacroNameLengthAllowed) {
+                  // Macro name too short
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered is too short! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                }
+                if (macroNameToLookup.length > longestMacroNameLengthAllowed) {
+                  // Macro name too long
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered is too long! The macro name must have between " + shortestMacroNameLengthAllowed + " and " + longestMacroNameLengthAllowed + " characters!");
+                }
+              }
+              if (macroNameToLookup.length >= shortestMacroNameLengthAllowed && macroNameToLookup.length <= longestMacroNameLengthAllowed) {
+                // Macro name has acceptable length
+                let checkIfMacroNameHasIllegalCharacters = /[^A-Za-z0-9\-\_]+/ig.test(macroNameToLookup);
+                if (checkIfMacroNameHasIllegalCharacters == true) {
+                  console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                  let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                  client.say(target, ".color " + defaultColorNames[randomColorName]);
+                  client.action(target, "@" + usernameToPing + " The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                }
+                if (checkIfMacroNameHasIllegalCharacters == false) {
+                  let macroRepeatCountToEnter = "0";
+                  console.log("The macro name you entered is valid");
+                  //console.log("A macroRepeatCountToEnter = " + macroRepeatCountToEnter);
+                  if (originalMessageWords[2] !== "" && originalMessageWords[2] !== undefined && originalMessageWords[2] !== null && originalMessageWords[2] !== [] && originalMessageWords[2] !== "[]" && originalMessageWords[2].toLowerCase() !== "null" && originalMessageWords[2].toLowerCase() !== "undefined") {
+                    console.log("There is repeat count entered");
+                    macroRepeatCountToEnter = originalMessageWords[2];
+                    //console.log(macroContentsToEnter);
+                    //macroRepeatCountToEnter.splice(0, 2);
+                    //console.log(macroContentsToEnter);
+                    //macroRepeatCountToEnter = macroRepeatCountToEnter.join(" ");
+                    macroRepeatCountToEnter = macroRepeatCountToEnter.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+                    for (let cyrillicsReplacementTableIndex = 0; cyrillicsReplacementTableIndex < cyrillicsReplacementTable.length; cyrillicsReplacementTableIndex++) {
+                      macroRepeatCountToEnter = macroRepeatCountToEnter.replace(cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolOriginalString, cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolReplacementString);
+                    }
+                    macroRepeatCountToEnter = macroRepeatCountToEnter.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
+                    macroRepeatCountToEnter = macroRepeatCountToEnter.toLowerCase();
+                    //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                    //console.log("macroContentsToEnter = ");
+                    //console.log(macroContentsToEnter);
+                    //let macroContentsToExecute = tidyUpAdvancedInputString(macroRepeatCountToEnter);
+                    //console.log(macroContentsProcessed);
+                    //macroRepeatCountToEnter = macroContentsToExecute;
+                    //macroRepeatCountToEnter = macroRepeatCountToEnter.replace(/(\s*\*\d*)+$/ig, "*0");
+                    //console.log(macroContentsToEnter);
+                  }
+                  //console.log("B macroRepeatCountToEnter = " + macroRepeatCountToEnter);
+                  if (originalMessageWords[2] === "" || originalMessageWords[2] === undefined || originalMessageWords[2] === null || originalMessageWords[2] === [] || originalMessageWords[2] === "[]" || originalMessageWords[2].toLowerCase() === "null" || originalMessageWords[2].toLowerCase() === "undefined") {
+                    console.log("No repeat count entered");
+                    macroRepeatCountToEnter = "0";
+                  }
+                  //console.log("C macroRepeatCountToEnter = " + macroRepeatCountToEnter);
+                  // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
+                  mongoClient.connect(mongoUrl, {
+                    useUnifiedTopology: true
+                  }, function(macroDbError, macroDb) {
+                    if (macroDbError) {
+                      throw macroDbError;
+                    }
+                    // Check if the macro entry for a specific game exists
+                    let macroDatabase = macroDb.db(globalConfig.macro_database_name);
+                    macroDatabase.collection(globalConfig.run_name).findOne({
+                      macro_name: macroNameToLookup
+                    }, function(resultError, result) {
+                      if (resultError) {
+                        throw resultError;
+                      }
+                      if (result === null) {
+                        console.log("Looks like this macro database entry does not exist");
+                        isExecutingSavedMacro = false;
+                        savedMacroNameToExecute = "";
+                        savedMacroContentsToExecute = "";
+                        savedMacroTimesWasUsed = 0;
+                        //let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        //client.say(target, ".color " + defaultColorNames[randomColorName]);
+                        //client.action(target, "@" + usernameToPing + " The macro " + macroNameToLookup + " doesn't exist. Make sure you entered the name correctly!");
+                      }
+                      if (result !== null) {
+                        console.log("Looks like this macro database entry exists, nice");
+                        mongoClient.connect(mongoUrl, {
+                          useUnifiedTopology: true
+                        }, function(databaseToUpdateError, databaseToUpdate) {
+                          if (databaseToUpdateError) {
+                            throw databaseToUpdateError;
+                          }
+                          let macroDatabaseToUpdate = databaseToUpdate.db(globalConfig.macro_database_name);
+                          let dataToQuery = {
+                            macro_creator_user_id: result.macro_creator_user_id,
+                            macro_owner_user_id: result.macro_owner_user_id,
+                            macro_name: result.macro_name,
+                            macro_contents: result.macro_contents,
+
+                            macro_created_at_timestamp: result.macro_created_at_timestamp,
+                            macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                            macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                            macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                            macro_last_edited_at_timestamp: result.macro_last_edited_at_timestamp,
+                            macro_last_edited_at_iso_timestamp: result.macro_last_edited_at_iso_timestamp,
+                            macro_last_edited_at_twitch_timestamp: result.macro_last_edited_at_twitch_timestamp,
+                            macro_last_edited_at_twitch_iso_timestamp: result.macro_last_edited_at_twitch_iso_timestamp,
+
+                            macro_last_used_at_timestamp: result.macro_last_used_at_timestamp,
+                            macro_last_used_at_iso_timestamp: result.macro_last_used_at_iso_timestamp,
+                            macro_last_used_at_twitch_timestamp: result.macro_last_used_at_twitch_timestamp,
+                            macro_last_used_at_twitch_iso_timestamp: result.macro_last_used_at_twitch_iso_timestamp,
+
+                            times_macro_was_edited: result.times_macro_was_edited,
+                            times_macro_was_used: result.times_macro_was_used,
+
+                            macro_last_edited_by: result.macro_last_edited_by,
+                            macro_last_used_by: result.macro_last_used_by,
+
+                            can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                          };
+                          let dataToUpdate = {
+                            $set: {
+                              macro_creator_user_id: result.macro_creator_user_id,
+                              macro_owner_user_id: result.macro_owner_user_id,
+                              macro_name: result.macro_name,
+                              macro_contents: result.macro_contents,
+
+                              macro_created_at_timestamp: result.macro_created_at_timestamp,
+                              macro_created_at_iso_timestamp: result.macro_created_at_iso_timestamp,
+                              macro_created_at_twitch_timestamp: result.macro_created_at_twitch_timestamp,
+                              macro_created_at_twitch_iso_timestamp: result.macro_created_at_twitch_iso_timestamp,
+
+                              macro_last_edited_at_timestamp: result.macro_last_edited_at_timestamp,
+                              macro_last_edited_at_iso_timestamp: result.macro_last_edited_at_iso_timestamp,
+                              macro_last_edited_at_twitch_timestamp: result.macro_last_edited_at_twitch_timestamp,
+                              macro_last_edited_at_twitch_iso_timestamp: result.macro_last_edited_at_twitch_iso_timestamp,
+
+                              macro_last_used_at_timestamp: internalMessageTimestamp,
+                              macro_last_used_at_iso_timestamp: internalMessageTimestampIsoString,
+                              macro_last_used_at_twitch_timestamp: twitchMessageTimestamp,
+                              macro_last_used_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+
+                              times_macro_was_edited: result.times_macro_was_edited,
+                              times_macro_was_used: result.times_macro_was_used + 1,
+
+                              macro_last_edited_by: result.macro_last_edited_by,
+                              macro_last_used_by: userId,
+
+                              can_macro_be_edited_by_anyone: result.can_macro_be_edited_by_anyone
+                            }
+                          };
+                          macroDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                            if (resError) {
+                              throw resError;
+                            }
+                            //console.log(res.result);
+                            //console.log("1 document updated");
+                            mongoClient.connect(mongoUrl, {
+                              useUnifiedTopology: true
+                            }, function(databaseToReadFromError, databaseToReadFrom) {
+                              if (databaseToReadFromError) {
+                                throw databaseToReadFromError;
+                              }
+                              let macroDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.macro_database_name);
+                              macroDatabaseToReadFrom.collection(globalConfig.run_name).findOne({
+                                macro_name: result.macro_name
+                              }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                                if (databaseToReadFromResultError) {
+                                  throw databaseToReadFromResultError;
+                                }
+                                databaseToReadFrom.close();
+                                console.log("Macro database entry updated and read from successfully!");
+                                console.log(databaseToReadFromResult);
+                                isExecutingSavedMacro = true;
+                                savedMacroNameToExecute = databaseToReadFromResult.macro_name;
+                                console.log("A savedMacroContentsToExecute = " + savedMacroContentsToExecute);
+                                savedMacroContentsToExecute = databaseToReadFromResult.macro_contents;
+                                console.log("B savedMacroContentsToExecute = " + savedMacroContentsToExecute);
+                                savedMacroContentsToExecute = savedMacroContentsToExecute.replace(/(\s*\*\d*)+$/ig, "*" + macroRepeatCountToEnter);
+                                console.log("C savedMacroContentsToExecute = " + savedMacroContentsToExecute);
+                                savedMacroContentsToExecute = tidyUpAdvancedInputString(savedMacroContentsToExecute);
+                                console.log("D savedMacroContentsToExecute = " + savedMacroContentsToExecute);
+                                savedMacroTimesWasUsed = databaseToReadFromResult.times_macro_was_used;
+                              });
+                            });
+                            databaseToUpdate.close();
+                          });
+                        });
+                        //console.log(result);
+                        //console.log(result.macro_contents);
+                        // macroRepeatCountToEnter
+                        let advancedInputToShow = result.macro_contents;
+                        advancedInputToShow = advancedInputToShow.replace(/(\s*\*\d*)+$/ig, "*" + macroRepeatCountToEnter);
+                        advancedInputToShow = tidyUpAdvancedInputString(advancedInputToShow);
+                        let advancedInputToShowArray = [];
+                        //advancedInputToShow = advancedInputToShow.replace(/(\s*\*\d*)+$/ig, "*0");
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(target, ".color " + defaultColorNames[randomColorName]);
+                        /*
+                        if (advancedInputToShow.length >= 200) {
+                          // Split in multiple messages
+                          advancedInputToShowArray = advancedInputToShow.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
+                          for (let advancedInputToShowArrayIndex = 0; advancedInputToShowArrayIndex < advancedInputToShowArray.length; advancedInputToShowArrayIndex++) {
+                            if (advancedInputToShowArrayIndex <= 0) {
+                              // Send first message here, the message that pings the user
+                              //client.action(target, "@" + usernameToPing + " " + result.macro_name + " = " + advancedInputToShowArray[advancedInputToShowArrayIndex]);
+                            }
+                            if (advancedInputToShowArrayIndex > 0) {
+                              // Send the rest of the messages but without pinging
+                              //client.action(target, advancedInputToShowArray[advancedInputToShowArrayIndex]);
+                            }
+                          }
+                        }
+                        if (advancedInputToShow.length < 200) {
+                          // Do not split, send as it is
+                          //client.action(target, "@" + usernameToPing + " " + result.macro_name + " = " + advancedInputToShow);
+                        }
+                        */
+                        //isExecutingSavedMacro = true;
+                        //savedMacroNameToExecute = result.macro_name;
+                        //savedMacroContentsToExecute = advancedInputToShow;
+                        //savedMacroTimesWasUsed = result.times_macro_was_used + 1;
+                      }
+                      macroDb.close();
+                    });
+                  });
+                }
+              }
+            }
+          }
+          await sleep(400);
+          console.log("isExecutingSavedMacro = " + isExecutingSavedMacro);
+          console.log("savedMacroNameToExecute = " + savedMacroNameToExecute);
+          console.log("savedMacroContentsToExecute = " + savedMacroContentsToExecute);
+          console.log("savedMacroTimesWasUsed = " + savedMacroTimesWasUsed);
+          if (isExecutingSavedMacro == true) {
+            message = savedMacroContentsToExecute;
+          }
           if (listSettablePrefixCheck == true) {
             //let tempListableInputArray = messageWords[1].replace(/[\:\/\\\.\;\']+/ig, " ");
             //tempListableInputArray = tempListableInputArray.trim();
@@ -3426,7 +5626,7 @@ async function onMessageHandler(target, tags, message, self) {
             if (settableMacroChain.length == 0) {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " There are no inputs set, use !set a+b;300 0, where a+b can be replaced with any input that's listed in !help, 300 is the duration in milliseconds, which can replaced with the duration from 1 to 10000 milliseconds, duration is an optional parameter, and 0 can be replaced with the position you want to set the input, starting at 0 and ending at 63.");
+              client.action(target, "@" + usernameToPing + " There are no inputs set, use !setsettablemacro a+b;300 0, where a+b can be replaced with any input that's listed in !help, 300 is the duration in milliseconds, which can replaced with the duration from 1 to 65535 milliseconds, duration is an optional parameter, default is 266, and 0 can be replaced with the position you want to set the input, starting at 0 and ending at 95.");
             }
             if (settableMacroChain.length > 0) {
               if (isNaN(parseInt(messageWords[1], 10)) == false) {
@@ -3535,7 +5735,7 @@ async function onMessageHandler(target, tags, message, self) {
               }
             }
           }
-          let setSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(set\s*macro)+/ig.test(originalMessage);
+          let setSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(set\s*settable\s*macro)+/ig.test(originalMessage);
           //console.log("setSettablePrefixCheck = " + setSettablePrefixCheck);
           if (setSettablePrefixCheck == true) {
             if (messageWords[1] == undefined) {
@@ -3702,7 +5902,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //
                 let randomColorName = Math.floor(Math.random() * defaultColors.length);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
-                client.action(target, "@" + usernameToPing + " Invalid position, please make sure there are no typos, and please make sure the positions before the position you entered were already assigned with inputs. First position is 0, last position is 63. Negative positions don't work, and positions higher than 63 can't be assigned.");
+                client.action(target, "@" + usernameToPing + " Invalid position, please make sure there are no typos, and please make sure the positions before the position you entered were already assigned with inputs. First position is 0, last position is 95. Negative positions don't work, and positions higher than 95 can't be assigned.");
               }
               //console.log("settableMacroChain.length = " + settableMacroChain.length);
               //console.log(settableMacroChain);
@@ -3710,7 +5910,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(processedSingleInput); 
             }
           }
-          let playSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(exec\s*macro)+/ig.test(originalMessage);
+          let playSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(exec\s*settable\s*macro)+/ig.test(originalMessage);
           //console.log("playSettablePrefixCheck = " + playSettablePrefixCheck);
           if (playSettablePrefixCheck == true) {
             let playSettableParametersToWrite = [controllerConfig.final_macro_preamble, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
@@ -3807,7 +6007,7 @@ async function onMessageHandler(target, tags, message, self) {
             if (isValidInputCount == false) {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " Invalid ending position, please make sure there are no typos, and please make sure the positions before the position you entered were already assigned with inputs. First position is 0, last position is the position you entered. (It'll play the inputs starting from the position 0 and will end at the position you entered.) Negative positions don't work, and positions higher than 63 can't be used.");
+              client.action(target, "@" + usernameToPing + " Invalid ending position, please make sure there are no typos, and please make sure the positions before the position you entered were already assigned with inputs. First position is 0, last position is the position you entered. (It'll play the inputs starting from the position 0 and will end at the position you entered.) Negative positions don't work, and positions higher than 95 can't be used.");
             }
             if (isValidInputCount == true) {
               let inputsToListPlayback = "";
@@ -3825,6 +6025,7 @@ async function onMessageHandler(target, tags, message, self) {
 
                 // Clear the incoming serial data from arduino before setting settable advanced input
                 port.flush(function(err, results) {
+                  console.log(new Date().toISOString() + " C [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
                     if (client.readyState() === "OPEN") {
                       if (chatConfig.send_debug_channel_messages == true) {
@@ -3833,11 +6034,13 @@ async function onMessageHandler(target, tags, message, self) {
                         client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                       }
                     }
+                    console.log(new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                     return console.log(err);
                   }
                   //console.log(new Date().toISOString() + " flush results " + results);
                 });
                 port.drain(function(err, results) {
+                  console.log(new Date().toISOString() + " D [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
                     if (client.readyState() === "OPEN") {
                       if (chatConfig.send_debug_channel_messages == true) {
@@ -3846,12 +6049,14 @@ async function onMessageHandler(target, tags, message, self) {
                         client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                       }
                     }
+                    console.log(new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                     return console.log(err);
                   }
                   //console.log(new Date().toISOString() + " drain results " + results);
                 });
 
                 port.write(settableMacroChain[settableInputsIndex].input_data, function(err) {
+                  console.log(new Date().toISOString() + " E [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
                     if (client.readyState() === "OPEN") {
                       if (chatConfig.send_debug_channel_messages == true) {
@@ -3860,6 +6065,7 @@ async function onMessageHandler(target, tags, message, self) {
                         client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                       }
                     }
+                    console.log(new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                     return console.log("Error on write: " + err.message);
                   }
                 });
@@ -3889,6 +6095,7 @@ async function onMessageHandler(target, tags, message, self) {
 
               // Clear the incoming serial data from arduino before setting an advanced input to be executed
               port.flush(function(err, results) {
+                console.log(new Date().toISOString() + " F [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -3897,11 +6104,13 @@ async function onMessageHandler(target, tags, message, self) {
                       client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                     }
                   }
+                  console.log(new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                   return console.log(err);
                 }
                 //console.log(new Date().toISOString() + " flush results " + results);
               });
               port.drain(function(err, results) {
+                console.log(new Date().toISOString() + " G [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -3910,12 +6119,14 @@ async function onMessageHandler(target, tags, message, self) {
                       client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                     }
                   }
+                  console.log(new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                   return console.log(err);
                 }
                 //console.log(new Date().toISOString() + " drain results " + results);
               });
 
               port.write(playSettableParametersToWrite, function(err) {
+                console.log(new Date().toISOString() + " H [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -3924,6 +6135,7 @@ async function onMessageHandler(target, tags, message, self) {
                       client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                     }
                   }
+                  console.log(new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                   return console.log("Error on write: " + err.message);
                 }
               });
@@ -3969,20 +6181,175 @@ async function onMessageHandler(target, tags, message, self) {
           // Sample input:
           // a+b+z:266/255.up+left:133/a+b+z:266/255.up+left:133/a+b+z:266/255.up+left:133/0
           // Input explanation:
-          // input1:delay/repeatcount.input2:delay/input3:delay/repeatcount.input4:delay/input5:delay/repeatcount.input5:delay/repeatcount
+          // input1:delay/repeatcount.input2:delay/input3:delay/repeatcount.input4:delay/input5:delay/repeatcount.input6:delay/repeatcount
           // First, inputs are split by periods (now split by commas),
           // Then, the elements of the input are split by : and /
           // Output should kinda look like this
           // a+b+z 266ms of delay repeating 255 times (repeat is only considered on the last element in the input array, so this repeat is not taken into consideration)
           // up+l
+          // Sample input with inner loop:
+          // a+b;266 [l+r;266 x+y;266]*4 up+right;2000 *255
+          // 1)a+b;266 2)[2a)l+r;266 2b)x+y;266]3)*4 4)up+right;2000 5)*255
+          // Explanation:
+          // 1) A+B will be executed once for 266ms
+          // 2) we enter the inner loop containing the chain "l+r;266 x+y;266" (the chain in square brackets "[]", "[" starts an inner loop, "]" ends an inner loop, inputs in inner loop use up the total amount of inputs allowed, max of 95 inputs allowed in an entire chain, in total, there are 4 inputs used in this chain)
+          // 2a) we execute l+r;266
+          // 2b) then we execute x+y;266
+          // 3) repeat that block 4 times
+          // 4) after the block is executed 4 times, go to up+right;2000
+          // 5) and finally, repeate the entire block 255 times
+          /*
+          let innerLoopsFound = [];
+          let innerLoopsCleanedUp = [];
+          let areThereInnerLoops = false;
+          console.log("START  innerLoopsFound = ");
+          console.log(innerLoopsFound);
+          console.log("START  innerLoopsFound.length = ");
+          console.log(innerLoopsFound.length);
+          console.log("START  innerLoopsCleanedUp = ");
+          console.log(innerLoopsCleanedUp);
+          console.log("START  innerLoopsCleanedUp.length = ");
+          console.log(innerLoopsCleanedUp.length);
+          innerLoopsFound = message.match(/\[.*?\]/ig);
+          console.log("message = ");
+          console.log(message);
+          console.log("BEFORE innerLoopsFound = ");
+          console.log(innerLoopsFound);
+          if (innerLoopsFound === null || innerLoopsFound === undefined || innerLoopsFound === "" || innerLoopsFound === [] || innerLoopsFound === "[]") {
+            console.log("No inner loops found");
+            innerLoopsFound = [];
+            innerLoopsCleanedUp = [];
+          }
+          */
+          /*
+          if (innerLoopsFound !== null && innerLoopsFound !== undefined && innerLoopsFound !== "" && innerLoopsFound !== [] && innerLoopsFound !== "[]") {
+            console.log("There were inner loops found? idk check the array size");
+            if (innerLoopsFound.length <= 0) {
+              console.log("Nope, no inner loops found");
+              innerLoopsFound = [];
+              innerLoopsCleanedUp = [];
+            }
+            if (innerLoopsFound.length > 0) {
+              console.log("At least one inner loop found");
+              console.log(innerLoopsFound.length);
+              for (var innerLoopsFoundIndex = 0; innerLoopsFoundIndex < innerLoopsFound.length; innerLoopsFoundIndex++) {
+                //console.log("BEFORE innerLoopsFoundIndex = " + innerLoopsFoundIndex);
+                //console.log(innerLoopsFound[innerLoopsFoundIndex]);
+                innerLoopsFound[innerLoopsFoundIndex] = innerLoopsFound[innerLoopsFoundIndex].replace(/([\[+\]+]+)+/ig, "");
+                innerLoopsFound[innerLoopsFoundIndex] = innerLoopsFound[innerLoopsFoundIndex].replace(/[\s\.\,]+/ig, " ");
+                innerLoopsFound[innerLoopsFoundIndex] = innerLoopsFound[innerLoopsFoundIndex].trim();
+                //console.log("AFTER  innerLoopsFoundIndex = " + innerLoopsFoundIndex);
+                //console.log(innerLoopsFound[innerLoopsFoundIndex]);
+                if (innerLoopsFound[innerLoopsFoundIndex] !== null && innerLoopsFound[innerLoopsFoundIndex] !== undefined && innerLoopsFound[innerLoopsFoundIndex] !== "" && innerLoopsFound[innerLoopsFoundIndex] !== "[]" && innerLoopsFound[innerLoopsFoundIndex] !== []) {
+                  innerLoopsCleanedUp.push(innerLoopsFound[innerLoopsFoundIndex]);
+                  console.log("VALID inner loop, use this");
+                }
+                
+                if (innerLoopsFound[innerLoopsFoundIndex] === null || innerLoopsFound[innerLoopsFoundIndex] === undefined || innerLoopsFound[innerLoopsFoundIndex] === "" || innerLoopsFound[innerLoopsFoundIndex] === "[]" || innerLoopsFound[innerLoopsFoundIndex] === []) {
+                  console.log("Invalid inner loop, don't use this");
+                }
+                
+              }
+              console.log("innerLoopsCleanedUp = ");
+              console.log(innerLoopsCleanedUp);
+              if (innerLoopsCleanedUp === null || innerLoopsCleanedUp === undefined || innerLoopsCleanedUp === "" || innerLoopsCleanedUp === [] || innerLoopsCleanedUp === "[]") {
+                console.log("No inner loops found STILL");
+                console.log("innerLoopsCleanedUp = ");
+                console.log(innerLoopsCleanedUp);
+                console.log("innerLoopsCleanedUp.length = ");
+                console.log(innerLoopsCleanedUp.length);
+                innerLoopsFound = [];
+                innerLoopsCleanedUp = [];
+              }
+              if (innerLoopsCleanedUp !== null && innerLoopsCleanedUp !== undefined && innerLoopsCleanedUp !== "" && innerLoopsCleanedUp !== [] && innerLoopsCleanedUp !== "[]") {
+                console.log("There were inner loops found? idk check the array size STILL");
+                console.log("innerLoopsCleanedUp = ");
+                console.log(innerLoopsCleanedUp);
+                console.log("innerLoopsCleanedUp.length = ");
+                console.log(innerLoopsCleanedUp.length);
+                if (innerLoopsCleanedUp.length <= 0) {
+                  console.log("Nope, no inner loops found STILL");
+                  console.log("innerLoopsCleanedUp = ");
+                  console.log(innerLoopsCleanedUp);
+                  console.log("innerLoopsCleanedUp.length = ");
+                  console.log(innerLoopsCleanedUp.length);
+                  innerLoopsFound = [];
+                  innerLoopsCleanedUp = [];
+                }
+                if (innerLoopsCleanedUp.length > 0) {
+                  console.log("At least one inner loop found STILL");
+                  console.log("innerLoopsCleanedUp = ");
+                  console.log(innerLoopsCleanedUp);
+                  console.log("innerLoopsCleanedUp.length = ");
+                  console.log(innerLoopsCleanedUp.length);
+                  for (var innerLoopsCleanedUpIndex = 0; innerLoopsCleanedUpIndex < innerLoopsCleanedUp.length; innerLoopsCleanedUpIndex++) {
+                    console.log("innerLoopsCleanedUpIndex = " + innerLoopsCleanedUpIndex);
+                    console.log("innerLoopsCleanedUp[innerLoopsCleanedUpIndex] = ");
+                    console.log(innerLoopsCleanedUp[innerLoopsCleanedUpIndex]);
+                  }
+                  innerLoopsFound = innerLoopsCleanedUp;
+                }
+              }
+            }
+          }
+          */
+          /*
+          console.log("AFTER  innerLoopsFound = ");
+          console.log(innerLoopsFound);
+          if (innerLoopsFound === null || innerLoopsFound === undefined || innerLoopsFound === "" || innerLoopsFound === [] || innerLoopsFound === "[]") {
+            console.log("No inner loops found STILL STILL");
+            innerLoopsFound = [];
+            innerLoopsCleanedUp = [];
+          }
+          if (innerLoopsFound !== null && innerLoopsFound !== undefined && innerLoopsFound !== "" && innerLoopsFound !== [] && innerLoopsFound !== "[]") {
+            console.log("There were inner loops found? idk check the array size STILL STILL");
+            if (innerLoopsFound.length <= 0) {
+              console.log("Nope, no inner loops found STILL STILL");
+              innerLoopsFound = [];
+              innerLoopsCleanedUp = [];
+            }
+            if (innerLoopsFound.length > 0) {
+              console.log("At least one inner loop found STILL STILL hell yeah use this to parse the inner loops found");
+              console.log(innerLoopsFound.length);
+              areThereInnerLoops = true;
+            }
+          }
+          */
+          //console.log("AFTER  innerLoopsFound.length = ");
+          //console.log(innerLoopsFound.length);
+          /*
+          for (var innerLoopsFoundIndex = 0; innerLoopsFoundIndex < innerLoopsFound.length; innerLoopsFoundIndex++) {
+            innerLoopsFound[innerLoopsFoundIndex] = innerLoopsFound[innerLoopsFoundIndex].replace(/[\s\.\,]+/ig, " ");
+            innerLoopsFound[innerLoopsFoundIndex] = innerLoopsFound[innerLoopsFoundIndex].trim();
+            console.log("innerLoopsFoundIndex = " + innerLoopsFoundIndex);
+            console.log(innerLoopsFound[innerLoopsFoundIndex]);
+            let innerLoopsSplit = innerLoopsFound[innerLoopsFoundIndex].split(/\s+/ig);
+            for (var innerLoopsSplitIndex = 0; innerLoopsSplitIndex < innerLoopsSplit.length; innerLoopsSplitIndex++) {
+              console.log("innerLoopsSplitIndex = " + innerLoopsSplitIndex);
+              console.log(innerLoopsSplit[innerLoopsSplitIndex]);
+            }
+          }
+          console.log("AFTER  innerLoopsFound = ");
+          console.log(innerLoopsFound);
+          */
+          //message = message.replace(/\s*\[+\s*/ig, "");
+          //message = message.replace(/\s*\]+\s*/ig, "");
           let macroDelayUsed = 0; // This variable keeps track of how many inputs have custom delay in the macro chain, if it's 0, set the first param in the last input of the macro chain to be repeat, if it's not 0, set the first param in the last input of the macro chain to be delay (only really used on a macro chain that has more than one input)
           precisionInputs = [];
           //console.log("messageWords[0] Before " + messageWords[0]);
+          //console.log("A message = ");
+          //console.log(message);
           precisionInputs = message.replace(/[\s\.\,]+/ig, " ");
+          //console.log("A precisionInputs = ");
+          //console.log(precisionInputs);
           precisionInputs = precisionInputs.trim();
+          //console.log("B precisionInputs = ");
+          //console.log(precisionInputs);
           //console.log("messageWords[0] NOW " + precisionInputs);
 
           precisionInputs = precisionInputs.split(/\s+/ig);
+          //console.log("C precisionInputs = ");
+          //console.log(precisionInputs);
           //precisionInputs = precisionInputs.trim();
           //console.log("precisionInputs.length = " + precisionInputs.length);
           for (var precisionInputsIndex = 0; precisionInputsIndex < precisionInputs.length; precisionInputsIndex++) {
@@ -3990,7 +6357,7 @@ async function onMessageHandler(target, tags, message, self) {
             //console.log("");
             //console.log("precisionInputsIndex = " + precisionInputsIndex + " precisionInputs[precisionInputsIndex] = " + precisionInputs[precisionInputsIndex]);
             //console.log("precisionInputs[precisionInputsIndex] at index " + precisionInputsIndex + " " + precisionInputs[precisionInputsIndex]);
-            precisionInputs[precisionInputsIndex] = precisionInputs[precisionInputsIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
+            precisionInputs[precisionInputsIndex] = precisionInputs[precisionInputsIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
             //console.log("precisionInputs[precisionInputsIndex] at index " + precisionInputsIndex + " " + precisionInputs[precisionInputsIndex]);
             if (precisionInputs[precisionInputsIndex] == "") {
               //console.log("INVALID INPUT 1");
@@ -4229,7 +6596,7 @@ async function onMessageHandler(target, tags, message, self) {
               }
               if (precisionInputString != "") {
                 //console.log("VALID INPUT 2");
-                precisionInputString = precisionInputString.replace(/[\+\_\|\#\[\]]+/ig, " ");
+                precisionInputString = precisionInputString.replace(/[\+\_\|\#]+/ig, " ");
                 precisionInputString = precisionInputString.trim();
                 precisionInputString = precisionInputString.split(/\s+/ig);
                 if (precisionInputString[0] == "") {
@@ -4350,24 +6717,24 @@ async function onMessageHandler(target, tags, message, self) {
               // Get user from userdatabase by using their userid then increment the user's advanced input count
               mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
-              }, function(err, userDb) {
-                if (err) {
-                  throw err;
+              }, function(userDbError, userDb) {
+                if (userDbError) {
+                  throw userDbError;
                 }
                 let userDatabase = userDb.db(globalConfig.main_database_name);
                 userDatabase.collection(globalConfig.chatters_collection_name).findOne({
                   user_id: userId
-                }, function(err, result) {
-                  if (err) {
-                    throw err;
+                }, function(resultError, result) {
+                  if (resultError) {
+                    throw resultError;
                   }
                   //console.log(result);
                   //
                   mongoClient.connect(mongoUrl, {
                     useUnifiedTopology: true
-                  }, function(err, databaseToUpdate) {
-                    if (err) {
-                      throw err;
+                  }, function(databaseToUpdateError, databaseToUpdate) {
+                    if (databaseToUpdateError) {
+                      throw databaseToUpdateError;
                     }
                     let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name);
                     let dataToQuery = {
@@ -4407,9 +6774,9 @@ async function onMessageHandler(target, tags, message, self) {
                       dataToUpdate.$set.is_first_message_basic_input = false;
                       dataToUpdate.$set.is_first_message_advanced_input = true;
                     }
-                    userDatabaseToUpdate.collection(globalConfig.chatters_collection_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-                      if (err) {
-                        throw err;
+                    userDatabaseToUpdate.collection(globalConfig.chatters_collection_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                      if (resError) {
+                        throw resError;
                       }
                       //console.log("1 document updated");
                       databaseToUpdate.close();
@@ -4422,18 +6789,18 @@ async function onMessageHandler(target, tags, message, self) {
               // The database checks below check an user's input count
               mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
-              }, function(err, userDb) {
+              }, function(userDbError, userDb) {
                 //isDatabaseBusy = true;
-                if (err) {
-                  throw err;
+                if (userDbError) {
+                  throw userDbError;
                 }
                 // Check if the user entry for a specific game exists
                 let userDatabase = userDb.db(globalConfig.inputter_database_name);
                 userDatabase.collection(globalConfig.run_name).findOne({
                   user_id: userId
-                }, function(err, result) {
-                  if (err) {
-                    throw err;
+                }, function(resultError, result) {
+                  if (resultError) {
+                    throw resultError;
                   }
                   //console.log(result);
                   //isNullDatabase = result;
@@ -4441,9 +6808,9 @@ async function onMessageHandler(target, tags, message, self) {
                     console.log("YES");
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
-                    }, function(err, databaseToCreate) {
-                      if (err) {
-                        throw err;
+                    }, function(databaseToCreateError, databaseToCreate) {
+                      if (databaseToCreateError) {
+                        throw databaseToCreateError;
                       }
                       let userDatabaseToCreate = databaseToCreate.db(globalConfig.inputter_database_name);
                       let dataToInsert = {
@@ -4453,23 +6820,23 @@ async function onMessageHandler(target, tags, message, self) {
                         advanced_inputs_sent: 1,
                         total_inputs_sent: 1
                       };
-                      userDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
-                        if (err) {
-                          throw err;
+                      userDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(resError, res) {
+                        if (resError) {
+                          throw resError;
                         }
                         //console.log("1 document inserted");
                         mongoClient.connect(mongoUrl, {
                           useUnifiedTopology: true
-                        }, function(err, databaseToReadFrom) {
-                          if (err) {
-                            throw err;
+                        }, function(databaseToReadFromError, databaseToReadFrom) {
+                          if (databaseToReadFromError) {
+                            throw databaseToReadFromError;
                           }
                           let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.inputter_database_name);
                           userDatabaseToReadFrom.collection(globalConfig.run_name).findOne({
                             user_id: userId
-                          }, function(err, databaseToReadFromResult) {
-                            if (err) {
-                              throw err;
+                          }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                            if (databaseToReadFromResultError) {
+                              throw databaseToReadFromResultError;
                             }
                             databaseToReadFrom.close();
                             //console.log(databaseToReadFromResult);
@@ -4484,9 +6851,9 @@ async function onMessageHandler(target, tags, message, self) {
                     //console.log("NO");
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
-                    }, function(err, databaseToUpdate) {
-                      if (err) {
-                        throw err;
+                    }, function(databaseToUpdateError, databaseToUpdate) {
+                      if (databaseToUpdateError) {
+                        throw databaseToUpdateError;
                       }
                       let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.inputter_database_name);
                       let dataToQuery = {
@@ -4506,24 +6873,24 @@ async function onMessageHandler(target, tags, message, self) {
                         }
                       };
                       //console.log(newvalues);
-                      userDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-                        if (err) {
-                          throw err;
+                      userDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                        if (resError) {
+                          throw resError;
                         }
                         //console.log(res.result);
                         //console.log("1 document updated");
                         mongoClient.connect(mongoUrl, {
                           useUnifiedTopology: true
-                        }, function(err, databaseToReadFrom) {
-                          if (err) {
-                            throw err;
+                        }, function(databaseToReadFromError, databaseToReadFrom) {
+                          if (databaseToReadFromError) {
+                            throw databaseToReadFromError;
                           }
                           let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.inputter_database_name);
                           userDatabaseToReadFrom.collection(globalConfig.run_name).findOne({
                             user_id: userId
-                          }, function(err, databaseToReadFromResult) {
-                            if (err) {
-                              throw err;
+                          }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                            if (databaseToReadFromResultError) {
+                              throw databaseToReadFromResultError;
                             }
                             databaseToReadFrom.close();
                             //console.log(databaseToReadFromResult);
@@ -4543,16 +6910,16 @@ async function onMessageHandler(target, tags, message, self) {
               // The database operations below check the total input count
               mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
-              }, function(err, globalDb) {
+              }, function(globalDbError, globalDb) {
                 //isDatabaseBusy = true;
-                if (err) {
-                  throw err;
+                if (globalDbError) {
+                  throw globalDbError;
                 }
                 // Check if the entry for a specific game exists
                 let globalDatabase = globalDb.db(globalConfig.global_database_name);
-                globalDatabase.collection(globalConfig.run_name).findOne({}, function(err, result) {
-                  if (err) {
-                    throw err;
+                globalDatabase.collection(globalConfig.run_name).findOne({}, function(resultError, result) {
+                  if (resultError) {
+                    throw resultError;
                   }
                   //console.log(result);
                   //isNullDatabase = result;
@@ -4560,9 +6927,9 @@ async function onMessageHandler(target, tags, message, self) {
                     //console.log("YES");
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
-                    }, function(err, databaseToCreate) {
-                      if (err) {
-                        throw err;
+                    }, function(databaseToCreateError, databaseToCreate) {
+                      if (databaseToCreateError) {
+                        throw databaseToCreateError;
                       }
                       let globalDatabaseToCreate = databaseToCreate.db(globalConfig.global_database_name);
                       let dataToInsert = {
@@ -4579,21 +6946,21 @@ async function onMessageHandler(target, tags, message, self) {
                       io.sockets.emit("input_counts_object", inputCountsObject);
 
                       // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
-                      globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
-                        if (err) {
-                          throw err;
+                      globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(resError, res) {
+                        if (resError) {
+                          throw resError;
                         }
                         //console.log("1 document inserted");
                         mongoClient.connect(mongoUrl, {
                           useUnifiedTopology: true
-                        }, function(err, databaseToReadFrom) {
-                          if (err) {
-                            throw err;
+                        }, function(databaseToReadFromError, databaseToReadFrom) {
+                          if (databaseToReadFromError) {
+                            throw databaseToReadFromError;
                           }
                           let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
-                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
-                            if (err) {
-                              throw err;
+                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                            if (databaseToReadFromResultError) {
+                              throw databaseToReadFromResultError;
                             }
                             databaseToReadFrom.close();
                             //console.log(databaseToReadFromResult);
@@ -4609,9 +6976,9 @@ async function onMessageHandler(target, tags, message, self) {
                     //console.log("NO");
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
-                    }, function(err, databaseToUpdate) {
-                      if (err) {
-                        throw err;
+                    }, function(databaseToUpdateError, databaseToUpdate) {
+                      if (databaseToUpdateError) {
+                        throw databaseToUpdateError;
                       }
                       let globalDatabaseToUpdate = databaseToUpdate.db(globalConfig.global_database_name);
                       let dataToQuery = {
@@ -4643,22 +7010,22 @@ async function onMessageHandler(target, tags, message, self) {
 
                       // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
                       //console.log(newvalues);
-                      globalDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-                        if (err) {
-                          throw err;
+                      globalDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                        if (resError) {
+                          throw resError;
                         }
                         //console.log(res.result);
                         //console.log("1 document updated");
                         mongoClient.connect(mongoUrl, {
                           useUnifiedTopology: true
-                        }, function(err, databaseToReadFrom) {
-                          if (err) {
-                            throw err;
+                        }, function(databaseToReadFromError, databaseToReadFrom) {
+                          if (databaseToReadFromError) {
+                            throw databaseToReadFromError;
                           }
                           let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
-                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
-                            if (err) {
-                              throw err;
+                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                            if (databaseToReadFromResultError) {
+                              throw databaseToReadFromResultError;
                             }
                             databaseToReadFrom.close();
                             //console.log(databaseToReadFromResult);
@@ -4711,13 +7078,28 @@ async function onMessageHandler(target, tags, message, self) {
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
                 for (let splitInputsInMultipleStringsIndex = 0; splitInputsInMultipleStringsIndex < splitInputsInMultipleStrings.length; splitInputsInMultipleStringsIndex++) {
                   if (splitInputsInMultipleStringsIndex == 0) {
-                    client.action(target, "@" + usernameToPing + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                    if (isExecutingSavedMacro == false) {
+                      client.action(target, "@" + usernameToPing + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                    }
+                    if (isExecutingSavedMacro == true) {
+                      client.action(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                    }
                   }
                   if (splitInputsInMultipleStringsIndex > 0 && splitInputsInMultipleStringsIndex != splitInputsInMultipleStrings.length - 1) {
-                    client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                    if (isExecutingSavedMacro == false) {
+                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                    }
+                    if (isExecutingSavedMacro == true) {
+                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                    }
                   }
                   if (splitInputsInMultipleStringsIndex == splitInputsInMultipleStrings.length - 1) {
-                    client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Type Stop or Wait to stop execution of inputs");
+                    if (isExecutingSavedMacro == false) {
+                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Type Stop or Wait to stop execution of inputs");
+                    }
+                    if (isExecutingSavedMacro == true) {
+                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Type Stop or Wait to stop execution of inputs");
+                    }
                   }
                 }
                 //console.log(splitInputsInMultipleStrings);
@@ -4728,7 +7110,12 @@ async function onMessageHandler(target, tags, message, self) {
                 //splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/(?:[^\,]+\,){1,10}[^\,]+/ig);
                 //console.log(splitInputsInMultipleStrings);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
-                client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Type Stop or Wait to stop execution of inputs");
+                if (isExecutingSavedMacro == false) {
+                  client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Type Stop or Wait to stop execution of inputs");
+                }
+                if (isExecutingSavedMacro == true) {
+                  client.action(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Type Stop or Wait to stop execution of inputs");
+                }
                 //client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2);
               }
               //let splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/.{100}/ig);
@@ -4737,6 +7124,7 @@ async function onMessageHandler(target, tags, message, self) {
 
               // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
               port.flush(function(err, results) {
+                console.log(new Date().toISOString() + " I [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -4745,11 +7133,13 @@ async function onMessageHandler(target, tags, message, self) {
                       client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                     }
                   }
+                  console.log(new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                   return console.log(err);
                 }
                 //console.log(new Date().toISOString() + " flush results " + results);
               });
               port.drain(function(err, results) {
+                console.log(new Date().toISOString() + " J [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -4758,12 +7148,14 @@ async function onMessageHandler(target, tags, message, self) {
                       client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                     }
                   }
+                  console.log(new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                   return console.log(err);
                 }
                 //console.log(new Date().toISOString() + " drain results " + results);
               });
 
               port.write(macroParametersToWrite, function(err) {
+                console.log(new Date().toISOString() + " K [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -4772,6 +7164,7 @@ async function onMessageHandler(target, tags, message, self) {
                       client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                     }
                   }
+                  console.log(new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                   return console.log("Error on write: " + err.message);
                 }
               });
@@ -4796,7 +7189,7 @@ async function onMessageHandler(target, tags, message, self) {
     }
     if (inputMode == 0) {
       if (messageWords.length > 0) {
-        messageInputs = message.split(/[\+\_\|\#\[\]\,\.\s]+/ig);
+        messageInputs = message.split(/[\+\_\|\#\,\.\s]+/ig);
         if (messageInputs[0] === "" || messageInputs[0] === undefined || messageInputs[0] === null) {
           messageInputs.splice(0, 1);
         }
@@ -4804,7 +7197,7 @@ async function onMessageHandler(target, tags, message, self) {
         //messageInputs = messageInputs.split(/[\+\_\|\#\[\]\,\.\s]+/ig);
         //console.log(messageInputs);
       }
-      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(com+ands*)+|(cmds*)+|(cmnds*)+|(control+s*)+|(control+ers*)+|((chat)*\s*how\s*(can|do|to)\s*play\s*(chat)*\s*\?*)+|((chat)*\s*how\s*(can|do|to)\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
+      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(com+ands*)+|(cmds*)+|(cmnds*)+|(control+s*)+|(control+ers*)+|((chat)*\s*how\s*(can|do|to)\s*play\s*(chat)*\s*\?*)+|((chat)*\s*how\s*(can|do|to)\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
           //console.log("Don't send the help message yet");
@@ -4914,24 +7307,24 @@ async function onMessageHandler(target, tags, message, self) {
                     // Get user from userdatabase by using their userid then increment the user's basic input count
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
-                    }, function(err, userDb) {
-                      if (err) {
-                        throw err;
+                    }, function(userDbError, userDb) {
+                      if (userDbError) {
+                        throw userDbError;
                       }
                       let userDatabase = userDb.db(globalConfig.main_database_name);
                       userDatabase.collection(globalConfig.chatters_collection_name).findOne({
                         user_id: userId
-                      }, function(err, result) {
-                        if (err) {
-                          throw err;
+                      }, function(resultError, result) {
+                        if (resultError) {
+                          throw resultError;
                         }
                         //console.log(result);
                         //
                         mongoClient.connect(mongoUrl, {
                           useUnifiedTopology: true
-                        }, function(err, databaseToUpdate) {
-                          if (err) {
-                            throw err;
+                        }, function(databaseToUpdateError, databaseToUpdate) {
+                          if (databaseToUpdateError) {
+                            throw databaseToUpdateError;
                           }
                           let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name);
                           let dataToQuery = {
@@ -4971,9 +7364,9 @@ async function onMessageHandler(target, tags, message, self) {
                             dataToUpdate.$set.is_first_message_basic_input = true;
                             dataToUpdate.$set.is_first_message_advanced_input = false;
                           }
-                          userDatabaseToUpdate.collection(globalConfig.chatters_collection_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-                            if (err) {
-                              throw err;
+                          userDatabaseToUpdate.collection(globalConfig.chatters_collection_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                            if (resError) {
+                              throw resError;
                             }
                             //console.log("1 document updated");
                             databaseToUpdate.close();
@@ -4987,18 +7380,18 @@ async function onMessageHandler(target, tags, message, self) {
                     // The database checks below check an user's input count
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
-                    }, function(err, userDb) {
+                    }, function(userDbError, userDb) {
                       //isDatabaseBusy = true;
-                      if (err) {
-                        throw err;
+                      if (userDbError) {
+                        throw userDbError;
                       }
                       // Check if the user entry for a specific game exists
                       let userDatabase = userDb.db(globalConfig.inputter_database_name);
                       userDatabase.collection(globalConfig.run_name).findOne({
                         user_id: userId
-                      }, function(err, result) {
-                        if (err) {
-                          throw err;
+                      }, function(resultError, result) {
+                        if (resultError) {
+                          throw resultError;
                         }
                         //console.log(result);
                         //isNullDatabase = result;
@@ -5006,9 +7399,9 @@ async function onMessageHandler(target, tags, message, self) {
                           console.log("YES");
                           mongoClient.connect(mongoUrl, {
                             useUnifiedTopology: true
-                          }, function(err, databaseToCreate) {
-                            if (err) {
-                              throw err;
+                          }, function(databaseToCreateError, databaseToCreate) {
+                            if (databaseToCreateError) {
+                              throw databaseToCreateError;
                             }
                             let userDatabaseToCreate = databaseToCreate.db(globalConfig.inputter_database_name);
                             let dataToInsert = {
@@ -5018,23 +7411,23 @@ async function onMessageHandler(target, tags, message, self) {
                               advanced_inputs_sent: 0,
                               total_inputs_sent: 1
                             };
-                            userDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
-                              if (err) {
-                                throw err;
+                            userDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(resError, res) {
+                              if (resError) {
+                                throw resError;
                               }
                               //console.log("1 document inserted");
                               mongoClient.connect(mongoUrl, {
                                 useUnifiedTopology: true
-                              }, function(err, databaseToReadFrom) {
-                                if (err) {
-                                  throw err;
+                              }, function(databaseToReadFromError, databaseToReadFrom) {
+                                if (databaseToReadFromError) {
+                                  throw databaseToReadFromError;
                                 }
                                 let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.inputter_database_name);
                                 userDatabaseToReadFrom.collection(globalConfig.run_name).findOne({
                                   user_id: userId
-                                }, function(err, databaseToReadFromResult) {
-                                  if (err) {
-                                    throw err;
+                                }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                                  if (databaseToReadFromResultError) {
+                                    throw databaseToReadFromResultError;
                                   }
                                   databaseToReadFrom.close();
                                   //console.log(databaseToReadFromResult);
@@ -5049,9 +7442,9 @@ async function onMessageHandler(target, tags, message, self) {
                           //console.log("NO");
                           mongoClient.connect(mongoUrl, {
                             useUnifiedTopology: true
-                          }, function(err, databaseToUpdate) {
-                            if (err) {
-                              throw err;
+                          }, function(databaseToUpdateError, databaseToUpdate) {
+                            if (databaseToUpdateError) {
+                              throw databaseToUpdateError;
                             }
                             let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.inputter_database_name);
                             let dataToQuery = {
@@ -5072,24 +7465,24 @@ async function onMessageHandler(target, tags, message, self) {
                             };
                             //console.log(dataToUpdate);
                             //console.log(newvalues);
-                            userDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-                              if (err) {
-                                throw err;
+                            userDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                              if (resError) {
+                                throw resError;
                               }
                               //console.log(res.result);
                               //console.log("1 document updated");
                               mongoClient.connect(mongoUrl, {
                                 useUnifiedTopology: true
-                              }, function(err, databaseToReadFrom) {
-                                if (err) {
-                                  throw err;
+                              }, function(databaseToReadFromError, databaseToReadFrom) {
+                                if (databaseToReadFromError) {
+                                  throw databaseToReadFromError;
                                 }
                                 let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.inputter_database_name);
                                 userDatabaseToReadFrom.collection(globalConfig.run_name).findOne({
                                   user_id: userId
-                                }, function(err, databaseToReadFromResult) {
-                                  if (err) {
-                                    throw err;
+                                }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                                  if (databaseToReadFromResultError) {
+                                    throw databaseToReadFromResultError;
                                   }
                                   databaseToReadFrom.close();
                                   //console.log(databaseToReadFromResult);
@@ -5109,16 +7502,16 @@ async function onMessageHandler(target, tags, message, self) {
                     // The database operations below check the total input count
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
-                    }, function(err, globalDb) {
+                    }, function(globalDbError, globalDb) {
                       //isDatabaseBusy = true;
-                      if (err) {
-                        throw err;
+                      if (globalDbError) {
+                        throw globalDbError;
                       }
                       // Check if the entry for a specific game exists
                       let globalDatabase = globalDb.db(globalConfig.global_database_name);
-                      globalDatabase.collection(globalConfig.run_name).findOne({}, function(err, result) {
-                        if (err) {
-                          throw err;
+                      globalDatabase.collection(globalConfig.run_name).findOne({}, function(resultError, result) {
+                        if (resultError) {
+                          throw resultError;
                         }
                         //console.log(result);
                         //isNullDatabase = result;
@@ -5126,9 +7519,9 @@ async function onMessageHandler(target, tags, message, self) {
                           //console.log("YES");
                           mongoClient.connect(mongoUrl, {
                             useUnifiedTopology: true
-                          }, function(err, databaseToCreate) {
-                            if (err) {
-                              throw err;
+                          }, function(databaseToCreateError, databaseToCreate) {
+                            if (databaseToCreateError) {
+                              throw databaseToCreateError;
                             }
                             let globalDatabaseToCreate = databaseToCreate.db(globalConfig.global_database_name);
                             let dataToInsert = {
@@ -5147,21 +7540,21 @@ async function onMessageHandler(target, tags, message, self) {
                             //console.log("dataToInsert");
                             //console.log(dataToInsert);
                             // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
-                            globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
-                              if (err) {
-                                throw err;
+                            globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(resError, res) {
+                              if (resError) {
+                                throw resError;
                               }
                               //console.log("1 document inserted");
                               mongoClient.connect(mongoUrl, {
                                 useUnifiedTopology: true
-                              }, function(err, databaseToReadFrom) {
-                                if (err) {
-                                  throw err;
+                              }, function(databaseToReadFromError, databaseToReadFrom) {
+                                if (databaseToReadFromError) {
+                                  throw databaseToReadFromError;
                                 }
                                 let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
-                                globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
-                                  if (err) {
-                                    throw err;
+                                globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                                  if (databaseToReadFromResultError) {
+                                    throw databaseToReadFromResultError;
                                   }
                                   databaseToReadFrom.close();
                                   //console.log(databaseToReadFromResult);
@@ -5177,9 +7570,9 @@ async function onMessageHandler(target, tags, message, self) {
                           //console.log("NO");
                           mongoClient.connect(mongoUrl, {
                             useUnifiedTopology: true
-                          }, function(err, databaseToUpdate) {
-                            if (err) {
-                              throw err;
+                          }, function(databaseToUpdateError, databaseToUpdate) {
+                            if (databaseToUpdateError) {
+                              throw databaseToUpdateError;
                             }
                             let globalDatabaseToUpdate = databaseToUpdate.db(globalConfig.global_database_name);
                             let dataToQuery = {
@@ -5213,22 +7606,22 @@ async function onMessageHandler(target, tags, message, self) {
                             //console.log(dataToUpdate);
                             // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
                             //console.log(newvalues);
-                            globalDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-                              if (err) {
-                                throw err;
+                            globalDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                              if (resError) {
+                                throw resError;
                               }
                               //console.log(res.result);
                               //console.log("1 document updated");
                               mongoClient.connect(mongoUrl, {
                                 useUnifiedTopology: true
-                              }, function(err, databaseToReadFrom) {
-                                if (err) {
-                                  throw err;
+                              }, function(databaseToReadFromError, databaseToReadFrom) {
+                                if (databaseToReadFromError) {
+                                  throw databaseToReadFromError;
                                 }
                                 let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
-                                globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
-                                  if (err) {
-                                    throw err;
+                                globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                                  if (databaseToReadFromResultError) {
+                                    throw databaseToReadFromResultError;
                                   }
                                   databaseToReadFrom.close();
                                   //console.log(databaseToReadFromResult);
@@ -5274,7 +7667,7 @@ async function onMessageHandler(target, tags, message, self) {
           for (var messageInputIndex = 0; messageInputIndex < messageInputs.length; messageInputIndex++) {
             if (hasInvalidInput == false) {
               let didInputMatch = false;
-              messageInputs[messageInputIndex] = messageInputs[messageInputIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
+              messageInputs[messageInputIndex] = messageInputs[messageInputIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
 
               let adjustableAnalogStickPosition = -1;
 
@@ -5538,13 +7931,19 @@ async function onMessageHandler(target, tags, message, self) {
                     dataToWrite[10] = inputDelayLow;
                     //console.log(backToHexString);
                     //console.log(controllerObject[controllerObjectIndex].is_blacklisted);
-                    if (controllerState[controllerObjectIndex] == false) {
-                      if (inputsUsed < inputsAllowed) {
-                        inputString = inputString.concat(controllerObject[controllerObjectIndex].input_name + "+");
-                      }
-                    }
                     //console.log(inputString);
+                    if (controllerObject[controllerObjectIndex].is_blacklisted == true) {
+                      console.log(controllerObject[controllerObjectIndex].input_name + " is blacklisted!");
+                      hasInvalidInput = true;
+                      didInputMatch = false;
+                    }
                     if (controllerObject[controllerObjectIndex].is_blacklisted == false) {
+                      //console.log(controllerObject[controllerObjectIndex].input_name + " is NOT blacklisted!");
+                      if (controllerState[controllerObjectIndex] == false) {
+                        if (inputsUsed < inputsAllowed) {
+                          inputString = inputString.concat(controllerObject[controllerObjectIndex].input_name + "+");
+                        }
+                      }
                       if (inputsUsed < inputsAllowed) {
                         if (controllerState[controllerObjectIndex] == true) {
                           //console.log("Input used, ignoring");
@@ -5581,7 +7980,7 @@ async function onMessageHandler(target, tags, message, self) {
                                 if (adjustableAnalogStickPosition != -1) {
                                   // Valid Stick Position
                                   //console.log("inputString = " + inputString);
-                                  inputString = inputString.replace(/[\+\_\|\#\[\]\,\.\s]+$/ig, "");
+                                  inputString = inputString.replace(/[\+\_\|\#\,\.\s]+$/ig, "");
                                   //console.log("inputString = " + inputString);
                                   inputString = inputString + ":" + adjustableAnalogStickPosition + "+";
                                   //console.log("inputString = " + inputString);
@@ -5835,7 +8234,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(new Date().toISOString() + " Blacklisted combos detected, dropping input!");
             }
             if (isBlacklistedCombo == false) {
-              inputString = inputString.replace(/[\+\_\|\#\[\]\,\.\s]+$/ig, "");
+              inputString = inputString.replace(/[\+\_\|\#\,\.\s]+$/ig, "");
               inputString = (setHold == true) ? inputString.concat("-") : inputString.concat("");
               if (inputDelay == controllerConfig.normal_delay) {
                 // Do nothing
@@ -5868,24 +8267,24 @@ async function onMessageHandler(target, tags, message, self) {
               // Get user from userdatabase by using their userid then increment the user's basic input count
               mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
-              }, function(err, userDb) {
-                if (err) {
-                  throw err;
+              }, function(userDbError, userDb) {
+                if (userDbError) {
+                  throw userDbError;
                 }
                 let userDatabase = userDb.db(globalConfig.main_database_name);
                 userDatabase.collection(globalConfig.chatters_collection_name).findOne({
                   user_id: userId
-                }, function(err, result) {
-                  if (err) {
-                    throw err;
+                }, function(resultError, result) {
+                  if (resultError) {
+                    throw resultError;
                   }
                   //console.log(result);
                   //
                   mongoClient.connect(mongoUrl, {
                     useUnifiedTopology: true
-                  }, function(err, databaseToUpdate) {
-                    if (err) {
-                      throw err;
+                  }, function(databaseToUpdateError, databaseToUpdate) {
+                    if (databaseToUpdateError) {
+                      throw databaseToUpdateError;
                     }
                     let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name);
                     let dataToQuery = {
@@ -5925,9 +8324,9 @@ async function onMessageHandler(target, tags, message, self) {
                       dataToUpdate.$set.is_first_message_basic_input = true;
                       dataToUpdate.$set.is_first_message_advanced_input = false;
                     }
-                    userDatabaseToUpdate.collection(globalConfig.chatters_collection_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-                      if (err) {
-                        throw err;
+                    userDatabaseToUpdate.collection(globalConfig.chatters_collection_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                      if (resError) {
+                        throw resError;
                       }
                       //console.log("1 document updated");
                       databaseToUpdate.close();
@@ -5941,18 +8340,18 @@ async function onMessageHandler(target, tags, message, self) {
               // The database checks below check an user's input count
               mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
-              }, function(err, userDb) {
+              }, function(userDbError, userDb) {
                 //isDatabaseBusy = true;
-                if (err) {
-                  throw err;
+                if (userDbError) {
+                  throw userDbError;
                 }
                 // Check if the user entry for a specific game exists
                 let userDatabase = userDb.db(globalConfig.inputter_database_name);
                 userDatabase.collection(globalConfig.run_name).findOne({
                   user_id: userId
-                }, function(err, result) {
-                  if (err) {
-                    throw err;
+                }, function(resultError, result) {
+                  if (resultError) {
+                    throw resultError;
                   }
                   //console.log(result);
                   //isNullDatabase = result;
@@ -5960,9 +8359,9 @@ async function onMessageHandler(target, tags, message, self) {
                     console.log("YES");
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
-                    }, function(err, databaseToCreate) {
-                      if (err) {
-                        throw err;
+                    }, function(databaseToCreateError, databaseToCreate) {
+                      if (databaseToCreateError) {
+                        throw databaseToCreateError;
                       }
                       let userDatabaseToCreate = databaseToCreate.db(globalConfig.inputter_database_name);
                       let dataToInsert = {
@@ -5972,23 +8371,23 @@ async function onMessageHandler(target, tags, message, self) {
                         advanced_inputs_sent: 0,
                         total_inputs_sent: 1
                       };
-                      userDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
-                        if (err) {
-                          throw err;
+                      userDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(resError, res) {
+                        if (resError) {
+                          throw resError;
                         }
                         //console.log("1 document inserted");
                         mongoClient.connect(mongoUrl, {
                           useUnifiedTopology: true
-                        }, function(err, databaseToReadFrom) {
-                          if (err) {
-                            throw err;
+                        }, function(databaseToReadFromError, databaseToReadFrom) {
+                          if (databaseToReadFromError) {
+                            throw databaseToReadFromError;
                           }
                           let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.inputter_database_name);
                           userDatabaseToReadFrom.collection(globalConfig.run_name).findOne({
                             user_id: userId
-                          }, function(err, databaseToReadFromResult) {
-                            if (err) {
-                              throw err;
+                          }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                            if (databaseToReadFromResultError) {
+                              throw databaseToReadFromResultError;
                             }
                             databaseToReadFrom.close();
                             //console.log(databaseToReadFromResult);
@@ -6003,9 +8402,9 @@ async function onMessageHandler(target, tags, message, self) {
                     //console.log("NO");
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
-                    }, function(err, databaseToUpdate) {
-                      if (err) {
-                        throw err;
+                    }, function(databaseToUpdateError, databaseToUpdate) {
+                      if (databaseToUpdateError) {
+                        throw databaseToUpdateError;
                       }
                       let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.inputter_database_name);
                       let dataToQuery = {
@@ -6025,24 +8424,24 @@ async function onMessageHandler(target, tags, message, self) {
                         }
                       };
                       //console.log(newvalues);
-                      userDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-                        if (err) {
-                          throw err;
+                      userDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                        if (resError) {
+                          throw resError;
                         }
                         //console.log(res.result);
                         //console.log("1 document updated");
                         mongoClient.connect(mongoUrl, {
                           useUnifiedTopology: true
-                        }, function(err, databaseToReadFrom) {
-                          if (err) {
-                            throw err;
+                        }, function(databaseToReadFromError, databaseToReadFrom) {
+                          if (databaseToReadFromError) {
+                            throw databaseToReadFromError;
                           }
                           let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.inputter_database_name);
                           userDatabaseToReadFrom.collection(globalConfig.run_name).findOne({
                             user_id: userId
-                          }, function(err, databaseToReadFromResult) {
-                            if (err) {
-                              throw err;
+                          }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                            if (databaseToReadFromResultError) {
+                              throw databaseToReadFromResultError;
                             }
                             databaseToReadFrom.close();
                             //console.log(databaseToReadFromResult);
@@ -6062,16 +8461,16 @@ async function onMessageHandler(target, tags, message, self) {
               // The database operations below check the total input count
               mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
-              }, function(err, globalDb) {
+              }, function(globalDbError, globalDb) {
                 //isDatabaseBusy = true;
-                if (err) {
-                  throw err;
+                if (globalDbError) {
+                  throw globalDbError;
                 }
                 // Check if the entry for a specific game exists
                 let globalDatabase = globalDb.db(globalConfig.global_database_name);
-                globalDatabase.collection(globalConfig.run_name).findOne({}, function(err, result) {
-                  if (err) {
-                    throw err;
+                globalDatabase.collection(globalConfig.run_name).findOne({}, function(resultError, result) {
+                  if (resultError) {
+                    throw resultError;
                   }
                   //console.log(result);
                   //isNullDatabase = result;
@@ -6079,9 +8478,9 @@ async function onMessageHandler(target, tags, message, self) {
                     //console.log("YES");
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
-                    }, function(err, databaseToCreate) {
-                      if (err) {
-                        throw err;
+                    }, function(databaseToCreateError, databaseToCreate) {
+                      if (databaseToCreateError) {
+                        throw databaseToCreateError;
                       }
                       let globalDatabaseToCreate = databaseToCreate.db(globalConfig.global_database_name);
                       let dataToInsert = {
@@ -6100,21 +8499,21 @@ async function onMessageHandler(target, tags, message, self) {
                       //console.log("dataToInsert");
                       //console.log(dataToInsert);
                       // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
-                      globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(err, res) {
-                        if (err) {
-                          throw err;
+                      globalDatabaseToCreate.collection(globalConfig.run_name).insertOne(dataToInsert, function(resError, res) {
+                        if (resError) {
+                          throw resError;
                         }
                         //console.log("1 document inserted");
                         mongoClient.connect(mongoUrl, {
                           useUnifiedTopology: true
-                        }, function(err, databaseToReadFrom) {
-                          if (err) {
-                            throw err;
+                        }, function(databaseToReadFromError, databaseToReadFrom) {
+                          if (databaseToReadFromError) {
+                            throw databaseToReadFromError;
                           }
                           let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
-                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
-                            if (err) {
-                              throw err;
+                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                            if (databaseToReadFromResultError) {
+                              throw databaseToReadFromResultError;
                             }
                             databaseToReadFrom.close();
                             //console.log(databaseToReadFromResult);
@@ -6130,9 +8529,9 @@ async function onMessageHandler(target, tags, message, self) {
                     //console.log("NO");
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
-                    }, function(err, databaseToUpdate) {
-                      if (err) {
-                        throw err;
+                    }, function(databaseToUpdateError, databaseToUpdate) {
+                      if (databaseToUpdateError) {
+                        throw databaseToUpdateError;
                       }
                       let globalDatabaseToUpdate = databaseToUpdate.db(globalConfig.global_database_name);
                       let dataToQuery = {
@@ -6166,22 +8565,22 @@ async function onMessageHandler(target, tags, message, self) {
                       //console.log(dataToUpdate);
                       // Executed means inputs that were successfully executed by the Arduino and sent back to the PC
                       //console.log(newvalues);
-                      globalDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(err, res) {
-                        if (err) {
-                          throw err;
+                      globalDatabaseToUpdate.collection(globalConfig.run_name).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                        if (resError) {
+                          throw resError;
                         }
                         //console.log(res.result);
                         //console.log("1 document updated");
                         mongoClient.connect(mongoUrl, {
                           useUnifiedTopology: true
-                        }, function(err, databaseToReadFrom) {
-                          if (err) {
-                            throw err;
+                        }, function(databaseToReadFromError, databaseToReadFrom) {
+                          if (databaseToReadFromError) {
+                            throw databaseToReadFromError;
                           }
                           let globalDatabaseToreadFrom = databaseToReadFrom.db(globalConfig.global_database_name);
-                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(err, databaseToReadFromResult) {
-                            if (err) {
-                              throw err;
+                          globalDatabaseToreadFrom.collection(globalConfig.run_name).findOne({}, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                            if (databaseToReadFromResultError) {
+                              throw databaseToReadFromResultError;
                             }
                             databaseToReadFrom.close();
                             //console.log(databaseToReadFromResult);
@@ -6330,45 +8729,55 @@ function checkModeVotes() {
     //console.log(neutralDataToWrite);
 
     // Clear the incoming serial data from arduino before setting an advanced input
-    port.flush(function(err, results) {
-      if (err) {
-        if (client.readyState() === "OPEN") {
-          if (chatConfig.send_debug_channel_messages == true) {
-            let randomColorName = Math.floor(Math.random() * defaultColors.length);
-            client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
-            client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+    if (waitForArduinoToBeReady == false) {
+      console.log(new Date().toISOString() + " [SERIAL PORT] It looks like we're trying to write to the port before it is ready com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+    }
+    if (waitForArduinoToBeReady == false) {
+      port.flush(function(err, results) {
+        console.log(new Date().toISOString() + " L [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+        if (err) {
+          if (client.readyState() === "OPEN") {
+            if (chatConfig.send_debug_channel_messages == true) {
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+              client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+            }
           }
+          console.log(new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+          return console.log(err);
         }
-        return console.log(err);
-      }
-      //console.log(new Date().toISOString() + " flush results " + results);
-    });
-    port.drain(function(err, results) {
-      if (err) {
-        if (client.readyState() === "OPEN") {
-          if (chatConfig.send_debug_channel_messages == true) {
-            let randomColorName = Math.floor(Math.random() * defaultColors.length);
-            client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
-            client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+        //console.log(new Date().toISOString() + " flush results " + results);
+      });
+      port.drain(function(err, results) {
+        console.log(new Date().toISOString() + " M [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+        if (err) {
+          if (client.readyState() === "OPEN") {
+            if (chatConfig.send_debug_channel_messages == true) {
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+              client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+            }
           }
+          console.log(new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+          return console.log(err);
         }
-        return console.log(err);
-      }
-      //console.log(new Date().toISOString() + " drain results " + results);
-    });
-
-    port.write(neutralDataToWrite, function(err) {
-      if (err) {
-        if (client.readyState() === "OPEN") {
-          if (chatConfig.send_debug_channel_messages == true) {
-            let randomColorName = Math.floor(Math.random() * defaultColors.length);
-            client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
-            client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+        //console.log(new Date().toISOString() + " drain results " + results);
+      });
+      port.write(neutralDataToWrite, function(err) {
+        console.log(new Date().toISOString() + " N [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+        if (err) {
+          if (client.readyState() === "OPEN") {
+            if (chatConfig.send_debug_channel_messages == true) {
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+              client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+            }
           }
+          console.log(new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+          return console.log("Error on write: " + err.message);
         }
-        return console.log("Error on write: " + err.message);
-      }
-    });
+      });
+    }
     if ((basicVoteCount + advancedVoteCount) == 0) {
       if (inputMode == 0) {
         //console.log("If this happened, then that means we got kicked out from a mode");
@@ -6472,6 +8881,7 @@ function onConnectedHandler(addr, port) {
     let randomColorName = Math.floor(Math.random() * defaultColors.length);
     client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
     client.action(chatConfig.debug_channel, new Date().toISOString() + " Main bot connected! PogChamp");
+    waitForArduinoToBeReady = false;
   }
 }
 
@@ -6675,7 +9085,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
 
   let precisionInputsUsed = 0;
   //console.log(messageWords);
-  let macroStringArray = macroString.split(/[\+\_\|\#\[\]\,\.\s]+/ig);
+  let macroStringArray = macroString.split(/[\+\_\|\#\,\.\s]+/ig);
   /*
   for (var messageInputIndex = 0; messageInputIndex < macroStringArray.length; messageInputIndex++) {
     for (var controllerObjectIndex = 0; controllerObjectIndex < controllerObject.length; controllerObjectIndex++) {
@@ -6692,7 +9102,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
   if (isTtsBusy == false) {
     for (var messageInputIndex = 0; messageInputIndex < macroStringArray.length; messageInputIndex++) {
       let didMacroInputMatch = false;
-      macroStringArray[messageInputIndex] = macroStringArray[messageInputIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″←↑↓→§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
+      macroStringArray[messageInputIndex] = macroStringArray[messageInputIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
       //console.log("macroStringArray[messageInputIndex] at index " + messageInputIndex + " = " + macroStringArray[messageInputIndex]);
       processedMessage = macroStringArray[messageInputIndex].toLowerCase();
 
@@ -6879,13 +9289,18 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
             dataToWrite[10] = inputDelayLow;
             //console.log(backToHexString);
             //console.log(controllerObject[controllerObjectIndex].is_blacklisted);
-            if (controllerState[controllerObjectIndex] == false) {
-              if (inputsUsed < precisionInputsAllowed) {
-                inputString = inputString.concat(controllerObject[controllerObjectIndex].input_name + "+");
-              }
-            }
             //console.log(inputString);
+            if (controllerObject[controllerObjectIndex].is_blacklisted == true) {
+              console.log(controllerObject[controllerObjectIndex].input_name + " is blacklisted!");
+              hasInvalidMacroInput = true;
+            }
             if (controllerObject[controllerObjectIndex].is_blacklisted == false) {
+              //console.log(controllerObject[controllerObjectIndex].input_name + " is NOT blacklisted!");
+              if (controllerState[controllerObjectIndex] == false) {
+                if (inputsUsed < precisionInputsAllowed) {
+                  inputString = inputString.concat(controllerObject[controllerObjectIndex].input_name + "+");
+                }
+              }
               if (inputsUsed < precisionInputsAllowed) {
                 if (controllerState[controllerObjectIndex] == true) {
                   //console.log("Input used, ignoring");
@@ -6921,7 +9336,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
                         if (adjustableAnalogStickPosition != -1) {
                           // Valid Stick Position
                           //console.log("inputString = " + inputString);
-                          inputString = inputString.replace(/[\+\_\|\#\[\]\,\.\s]+$/ig, "");
+                          inputString = inputString.replace(/[\+\_\|\#\,\.\s]+$/ig, "");
                           //console.log("inputString = " + inputString);
                           inputString = inputString + ":" + adjustableAnalogStickPosition + "+";
                           //console.log("inputString = " + inputString);
@@ -7064,7 +9479,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
       // if (inputsUsed == macroStringArray.length)
       //if (isBlacklistedCombo == false)
       {
-        inputString = inputString.replace(/[\+\_\|\#\[\]\,\.\s]+$/ig, "");
+        inputString = inputString.replace(/[\+\_\|\#\,\.\s]+$/ig, "");
         if (controllerConfig.default_duration_per_precision_input_millis != macroInputDelay) {
           //
         }
@@ -7090,6 +9505,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
 
             // Clear the incoming serial data from arduino before setting any input in the input chain
             port.flush(function(err, results) {
+              console.log(new Date().toISOString() + " O [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
                 if (client.readyState() === "OPEN") {
                   if (chatConfig.send_debug_channel_messages == true) {
@@ -7098,11 +9514,13 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
                     client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                   }
                 }
+                console.log(new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                 return console.log(err);
               }
               //console.log(new Date().toISOString() + " flush results " + results);
             });
             port.drain(function(err, results) {
+              console.log(new Date().toISOString() + " P [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
                 if (client.readyState() === "OPEN") {
                   if (chatConfig.send_debug_channel_messages == true) {
@@ -7111,12 +9529,14 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
                     client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                   }
                 }
+                console.log(new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                 return console.log(err);
               }
               //console.log(new Date().toISOString() + " drain results " + results);
             });
 
             port.write(dataToWrite, function(err) {
+              console.log(new Date().toISOString() + " Q [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
                 if (client.readyState() === "OPEN") {
                   if (chatConfig.send_debug_channel_messages == true) {
@@ -7125,6 +9545,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
                     client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                   }
                 }
+                console.log(new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
                 return console.log("Error on write: " + err.message);
               }
             });
@@ -7176,4 +9597,292 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
     processed_macro_input_delay: processedMacroInputDelay,
     input_data: dataToWrite
   };
+}
+
+function tidyUpAdvancedInputString(inputStringToProcess) {
+  let isValidInput = false;
+  let inputString = "";
+  let precisionInputs = [];
+  let precisionInputsPreProcessed = {
+    input_array: [],
+    input_repeat_count: 0
+  };
+
+  let hasInvalidPrecisionInput = false;
+  let isValidPrecisionInputRepeat = false;
+  //console.log("inputStringToProcess Before " + inputStringToProcess);
+  inputStringToProcess = inputStringToProcess.replace(/\s+/ig, " ")
+  inputStringToProcess = inputStringToProcess.replace(/\s*\++\s*/ig, "+");
+  inputStringToProcess = inputStringToProcess.replace(/\s*\_+\s*/ig, "+");
+  inputStringToProcess = inputStringToProcess.replace(/\s*\|+\s*/ig, "+");
+  inputStringToProcess = inputStringToProcess.replace(/\s*\#+\s*/ig, "+");
+  //inputStringToProcess = inputStringToProcess.replace(/\s*\[+\s*/ig, "+");
+  //inputStringToProcess = inputStringToProcess.replace(/\s*\]+\s*/ig, "+");
+  inputStringToProcess = inputStringToProcess.replace(/\s*(and)+\s*/ig, "+");
+  inputStringToProcess = inputStringToProcess.replace(/\s*(adn)+\s*/ig, "+");
+  inputStringToProcess = inputStringToProcess.replace(/\s*(then)+\s*/ig, ",");
+  inputStringToProcess = inputStringToProcess.replace(/\s*[\.\,]+\s*/ig, ",");
+  //inputStringToProcess = inputStringToProcess.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "");
+  inputStringToProcess = inputStringToProcess.normalize("NFD");
+  //console.log("NORMALIZED " + inputStringToProcess);
+  //console.log("inputStringToProcess now " + inputStringToProcess);
+  let messageWords = inputStringToProcess.split(/\s+/ig);
+  //var usernameToPing = (username.toLowerCase() == displayName.toLowerCase()) ? displayName : username;
+  let precisionInputsLoop = false;
+
+  let precisionInputString = "";
+  let precisionInputHold = 133;
+  let precisionInputRepeat = 0;
+
+  let precisionInputsMacroCount = 0;
+
+  let precisionInputStringToDisplay = {
+    macro_array: [],
+    repeat_count: 0
+  };
+  let precisionInputStringToDisplay2 = "";;
+
+  let macroDelayUsed = 0; // This variable keeps track of how many inputs have custom delay in the macro chain, if it's 0, set the first param in the last input of the macro chain to be repeat, if it's not 0, set the first param in the last input of the macro chain to be delay (only really used on a macro chain that has more than one input)
+  precisionInputs = inputStringToProcess.replace(/[\s\.\,]+/ig, " ");
+  precisionInputs = precisionInputs.trim();
+
+  precisionInputs = precisionInputs.split(/\s+/ig);
+  for (var precisionInputsIndex = 0; precisionInputsIndex < precisionInputs.length; precisionInputsIndex++) {
+    let didPrecisionInputMatch = false;
+    precisionInputs[precisionInputsIndex] = precisionInputs[precisionInputsIndex].replace(/^[!\"#$%&'()*+,-./:;%=%?@\[\\\]_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+/ig, ""); // Remove all unecessary prefix
+    if (precisionInputs[precisionInputsIndex] != "") {
+      let tempInputArray = precisionInputs[precisionInputsIndex].replace(/[\/\\\;\*\']+/ig, " ");
+      tempInputArray = tempInputArray.trim();
+
+      tempInputArray = tempInputArray.split(/\s+/ig);
+
+      precisionInputString = "";
+      precisionInputHold = controllerConfig.default_duration_per_precision_input_millis;
+      for (let tempInputArrayIndex = 0; tempInputArrayIndex < tempInputArray.length; tempInputArrayIndex++) {
+        if (tempInputArrayIndex == 0) {
+          precisionInputString = tempInputArray[tempInputArrayIndex];
+        }
+        if (tempInputArrayIndex == 1) {
+          if (precisionInputs.length == 1) {
+            {
+              if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
+                if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
+                  if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
+                    precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
+                    if (precisionInputHold <= 10) {
+                      precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
+                    }
+                  }
+                  if (parseInt(tempInputArray[tempInputArrayIndex], 10) > controllerConfig.max_duration_per_precision_input_millis) {
+                    precisionInputHold = controllerConfig.max_duration_per_precision_input_millis;
+                  }
+                }
+                if (parseInt(tempInputArray[tempInputArrayIndex], 10) < 1) {
+                  precisionInputHold = controllerConfig.default_duration_per_precision_input_millis;
+                }
+              }
+              if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == true) {
+                precisionInputHold = controllerConfig.default_duration_per_precision_input_millis;
+              }
+            }
+          }
+          if (precisionInputs.length != 1) {
+            if (precisionInputsIndex != precisionInputs.length - 1) {
+              {
+                if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
+                  macroDelayUsed++;
+                  if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
+                    if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
+                      precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
+                      if (precisionInputHold <= 10) {
+                        precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
+                      }
+                    }
+                    if (parseInt(tempInputArray[tempInputArrayIndex], 10) > controllerConfig.max_duration_per_precision_input_millis) {
+                      precisionInputHold = controllerConfig.max_duration_per_precision_input_millis;
+                    }
+                  }
+                  if (parseInt(tempInputArray[tempInputArrayIndex], 10) < 1) {
+                    precisionInputHold = controllerConfig.default_duration_per_precision_input_millis;
+                  }
+                }
+                if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == true) {
+                  precisionInputHold = controllerConfig.default_duration_per_precision_input_millis;
+                }
+              }
+            }
+            if (precisionInputsIndex == precisionInputs.length - 1) {
+              if (macroDelayUsed != 0) {
+                if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
+                  if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
+                    if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
+                      precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
+                      if (precisionInputHold <= 10) {
+                        precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
+                      }
+                    }
+                    if (parseInt(tempInputArray[tempInputArrayIndex], 10) > controllerConfig.max_duration_per_precision_input_millis) {
+                      precisionInputHold = controllerConfig.max_duration_per_precision_input_millis;
+                    }
+                  }
+                  if (parseInt(tempInputArray[tempInputArrayIndex], 10) < 1) {
+                    precisionInputHold = controllerConfig.default_duration_per_precision_input_millis;
+                  }
+                }
+                if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == true) {
+                  precisionInputHold = controllerConfig.default_duration_per_precision_input_millis;
+                }
+              }
+              if (macroDelayUsed == 0) {
+                if (tempInputArray.length == 2) {
+                  if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
+                    if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
+                      if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_times_to_repeat_macro) {
+                        precisionInputRepeat = parseInt(tempInputArray[tempInputArrayIndex], 10);
+                        isValidPrecisionInputRepeat = true;
+                      }
+                      if (parseInt(tempInputArray[tempInputArrayIndex], 10) > controllerConfig.max_times_to_repeat_macro) {
+                        precisionInputRepeat = controllerConfig.max_times_to_repeat_macro;
+                        isValidPrecisionInputRepeat = true;
+                      }
+                    }
+                    if (parseInt(tempInputArray[tempInputArrayIndex], 10) < 0) {
+                      precisionInputRepeat = 0;
+                    }
+                  }
+                  if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == true) {
+                    precisionInputRepeat = 0;
+                  }
+                }
+              }
+              if (tempInputArray.length != 2) {
+                if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
+                  if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
+                    if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
+                      precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
+                      if (precisionInputHold <= 10) {
+                        precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
+                      }
+                    }
+                    if (parseInt(tempInputArray[tempInputArrayIndex], 10) > controllerConfig.max_duration_per_precision_input_millis) {
+                      precisionInputHold = controllerConfig.max_duration_per_precision_input_millis;
+                    }
+                  }
+                  if (parseInt(tempInputArray[tempInputArrayIndex], 10) < 1) {
+                    precisionInputHold = controllerConfig.default_duration_per_precision_input_millis;
+                  }
+                }
+                if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == true) {
+                  precisionInputHold = controllerConfig.default_duration_per_precision_input_millis;
+                }
+              }
+            }
+          }
+        }
+        if (tempInputArrayIndex == 2) {
+          if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == false) {
+            //console.log(new Date().toISOString() + " B POGGERS WE GOT A NUMBER");
+            if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
+              if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_times_to_repeat_macro) {
+                precisionInputRepeat = parseInt(tempInputArray[tempInputArrayIndex], 10);
+                isValidPrecisionInputRepeat = true;
+              }
+              if (parseInt(tempInputArray[tempInputArrayIndex], 10) > controllerConfig.max_times_to_repeat_macro) {
+                precisionInputRepeat = controllerConfig.max_times_to_repeat_macro;
+                isValidPrecisionInputRepeat = true;
+              }
+            }
+            if (parseInt(tempInputArray[tempInputArrayIndex], 10) < 0) {
+              precisionInputRepeat = 0;
+            }
+          }
+          if (isNaN(parseInt(tempInputArray[tempInputArrayIndex], 10)) == true) {
+            precisionInputRepeat = 0;
+          }
+        }
+      }
+      if (precisionInputString == "") {}
+      if (precisionInputString != "") {
+        precisionInputString = precisionInputString.replace(/[\+\_\|\#]+/ig, " ");
+        precisionInputString = precisionInputString.trim();
+        precisionInputString = precisionInputString.split(/\s+/ig);
+        if (precisionInputString[0] == "") {}
+        if (precisionInputString[0] != "") {
+          precisionInputsPreProcessed.input_array.push({
+            input_string_array: precisionInputString,
+            input_hold_delay: precisionInputHold
+          });
+        }
+      }
+    }
+  }
+  //console.log(new Date().toISOString() + " [PRECISIONINPUTREPEAT] precisionInputRepeat = " + precisionInputRepeat);
+  if (precisionInputsPreProcessed.input_array.length > 0) {
+    precisionInputsPreProcessed.input_repeat_count = precisionInputRepeat;
+    //console.log(precisionInputsPreProcessed);
+    let currentMacroChainIndex = 0;
+    for (let preprocessedArrayIndex = 0; preprocessedArrayIndex < precisionInputsPreProcessed.input_array.length; preprocessedArrayIndex++) {
+      if (hasInvalidPrecisionInput == true) {
+        //console.log(new Date().toISOString() + " [HASINVALIDPRECISIONINPUT] hasInvalidPrecisionInput = " + hasInvalidPrecisionInput);
+      }
+      if (hasInvalidPrecisionInput == false) {
+        if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
+          let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, false);
+          if (macroChainInputObject.is_valid_input == false) {
+            // idk do the thing to do the replacmenet thing
+            //console.log(new Date().toISOString() + " [ISVALIDPRECISIONINPUTREPEAT] isValidPrecisionInputRepeat = " + isValidPrecisionInputRepeat);
+            hasInvalidPrecisionInput = true;
+
+            if (isValidPrecisionInputRepeat == false) {
+              //
+              //console.log(isNaN(parseInt(testVar[testVarIndex], 10)));
+              if (isNaN(parseInt(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), 10)) == false) {
+                //console.log("POGGERS WE GOT A NUMBER");
+                if (parseInt(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), 10) >= 0) {
+                  if (parseInt(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), 10) <= controllerConfig.max_times_to_repeat_macro) {
+                    precisionInputRepeat = parseInt(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), 10);
+                  }
+                  if (parseInt(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), 10) > controllerConfig.max_times_to_repeat_macro) {
+                    precisionInputRepeat = controllerConfig.max_times_to_repeat_macro;
+                  }
+                }
+                if (parseInt(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), 10) < 0) {
+                  precisionInputRepeat = 0;
+                }
+              }
+              if (isNaN(parseInt(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), 10)) == true) {
+                precisionInputRepeat = 0;
+              }
+              precisionInputsPreProcessed.input_repeat_count = precisionInputRepeat;
+            }
+
+          }
+          //console.log(macroChainInputObject);
+          if (macroChainInputObject.is_valid_input == true) {
+            precisionInputStringToDisplay.macro_array.push(macroChainInputObject);
+            //precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_string + ";";
+            precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_string + ";" + macroChainInputObject.processed_macro_input_delay + "ms";
+            if (preprocessedArrayIndex < precisionInputsPreProcessed.input_array.length - 1) {
+              precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + " ";
+              //precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_delay + "\n";
+            }
+            if (preprocessedArrayIndex >= precisionInputsPreProcessed.input_array.length - 1) {}
+            currentMacroChainIndex++;
+          }
+        }
+      }
+    }
+    let macroParametersToWrite = [controllerConfig.final_macro_preamble, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
+    //console.log(macroParametersToWrite);
+    //console.log("precisionInputsPreProcessed.input_repeat_count: " + precisionInputsPreProcessed.input_repeat_count);
+    if (currentMacroChainIndex > 0) {
+      //console.log("IS THIS VALID INPUT?");
+      precisionInputStringToDisplay.repeat_count = precisionInputsPreProcessed.input_repeat_count;
+      precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/[\.\,]+$/ig, "");
+      precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + "*" + precisionInputsPreProcessed.input_repeat_count;
+    }
+  }
+  //console.log("precisionInputStringToDisplay2 = ");
+  //console.log(precisionInputStringToDisplay2);
+  return precisionInputStringToDisplay2;
 }

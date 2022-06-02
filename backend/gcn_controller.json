@@ -17,6 +17,11 @@
     "input_value": "0x01017F7F7F7F0000L",
     "input_name": "L",
     "input_alias": [
+      "BumperLeft",
+      "TriggerLeft",
+      "TLeft",
+      "BLeft",
+      "ButtonLeft",
       "LwfttB",
       "LwfttBumper",
       "LwfttButton",
@@ -239,6 +244,11 @@
     "input_value": "0x02027F7F7F7F0000L",
     "input_name": "R",
     "input_alias": [
+      "BumperRight",
+      "TriggerRight",
+      "TRight",
+      "BRight",
+      "ButtonRight",
       "Rughtrigger",
       "RughtyTrigger",
       "RughtyT",
@@ -2989,6 +2999,8 @@
     "input_value": "0x00107F7F7F7F0000L",
     "input_name": "D^",
     "input_alias": [
+      "UpD",
+      "UpDpad",
       "Gear",
       "DForwrddJp",
       "DpadForwrddJp",
@@ -3545,6 +3557,8 @@
     "input_value": "0x00207F7F7F7F0000L",
     "input_name": "Dv",
     "input_alias": [
+      "DownD",
+      "DownDpad",
       "Journal",
       "DAckwrd",
       "DAckwrds",
@@ -7071,6 +7085,8 @@
     "input_value": "0x00407F7F7F7F0000L",
     "input_name": "D>",
     "input_alias": [
+      "RightD",
+      "RightDpad",
       "DRught",
       "DpadRught",
       "DRughty",
@@ -7210,6 +7226,8 @@
     "input_value": "0x00807F7F7F7F0000L",
     "input_name": "D<",
     "input_alias": [
+      "LeftD",
+      "LeftDpad",
       "Party",
       "DLwftt",
       "DpadLwftt",
@@ -7488,6 +7506,8 @@
     "input_value": "0x0000007F7F7F0000L",
     "input_name": "<",
     "input_alias": [
+      "LeftA",
+      "LeftAnalog",
       "AnalogLwftt",
       "ALwftt",
       "Lwftt",
@@ -7685,6 +7705,7 @@
       "A<-",
       "A←",
       "A◄",
+      "◄",
       "AWest",
       "West",
       "AW",
@@ -7763,6 +7784,8 @@
     "input_value": "0x0000FF7F7F7F0000L",
     "input_name": ">",
     "input_alias": [
+      "RightA",
+      "RightAnalog",
       "AnalogRught",
       "ARught",
       "Rught",
@@ -8010,6 +8033,7 @@
       "East",
       "E",
       "AE",
+      "►",
       "A►",
       "Walkright",
       "Moveright",
@@ -8072,6 +8096,8 @@
     "input_value": "0x00007F007F7F0000L",
     "input_name": "^",
     "input_alias": [
+      "UpA",
+      "UpAnalog",
       "ForwrddJp",
       "AForwrddJp",
       "WalkForwrddJp",
@@ -9122,6 +9148,7 @@
       "A^",
       "A↑",
       "A▲",
+      "▲",
       "ANorth",
       "North",
       "N",
@@ -9303,6 +9330,8 @@
     "input_value": "0x00007FFF7F7F0000L",
     "input_name": "v",
     "input_alias": [
+      "DownA",
+      "DownAnalog",
       "Ackwrd",
       "Ackwrds",
       "AAckwrd",
@@ -10071,6 +10100,7 @@
       "S",
       "AS",
       "A▼",
+      "▼",
       "Adiwn",
       "Adwin",
       "Adinw",
@@ -13237,6 +13267,8 @@
     "input_value": "0x00007F7F007F0000L",
     "input_name": "C<",
     "input_alias": [
+      "LeftC",
+      "LeftCamera",
       "C-Lwftt",
       "Camera-Lwftt",
       "CLwftt",
@@ -13554,6 +13586,8 @@
     "input_value": "0x00007F7FFF7F0000L",
     "input_name": "C>",
     "input_alias": [
+      "RightC",
+      "RightCamera",
       "C-Rught",
       "Camera-Rught",
       "CRught",
@@ -13731,6 +13765,8 @@
     "input_value": "0x00007F7F7F000000L",
     "input_name": "C^",
     "input_alias": [
+      "UpC",
+      "UpCamera",
       "CForwrddJp",
       "CameraForwrddJp",
       "CForwrdfJp",
@@ -14294,6 +14330,8 @@
     "input_value": "0x00007F7F7FFF0000L",
     "input_name": "Cv",
     "input_alias": [
+      "DownC",
+      "DownCamera",
       "CAckwrd",
       "CAckwrds",
       "CameraAckwrd",

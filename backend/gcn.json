@@ -1,8 +1,8 @@
 {
-  "com_port": "COM4",
+  "com_port": "COM3",
   "com_port_parameters": {
     "autoOpen": false,
-    "baudRate": 1000000
+    "baudRate": 500000
   },
   "normal_delay": 266,
   "max_delay": 65535,
@@ -11,9 +11,12 @@
   "stick_maximum": 255,
   "stick_center": 127,
   "stick_limit": 0,
-  "initial_macro_preamble": 64,
-  "final_macro_preamble": 128,
-  "advanced_input_macros_allowed": 64,
+  "initial_macro_preamble": 4,
+  "final_macro_preamble": 100,
+  "initial_macro_inner_loop": 101,
+  "final_macro_inner_loop": 197,
+  "advanced_input_macros_allowed": 96,
+  "advanced_input_macro_inner_loops_allowed": 96,
   "max_duration_per_precision_input_millis": 65535,
   "default_duration_per_precision_input_millis": 266,
   "held_duration_per_precision_input_millis": 533,
@@ -24,7 +27,7 @@
   "help_message_basic": [
     "Valid inputs are A, B, X, Y, L, R, Z, Start (Buttons and triggers), Up, Down, Left, Right (Analog Stick), Cup, Cdown, Cleft, Cright (C Stick), and Dup, Ddown, Dleft, Dright, (D Pad). Typos work too!",
     "Up to 4 different inputs can be executed at the same time by using + to combine inputs. Example: B+Up+Cright will press the B Button, pull Up on the Analog Stick and pull Right on the C Stick. It is not needed to start your message with ! mark.",
-    "Normal duration of inputs is 266 milliseconds, but you can end your input with - to execute the inputs indefinitely until the next input comes. Alternatively, you can type Wait or Stop to stop the execution of a held input.",
+    "Normal duration of inputs is 266 milliseconds, but you can end your input with - to execute the inputs indefinitely until the next input comes. Alternatively, you can type Wait or Stop to stop the execution of a held input. Maximum duration for an input is 65535 milliseconds. ",
     "Example: A+Z+Right- will hold the Buttons A and Z and will pull Right on the Analog Stick. Commands are NOT case sensitive: left and lEft will both pull Left on the Analog Stick.",
     "You can type Basic or Advanced to vote to change input modes. The majority of votes needs at least 75% of votes to have the input mode changed to their side, votes are removed from the pool after 5 minutes. After that, you'll have to vote again to have your vote readded to the pool.",
     "Alternatively, you can spam votes to make sure your vote always stays in the pool. You can switch sides whenever you want. Basic mode executes inputs are they are received from chat, it is limited for some tasks, while advanced can be used to do a sequence of very precise inputs. Current mode is Basic mode."
@@ -33,11 +36,23 @@
   "help_message_advanced": [
     "Valid inputs are A, B, X, Y, L, R, Z, Start (Buttons and triggers), Up, Down, Left, Right (Analog Stick), Cup, Cdown, Cleft, Cright (C Stick), and Dup, Ddown, Dleft, Dright, (D Pad). Typos work too!",
     "Up to 4 different inputs can be executed at the same time by using + to combine inputs. Example: B+Up+Cright will press the B Button, pull Up on the Analog Stick and pull Right on the C Stick. It is not needed to start your message with ! mark. Commands are NOT case sensitive: left and lEft will both pull Left on the Analog Stick.",
-    "Normal duration of inputs is 266 milliseconds. You can separate multiple inputs by spaces or commas to execute multiple inputs in rapid succession.",
+    "Normal duration of inputs is 266 milliseconds. You can separate multiple inputs by using spaces or commas to execute multiple inputs in rapid succession.",
     "Example: Up+Right+B;2000 A+Z+Down;1000 *5 Will pull Up and Right on the Analog Stick and press the B Button for 2000 milliseconds (2 seconds), then press the A and Z Buttons and pull Down on the Analog Stick for 1000 milliseconds (1 second), and *5 means the input will be executed once, then it will be repeated 5 times. There is no delay between inputs.",
-    "There is no delay between inputs, but sometimes you'll need a delay between inputs, you can use Wait or Stop to add a delay between inputs. Example: A Wait *255 will press the A Button for 266 milliseconds then wait for another 266 milliseconds, and will repeat that macro 255 times, basically mashing the A Button 256 times.",
-    "You can type Basic or Advanced to vote to change input modes. The majority of votes needs at least 75% of votes to have the input mode changed to their side, votes are removed from the pool after 5 minutes. After that, you'll have to vote again to have your vote readded to the pool.",
-    "Alternatively, you can spam votes to make sure your vote always stays in the pool. You can switch sides whenever you want. Basic mode executes inputs are they are received from chat, it is limited for some tasks, while advanced can be used to do a sequence of very precise inputs. Current mode is Advanced mode."
+    "There is no delay between inputs, but sometimes you'll need a delay between inputs, you can use Wait or Stop to add a delay between inputs. Example: A Wait *255 will press the A Button for 266 milliseconds then wait for another 266 milliseconds, and will repeat that macro 255 times, basically mashing the A Button 256 times. Macros can be repeated up to 255 times. Up to 95 inputs can be chained in a macro.",
+    "Maximum duration for an input is 65535 milliseconds. You can type Basic or Advanced to vote to change input modes. The majority of votes needs at least 75% of votes to have the input mode changed to their side, votes are removed from the pool after 5 minutes. After that, you'll have to vote again to have your vote readded to the pool.",
+    "Alternatively, you can spam votes to make sure your vote always stays in the pool. You can switch sides whenever you want. Basic mode executes inputs are they are received from chat, it is limited for some tasks, while advanced can be used to do a sequence of very precise inputs. Current mode is Advanced mode.",
+    "You can learn how to save and execute saved macros (and more!) by using the command !savingmacroshelp."
+  ],
+  "help_message_saving_macros": [
+    "You can save or edit a macro by using the command !savemacro <macro name> <macro inputs>. Example: !savemacro WalkInCircles Up Right Down Left will save or edit the macro WalkInCircles with the inputs Up Right Down Left, which can then be used later.",
+    "You can rename a macro by using the command !renamemacro <old macro name> <new macro name>. Example: !renamemacro WalkInCircles WalkingCircles will rename the macro WalkInCircles to WalkingCircles.",
+    "You can execute a saved macro by using the command !execmacro <macro name> <times to repeat(optional)>. Example: !execmacro WalkingCircles 2 will execute the macro WalkingCircles 1 time then repeat it 2 times. If there's no number provided, the macro will be executed only 1 time.",
+    "You can see the list of inputs of a macro by using the command !listmacro <macro name>. Example: !listmacro WalkingCircles will list the inputs of the macro WalkingCircles, which is Up Right Down Left. You can see the list of all macros saved by using the command !listallmacros.",
+    "You can change if a macro can be edited only by the owner of the macro or by anyone by using the command !togglemacroeditability <macro name>. Example: !togglemacroeditability WalkingCircles will make it so the macro WalkingCircles can be edited by anyone, and sending !togglemacroeditability WalkingCircles again will make it so the macro WalkingCircles can be edited only by the owner of the macro.",
+    "!togglemacroeditability <macro name> can be executed only by the owner of the macro. By default, when a new macro is created, it can only be edited by the owner of the macro.",
+    "You can set a single input per message by using the command !setsettablemacro <input> <position to edit>. Example: a+b;300 0 will set A+B for 300 milliseconds at position 0. Starting position is 0, final position is 95.",
+    "You can list all inputs currently set by using the command !listsettablemacro <up to which position to list(optional)>. Example: !listsettablemacro 5 will list the first 5 inputs currently set. Starting position is 0, final position is 95. If there's no number provided, all of the inputs currently set will be listed.",
+    "You can execute all inputs currently set by using the command !execsettablemacro <up to which position to execute> <times to repeat(optional)>. Example: !execsettablemacro 5 2 will execute the first 5 inputs currently set 1 time then repeat 2 more times. Starting position is 0, final position is 95. If there's no second number provided, the macro will be executed only 1 time. Currently, you can't save macros that were set using the !setsettablemacro command."
   ],
   "blacklisted_combos": [
     {

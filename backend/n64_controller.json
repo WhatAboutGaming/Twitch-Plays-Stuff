@@ -754,6 +754,11 @@
     "input_value": "0x00017F7F00000000L",
     "input_name": "L",
     "input_alias": [
+      "BumperLeft",
+      "TriggerLeft",
+      "TLeft",
+      "BLeft",
+      "ButtonLeft",
       "LwfttB",
       "LwfttBumper",
       "LwfttButton",
@@ -976,6 +981,11 @@
     "input_value": "0x00027F7F00000000L",
     "input_name": "R",
     "input_alias": [
+      "BumperRight",
+      "TriggerRight",
+      "TRight",
+      "BRight",
+      "ButtonRight",
       "Rughtrigger",
       "RughtyTrigger",
       "RughtyT",
@@ -2932,8 +2942,10 @@
   },
   {
     "input_value": "0x10007F7F00000000L",
-    "input_name": "D↑",
+    "input_name": "D^",
     "input_alias": [
+      "UpD",
+      "UpDpad",
       "DForwrddJp",
       "DpadForwrddJp",
       "DForwrdfJp",
@@ -3487,8 +3499,10 @@
   },
   {
     "input_value": "0x20007F7F00000000L",
-    "input_name": "D↓",
+    "input_name": "Dv",
     "input_alias": [
+      "DownD",
+      "DownDpad",
       "DAckwrd",
       "DAckwrds",
       "DpadAckwrd",
@@ -7153,8 +7167,10 @@
   },
   {
     "input_value": "0x80007F7F00000000L",
-    "input_name": "D→",
+    "input_name": "D>",
     "input_alias": [
+      "RightD",
+      "RightDpad",
       "DRught",
       "DpadRught",
       "DRughty",
@@ -7291,8 +7307,10 @@
   },
   {
     "input_value": "0x40007F7F00000000L",
-    "input_name": "D←",
+    "input_name": "D<",
     "input_alias": [
+      "LeftD",
+      "LeftDpad",
       "DLwftt",
       "DpadLwftt",
       "DLwft",
@@ -7590,8 +7608,11 @@
   },
   {
     "input_value": "0x0000007F00000000L",
-    "input_name": "←",
+    "input_name": "<",
     "input_alias": [
+      "◄",
+      "LeftA",
+      "LeftAnalog",
       "AnalogLwftt",
       "ALwftt",
       "Lwftt",
@@ -7981,8 +8002,11 @@
   },
   {
     "input_value": "0x0000FF7F00000000L",
-    "input_name": "→",
+    "input_name": ">",
     "input_alias": [
+      "►",
+      "RightA",
+      "RightAnalog",
       "AnalogRught",
       "ARught",
       "Rught",
@@ -8290,8 +8314,10 @@
   },
   {
     "input_value": "0x00007F0000000000L",
-    "input_name": "↑",
+    "input_name": "^",
     "input_alias": [
+      "UpA",
+      "UpAnalog",
       "ForwrddJp",
       "AForwrddJp",
       "WalkForwrddJp",
@@ -9342,6 +9368,7 @@
       "A^",
       "A↑",
       "A▲",
+      "▲",
       "ANorth",
       "North",
       "N",
@@ -9521,8 +9548,10 @@
   },
   {
     "input_value": "0x00007FFF00000000L",
-    "input_name": "↓",
+    "input_name": "v",
     "input_alias": [
+      "DownA",
+      "DownAnalog",
       "Ackwrd",
       "Ackwrds",
       "AAckwrd",
@@ -10291,6 +10320,7 @@
       "S",
       "AS",
       "A▼",
+      "▼",
       "Adiwn",
       "Adwin",
       "Adinw",
@@ -13453,8 +13483,10 @@
   },
   {
     "input_value": "0x00107F7F00000000L",
-    "input_name": "C←",
+    "input_name": "C<",
     "input_alias": [
+      "LeftC",
+      "LeftCamera",
       "C-Lwftt",
       "Camera-Lwftt",
       "CLwftt",
@@ -13800,8 +13832,10 @@
   },
   {
     "input_value": "0x00207F7F00000000L",
-    "input_name": "C→",
+    "input_name": "C>",
     "input_alias": [
+      "RightC",
+      "RightCamera",
       "C-Rught",
       "Camera-Rught",
       "CRught",
@@ -13977,8 +14011,10 @@
   },
   {
     "input_value": "0x00047F7F00000000L",
-    "input_name": "C↑",
+    "input_name": "C^",
     "input_alias": [
+      "UpC",
+      "UpCamera",
       "CForwrddJp",
       "CameraForwrddJp",
       "CForwrdfJp",
@@ -14540,8 +14576,10 @@
   },
   {
     "input_value": "0x00087F7F00000000L",
-    "input_name": "C↓",
+    "input_name": "Cv",
     "input_alias": [
+      "DownC",
+      "DownCamera",
       "CAckwrd",
       "CAckwrds",
       "CameraAckwrd",
