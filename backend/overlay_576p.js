@@ -124,6 +124,7 @@ var acceptInputs = false;
 //var helpMessages = ["Type “!help” or “!commands” to learn how to play!", "Please, don’t delete any files, and please save regularly!", "Deliberately deleting any file will result in a ban", "If anything breaks, please ping @WhatAboutGamingLive", "The Twitch Plays file is File 4 named “Ponjos”", "Main quest took 8d10h01m47s! Ended at 2021-01-29T16:48:35Z!", "Congrats to everyone who participated!", "Current goal: Do sidequests until I decide what the next game is!"];
 var helpMessages = ["Hi Chat :)"];
 var headerText = "Restarting overlay";
+var advancedModeHelpMessageToDisplay = "\n\n\n\n\n!help to learn how to play";
 
 var secondCurrent = 0;
 var secondOld = 0;
@@ -154,6 +155,7 @@ var viewerCount = -1;
 var gameTitle = "Game Title";
 var gameTitleShort = "Game Title Short"
 var nextGameTitle = "Next Game Title";
+var nextGameTitleShort = "Next Game Title Short";
 
 var votingBarSize = 200;
 var votingBarCenterPosition = 896;
@@ -331,8 +333,14 @@ function setup() {
   socket.on("next_game_title", function(data) {
     nextGameTitle = data;
   });
+  socket.on("next_game_title_short", function(data) {
+    nextGameTitleShort = data;
+  });
   socket.on("header_text", function(data) {
     headerText = data;
+  });
+  socket.on("advanced_mode_help_message_to_display", function(data) {
+    advancedModeHelpMessageToDisplay = data;
   });
   socket.on("accept_inputs", function(data) {
     acceptInputs = data;
@@ -643,8 +651,9 @@ function draw() {
   //if (isTtsBusy == false) {
     //inputQueue[currentInputInQueue].tts_message;
     if (helpMessages.length > 0) {
-      var helpMessageToDisplay = helpMessages[currentValueToDisplay];
+      let helpMessageToDisplay = helpMessages[currentValueToDisplay];
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title}})+/ig, nextGameTitle);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title_short}})+/ig, nextGameTitleShort);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + " (" + nextStartTimeISOString + ")");
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + "\n(" + streamEndTimeISOString + ")");
       /*
@@ -851,7 +860,14 @@ function draw() {
         scale(0.5, 1);
         textLeading(textDefaultLeadingToUse);
         //text("Stream goes offline in\n" + streamEndTimeRemainingString + "\n(" + streamEndTimeISOString  + ")\n(The 31 day mark)\n\n Super Mario RPG:\nLegend of the Seven Stars\nStarts in\n" + nextStartTimeRemainingString + "\n(" + nextStartTimeISOString + ")", 896 * 2, 60);
-        text("\n\n\n\n\n!help to learn how to play", 896 * 2, 60);
+        let advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay;
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title}})+/ig, nextGameTitle);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title_short}})+/ig, nextGameTitleShort);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + "\n(" + nextStartTimeISOString + ")");
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + "\n(" + streamEndTimeISOString + ")");
+        //console.log(advancedModeHelpMessageToDisplay);
+        //console.log(advancedModeHelpMessageToDisplay2);
+        text(advancedModeHelpMessageToDisplay2, 896 * 2, 60);
         scale(2, 1);
       }
     }

@@ -72,8 +72,9 @@ var usersWhoDontHaveColor = [];
 //var helpMessage = "Valid inputs are a, b, z, l, r, start, cup, cdown, cleft, cright, dup, ddown, dleft, dright, up, down, left and right. Typos work too! Directions can be replaced with cardinal directions (n, s, w, e, north, south, west, east). Up to 3 buttons can be pressed simultaneously: \"b+up+right\". End your input with \"-\" to hold the buttons down for a longer (hold indefinitely until the next input comes) period than normal (266 milliseconds): \"a+z+right-\". Commands are not case sensitive: Typing \"left\" and \"lEft\" have the same effect."
 var helpMessageBasic = controllerConfig.help_message_basic;
 var helpMessageAdvanced = controllerConfig.help_message_advanced;
-var helpMessageSavingMacros = controllerConfig.help_message_saving_macros; // This help message can only be used in advanced mode
+var helpMessageSavingMacros = globalConfig.help_message_saving_macros; // This help message can only be used in advanced mode
 var currentRunEndgameGoals = globalConfig.current_run_endgame_goals;
+var periodicalNewsMessages = globalConfig.periodical_news_messages;
 
 var acceptInputs = globalConfig.initial_accept_inputs;
 var acceptTts = globalConfig.initial_accept_tts;
@@ -201,6 +202,13 @@ io.sockets.on("connection",
     runStartTime = globalConfig.run_start_time;
     nextRunStartTime = globalConfig.next_run_start_time;
     streamEndTime = globalConfig.stream_end_time;
+
+    helpMessageBasic = controllerConfig.help_message_basic;
+    helpMessageAdvanced = controllerConfig.help_message_advanced;
+    helpMessageSavingMacros = globalConfig.help_message_saving_macros; // This help message can only be used in advanced mode
+    currentRunEndgameGoals = globalConfig.current_run_endgame_goals;
+    periodicalNewsMessages = globalConfig.periodical_news_messages;
+    
     //acceptInputs = globalConfig.initial_accept_inputs;
     //acceptTts = globalConfig.initial_accept_tts;
     //inputMode = globalConfig.initial_input_mode;
@@ -241,6 +249,7 @@ io.sockets.on("connection",
     io.to(socket.id).emit("game_title", globalConfig.game_title);
     io.to(socket.id).emit("game_title_short", globalConfig.game_title_short);
     io.to(socket.id).emit("next_game_title", globalConfig.next_game_title);
+    io.to(socket.id).emit("next_game_title_short", globalConfig.next_game_title_short);
     io.to(socket.id).emit("vote_data", voteDataObject);
     io.to(socket.id).emit("viewer_count", currentViewerCount);
     io.to(socket.id).emit("run_start_time", runStartTime);
@@ -248,6 +257,7 @@ io.sockets.on("connection",
     io.to(socket.id).emit("stream_end_time", streamEndTime);
     io.to(socket.id).emit("help_messages", globalConfig.overlay_text_rotation);
     io.to(socket.id).emit("header_text", globalConfig.overlay_header_text);
+    io.to(socket.id).emit("advanced_mode_help_message_to_display", globalConfig.overlay_advanced_mode_help_message_to_display);
     io.to(socket.id).emit("accept_inputs", acceptInputs);
 
     socket.on("disconnect", function() {
@@ -452,7 +462,7 @@ function writeToPort(inputArray, inputIndex, inputDelay) {
 
   // Clear the incoming serial data from arduino before sending a basic input
   port.flush(function(err, results) {
-    console.log(new Date().toISOString() + " 1 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+    //console.log(new Date().toISOString() + " 1 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     if (err) {
       if (client.readyState() === "OPEN") {
         if (chatConfig.send_debug_channel_messages == true) {
@@ -467,7 +477,7 @@ function writeToPort(inputArray, inputIndex, inputDelay) {
     //console.log(new Date().toISOString() + " flush results " + results);
   });
   port.drain(function(err, results) {
-    console.log(new Date().toISOString() + " 2 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+    //console.log(new Date().toISOString() + " 2 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     if (err) {
       if (client.readyState() === "OPEN") {
         if (chatConfig.send_debug_channel_messages == true) {
@@ -483,7 +493,7 @@ function writeToPort(inputArray, inputIndex, inputDelay) {
   });
 
   port.write(inputArray, function(err) {
-    console.log(new Date().toISOString() + " 3 [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+    //console.log(new Date().toISOString() + " 3 [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     if (err) {
       if (client.readyState() === "OPEN") {
         if (chatConfig.send_debug_channel_messages == true) {
@@ -580,7 +590,7 @@ parser.on("data", async function(data) {
     if (data.length != incomingSerialDataSize) {
       //console.log(new Date().toISOString() + " Invalid data size");
       port.flush(function(err, results) {
-        console.log(new Date().toISOString() + " 4 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+        //console.log(new Date().toISOString() + " 4 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
           if (client.readyState() === "OPEN") {
             if (chatConfig.send_debug_channel_messages == true) {
@@ -595,7 +605,7 @@ parser.on("data", async function(data) {
         //console.log(new Date().toISOString() + " flush results " + results);
       });
       port.drain(function(err, results) {
-        console.log(new Date().toISOString() + " 5 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+        //console.log(new Date().toISOString() + " 5 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
           if (client.readyState() === "OPEN") {
             if (chatConfig.send_debug_channel_messages == true) {
@@ -781,11 +791,12 @@ parser.on("data", async function(data) {
             io.sockets.emit("input_state_from_arduino", inputStateFromArduino);
             //console.log(inputArrayToDisplay.join("+"));
           }
+          //console.log("Received end of input?");
         }
         if (data[0] == 1) {
           if (inputMode != 0) {
             port.flush(function(err, results) {
-              console.log(new Date().toISOString() + " 6 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+              //console.log(new Date().toISOString() + " 6 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
                 if (client.readyState() === "OPEN") {
                   if (chatConfig.send_debug_channel_messages == true) {
@@ -800,7 +811,7 @@ parser.on("data", async function(data) {
               //console.log(new Date().toISOString() + " flush results " + results);
             });
             port.drain(function(err, results) {
-              console.log(new Date().toISOString() + " 7 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+              //console.log(new Date().toISOString() + " 7 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
                 if (client.readyState() === "OPEN") {
                   if (chatConfig.send_debug_channel_messages == true) {
@@ -1139,7 +1150,7 @@ parser.on("data", async function(data) {
         if (data[0] >= controllerConfig.initial_macro_preamble && data[0] <= (controllerConfig.final_macro_preamble - 1)) {
           if (inputMode != 2) {
             port.flush(function(err, results) {
-              console.log(new Date().toISOString() + " 8 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+              //console.log(new Date().toISOString() + " 8 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
                 if (client.readyState() === "OPEN") {
                   if (chatConfig.send_debug_channel_messages == true) {
@@ -1154,7 +1165,7 @@ parser.on("data", async function(data) {
               //console.log(new Date().toISOString() + " flush results " + results);
             });
             port.drain(function(err, results) {
-              console.log(new Date().toISOString() + " 9 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+              //console.log(new Date().toISOString() + " 9 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
                 if (client.readyState() === "OPEN") {
                   if (chatConfig.send_debug_channel_messages == true) {
@@ -1517,7 +1528,7 @@ parser.on("data", async function(data) {
         //console.log(new Date().toISOString() + " Invalid data format, data[0] = " + data[0] + " data[11] = " + data[11]);
         //console.log(data);
         port.flush(function(err, results) {
-          console.log(new Date().toISOString() + " A [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+          //console.log(new Date().toISOString() + " A [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
           if (err) {
             if (client.readyState() === "OPEN") {
               if (chatConfig.send_debug_channel_messages == true) {
@@ -1532,7 +1543,7 @@ parser.on("data", async function(data) {
           //console.log(new Date().toISOString() + " flush results " + results);
         });
         port.drain(function(err, results) {
-          console.log(new Date().toISOString() + " B [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+          //console.log(new Date().toISOString() + " B [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
           if (err) {
             if (client.readyState() === "OPEN") {
               if (chatConfig.send_debug_channel_messages == true) {
@@ -1653,7 +1664,7 @@ function onTimeOut(channel, msg, unused, duration, tags) {
   */
   let randomColorName = Math.floor(Math.random() * defaultColors.length);
   client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
-  client.whisper(msg, "You were timed out for " + duration + " seconds from channel " + channel + ".");
+  client.whisper(msg, "You were timed out for " + duration + " seconds from " + channel + ".");
 }
 
 function onBan(channel, msg, unused, tags) {
@@ -1666,7 +1677,7 @@ function onBan(channel, msg, unused, tags) {
   */
   let randomColorName = Math.floor(Math.random() * defaultColors.length);
   client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
-  client.whisper(msg, "You were permanently banned from channel " + channel + ".");
+  client.whisper(msg, "You were permanently banned from " + channel + ".");
 }
 
 function onClearMsg(channel, username, deletedMessage, tags) {
@@ -1679,7 +1690,7 @@ function onClearMsg(channel, username, deletedMessage, tags) {
   */
   let randomColorName = Math.floor(Math.random() * defaultColors.length);
   client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
-  client.whisper(username, "Your message \"" + deletedMessage + "\" was deleted from channel " + channel + ".");
+  client.whisper(username, "Your message \"" + deletedMessage + "\" was deleted from " + channel + ".");
 }
 
 function rawMessageLogger(messageCloned, message) {
@@ -2046,7 +2057,7 @@ function getStreamViewerCount(twitchCredentialsObject, twitchAccessTokenObject) 
         }
       }
       if (dataSize <= 0) {
-        // Stream is probably offline or the Twitch API fucked up (Or the OAuth Token expired)
+        // Stream is probably offline or the Twitch API fucked up (Or the OAuth Token expired, or failed to connect for whatever reason)
         currentViewerCount = -1;
         //console.log(new Date().toISOString() + " [STREAM OFFLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
         if (currentViewerCount != oldViewerCount) {
@@ -2089,9 +2100,9 @@ function getStreamViewerCount(twitchCredentialsObject, twitchAccessTokenObject) 
   });
 
   req.on("error", function(error) {
-    currentViewerCount = -1;
+    //currentViewerCount = -1;
     //oldViewerCount = -1;
-    io.sockets.emit("viewer_count", currentViewerCount);
+    //io.sockets.emit("viewer_count", currentViewerCount);
     console.log(new Date().toISOString() + " VIEWER COUNT CONNECTION ERROR");
     console.error(error);
   });
@@ -2160,6 +2171,62 @@ function updateStreamTime() {
     //console.log(playTimeTotal);
     //console.log("Time can be checked here for the start of the run");
     if (oldSecond != currentSecond) {
+      if (oldMinute != currentMinute) {
+        if (currentMinute == 0 || currentMinute == 15 || currentMinute == 30 || currentMinute == 45) {
+          console.log("Current minute (" + currentMinute + ") is now 00 or 15 or 30 or 45");
+          if (client.readyState() === "OPEN") {
+            if (periodicalNewsMessages.length > 0) {
+
+              currentTimeMillis = new Date().getTime();
+              playTimeTotal = currentTimeMillis - runStartTime;
+              //console.log(currentTimeMillis - runStartTime);
+              let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
+              let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+              let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
+              let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
+              let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
+              let playTimeString = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s " + playTimeMillis + "ms";
+
+              let nextStartTimeISOString = new Date(nextRunStartTime).toISOString();
+              let nextStartTimeRemaining = currentTimeMillis - nextRunStartTime;
+              nextStartTimeRemaining = Math.abs(nextStartTimeRemaining);
+              let nextStartTimeRemainingDays = (parseInt(nextStartTimeRemaining / 86400000)).toString().padStart(2, "0");
+              let nextStartTimeRemainingHours = (parseInt(nextStartTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
+              let nextStartTimeRemainingMinutes = (parseInt(nextStartTimeRemaining / 60000) % 60).toString().padStart(2, "0");
+              let nextStartTimeRemainingSeconds = (parseInt(nextStartTimeRemaining / 1000) % 60).toString().padStart(2, "0");
+              let nextStartTimeRemainingMillis = (nextStartTimeRemaining % 1000).toString().padStart(3, "0");
+              let nextStartTimeRemainingString = nextStartTimeRemainingDays + "d " + nextStartTimeRemainingHours + "h " + nextStartTimeRemainingMinutes + "m " + nextStartTimeRemainingSeconds + "s " + nextStartTimeRemainingMillis + "ms";
+
+              let streamEndTimeISOString = new Date(streamEndTime).toISOString();
+              let streamEndTimeRemaining = currentTimeMillis - streamEndTime;
+              streamEndTimeRemaining = Math.abs(streamEndTimeRemaining);
+              let streamEndTimeRemainingDays = (parseInt(streamEndTimeRemaining / 86400000)).toString().padStart(2, "0");
+              let streamEndTimeRemainingHours = (parseInt(streamEndTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
+              let streamEndTimeRemainingMinutes = (parseInt(streamEndTimeRemaining / 60000) % 60).toString().padStart(2, "0");
+              let streamEndTimeRemainingSeconds = (parseInt(streamEndTimeRemaining / 1000) % 60).toString().padStart(2, "0");
+              let streamEndTimeRemainingMillis = (streamEndTimeRemaining % 1000).toString().padStart(3, "0");
+              let streamEndTimeRemainingString = streamEndTimeRemainingDays + "d " + streamEndTimeRemainingHours + "h " + streamEndTimeRemainingMinutes + "m " + streamEndTimeRemainingSeconds + "s " + streamEndTimeRemainingMillis + "ms";
+
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
+              let randomPeriodicalNewsMessage = Math.floor(Math.random() * periodicalNewsMessages.length);
+              //randomPeriodicalNewsMessage = 3;
+              let randomPeriodicalNewsMessageToSend = periodicalNewsMessages[randomPeriodicalNewsMessage];
+
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_short}})+/ig,globalConfig.next_game_title_short);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + " (" + nextStartTimeISOString + ")");
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + " (" + streamEndTimeISOString + ")");
+
+              console.log("The random periodical news message is: " + randomPeriodicalNewsMessageToSend);
+              client.action(chatConfig.main_channel, randomPeriodicalNewsMessageToSend);
+            }
+          }
+        }
+        if (oldHour != currentHour) {
+          console.log("Hour changed from " + oldHour + " to " + currentHour);
+        }
+      }
       //console.log("Second changed from " + oldSecond + " to " + currentSecond);
       if (currentSecond == secondToCheck) {
         //console.log("Current Second " + currentSecond + " equals to " + secondToCheck);
@@ -2174,7 +2241,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24");
+              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24, stream is briefly going offline, don't go anywhere!");
             }
           }
           if (currentHour == hourToCheckPm) {
@@ -2186,7 +2253,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + (playTimeDays + 1) + ", Hour 0 to Hour 12");
+              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + playTimeDays + ", Hour 0 to Hour 12, stream is briefly going offline, don't go anywhere!");
             }
           }
           /*
@@ -2202,6 +2269,62 @@ function updateStreamTime() {
     //console.log(playTimeTotal);
     //console.log(" Time can be checked here for the rest of the run");
     if (oldSecond != currentSecond) {
+      if (oldMinute != currentMinute) {
+        if (currentMinute == 0 || currentMinute == 15 || currentMinute == 30 || currentMinute == 45) {
+          console.log("Current minute (" + currentMinute + ") is now 00 or 15 or 30 or 45");
+          if (client.readyState() === "OPEN") {
+            if (periodicalNewsMessages.length > 0) {
+
+              currentTimeMillis = new Date().getTime();
+              playTimeTotal = currentTimeMillis - runStartTime;
+              //console.log(currentTimeMillis - runStartTime);
+              let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
+              let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+              let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
+              let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
+              let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
+              let playTimeString = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s " + playTimeMillis + "ms";
+
+              let nextStartTimeISOString = new Date(nextRunStartTime).toISOString();
+              let nextStartTimeRemaining = currentTimeMillis - nextRunStartTime;
+              nextStartTimeRemaining = Math.abs(nextStartTimeRemaining);
+              let nextStartTimeRemainingDays = (parseInt(nextStartTimeRemaining / 86400000)).toString().padStart(2, "0");
+              let nextStartTimeRemainingHours = (parseInt(nextStartTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
+              let nextStartTimeRemainingMinutes = (parseInt(nextStartTimeRemaining / 60000) % 60).toString().padStart(2, "0");
+              let nextStartTimeRemainingSeconds = (parseInt(nextStartTimeRemaining / 1000) % 60).toString().padStart(2, "0");
+              let nextStartTimeRemainingMillis = (nextStartTimeRemaining % 1000).toString().padStart(3, "0");
+              let nextStartTimeRemainingString = nextStartTimeRemainingDays + "d " + nextStartTimeRemainingHours + "h " + nextStartTimeRemainingMinutes + "m " + nextStartTimeRemainingSeconds + "s " + nextStartTimeRemainingMillis + "ms";
+
+              let streamEndTimeISOString = new Date(streamEndTime).toISOString();
+              let streamEndTimeRemaining = currentTimeMillis - streamEndTime;
+              streamEndTimeRemaining = Math.abs(streamEndTimeRemaining);
+              let streamEndTimeRemainingDays = (parseInt(streamEndTimeRemaining / 86400000)).toString().padStart(2, "0");
+              let streamEndTimeRemainingHours = (parseInt(streamEndTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
+              let streamEndTimeRemainingMinutes = (parseInt(streamEndTimeRemaining / 60000) % 60).toString().padStart(2, "0");
+              let streamEndTimeRemainingSeconds = (parseInt(streamEndTimeRemaining / 1000) % 60).toString().padStart(2, "0");
+              let streamEndTimeRemainingMillis = (streamEndTimeRemaining % 1000).toString().padStart(3, "0");
+              let streamEndTimeRemainingString = streamEndTimeRemainingDays + "d " + streamEndTimeRemainingHours + "h " + streamEndTimeRemainingMinutes + "m " + streamEndTimeRemainingSeconds + "s " + streamEndTimeRemainingMillis + "ms";
+
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
+              let randomPeriodicalNewsMessage = Math.floor(Math.random() * periodicalNewsMessages.length);
+              //randomPeriodicalNewsMessage = 3;
+              let randomPeriodicalNewsMessageToSend = periodicalNewsMessages[randomPeriodicalNewsMessage];
+
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + " (" + nextStartTimeISOString + ")");
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + " (" + streamEndTimeISOString + ")");
+
+              console.log("The random periodical news message is: " + randomPeriodicalNewsMessageToSend);
+              client.action(chatConfig.main_channel, randomPeriodicalNewsMessageToSend);
+            }
+          }
+        }
+        if (oldHour != currentHour) {
+          console.log("Hour changed from " + oldHour + " to " + currentHour);
+        }
+      }
       //console.log("Second changed from " + oldSecond + " to " + currentSecond);
       if (currentSecond == secondToCheck) {
         //console.log("Current Second " + currentSecond + " equals to " + secondToCheck);
@@ -2216,7 +2339,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24");
+              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24, stream is briefly going offline, don't go anywhere!");
             }
           }
           if (currentHour == hourToCheckPm) {
@@ -2228,7 +2351,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + (playTimeDays + 1) + ", Hour 0 to Hour 12");
+              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + (playTimeDays + 1) + ", Hour 0 to Hour 12, stream is briefly going offline, don't go anywhere!");
             }
           }
           /*
@@ -2607,7 +2730,8 @@ async function onMessageHandler(target, tags, message, self) {
       /(b+i+g+)+\s*(\.+|d+o+t+)*\s*((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(c+h+i+l+p+|b+i+g+\s*((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+)+\s*(\.+|d+o+t+)*\s*(c+o+m+|i+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       ///(b+i+g+\s*f+o+l+o+w+\w*)+\s*(\.+|d+o+t+)*\s*(c+o+m+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(h+e+l+o+[^\s]*)+\s+(i+)+\s+(d+o+)+\s+(g+r+a+p+h+i+c+)+\s+(d+e+s+i+g+n+)+\s+(\w+o+)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(w+o+r+k+)+\s+(d+o+n+e+)+\s+(l+i+k+e+)+\s+(\w+)+\s+(l+o+g+o+[^\s]*)+\s+(b+a+n+e+r+[^\s]*)+\s+(p+a+n+e+l+[^\s]*)+\s+(o+v+e+r+l+a+y+[^\s]*)+\s+(e+t+c+[^\s]*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
+      /(h+e+l+o+[^\s]*)+\s+(i+)+\s+(d+o+)+\s+(g+r+a+p+h+i+c+)+\s+(d+e+s+i+g+n+)+\s+(\w+o+)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(w+o+r+k+)+\s+(d+o+n+e+)+\s+(l+i+k+e+)+\s+(\w+)+\s+(l+o+g+o+[^\s]*)+\s+(b+a+n+e+r+[^\s]*)+\s+(p+a+n+e+l+[^\s]*)+\s+(o+v+e+r+l+a+y+[^\s]*)+\s+(e+t+c+[^\s]*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(c+o+d+e+)+\s+(f+o+r+)+\s+(\w+)+\s+(v+i+e+w+e+r+\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
     let multiMessageSpamBotTypeA = [/((i+t+)+\s*(i+s+)|(i+t+\W*s+))+\s+(n+i+c+e+)+\s+(t+o+)+\s+(m+e+t+)+\s+(y+\w*)+\s+(\w+\W*v+e+)+\s+(w+a+t+c+h+e+d+)+\s+(y+\w*)+\s+([^\s]*)+\s+(t+w+\w*t+c+h+)\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(y+\w*)+\s+(s+i+r+\W*)+\s+(h+a+v+e+)+\s+(f+l+o+w+\W*)+\s+(i+t+\W*s+)+\s+(a+w+e+s+\w+m+e\W*)+\s+(\w+)+\s+(l+i+k+e+)+\s+(y+\w*)+\s+(s+t+r+e+a+m+\w*\W*\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -2619,6 +2743,8 @@ async function onMessageHandler(target, tags, message, self) {
       /(k+e+e+p+)+\s+(u+p+)+\s+(t+h+e+)+\s+(g+o+d+)+\s+(s+t+r+e+a+m\w*\W*\w*)+\s+(m+a+n+)+\s+((\w+\W*\s*a+m+)|(\w+\W*\s*m+))+\s+(g+o+i+n+g+)+\s+(t+o+)+\s+(d+o+)+\s+(a+n+i+m+a+t+e+d+)+\s+(b+r+b+\W*)+\s+(i+n+t+r+o\W*)+\s+(a+n+d+)+\s+(o+f+l+i+n+e+)+\s+(s+c+r+e+n+)+\s+(f+o+r+)+\s+(y+\w*)+\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(t+a+k+e+)+\s+(\w+)+\s+(l+o+k+)+\s+((a*t*|i*n*|o*n*)*\s*(t+h+e+)+)+\s+(u+r+l+)+\s+(\w*)+\s+(m+y+)+\s+(a+c+o+u+n+t+\W*\w*)+\s+(i+m+a+g+e+)+\s+(p+r+o+b+a+b+l+y+)+\s+(t+h+e+)+\s+(b+e+s+t+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
+    //let slurDetection = /((\bn+[^\s]+g+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")); // User will be instantly permabanned, no matter how known the user is, currently only the N word is implemented, more words will be added as they happen
+    let slurDetection = false; // Todo: improve nword detection because currently it has a lot of false positives // I am not really happy with any solution because no matter what I do, there will always be false positives, and the fact that the n-word can be reduced to its first 3 letters makes this really hard, also there is a country name that starts with the first 3 letters of the n-word // I'm starting to think that this has to be moderated manually by a human that can tell what's inappropriate based on the context
     //console.log("singleMessageSpamBots");
     //console.log(singleMessageSpamBots);
     //console.log("multiMessageSpamBotTypeA");
@@ -2763,6 +2889,12 @@ async function onMessageHandler(target, tags, message, self) {
                 }
               }
             }
+            if (slurDetection == true) {
+              dataToInsert.strike_count = dataToInsert.strike_count + 1;
+              dataToInsert.ban_count = dataToInsert.ban_count + 1;
+              dataToInsert.is_account_blacklisted = true;
+              dataToInsert.is_banned = true;
+            }
             if (isFirstMessageSpam == true) {
               dataToInsert.strike_count = dataToInsert.strike_count + 1;
             }
@@ -2825,7 +2957,7 @@ async function onMessageHandler(target, tags, message, self) {
                       //console.log("chatConfig.debug_channel = " + chatConfig.debug_channel);
                       let randomColorName = Math.floor(Math.random() * defaultColors.length);
                       client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message);
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot);
                     }
                   }
                   if (databaseToReadFromResult.is_account_blacklisted == true) {
@@ -2845,9 +2977,10 @@ async function onMessageHandler(target, tags, message, self) {
                             client.say(target, ".color " + defaultColorNames[randomColorName]);
                             client.say(target, ".ban " + databaseToReadFromResult.last_known_username + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.");
                             client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.");
-                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from the channel " + target + ".");
+                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from " + target + ".");
+                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                             if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + " Banned, first message too long.");
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, first message too long.");
                             }
                           }
                           if (globalConfig.permaban_if_first_message_is_long == false) {
@@ -2855,9 +2988,10 @@ async function onMessageHandler(target, tags, message, self) {
                             client.say(target, ".color " + defaultColorNames[randomColorName]);
                             client.say(target, ".timeout " + databaseToReadFromResult.last_known_username + " " + globalConfig.long_message_timeout + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!");
                             client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!");
-                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down! This whisper was sent from the channel " + target + ".");
+                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down! This whisper was sent from " + target + ".");
+                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                             if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + " Timeout, first message too long.");
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Timeout, first message too long.");
                             }
                           }
                         }
@@ -2870,13 +3004,24 @@ async function onMessageHandler(target, tags, message, self) {
                     client.say(target, ".color " + defaultColorNames[randomColorName]);
                     client.say(target, ".ban " + databaseToReadFromResult.last_known_username + " You were banned because you got detected as spam bot."); // These should use the names stored in the database, not the IRC names twitch sends
                     client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot.");
-                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot. This whisper was sent from the channel " + target + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.");
+                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot. This whisper was sent from " + target + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.");
+                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                     if (chatConfig.send_debug_channel_messages == true) {
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + " Banned, detected as spam bot.");
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message  + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, detected as spam bot.");
                     }
                   }
                   if (databaseToReadFromResult.is_first_message_spam_bot == true) {
                     console.log("Keep an eye on this user");
+                  }
+                  if (slurDetection == true) {
+                    // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+                    client.say(target, ".color " + defaultColorNames[randomColorName]);
+                    client.say(target, ".ban " + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.");
+                    client.action(target, "@" + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.");
+                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from " + target + ".");
+                    if (chatConfig.send_debug_channel_messages == true) {
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message  + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, sent a slur.");
+                    }
                   }
                 });
               });
@@ -3007,6 +3152,12 @@ async function onMessageHandler(target, tags, message, self) {
                 }
               }
             }
+            if (slurDetection == true) {
+              //dataToUpdate.$set.strike_count = dataToUpdate.$set.strike_count + 1;
+              dataToUpdate.$set.ban_count = dataToUpdate.$set.ban_count + 1;
+              dataToUpdate.$set.is_account_blacklisted = true;
+              dataToUpdate.$set.is_banned = true;
+            }
             if (dataToUpdate.$set.is_account_blacklisted == true) {
               dataToUpdate.$set.message_deletion_count = dataToUpdate.$set.message_deletion_count + 1;
             }
@@ -3045,7 +3196,7 @@ async function onMessageHandler(target, tags, message, self) {
                       //console.log("chatConfig.debug_channel = " + chatConfig.debug_channel);
                       let randomColorName = Math.floor(Math.random() * defaultColors.length);
                       client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message);
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot);
                     }
                   }
                   if (databaseToReadFromResult.is_account_blacklisted == true) {
@@ -3066,9 +3217,10 @@ async function onMessageHandler(target, tags, message, self) {
                           client.say(target, ".color " + defaultColorNames[randomColorName]);
                           client.say(target, ".ban " + databaseToReadFromResult.last_known_username + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.");
                           client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.");
-                          client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from the channel " + target + ".");
+                          client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from " + target + ".");
+                          client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                           if (chatConfig.send_debug_channel_messages == true) {
-                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + " Timeout, message too long.");
+                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Timeout, message too long.");
                           }
                           */
                         }
@@ -3093,9 +3245,10 @@ async function onMessageHandler(target, tags, message, self) {
                             client.say(target, ".color " + defaultColorNames[randomColorName]);
                             client.say(target, ".ban " + databaseToReadFromResult.last_known_username + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.");
                             client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.");
-                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from the channel " + target + ".");
+                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from " + target + ".");
+                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                             if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + " Banned, first message too long.");
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, first message too long.");
                             }
                           }
                           if (globalConfig.permaban_if_first_message_is_long == false) {
@@ -3103,9 +3256,10 @@ async function onMessageHandler(target, tags, message, self) {
                             client.say(target, ".color " + defaultColorNames[randomColorName]);
                             client.say(target, ".timeout " + databaseToReadFromResult.last_known_username + " " + globalConfig.long_message_timeout + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!");
                             client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!");
-                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down! This whisper was sent from the channel " + target + ".");
+                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down! This whisper was sent from " + target + ".");
+                            client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                             if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + " Timeout, first message too long.");
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Timeout, first message too long.");
                             }
                           }
                         }
@@ -3119,9 +3273,10 @@ async function onMessageHandler(target, tags, message, self) {
                     client.say(target, ".color " + defaultColorNames[randomColorName]);
                     client.say(target, ".ban " + databaseToReadFromResult.last_known_username + " You were banned because you got detected as spam bot."); // These should use the names stored in the database, not the IRC names twitch sends
                     client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot.");
-                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot. This whisper was sent from the channel " + target + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.");
+                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot. This whisper was sent from " + target + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.");
+                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                     if (chatConfig.send_debug_channel_messages == true) {
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + " Banned, detected as spam bot.");
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, detected as spam bot.");
                     }
                   }
                   if (databaseToReadFromResult.is_first_message_spam_bot == true) {
@@ -3133,14 +3288,25 @@ async function onMessageHandler(target, tags, message, self) {
                           client.say(target, ".color " + defaultColorNames[randomColorName]);
                           client.say(target, ".ban " + databaseToReadFromResult.last_known_username + " You were banned because you got detected as spam bot.");
                           client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot.");
-                          client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot. This whisper was sent from the channel " + target + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.");
+                          client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot. This whisper was sent from " + target + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.");
+                          client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                           if (chatConfig.send_debug_channel_messages == true) {
-                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + " Banned, detected as spam bot.");
+                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, detected as spam bot.");
                           }
                         }
                       }
                     }
                     console.log("Keep an eye on this user");
+                  }
+                  if (slurDetection == true) {
+                    // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+                    client.say(target, ".color " + defaultColorNames[randomColorName]);
+                    client.say(target, ".ban " + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.");
+                    client.action(target, "@" + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.");
+                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from " + target + ".");
+                    if (chatConfig.send_debug_channel_messages == true) {
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message  + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, sent a slur.");
+                    }
                   }
                 });
               });
@@ -3273,6 +3439,10 @@ async function onMessageHandler(target, tags, message, self) {
     };
     let precisionInputStringToDisplay2 = "";
 
+    let precisionInputSingleLoopDuration = 0;
+    let precisionInputTotalDuration = 0;
+    let precisionInputTotalTimesToLoop = 0;
+
     let trustedUsersIndex = chatConfig.trusted_users.findIndex(element => element == userId);
     //console.log(trustedUsersIndex);
     //console.log(chatConfig.trusted_users[trustedUsersIndex])
@@ -3366,12 +3536,12 @@ async function onMessageHandler(target, tags, message, self) {
             if (hasRunStarted == false) {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " The stream has been up for " + uptimeString + ". The next run starts in " + playTimeString + ".");
+              client.action(target, "@" + usernameToPing + " The server has been up for " + uptimeString + ". The next run starts in " + playTimeString + ".");
             }
             if (hasRunStarted == true) {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " The stream has been up for " + uptimeString + ". This run has been going for " + playTimeString + ".");
+              client.action(target, "@" + usernameToPing + " The server has been up for " + uptimeString + ". This run has been going for " + playTimeString + ".");
             }
 
           }
@@ -3509,7 +3679,7 @@ async function onMessageHandler(target, tags, message, self) {
         }
       }
     }
-    let currentRunEndgameGoalsPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((run\s*end\s*game\s*goals)+|(ends\*game\s*goals)+)+/ig.test(originalMessage);
+    let currentRunEndgameGoalsPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((run\s*end\s*game\s*condition+s*)+|(ends\*game\s*condition+s*)+)+/ig.test(originalMessage);
     if (currentRunEndgameGoalsPrefixCheck == true) {
       let randomColorName = Math.floor(Math.random() * defaultColors.length);
       client.say(target, ".color " + defaultColorNames[randomColorName]);
@@ -3529,7 +3699,7 @@ async function onMessageHandler(target, tags, message, self) {
       client.action(target, "@" + usernameToPing + " Discord: " + globalConfig.discord_url);
     }
     if (inputMode == 2) {
-      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(com+ands*)+|(cmds*)+|(cmnds*)+|(control+s*)+|(control+ers*)+|((chat)*\s*how\s*(can|do|to)\s*play\s*(chat)*\s*\?*)+|((chat)*\s*how\s*(can|do|to)\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
+      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(com+ands*)+|(cmds*)+|(cmnds*)+|(control+s*)+|(control+ers*)+|((chat)*\s*how\s*(can|do|to)\s*play\s*(chat)*\s*\?*)+|((chat)*\s*how\s*(can|do|to)\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
           //console.log("Don't send the help message yet");
@@ -3548,7 +3718,8 @@ async function onMessageHandler(target, tags, message, self) {
           helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
         }
       }
-      let savedMacroHelpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((saving\s*macro\s*help)+|(saving\s*macros\s*help)+)+/ig.test(originalMessage);
+      //let savedMacroHelpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((saving\s*macro\s*help)+|(saving\s*macros\s*help)+)+/ig.test(originalMessage);
+      let savedMacroHelpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((macro\s*help)+|(macros\s*help)+)+/ig.test(originalMessage);
       if (savedMacroHelpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
           //console.log("Don't send the help message yet");
@@ -3570,10 +3741,10 @@ async function onMessageHandler(target, tags, message, self) {
       if (acceptInputs == true) {
         if (messageWords.length > 0) {
           let renameMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((rename\s*macro)+|(update\s*macro\s*name)+|(edit\s*macro\s*name)+|(update\s*name)+|(edit\s*name)+)+/ig.test(originalMessage); // 2 Parameters: Old Macro Name and New Macro Name
-          let createMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((create\s*macro)+|(save\s*macro)+|(store\s*macro)+|(update\s*macro)+|(edit\s*macro)+|(make\s*macro)+|(new\s*macro)+|(set\s*macro)+)+/ig.test(originalMessage);// 2 Parameters: Macro Name and Inputs
+          let createMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((create\s*macro)+|(save\s*macro)+|(store\s*macro)+|(update\s*macro)+|(edit\s*macro)+|(make\s*macro)+|(new\s*macro)+|(set\s*macro)+|(add\s*macro)+)+/ig.test(originalMessage);// 2 Parameters: Macro Name and Inputs
           let toggleMacroEditabilityPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((toggle\s*macro\s*editability)+|(toggle\s*editability)+)+/ig.test(originalMessage); // Used to toggle can_macro_be_edited_by_anyone between true and false // 0 Parameters
           let listAllMacrosSavedPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((list\s*all\s*macros)+|(show\s*all\s*macros)+|(view\s*all\s*macros)+|(display\s*all\s*macros)+|(all\s*macros)+|(list\s*saved\s*macros)+|(list\s*stored\s*macros)+|(show\s*saved\s*macros)+|(show\s*stored\s*macros)+|(view\s*saved\s*macros)+|(view\s*stored\s*macros)+|(display\s*saved\s*macros)+|(display\s*stored\s*macros)+|(saved\s*macros)+|(stored\s*macros)+|(list\s*all\s*saved\s*macros)+|(list\s*all\s*stored\s*macros)+|(show\s*all\s*saved\s*macros)+|(show\s*all\s*stored\s*macros)+|(view\s*all\s*saved\s*macros)+|(view\s*all\s*stored\s*macros)+|(display\s*all\s*saved\s*macros)+|(display\s*all\s*stored\s*macros)+|(all\s*saved\s*macros)+|(all\s*stored\s*macros)+|(list\s*all\s*macros\s*saved)+|(list\s*all\s*macros\s*stored)+|(show\s*all\s*macros\s*saved)+|(show\s*all\s*macros\s*stored)+|(view\s*all\s*macros\s*saved)+|(view\s*all\s*macros\s*stored)+|(display\s*all\s*macros\s*saved)+|(display\s*all\s*macros\s*stored)+|(all\s*macros\s*saved)+|(all\s*macros\s*stored)+)+/ig.test(originalMessage); // Used to list all macros saved // 0 Parameters
-          let showContentsOfSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((list\s*macro)+|(show\s*macro)+|(view\s*macro)+|(display\s*macro)+|(macro)+)+/ig.test(originalMessage); // 1 Parameter: Macro Name
+          let showContentsOfSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((list\s*macro)+|(show\s*macro)+|(view\s*macro)+|(display\s*macro)+)+/ig.test(originalMessage); // 1 Parameter: Macro Name
           let executeSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((exec\s*saved\s*macro)+|(execute\s*saved\s*macro)+|(play\s*saved\s*macro)+|(run\s*saved\s*macro)+|(exec\s*stored\s*macro)+|(execute\s*stored\s*macro)+|(play\s*stored\s*macro)+|(run\s*stored\s*macro)+|(exec\s*macro)+|(execute\s*macro)+|(play\s*macro)+|(run\s*macro)+)+/ig.test(originalMessage); // 2 Parameters: Macro Name and Times To Repeat (Times To Repeat is optional)
           let listSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(list\s*settable\s*macro)+/ig.test(originalMessage);
           //console.log("listSettablePrefixCheck = " + listSettablePrefixCheck);
@@ -5368,14 +5539,14 @@ async function onMessageHandler(target, tags, message, self) {
               let macroNameToLookup = originalMessageWords[1];
               macroNameToLookup = macroNameToLookup.toLowerCase();
               // Cleanup garbage from macro name, allow only letters, numbers, hyphens, underscores, can't be case sensitive
-              console.log("BEFORE Looks like someone is trying to view the macro " + macroNameToLookup);
+              console.log("BEFORE Looks like someone is trying to execute the macro " + macroNameToLookup);
               macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
               for (let cyrillicsReplacementTableIndex = 0; cyrillicsReplacementTableIndex < cyrillicsReplacementTable.length; cyrillicsReplacementTableIndex++) {
                 macroNameToLookup = macroNameToLookup.replace(cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolOriginalString, cyrillicsReplacementTable[cyrillicsReplacementTableIndex].symbolReplacementString);
               }
               macroNameToLookup = macroNameToLookup.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
               macroNameToLookup = macroNameToLookup.toLowerCase();
-              console.log("AFTER  Looks like someone is trying to view the macro " + macroNameToLookup);
+              console.log("AFTER  Looks like someone is trying to execute the macro " + macroNameToLookup);
               let shortestMacroNameLengthAllowed = 4;
               let longestMacroNameLengthAllowed = 25;
               if (macroNameToLookup.length < shortestMacroNameLengthAllowed || macroNameToLookup.length > longestMacroNameLengthAllowed) {
@@ -5548,17 +5719,17 @@ async function onMessageHandler(target, tags, message, self) {
                                   throw databaseToReadFromResultError;
                                 }
                                 databaseToReadFrom.close();
-                                console.log("Macro database entry updated and read from successfully!");
+                                console.log(new Date().toISOString() + " Macro database entry updated and read from successfully!");
                                 console.log(databaseToReadFromResult);
                                 isExecutingSavedMacro = true;
                                 savedMacroNameToExecute = databaseToReadFromResult.macro_name;
-                                console.log("A savedMacroContentsToExecute = " + savedMacroContentsToExecute);
+                                console.log(new Date().toISOString() + " A savedMacroContentsToExecute = " + savedMacroContentsToExecute);
                                 savedMacroContentsToExecute = databaseToReadFromResult.macro_contents;
-                                console.log("B savedMacroContentsToExecute = " + savedMacroContentsToExecute);
+                                console.log(new Date().toISOString() + " B savedMacroContentsToExecute = " + savedMacroContentsToExecute);
                                 savedMacroContentsToExecute = savedMacroContentsToExecute.replace(/(\s*\*\d*)+$/ig, "*" + macroRepeatCountToEnter);
-                                console.log("C savedMacroContentsToExecute = " + savedMacroContentsToExecute);
+                                console.log(new Date().toISOString() + " C savedMacroContentsToExecute = " + savedMacroContentsToExecute);
                                 savedMacroContentsToExecute = tidyUpAdvancedInputString(savedMacroContentsToExecute);
-                                console.log("D savedMacroContentsToExecute = " + savedMacroContentsToExecute);
+                                console.log(new Date().toISOString() + " D savedMacroContentsToExecute = " + savedMacroContentsToExecute);
                                 savedMacroTimesWasUsed = databaseToReadFromResult.times_macro_was_used;
                               });
                             });
@@ -5606,15 +5777,25 @@ async function onMessageHandler(target, tags, message, self) {
                 }
               }
             }
+            await sleep(5000);
+            console.log(new Date().toISOString() + " isExecutingSavedMacro = " + isExecutingSavedMacro);
+            console.log(new Date().toISOString() + " savedMacroNameToExecute = " + savedMacroNameToExecute);
+            console.log(new Date().toISOString() + " savedMacroContentsToExecute = " + savedMacroContentsToExecute);
+            console.log(new Date().toISOString() + " savedMacroTimesWasUsed = " + savedMacroTimesWasUsed);
+            if (isExecutingSavedMacro == true) {
+              message = savedMacroContentsToExecute;
+            }
           }
-          await sleep(400);
-          console.log("isExecutingSavedMacro = " + isExecutingSavedMacro);
-          console.log("savedMacroNameToExecute = " + savedMacroNameToExecute);
-          console.log("savedMacroContentsToExecute = " + savedMacroContentsToExecute);
-          console.log("savedMacroTimesWasUsed = " + savedMacroTimesWasUsed);
+          /*
+          await sleep(5000);
+          console.log(new Date().toISOString() + " isExecutingSavedMacro = " + isExecutingSavedMacro);
+          console.log(new Date().toISOString() + " savedMacroNameToExecute = " + savedMacroNameToExecute);
+          console.log(new Date().toISOString() + " savedMacroContentsToExecute = " + savedMacroContentsToExecute);
+          console.log(new Date().toISOString() + " savedMacroTimesWasUsed = " + savedMacroTimesWasUsed);
           if (isExecutingSavedMacro == true) {
             message = savedMacroContentsToExecute;
           }
+          */
           if (listSettablePrefixCheck == true) {
             //let tempListableInputArray = messageWords[1].replace(/[\:\/\\\.\;\']+/ig, " ");
             //tempListableInputArray = tempListableInputArray.trim();
@@ -6025,7 +6206,7 @@ async function onMessageHandler(target, tags, message, self) {
 
                 // Clear the incoming serial data from arduino before setting settable advanced input
                 port.flush(function(err, results) {
-                  console.log(new Date().toISOString() + " C [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+                  //console.log(new Date().toISOString() + " C [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
                     if (client.readyState() === "OPEN") {
                       if (chatConfig.send_debug_channel_messages == true) {
@@ -6040,7 +6221,7 @@ async function onMessageHandler(target, tags, message, self) {
                   //console.log(new Date().toISOString() + " flush results " + results);
                 });
                 port.drain(function(err, results) {
-                  console.log(new Date().toISOString() + " D [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+                  //console.log(new Date().toISOString() + " D [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
                     if (client.readyState() === "OPEN") {
                       if (chatConfig.send_debug_channel_messages == true) {
@@ -6056,7 +6237,7 @@ async function onMessageHandler(target, tags, message, self) {
                 });
 
                 port.write(settableMacroChain[settableInputsIndex].input_data, function(err) {
-                  console.log(new Date().toISOString() + " E [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+                  //console.log(new Date().toISOString() + " E [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
                     if (client.readyState() === "OPEN") {
                       if (chatConfig.send_debug_channel_messages == true) {
@@ -6095,7 +6276,7 @@ async function onMessageHandler(target, tags, message, self) {
 
               // Clear the incoming serial data from arduino before setting an advanced input to be executed
               port.flush(function(err, results) {
-                console.log(new Date().toISOString() + " F [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+                //console.log(new Date().toISOString() + " F [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -6110,7 +6291,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(new Date().toISOString() + " flush results " + results);
               });
               port.drain(function(err, results) {
-                console.log(new Date().toISOString() + " G [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+                //console.log(new Date().toISOString() + " G [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -6126,7 +6307,7 @@ async function onMessageHandler(target, tags, message, self) {
               });
 
               port.write(playSettableParametersToWrite, function(err) {
-                console.log(new Date().toISOString() + " H [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+                //console.log(new Date().toISOString() + " H [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -6698,6 +6879,7 @@ async function onMessageHandler(target, tags, message, self) {
                     //precisionInputStringToDisplay2.concat(macroChainInputObject.processed_macro_input_delay + "ms ")
                     //console.log(precisionInputStringToDisplay2);
                     //console.log(macroChainInputObject);
+                    precisionInputSingleLoopDuration = precisionInputSingleLoopDuration + macroChainInputObject.processed_macro_input_delay;
                     currentMacroChainIndex++;
                   }
                 }
@@ -7094,11 +7276,13 @@ async function onMessageHandler(target, tags, message, self) {
                     }
                   }
                   if (splitInputsInMultipleStringsIndex == splitInputsInMultipleStrings.length - 1) {
+                    precisionInputTotalTimesToLoop = macroParametersToWrite[4] + 1;
+                    precisionInputTotalDuration = precisionInputTotalTimesToLoop * precisionInputSingleLoopDuration;
                     if (isExecutingSavedMacro == false) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Type Stop or Wait to stop execution of inputs");
+                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs");
                     }
                     if (isExecutingSavedMacro == true) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Type Stop or Wait to stop execution of inputs");
+                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs");
                     }
                   }
                 }
@@ -7109,12 +7293,14 @@ async function onMessageHandler(target, tags, message, self) {
                 //let splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/.{100}/ig);
                 //splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/(?:[^\,]+\,){1,10}[^\,]+/ig);
                 //console.log(splitInputsInMultipleStrings);
+                precisionInputTotalTimesToLoop = macroParametersToWrite[4] + 1;
+                precisionInputTotalDuration = precisionInputTotalTimesToLoop * precisionInputSingleLoopDuration;
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
                 if (isExecutingSavedMacro == false) {
-                  client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Type Stop or Wait to stop execution of inputs");
+                  client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs");
                 }
                 if (isExecutingSavedMacro == true) {
-                  client.action(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Type Stop or Wait to stop execution of inputs");
+                  client.action(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs");
                 }
                 //client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2);
               }
@@ -7124,7 +7310,7 @@ async function onMessageHandler(target, tags, message, self) {
 
               // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
               port.flush(function(err, results) {
-                console.log(new Date().toISOString() + " I [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+                //console.log(new Date().toISOString() + " I [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -7139,7 +7325,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(new Date().toISOString() + " flush results " + results);
               });
               port.drain(function(err, results) {
-                console.log(new Date().toISOString() + " J [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+                //console.log(new Date().toISOString() + " J [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -7155,7 +7341,7 @@ async function onMessageHandler(target, tags, message, self) {
               });
 
               port.write(macroParametersToWrite, function(err) {
-                console.log(new Date().toISOString() + " K [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+                //console.log(new Date().toISOString() + " K [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
                   if (client.readyState() === "OPEN") {
                     if (chatConfig.send_debug_channel_messages == true) {
@@ -7197,7 +7383,7 @@ async function onMessageHandler(target, tags, message, self) {
         //messageInputs = messageInputs.split(/[\+\_\|\#\[\]\,\.\s]+/ig);
         //console.log(messageInputs);
       }
-      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(com+ands*)+|(cmds*)+|(cmnds*)+|(control+s*)+|(control+ers*)+|((chat)*\s*how\s*(can|do|to)\s*play\s*(chat)*\s*\?*)+|((chat)*\s*how\s*(can|do|to)\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
+      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(com+ands*)+|(cmds*)+|(cmnds*)+|(control+s*)+|(control+ers*)+|((chat)*\s*how\s*(can|do|to)\s*play\s*(chat)*\s*\?*)+|((chat)*\s*how\s*(can|do|to)\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
           //console.log("Don't send the help message yet");
@@ -8734,7 +8920,7 @@ function checkModeVotes() {
     }
     if (waitForArduinoToBeReady == false) {
       port.flush(function(err, results) {
-        console.log(new Date().toISOString() + " L [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+        //console.log(new Date().toISOString() + " L [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
           if (client.readyState() === "OPEN") {
             if (chatConfig.send_debug_channel_messages == true) {
@@ -8749,7 +8935,7 @@ function checkModeVotes() {
         //console.log(new Date().toISOString() + " flush results " + results);
       });
       port.drain(function(err, results) {
-        console.log(new Date().toISOString() + " M [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+        //console.log(new Date().toISOString() + " M [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
           if (client.readyState() === "OPEN") {
             if (chatConfig.send_debug_channel_messages == true) {
@@ -8764,7 +8950,7 @@ function checkModeVotes() {
         //console.log(new Date().toISOString() + " drain results " + results);
       });
       port.write(neutralDataToWrite, function(err) {
-        console.log(new Date().toISOString() + " N [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+        //console.log(new Date().toISOString() + " N [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
           if (client.readyState() === "OPEN") {
             if (chatConfig.send_debug_channel_messages == true) {
@@ -9505,7 +9691,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
 
             // Clear the incoming serial data from arduino before setting any input in the input chain
             port.flush(function(err, results) {
-              console.log(new Date().toISOString() + " O [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+              //console.log(new Date().toISOString() + " O [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
                 if (client.readyState() === "OPEN") {
                   if (chatConfig.send_debug_channel_messages == true) {
@@ -9520,7 +9706,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
               //console.log(new Date().toISOString() + " flush results " + results);
             });
             port.drain(function(err, results) {
-              console.log(new Date().toISOString() + " P [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+              //console.log(new Date().toISOString() + " P [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
                 if (client.readyState() === "OPEN") {
                   if (chatConfig.send_debug_channel_messages == true) {
@@ -9536,7 +9722,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
             });
 
             port.write(dataToWrite, function(err) {
-              console.log(new Date().toISOString() + " Q [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+              //console.log(new Date().toISOString() + " Q [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
                 if (client.readyState() === "OPEN") {
                   if (chatConfig.send_debug_channel_messages == true) {
@@ -9640,7 +9826,7 @@ function tidyUpAdvancedInputString(inputStringToProcess) {
     macro_array: [],
     repeat_count: 0
   };
-  let precisionInputStringToDisplay2 = "";;
+  let precisionInputStringToDisplay2 = "";
 
   let macroDelayUsed = 0; // This variable keeps track of how many inputs have custom delay in the macro chain, if it's 0, set the first param in the last input of the macro chain to be repeat, if it's not 0, set the first param in the last input of the macro chain to be delay (only really used on a macro chain that has more than one input)
   precisionInputs = inputStringToProcess.replace(/[\s\.\,]+/ig, " ");
