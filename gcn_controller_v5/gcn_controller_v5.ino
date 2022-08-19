@@ -178,7 +178,7 @@ uint32_t inputDelay = 0;
 uint32_t previousInputDelay = 0;
 //uint32_t currentMillis = 0;
 
-uint32_t baudRate = 500000;
+uint32_t baudRate = 2000000;
 
 uint8_t serial_rx_buffer[12];
 uint8_t current_macro_input[12];
@@ -782,9 +782,21 @@ void pressButtons()
               Serial.write(0x00);
               Serial.write(endingMacroIndex);
             }
-            for (uint8_t currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
-              // Send only data back if it has changed, I don't know how to do this without having two loops
-              Serial.write(current_macro_input[currentByteIndex]);;
+            if (loopMacro <= 0) {
+              if (currentMacroIndexRunning == macroInputsToRun) {
+                for (uint8_t currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
+                  // Send only data back if it has changed, I don't know how to do this without having two loops
+                  Serial.write(current_macro_input[currentByteIndex]);
+                }
+              }
+            }
+            if (loopMacro > 0) {
+              if (loopCounter > timesToLoop) {
+                for (uint8_t currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
+                  // Send only data back if it has changed, I don't know how to do this without having two loops
+                  Serial.write(current_macro_input[currentByteIndex]);
+                }
+              }
             }
           }
           Serial.flush();
