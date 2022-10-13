@@ -255,8 +255,6 @@ void loop() {
                 whereDoesTheCurrentInnerLoopStart = inner_loop_metadata[macroMetadataIndexInner][6];
                 //whereDoesTheCurrentInnerLoopEnd = inner_loop_metadata[macroMetadataIndexInner][7];
                 howManyInnerLoopsShouldBeExecutedAfterTheCurrentInnerLoop = inner_loop_metadata[macroMetadataIndexInner][8];
-                if (countValidInnerLoops == false) {
-                }
                 if (countValidInnerLoops == true) {
                   if (macroMetadataIndexInner <= 0) {
                     if (whereDoesThePreviousInnerLoopEnd <= 0) {
@@ -319,8 +317,6 @@ void loop() {
                     }
                     // Something else happens here
                   }
-                }
-                if (countValidInnerLoops == false) {
                 }
                 whereDoesTheNextPreviousInnerLoopStart = inner_loop_metadata[macroMetadataIndexInner][5];
                 //whereDoesThePreviousInnerLoopStart = inner_loop_metadata[macroMetadataIndexInner][6];
@@ -625,7 +621,6 @@ void pressButtons() {
           current_macro_input[11] = 0x00;
 
           didInputChange = false;
-
           // Send the controller data back so it can be used to display controller information on the overlay
           for (uint8_t currentByteIndex = 0; currentByteIndex < sizeof(current_macro_input); currentByteIndex++) {
             if (current_macro_input[currentByteIndex] != old_macro_input[currentByteIndex]) {
@@ -690,7 +685,7 @@ void pressButtons() {
           inputStatus[21] = (current_macro_input[2] & B00000100);  // L
           inputStatus[22] = (current_macro_input[2] & B00001000);  // R
           inputStatus[23] = (current_macro_input[2] & B00001000);  // R
-                                                                   // Sometimes buttons are considered as released by the console between inputs, the pieces of code below will hopefully make it so buttons are only released at the end of the final iteration of a loopable macro, or released at the final input of a non-loopable macro, or released at the end of a basic input
+          // Sometimes buttons are considered as released by the console between inputs, the pieces of code below will hopefully make it so buttons are only released at the end of the final iteration of a loopable macro, or released at the final input of a non-loopable macro, or released at the end of a basic input
           if (loopMacro <= 0) {
             if (currentMacroIndexRunning == macroInputsToRun) {
               // Reset all variables related to macro to stop the arduino from running useless code

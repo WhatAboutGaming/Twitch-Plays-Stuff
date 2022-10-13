@@ -1,141 +1,71 @@
-// This project uses 4 8-bit shift register, such as 74HC595 or HCF4094, in cascading format
 /*
-  GCN Controller for Arduino UNO by WhatAboutGaming NOTE: THIS CODE HAD TO BE MODIFIED TO WORK WITH MEGA 2560 BECAUSE UNO RAN OUT OF RAM, THIS CODE NEEDS TO BE OPTIMIZED TO SAVE RAM, I DON'T KNOW WHERE TO EVEN START TO OPTIMIZE THE CODE, TO ME, EVERYTHING LOOKS FINE BUT I'M A NOOB
+  N64 Controller for Arduino Uno v1.3 by WhatAboutGamingLive https://www.twitch.tv/whataboutgaminglive/
+  v1.3 allows programmable macros, which can be looped if the user desires so
   For use in the Twitch.TV stream TwitchTriesToPlay.
   https://www.twitch.tv/twitchtriestoplay
   https://github.com/WhatAboutGaming/Twitch-Plays-Stuff
 
   Reference:
-  http://www.int03.co.uk/crema/hardware/gamecube/gc-control.html
-  http://www.seas.upenn.edu/~gland/gamecube.html
+  http://cnt.at-ninja.jp/n64_dpp/N64%20controller.htm
+  http://svn.navi.cx/misc/trunk/wasabi/devices/cube64/notes/n64-observations
+  http://www.acidmods.com/RDC/NINTENDO/N64/N64_Controller_200010_Top_CLEAN.jpg
+  http://www.acidmods.com/RDC/NINTENDO/N64/N64_Controller_700010_Top.jpg
+  http://slagcoin.com/joystick/pcb_diagrams/n64_diagram1.jpg
+  https://i.imgur.com/ZMwTdwp.png
+  https://dpedu.io/article/2015-03-11/nintendo-64-joystick-pinout-arduino
+  https://www.youtube.com/watch?v=0QLZCfqUeg4
   https://nintenduino.wordpress.com/documentation/controller-reference/
   https://nintenduino.files.wordpress.com/2013/12/untitled.png
   https://nintenduino.files.wordpress.com/2013/12/protocolv1-0.png
-  https://github.com/NicoHood/Nintendo
-  https://github.com/dekuNukem/gc3ds
 */
 
 /*
   PINOUTS
 
 
-  Protoboard Side|SR Bit      |Variable Name |GCN Controller Side
-  13 LEFT        |22 and 23   |axisY         |Analog Axis Y // Done
-  14 LEFT        |20 and 21   |axisX         |Analog Axis X // Done
-  15 LEFT        |18 and 19   |axisCx        |Axis C X // Done
-  16 LEFT        |16 and 17   |axisCy        |Axis C Y // Done
-  6  LEFT        |7           |buttonDDown   |D-Down // Done
-  5  LEFT        |6           |buttonDLeft   |D-Left // Done
-  8  LEFT        |8           |axisLTrigger  |L Analog Trigger // Done
-  7  LEFT        |10          |buttonLTrigger|L Digital Trigger // Done
-  10 LEFT        |0           |buttonTurbo   |Turbo (Bootleg Controller Button) // Done
-  11 LEFT        |24          |buttonMode    |Mode (Bootleg Controller Button) // Done
-  12 LEFT        |3           |buttonStart   |Start // Done
-  4  RIGHT       |9           |axisRTrigger  |R Analog Trigger // Done
-  3  LEFT        |4           |buttonDUp     |D-Up // Done
-  4  LEFT        |5           |buttonDRight  |D-Right // Done
-  5  RIGHT       |15          |buttonB       |B // Done
-  3  RIGHT       |11          |buttonRTrigger|R Digital Trigger // Done
-  6  RIGHT       |12          |buttonY       |Y // Done
-  8  RIGHT       |13          |buttonX       |X // Done
-  7  RIGHT       |14          |buttonA       |A // Done
-  10 RIGHT       |2           |buttonZ       |Z // Done
-  9  RIGHT       |1           |buttonMacro   |Macro (Bootleg Controller Button) // Done
-  9  LEFT        |A0 (Not SR) |motorInput    |Motor
-  11 RIGHT       |A1 (Not SR) |turboLed      |Turbo LED (Bootleg Controller Function)
-  12 RIGHT       |A2 (Not SR) |macroLed      |Macro LED (Bootleg Controller Function)
-  SR = Shift Register
+  Protoboard Side Arduino Side  N64 Controller Side
+  1               2             A
+  8               3             D-Right
+  7               4             D-Left
+  6               5             D-Down
+  5               6             D-Up
+  4               7             Start
+  3               8             Z
+  2               9             B
+  9               10            L
+  10              11            R
+  11              12            C-Up
+  12              13            C-Down
+  13              A0            C-Left
+  17              A1            Analog YQ
+  16              A2            Analog XI
+  18              A3            Analog YI
+  15              A4            Analog XQ
+  14              A5            C-Right
 */
 
-#define bootLed 13
+#define buttonA 2
+#define buttonB 9
+#define buttonZ 8
+#define buttonStart 7
 
-#define latchPin 2  // HCF4094/74HC595 Latch/Strobe Input
-#define dataPin 3   // HCF4094/74HC595 Data Input
-#define clockPin 4  // HCF4094/74HC595 Clock Input
+#define buttonDUp 6
+#define buttonDDown 5
+#define buttonDLeft 4
+#define buttonDRight 3
 
-/*
-  #define buttonLTrigger 0 // Left 7 // Bit
-  #define buttonRTrigger 1 // Right 3 // Bit
-  #define buttonZ 2 // Right 10 // Bit
-  #define buttonStart 3 // Left 12 // Bit
+#define buttonL 10
+#define buttonR 11
 
-  #define buttonY 4 // Right 6 // Bit
-  #define buttonX 5 // Right 8 // Bit
-  #define buttonB 6 // Right 5 // Bit
-  #define buttonA 7 // Right 7 // Bit
+#define buttonCUp 12
+#define buttonCDown 13
+#define buttonCLeft A0
+#define buttonCRight A5
 
-  #define axisLTrigger 8 // Left 8 // Bit
-  #define axisRTrigger 9 // Right 4 // Bit
-  #define buttonMacro 10 // Right 9 // Bit
-  #define buttonTurbo 11 // Left 10 // Bit
-
-  #define buttonDUp 12 // Left 3 // Bit
-  #define buttonDDown 13 // Left 6 // Bit
-  #define buttonDRight 14 // Left 4 // Bit
-  #define buttonDLeft 15 // Left 5 // Bit
-
-  #define axisXHalf 16 // Left 14
-  #define axisXFull 17 // Left 14 // Both are part of the same byte
-
-  #define axisYHalf 18 // Left 13
-  #define axisYFull 19 // Left 13 // Both are part of the same byte
-
-  #define axisCxHalf 20 // left 15
-  #define axisCxFull 21 // left 15 // Both are part of the same byte
-
-  #define axisCyHalf 22 // Left 16
-  #define axisCyFull 23 // Left 16 // Both are part of the same byte
-
-  #define buttonMode 24 // Left 11 // Bit
-*/
-#define buttonTurbo 0  // Left 10 // Bit
-#define buttonMacro 1  // Right 9 // Bit
-#define buttonZ 2      // Right 10 // Bit
-#define buttonStart 3  // Left 12 // Bit
-
-#define buttonDUp 4     // Left 3 // Bit
-#define buttonDRight 5  // Left 4 // Bit
-#define buttonDLeft 6   // Left 5 // Bit
-#define buttonDDown 7   // Left 6 // Bit
-
-#define axisLTrigger 8     // Left 8 // Bit
-#define axisRTrigger 9     // Right 4 // Bit
-#define buttonLTrigger 10  // Left 7 // Bit
-#define buttonRTrigger 11  // Right 3 // Bit
-
-#define buttonY 12  // Right 6 // Bit
-#define buttonX 13  // Right 8 // Bit
-#define buttonA 14  // Right 7 // Bit
-#define buttonB 15  // Right 5 // Bit
-
-#define axisCxHalf 18  // Left 14
-#define axisCxFull 19  // Left 14 // Both are part of the same byte
-
-#define axisCyHalf 16  // Left 13
-#define axisCyFull 17  // Left 13 // Both are part of the same byte
-
-#define axisXHalf 20  // left 15
-#define axisXFull 21  // left 15 // Both are part of the same byte
-
-#define axisYHalf 22  // Left 16
-#define axisYFull 23  // Left 16 // Both are part of the same byte
-
-#define buttonMode 24  // Left 11 // Bit
-/*
-  serial_rx_buffer[0] = 0x01; //  Preamble
-  serial_rx_buffer[1] = 0x00; //  Digital L Trigger, Digital R Trigger, Z, Start, Y, X, B, A
-  serial_rx_buffer[2] = 0x00; //  Analog L Trigger, Analog R Trigger, Macro (Bootleg), Turbo (Bootleg), DUp, DDown, DRight, DLeft
-  serial_rx_buffer[3] = 0x7F; //  Analog X Axis
-  serial_rx_buffer[4] = 0x7F; //  Analog Y Axis
-  serial_rx_buffer[5] = 0x7F; //  C X Axis
-  serial_rx_buffer[6] = 0x7F; //  C Y Axis
-  serial_rx_buffer[7] = 0x00; //  Mode (Bootleg), Buffer Array Element 7  //  All other bits in this Buffer Array Element are unused
-  serial_rx_buffer[8] = 0x00; //  Unused
-  serial_rx_buffer[9] = 0x00; //  Delay Byte 2
-  serial_rx_buffer[10] = 0x00; // Delay Byte 1
-  serial_rx_buffer[11] = 0x01; // Postamble
-*/
-/////////////////////////////////
+#define axisXi A2
+#define axisXq A4
+#define axisYi A3
+#define axisYq A1
 
 const unsigned int startingMacroIndex = 0x04;
 const unsigned int endingMacroIndex = 0x64;
@@ -154,23 +84,32 @@ unsigned int howManyInnerLoopsMacroHas = 0;  //This variable is used to tell if 
 unsigned int macroMetadataIndex = 0;
 unsigned int isInnerLoop = 0;
 
-#define motorInput A0  // Left 9
-#define turboLed A1    // Right 11
-#define macroLed A2    // Right 12
+unsigned int xAxisStepCounter = 0;
+unsigned int yAxisStepCounter = 0;
 
-// Left 9 = Motor Input = A0
-// Right 11 = Turbo LED = A1
-// Right 12 = Macro LED = A2
+unsigned int xAxisIndex = 0;
+unsigned int yAxisIndex = 0;
 
-const bool defaultStatus[] = { HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH };
-bool inputStatus[] = { HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH };
-unsigned int commandArray[] = { buttonTurbo, buttonMacro, buttonZ, buttonStart, buttonDUp, buttonDRight, buttonDLeft, buttonDDown, axisLTrigger, axisRTrigger, buttonLTrigger, buttonRTrigger, buttonY, buttonX, buttonA, buttonB, axisCyHalf, axisCyFull, axisCxHalf, axisCxFull, axisXHalf, axisXFull, axisYHalf, axisYHalf, buttonMode, 25, 26, 27, 28, 29, 30, 31 };
-unsigned int motorArray[] = { motorInput, turboLed, macroLed };  // Motor, Turbo LED, Macro LED
+unsigned int xAxisStepsToMove = 0;
+unsigned int yAxisStepsToMove = 0;
+
+unsigned int xAxisCurrentPosition = 127;  // 127 is the center of the controller for both X and Y Axis, so it should be the standard position
+unsigned int yAxisCurrentPosition = 127;
+
+unsigned int xAxisPreviousPosition = 127;
+unsigned int yAxisPreviousPosition = 127;
+
+bool axisYqActive = false;
+bool axisXqActive = false;
+bool axisYiActive = false;
+bool axisXiActive = false;
 
 bool isInputting = false;
 bool isInputtingDelayed = false;
 
 bool didInputChange = false;
+
+uint8_t buttonArrayIndex = 0;
 
 uint32_t inputDelay = 0;
 uint32_t previousInputDelay = 0;
@@ -184,97 +123,175 @@ uint8_t macro_buffer[macroBufferSize][12];
 uint8_t inner_loop_metadata[macroMetadataSize][12];  // Contains informations such as how many times to repeat a portion of a macro, and where to start and end
 uint32_t controller = 0;
 
+//  The array below is an array of all buttons in the order the bytes have to be sent
+uint8_t xAxisPins[] = { axisXq, axisXi };
+uint8_t yAxisPins[] = { axisYq, axisYi };
+uint8_t commandArray[] = { buttonA, buttonB, buttonZ, buttonStart, buttonDUp, buttonDDown, buttonDLeft, buttonDRight, buttonL, buttonR, buttonCUp, buttonCDown, buttonCLeft, buttonCRight };
+uint8_t buttonArray[] = { buttonA, buttonB, buttonZ, buttonStart, buttonDUp, buttonDDown, buttonDLeft, buttonDRight, buttonL, buttonR, buttonCUp, buttonCDown, buttonCLeft, buttonCRight };
+
 void setup() {
-  pinMode(bootLed, OUTPUT);
-  digitalWrite(bootLed, HIGH);
   Serial.begin(baudRate);
-
-  pinMode(motorInput, INPUT);
-  pinMode(turboLed, INPUT);
-  pinMode(macroLed, INPUT);
-
-  pinMode(latchPin, OUTPUT);
-  pinMode(dataPin, OUTPUT);
-  pinMode(clockPin, OUTPUT);
-
-  digitalWrite(latchPin, LOW);
-  for (int8_t i = 31; i >= 0; i--) {
-    digitalWrite(clockPin, LOW);
-    digitalWrite(dataPin, defaultStatus[i]);
-    digitalWrite(clockPin, HIGH);
+  //  Define buttons and stick to neutral state on startup
+  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(uint8_t)); buttonArrayIndex++) {
+    pinMode(buttonArray[buttonArrayIndex], OUTPUT);
+    digitalWrite(buttonArray[buttonArrayIndex], LOW);
   }
-  digitalWrite(latchPin, HIGH);
-
-  // Press the buttons X, Y and Start for 2 to 3 seconds to reset the controller,
-  // this is a built in controller feature to make it easier to reset analog sticks and
-  // triggers without having to unplug the controller, thanks Nintendo, this feature is very useful!
-  inputStatus[buttonX] = LOW;
-  inputStatus[buttonY] = LOW;
-  inputStatus[buttonStart] = LOW;
-
-  digitalWrite(latchPin, LOW);
-  for (int8_t i = 31; i >= 0; i--) {
-    digitalWrite(clockPin, LOW);
-    digitalWrite(dataPin, inputStatus[i]);
-    digitalWrite(clockPin, HIGH);
+  // Setup stick
+  for (xAxisIndex = 0; xAxisIndex < (sizeof(xAxisPins) / sizeof(uint8_t)); xAxisIndex++) {
+    pinMode(xAxisPins[xAxisIndex], OUTPUT);
+    digitalWrite(xAxisPins[xAxisIndex], LOW);
   }
-  digitalWrite(latchPin, HIGH);
-
-  delay(2000);  // Change this if the controller takes longer to reset
-
-  // Now we release the buttons X, Y and Start after 2 to 3 seconds have passed
-  inputStatus[buttonX] = HIGH;
-  inputStatus[buttonY] = HIGH;
-  inputStatus[buttonStart] = HIGH;
-
-  digitalWrite(latchPin, LOW);
-  for (int8_t i = 31; i >= 0; i--) {
-    digitalWrite(clockPin, LOW);
-    digitalWrite(dataPin, inputStatus[i]);
-    digitalWrite(clockPin, HIGH);
+  for (yAxisIndex = 0; yAxisIndex < (sizeof(yAxisPins) / sizeof(uint8_t)); yAxisIndex++) {
+    pinMode(yAxisPins[yAxisIndex], OUTPUT);
+    digitalWrite(yAxisPins[yAxisIndex], LOW);
   }
-  digitalWrite(latchPin, HIGH);
+  //  Prepare data to send on startup as a way to tell the controller is in Neutral position
+  //  That means, when all buttons and analog stick are reset to their Neutral positions
+  serial_rx_buffer[0] = 0x00;   //  Preamble
+  serial_rx_buffer[1] = 0x00;   //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
+  serial_rx_buffer[2] = 0x00;   //  L, R, CUP, CDOWN, CLEFT, CRIGHT, N/A, N/A
+  serial_rx_buffer[3] = 0x7F;   //  Control Stick X Axis
+  serial_rx_buffer[4] = 0x7F;   //  Control Stick Y Axis
+  serial_rx_buffer[5] = 0x00;   //  N/A (All 8 bits)
+  serial_rx_buffer[6] = 0x00;   //  N/A (All 8 bits)
+  serial_rx_buffer[7] = 0x00;   //  N/A (All 8 bits)
+  serial_rx_buffer[8] = 0x00;   //  Unused
+  serial_rx_buffer[9] = 0x00;   //  Delay Byte 2
+  serial_rx_buffer[10] = 0x00;  // Delay Byte 1
+  serial_rx_buffer[11] = 0x00;  // Postamble
 
-  //  Reset everything
-  serial_rx_buffer[0] = 0x00;
-  serial_rx_buffer[1] = 0x00;
-  serial_rx_buffer[2] = 0x00;
-  serial_rx_buffer[3] = 0x7F;
-  serial_rx_buffer[4] = 0x7F;
-  serial_rx_buffer[5] = 0x7F;
-  serial_rx_buffer[6] = 0x7F;
-  serial_rx_buffer[7] = 0x00;
-  serial_rx_buffer[8] = 0x00;
-  serial_rx_buffer[9] = 0x00;
-  serial_rx_buffer[10] = 0x00;
-  serial_rx_buffer[11] = 0x00;
+  current_macro_input[0] = 0x00;   //  Preamble
+  current_macro_input[1] = 0x00;   //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
+  current_macro_input[2] = 0x00;   //  L, R, CUP, CDOWN, CLEFT, CRIGHT, N/A, N/A
+  current_macro_input[3] = 0x7F;   //  Control Stick X Axis
+  current_macro_input[4] = 0x7F;   //  Control Stick Y Axis
+  current_macro_input[5] = 0x00;   //  N/A (All 8 bits)
+  current_macro_input[6] = 0x00;   //  N/A (All 8 bits)
+  current_macro_input[7] = 0x00;   //  N/A (All 8 bits)
+  current_macro_input[8] = 0x00;   //  Unused
+  current_macro_input[9] = 0x00;   //  Delay Byte 2
+  current_macro_input[10] = 0x00;  // Delay Byte 1
+  current_macro_input[11] = 0x00;  // Postamble
 
-  current_macro_input[0] = 0x00;
-  current_macro_input[1] = 0x00;
-  current_macro_input[2] = 0x00;
-  current_macro_input[3] = 0x7F;
-  current_macro_input[4] = 0x7F;
-  current_macro_input[5] = 0x7F;
-  current_macro_input[6] = 0x7F;
-  current_macro_input[7] = 0x00;
-  current_macro_input[8] = 0x00;
-  current_macro_input[9] = 0x00;
-  current_macro_input[10] = 0x00;
-  current_macro_input[11] = 0x00;
+  old_macro_input[0] = 0x00;   //  Preamble
+  old_macro_input[1] = 0x00;   //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
+  old_macro_input[2] = 0x00;   //  L, R, CUP, CDOWN, CLEFT, CRIGHT, N/A, N/A
+  old_macro_input[3] = 0x7F;   //  Control Stick X Axis
+  old_macro_input[4] = 0x7F;   //  Control Stick Y Axis
+  old_macro_input[5] = 0x00;   //  N/A (All 8 bits)
+  old_macro_input[6] = 0x00;   //  N/A (All 8 bits)
+  old_macro_input[7] = 0x00;   //  N/A (All 8 bits)
+  old_macro_input[8] = 0x00;   //  Unused
+  old_macro_input[9] = 0x00;   //  Delay Byte 2
+  old_macro_input[10] = 0x00;  // Delay Byte 1
+  old_macro_input[11] = 0x00;  // Postamble
 
-  old_macro_input[0] = 0x00;
-  old_macro_input[1] = 0x00;
-  old_macro_input[2] = 0x00;
-  old_macro_input[3] = 0x7F;
-  old_macro_input[4] = 0x7F;
-  old_macro_input[5] = 0x7F;
-  old_macro_input[6] = 0x7F;
-  old_macro_input[7] = 0x00;
-  old_macro_input[8] = 0x00;
-  old_macro_input[9] = 0x00;
-  old_macro_input[10] = 0x00;
-  old_macro_input[11] = 0x00;
-  digitalWrite(bootLed, LOW);
+  resetController();
+  //  And we are ready to go
+}
+
+void resetController() {
+  xAxisStepCounter = 0;
+  yAxisStepCounter = 0;
+
+  xAxisIndex = 0;
+  yAxisIndex = 0;
+
+  xAxisStepsToMove = 0;
+  yAxisStepsToMove = 0;
+
+  xAxisCurrentPosition = 127;
+  yAxisCurrentPosition = 127;
+
+  xAxisPreviousPosition = 127;
+  yAxisPreviousPosition = 127;
+
+  axisYqActive = false;
+  axisXqActive = false;
+  axisYiActive = false;
+  axisXiActive = false;
+
+  buttonArrayIndex = 0;
+
+  //Press L+R+Start to tell the N64 to reset the controller data, which can be used to fix faulty analog stick readings
+  digitalWrite(buttonArray[8], HIGH);
+  digitalWrite(buttonArray[9], HIGH);
+  digitalWrite(buttonArray[3], HIGH);
+  delay(2000);
+  digitalWrite(buttonArray[8], LOW);
+  digitalWrite(buttonArray[9], LOW);
+  digitalWrite(buttonArray[3], LOW);
+
+  for (buttonArrayIndex = 0; buttonArrayIndex < (sizeof(buttonArray) / sizeof(uint8_t)); buttonArrayIndex++) {
+    digitalWrite(buttonArray[buttonArrayIndex], LOW);
+  }
+}
+
+void moveStick(uint8_t xAxisPosition, uint8_t yAxisPosition) {
+  // Y AXIS
+  // Move stick down to specified position
+  if (yAxisPosition >= yAxisCurrentPosition) {
+    yAxisStepsToMove = yAxisPosition - yAxisCurrentPosition;
+    for (yAxisStepCounter = 0; yAxisStepCounter < yAxisStepsToMove; yAxisStepCounter++) {
+      if (axisYqActive == axisYiActive) {
+        axisYiActive = !axisYiActive;
+        digitalWrite(yAxisPins[1], axisYiActive ? HIGH : LOW);
+      } else {
+        axisYqActive = !axisYqActive;
+        digitalWrite(yAxisPins[0], axisYqActive ? HIGH : LOW);
+      }
+    }
+    yAxisCurrentPosition = yAxisPosition;
+    yAxisPreviousPosition = yAxisStepCounter;
+  }
+  // Y AXIS
+  // Move stick up to specified position
+  if (yAxisPosition < yAxisCurrentPosition) {
+    yAxisStepsToMove = yAxisCurrentPosition - yAxisPosition;
+    for (yAxisStepCounter = 0; yAxisStepCounter < yAxisStepsToMove; yAxisStepCounter++) {
+      if (axisYiActive == axisYqActive) {
+        axisYqActive = !axisYqActive;
+        digitalWrite(yAxisPins[0], axisYqActive ? LOW : HIGH);
+      } else {
+        axisYiActive = !axisYiActive;
+        digitalWrite(yAxisPins[1], axisYiActive ? LOW : HIGH);
+      }
+    }
+    yAxisCurrentPosition = yAxisPosition;
+    yAxisPreviousPosition = yAxisStepCounter;
+  }
+  // X AXIS
+  // Move stick right to specified position
+  if (xAxisPosition >= xAxisCurrentPosition) {
+    xAxisStepsToMove = xAxisPosition - xAxisCurrentPosition;
+    for (xAxisStepCounter = 0; xAxisStepCounter < xAxisStepsToMove; xAxisStepCounter++) {
+      if (axisXqActive == axisXiActive) {
+        axisXiActive = !axisXiActive;
+        digitalWrite(xAxisPins[1], axisXiActive ? HIGH : LOW);
+      } else {
+        axisXqActive = !axisXqActive;
+        digitalWrite(xAxisPins[0], axisXqActive ? HIGH : LOW);
+      }
+    }
+    xAxisCurrentPosition = xAxisPosition;
+    xAxisPreviousPosition = xAxisStepCounter;
+  }
+  // X AXIS
+  // Move stick left to specified position
+  if (xAxisPosition < xAxisCurrentPosition) {
+    xAxisStepsToMove = xAxisCurrentPosition - xAxisPosition;
+    for (xAxisStepCounter = 0; xAxisStepCounter < xAxisStepsToMove; xAxisStepCounter++) {
+      if (axisXiActive == axisXqActive) {
+        axisXqActive = !axisXqActive;
+        digitalWrite(xAxisPins[0], axisXqActive ? LOW : HIGH);
+      } else {
+        axisXiActive = !axisXiActive;
+        digitalWrite(xAxisPins[1], axisXiActive ? LOW : HIGH);
+      }
+    }
+    xAxisCurrentPosition = xAxisPosition;
+    xAxisPreviousPosition = xAxisStepCounter;
+  }
 }
 
 void loop() {
@@ -695,108 +712,28 @@ void pressButtons() {
     //  Press Button
 
     //  First 8 buttons, Buffer Array Element 1
-    //  Digital L Trigger, Digital R Trigger, Z, Start, Y, X, B, A
-    inputStatus[buttonLTrigger] = !(current_macro_input[1] & B00000001);
-    inputStatus[buttonRTrigger] = !(current_macro_input[1] & B00000010);
-    inputStatus[buttonZ] = !(current_macro_input[1] & B00000100);
-    inputStatus[buttonStart] = !(current_macro_input[1] & B00001000);
-    inputStatus[buttonY] = !(current_macro_input[1] & B00010000);
-    inputStatus[buttonX] = !(current_macro_input[1] & B00100000);
-    inputStatus[buttonB] = !(current_macro_input[1] & B01000000);
-    inputStatus[buttonA] = !(current_macro_input[1] & B10000000);
+    //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
+    digitalWrite(commandArray[0], (current_macro_input[1] & B00000001));  // A
+    digitalWrite(commandArray[1], (current_macro_input[1] & B00000010));  // B
+    digitalWrite(commandArray[2], (current_macro_input[1] & B00000100));  // Z
+    digitalWrite(commandArray[3], (current_macro_input[1] & B00001000));  // START
+    digitalWrite(commandArray[4], (current_macro_input[1] & B00010000));  // DUP
+    digitalWrite(commandArray[5], (current_macro_input[1] & B00100000));  // DDOWN
+    digitalWrite(commandArray[6], (current_macro_input[1] & B01000000));  // DLEFT
+    digitalWrite(commandArray[7], (current_macro_input[1] & B10000000));  // DRIGHT
 
     //  Second 8 buttons, Buffer Array Element 2
-    //  Analog L Trigger, Analog R Trigger, Macro (Bootleg), Turbo (Bootleg), DUp, DDown, DRight, DLeft
-    //  Analog R and L Triggers have to be inverted (invert the logic level)
-    inputStatus[axisLTrigger] = (current_macro_input[2] & B00000001);
-    inputStatus[axisRTrigger] = (current_macro_input[2] & B00000010);
-    inputStatus[buttonMacro] = !(current_macro_input[2] & B00000100);
-    inputStatus[buttonTurbo] = !(current_macro_input[2] & B00001000);
-    inputStatus[buttonDUp] = !(current_macro_input[2] & B00010000);
-    inputStatus[buttonDDown] = !(current_macro_input[2] & B00100000);
-    inputStatus[buttonDRight] = !(current_macro_input[2] & B01000000);
-    inputStatus[buttonDLeft] = !(current_macro_input[2] & B10000000);
+    //  L, R, CUP, CDOWN, CLEFT, CRIGHT, N/A, N/A
+    digitalWrite(commandArray[8], (current_macro_input[2] & B00000001));   // L
+    digitalWrite(commandArray[9], (current_macro_input[2] & B00000010));   // R
+    digitalWrite(commandArray[10], (current_macro_input[2] & B00000100));  // CUP
+    digitalWrite(commandArray[11], (current_macro_input[2] & B00001000));  // CDOWN
+    digitalWrite(commandArray[12], (current_macro_input[2] & B00010000));  // CLEFT
+    digitalWrite(commandArray[13], (current_macro_input[2] & B00100000));  // CRIGHT
 
-    //  4 Axis, Buffer Array Elements 3, 4, 5, 6
-    //  X, Y, CX, CY
-
-    //X STICK
-    if (current_macro_input[3] > 127) {
-      // Push X Stick to Right
-      inputStatus[axisXHalf] = HIGH;
-      inputStatus[axisXFull] = HIGH;
-    }
-    if (current_macro_input[3] < 127) {
-      // Push X Stick to Left
-      inputStatus[axisXHalf] = LOW;
-      inputStatus[axisXFull] = LOW;
-    }
-    if (current_macro_input[3] == 127) {
-      // Keep X Stick Centered
-      inputStatus[axisXHalf] = HIGH;
-      inputStatus[axisXFull] = LOW;
-    }
-    //Y STICK
-    if (current_macro_input[4] > 127) {
-      // Push Y Stick to Up
-      inputStatus[axisYHalf] = LOW;
-      inputStatus[axisYFull] = LOW;
-    }
-    if (current_macro_input[4] < 127) {
-      // Push Y Stick to Down
-      inputStatus[axisYHalf] = HIGH;
-      inputStatus[axisYFull] = HIGH;
-    }
-    if (current_macro_input[4] == 127) {
-      // Keep Y Stick Centered
-      inputStatus[axisYHalf] = HIGH;
-      inputStatus[axisYFull] = LOW;
-    }
-    //CX STICK
-    if (current_macro_input[5] > 127) {
-      // Push CX Stick to Right
-      inputStatus[axisCxHalf] = HIGH;
-      inputStatus[axisCxFull] = HIGH;
-    }
-    if (current_macro_input[5] < 127) {
-      // Push CX Stick to Left
-      inputStatus[axisCxHalf] = LOW;
-      inputStatus[axisCxFull] = LOW;
-    }
-    if (current_macro_input[5] == 127) {
-      // Keep CX Stick Centered
-      inputStatus[axisCxHalf] = HIGH;
-      inputStatus[axisCxFull] = LOW;
-    }
-    //CY STICK
-    if (current_macro_input[6] > 127) {
-      // Push CY Stick to Down
-      inputStatus[axisCyHalf] = LOW;
-      inputStatus[axisCyFull] = LOW;
-    }
-    if (current_macro_input[6] < 127) {
-      // Push CY Stick to Up
-      inputStatus[axisCyHalf] = HIGH;
-      inputStatus[axisCyFull] = HIGH;
-    }
-    if (current_macro_input[6] == 127) {
-      // Keep CY Stick Centered
-      inputStatus[axisCyHalf] = HIGH;
-      inputStatus[axisCyFull] = LOW;
-    }
-    //  Mode (Bootleg), Buffer Array Element 7
-    //  All other bits in this Buffer Array Element are unused
-    inputStatus[buttonMode] = !(current_macro_input[7] & B00000001);
-
-    digitalWrite(latchPin, LOW);
-    for (int8_t i = 31; i >= 0; i--) {
-      digitalWrite(clockPin, LOW);
-      digitalWrite(dataPin, inputStatus[i]);
-      digitalWrite(clockPin, HIGH);
-    }
-    digitalWrite(latchPin, HIGH);
-
-    //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
+    //  2 Axis, Buffer Array Elements 3, 4
+    //  Stick X axis, Stick Y Axis
+    moveStick(current_macro_input[3], current_macro_input[4]);
 
     //  Buffer Array Elements 9 and 10 are used to tell the Arduino how long commands are executed, on a delay ranging from 1-65535ms
     if (inputDelay != 0) {
@@ -807,31 +744,31 @@ void pressButtons() {
           //  Now we need to stop the Soft Delay
 
           //  Reset everything
-          serial_rx_buffer[0] = 0x00;
-          serial_rx_buffer[1] = 0x00;
-          serial_rx_buffer[2] = 0x00;
-          serial_rx_buffer[3] = 0x7F;
-          serial_rx_buffer[4] = 0x7F;
-          serial_rx_buffer[5] = 0x7F;
-          serial_rx_buffer[6] = 0x7F;
-          serial_rx_buffer[7] = 0x00;
-          serial_rx_buffer[8] = 0x00;
-          serial_rx_buffer[9] = 0x00;
-          serial_rx_buffer[10] = 0x00;
-          serial_rx_buffer[11] = 0x00;
+          serial_rx_buffer[0] = 0x00;   //  Preamble
+          serial_rx_buffer[1] = 0x00;   //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
+          serial_rx_buffer[2] = 0x00;   //  L, R, CUP, CDOWN, CLEFT, CRIGHT, N/A, N/A
+          serial_rx_buffer[3] = 0x7F;   //  Control Stick X Axis
+          serial_rx_buffer[4] = 0x7F;   //  Control Stick Y Axis
+          serial_rx_buffer[5] = 0x00;   //  N/A (All 8 bits)
+          serial_rx_buffer[6] = 0x00;   //  N/A (All 8 bits)
+          serial_rx_buffer[7] = 0x00;   //  N/A (All 8 bits)
+          serial_rx_buffer[8] = 0x00;   //  Unused
+          serial_rx_buffer[9] = 0x00;   //  Delay Byte 2
+          serial_rx_buffer[10] = 0x00;  // Delay Byte 1
+          serial_rx_buffer[11] = 0x00;  // Postamble
 
-          current_macro_input[0] = 0x00;
-          current_macro_input[1] = 0x00;
-          current_macro_input[2] = 0x00;
-          current_macro_input[3] = 0x7F;
-          current_macro_input[4] = 0x7F;
-          current_macro_input[5] = 0x7F;
-          current_macro_input[6] = 0x7F;
-          current_macro_input[7] = 0x00;
-          current_macro_input[8] = 0x00;
-          current_macro_input[9] = 0x00;
-          current_macro_input[10] = 0x00;
-          current_macro_input[11] = 0x00;
+          current_macro_input[0] = 0x00;   //  Preamble
+          current_macro_input[1] = 0x00;   //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
+          current_macro_input[2] = 0x00;   //  L, R, CUP, CDOWN, CLEFT, CRIGHT, N/A, N/A
+          current_macro_input[3] = 0x7F;   //  Control Stick X Axis
+          current_macro_input[4] = 0x7F;   //  Control Stick Y Axis
+          current_macro_input[5] = 0x00;   //  N/A (All 8 bits)
+          current_macro_input[6] = 0x00;   //  N/A (All 8 bits)
+          current_macro_input[7] = 0x00;   //  N/A (All 8 bits)
+          current_macro_input[8] = 0x00;   //  Unused
+          current_macro_input[9] = 0x00;   //  Delay Byte 2
+          current_macro_input[10] = 0x00;  // Delay Byte 1
+          current_macro_input[11] = 0x00;  // Postamble
 
           didInputChange = false;
           // Send the controller data back so it can be used to display controller information on the overlay
@@ -875,99 +812,6 @@ void pressButtons() {
             }
           }
           Serial.flush();
-          //  First 8 buttons, Buffer Array Element 1
-          //  Digital L Trigger, Digital R Trigger, Z, Start, Y, X, B, A
-          inputStatus[buttonLTrigger] = !(current_macro_input[1] & B00000001);
-          inputStatus[buttonRTrigger] = !(current_macro_input[1] & B00000010);
-          inputStatus[buttonZ] = !(current_macro_input[1] & B00000100);
-          inputStatus[buttonStart] = !(current_macro_input[1] & B00001000);
-          inputStatus[buttonY] = !(current_macro_input[1] & B00010000);
-          inputStatus[buttonX] = !(current_macro_input[1] & B00100000);
-          inputStatus[buttonB] = !(current_macro_input[1] & B01000000);
-          inputStatus[buttonA] = !(current_macro_input[1] & B10000000);
-
-          //  Second 8 buttons, Buffer Array Element 2
-          //  Analog L Trigger, Analog R Trigger, Macro (Bootleg), Turbo (Bootleg), DUp, DDown, DRight, DLeft
-          //  Analog R and L Triggers have to be inverted (invert the logic level)
-          inputStatus[axisLTrigger] = (current_macro_input[2] & B00000001);
-          inputStatus[axisRTrigger] = (current_macro_input[2] & B00000010);
-          inputStatus[buttonMacro] = !(current_macro_input[2] & B00000100);
-          inputStatus[buttonTurbo] = !(current_macro_input[2] & B00001000);
-          inputStatus[buttonDUp] = !(current_macro_input[2] & B00010000);
-          inputStatus[buttonDDown] = !(current_macro_input[2] & B00100000);
-          inputStatus[buttonDRight] = !(current_macro_input[2] & B01000000);
-          inputStatus[buttonDLeft] = !(current_macro_input[2] & B10000000);
-
-          //  4 Axis, Buffer Array Elements 3, 4, 5, 6
-          //  X, Y, CX, CY
-
-          //X STICK
-          if (current_macro_input[3] > 127) {
-            // Push X Stick to Right
-            inputStatus[axisXHalf] = HIGH;
-            inputStatus[axisXFull] = HIGH;
-          }
-          if (current_macro_input[3] < 127) {
-            // Push X Stick to Left
-            inputStatus[axisXHalf] = LOW;
-            inputStatus[axisXFull] = LOW;
-          }
-          if (current_macro_input[3] == 127) {
-            // Keep X Stick Centered
-            inputStatus[axisXHalf] = HIGH;
-            inputStatus[axisXFull] = LOW;
-          }
-          //Y STICK
-          if (current_macro_input[4] > 127) {
-            // Push Y Stick to Up
-            inputStatus[axisYHalf] = LOW;
-            inputStatus[axisYFull] = LOW;
-          }
-          if (current_macro_input[4] < 127) {
-            // Push Y Stick to Down
-            inputStatus[axisYHalf] = HIGH;
-            inputStatus[axisYFull] = HIGH;
-          }
-          if (current_macro_input[4] == 127) {
-            // Keep Y Stick Centered
-            inputStatus[axisYHalf] = HIGH;
-            inputStatus[axisYFull] = LOW;
-          }
-          //CX STICK
-          if (current_macro_input[5] > 127) {
-            // Push CX Stick to Right
-            inputStatus[axisCxHalf] = HIGH;
-            inputStatus[axisCxFull] = HIGH;
-          }
-          if (current_macro_input[5] < 127) {
-            // Push CX Stick to Left
-            inputStatus[axisCxHalf] = LOW;
-            inputStatus[axisCxFull] = LOW;
-          }
-          if (current_macro_input[5] == 127) {
-            // Keep CX Stick Centered
-            inputStatus[axisCxHalf] = HIGH;
-            inputStatus[axisCxFull] = LOW;
-          }
-          //CY STICK
-          if (current_macro_input[6] > 127) {
-            // Push CY Stick to Down
-            inputStatus[axisCyHalf] = LOW;
-            inputStatus[axisCyFull] = LOW;
-          }
-          if (current_macro_input[6] < 127) {
-            // Push CY Stick to Up
-            inputStatus[axisCyHalf] = HIGH;
-            inputStatus[axisCyFull] = HIGH;
-          }
-          if (current_macro_input[6] == 127) {
-            // Keep CY Stick Centered
-            inputStatus[axisCyHalf] = HIGH;
-            inputStatus[axisCyFull] = LOW;
-          }
-          //  Mode (Bootleg), Buffer Array Element 7
-          //  All other bits in this Buffer Array Element are unused
-          inputStatus[buttonMode] = !(current_macro_input[7] & B00000001);
           // Sometimes buttons are considered as released by the console between inputs, the pieces of code below will hopefully make it so buttons are only released at the end of the final iteration of a loopable macro, or released at the final input of a non-loopable macro, or released at the end of a basic input
           if (loopMacro <= 0) {
             if (currentMacroIndexRunning == macroInputsToRun) {
@@ -981,13 +825,29 @@ void pressButtons() {
               howManyInnerLoopsMacroHas = 0;
               macroMetadataIndex = 0;
               isInnerLoop = 0;
-              digitalWrite(latchPin, LOW);
-              for (int8_t i = 31; i >= 0; i--) {
-                digitalWrite(clockPin, LOW);
-                digitalWrite(dataPin, inputStatus[i]);
-                digitalWrite(clockPin, HIGH);
-              }
-              digitalWrite(latchPin, HIGH);
+              //  First 8 buttons, Buffer Array Element 1
+              //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
+              digitalWrite(commandArray[0], (current_macro_input[1] & B00000001));  // A
+              digitalWrite(commandArray[1], (current_macro_input[1] & B00000010));  // B
+              digitalWrite(commandArray[2], (current_macro_input[1] & B00000100));  // Z
+              digitalWrite(commandArray[3], (current_macro_input[1] & B00001000));  // START
+              digitalWrite(commandArray[4], (current_macro_input[1] & B00010000));  // DUP
+              digitalWrite(commandArray[5], (current_macro_input[1] & B00100000));  // DDOWN
+              digitalWrite(commandArray[6], (current_macro_input[1] & B01000000));  // DLEFT
+              digitalWrite(commandArray[7], (current_macro_input[1] & B10000000));  // DRIGHT
+
+              //  Second 8 buttons, Buffer Array Element 2
+              //  L, R, CUP, CDOWN, CLEFT, CRIGHT, N/A, N/A
+              digitalWrite(commandArray[8], (current_macro_input[2] & B00000001));   // L
+              digitalWrite(commandArray[9], (current_macro_input[2] & B00000010));   // R
+              digitalWrite(commandArray[10], (current_macro_input[2] & B00000100));  // CUP
+              digitalWrite(commandArray[11], (current_macro_input[2] & B00001000));  // CDOWN
+              digitalWrite(commandArray[12], (current_macro_input[2] & B00010000));  // CLEFT
+              digitalWrite(commandArray[13], (current_macro_input[2] & B00100000));  // CRIGHT
+
+              //  2 Axis, Buffer Array Elements 3, 4
+              //  Stick X axis, Stick Y Axis
+              moveStick(current_macro_input[3], current_macro_input[4]);
             }
           }
           if (loopMacro > 0) {
@@ -1002,13 +862,29 @@ void pressButtons() {
               howManyInnerLoopsMacroHas = 0;
               macroMetadataIndex = 0;
               isInnerLoop = 0;
-              digitalWrite(latchPin, LOW);
-              for (int8_t i = 31; i >= 0; i--) {
-                digitalWrite(clockPin, LOW);
-                digitalWrite(dataPin, inputStatus[i]);
-                digitalWrite(clockPin, HIGH);
-              }
-              digitalWrite(latchPin, HIGH);
+              //  First 8 buttons, Buffer Array Element 1
+              //  A, B, Z, START, DUP, DDOWN, DLEFT, DRIGHT
+              digitalWrite(commandArray[0], (current_macro_input[1] & B00000001));  // A
+              digitalWrite(commandArray[1], (current_macro_input[1] & B00000010));  // B
+              digitalWrite(commandArray[2], (current_macro_input[1] & B00000100));  // Z
+              digitalWrite(commandArray[3], (current_macro_input[1] & B00001000));  // START
+              digitalWrite(commandArray[4], (current_macro_input[1] & B00010000));  // DUP
+              digitalWrite(commandArray[5], (current_macro_input[1] & B00100000));  // DDOWN
+              digitalWrite(commandArray[6], (current_macro_input[1] & B01000000));  // DLEFT
+              digitalWrite(commandArray[7], (current_macro_input[1] & B10000000));  // DRIGHT
+
+              //  Second 8 buttons, Buffer Array Element 2
+              //  L, R, CUP, CDOWN, CLEFT, CRIGHT, N/A, N/A
+              digitalWrite(commandArray[8], (current_macro_input[2] & B00000001));   // L
+              digitalWrite(commandArray[9], (current_macro_input[2] & B00000010));   // R
+              digitalWrite(commandArray[10], (current_macro_input[2] & B00000100));  // CUP
+              digitalWrite(commandArray[11], (current_macro_input[2] & B00001000));  // CDOWN
+              digitalWrite(commandArray[12], (current_macro_input[2] & B00010000));  // CLEFT
+              digitalWrite(commandArray[13], (current_macro_input[2] & B00100000));  // CRIGHT
+
+              //  2 Axis, Buffer Array Elements 3, 4
+              //  Stick X axis, Stick Y Axis
+              moveStick(current_macro_input[3], current_macro_input[4]);
             }
           }
           //  Buffer Array Element 8 is unused in this code, but is existing in case changes are needed
