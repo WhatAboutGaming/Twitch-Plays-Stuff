@@ -1,50 +1,15 @@
 // This project uses 4 8-bit shift register, such as 74HC595 or HCF4094, in cascading format
 /*
-  GCN Controller for Arduino UNO by WhatAboutGaming NOTE: THIS CODE HAD TO BE MODIFIED TO WORK WITH MEGA 2560 BECAUSE UNO RAN OUT OF RAM, THIS CODE NEEDS TO BE OPTIMIZED TO SAVE RAM, I DON'T KNOW WHERE TO EVEN START TO OPTIMIZE THE CODE, TO ME, EVERYTHING LOOKS FINE BUT I'M A NOOB
+  PS2 Controller for Arduino UNO by WhatAboutGaming
   For use in the Twitch.TV stream TwitchTriesToPlay.
   https://www.twitch.tv/twitchtriestoplay
   https://github.com/WhatAboutGaming/Twitch-Plays-Stuff
 
   Reference:
-  http://www.int03.co.uk/crema/hardware/gamecube/gc-control.html
-  http://www.seas.upenn.edu/~gland/gamecube.html
-  https://nintenduino.wordpress.com/documentation/controller-reference/
-  https://nintenduino.files.wordpress.com/2013/12/untitled.png
-  https://nintenduino.files.wordpress.com/2013/12/protocolv1-0.png
-  https://github.com/NicoHood/Nintendo
-  https://github.com/dekuNukem/gc3ds
-*/
-
-/*
-  PINOUTS
-
-
-  Protoboard Side|SR Bit      |Variable Name |GCN Controller Side
-  13 LEFT        |22 and 23   |axisY         |Analog Axis Y // Done
-  14 LEFT        |20 and 21   |axisX         |Analog Axis X // Done
-  15 LEFT        |18 and 19   |axisCx        |Axis C X // Done
-  16 LEFT        |16 and 17   |axisCy        |Axis C Y // Done
-  6  LEFT        |7           |buttonDDown   |D-Down // Done
-  5  LEFT        |6           |buttonDLeft   |D-Left // Done
-  8  LEFT        |8           |axisLTrigger  |L Analog Trigger // Done
-  7  LEFT        |10          |buttonLTrigger|L Digital Trigger // Done
-  10 LEFT        |0           |buttonTurbo   |Turbo (Bootleg Controller Button) // Done
-  11 LEFT        |24          |buttonMode    |Mode (Bootleg Controller Button) // Done
-  12 LEFT        |3           |buttonStart   |Start // Done
-  4  RIGHT       |9           |axisRTrigger  |R Analog Trigger // Done
-  3  LEFT        |4           |buttonDUp     |D-Up // Done
-  4  LEFT        |5           |buttonDRight  |D-Right // Done
-  5  RIGHT       |15          |buttonB       |B // Done
-  3  RIGHT       |11          |buttonRTrigger|R Digital Trigger // Done
-  6  RIGHT       |12          |buttonY       |Y // Done
-  8  RIGHT       |13          |buttonX       |X // Done
-  7  RIGHT       |14          |buttonA       |A // Done
-  10 RIGHT       |2           |buttonZ       |Z // Done
-  9  RIGHT       |1           |buttonMacro   |Macro (Bootleg Controller Button) // Done
-  9  LEFT        |A0 (Not SR) |motorInput    |Motor
-  11 RIGHT       |A1 (Not SR) |turboLed      |Turbo LED (Bootleg Controller Function)
-  12 RIGHT       |A2 (Not SR) |macroLed      |Macro LED (Bootleg Controller Function)
-  SR = Shift Register
+  https://gist.github.com/scanlime/5042071
+  http://store.curiousinventor.com/guides/PS2/
+  http://www.lynxmotion.com/images/files/ps2cmd01.txt
+  http://procrastineering.blogspot.com/2010/12/simulated-ps2-controller-for.html
 */
 
 #define bootLed 13
@@ -53,89 +18,47 @@
 #define dataPin 3   // HCF4094/74HC595 Data Input
 #define clockPin 4  // HCF4094/74HC595 Clock Input
 
-/*
-  #define buttonLTrigger 0 // Left 7 // Bit
-  #define buttonRTrigger 1 // Right 3 // Bit
-  #define buttonZ 2 // Right 10 // Bit
-  #define buttonStart 3 // Left 12 // Bit
+#define buttonSelect 0  // Left 10
+#define buttonL3 1      // Right 9
+#define buttonR3 2      // Right 10
+#define buttonStart 3   // Left 12
 
-  #define buttonY 4 // Right 6 // Bit
-  #define buttonX 5 // Right 8 // Bit
-  #define buttonB 6 // Right 5 // Bit
-  #define buttonA 7 // Right 7 // Bit
+#define buttonDUp 4     // Left 3
+#define buttonDRight 5  // Left 4
+#define buttonDDown 6   // Left 6
+#define buttonDLeft 7   // Left 5
 
-  #define axisLTrigger 8 // Left 8 // Bit
-  #define axisRTrigger 9 // Right 4 // Bit
-  #define buttonMacro 10 // Right 9 // Bit
-  #define buttonTurbo 11 // Left 10 // Bit
+#define buttonL2 8   // Left 7
+#define buttonR2 9   // Right 4
+#define buttonL1 10  // Left 8
+#define buttonR1 11  // Right 3
 
-  #define buttonDUp 12 // Left 3 // Bit
-  #define buttonDDown 13 // Left 6 // Bit
-  #define buttonDRight 14 // Left 4 // Bit
-  #define buttonDLeft 15 // Left 5 // Bit
+#define buttonTriangle 12  // Right 6
+#define buttonCircle 13    // Right 8
+#define buttonCross 14     // Right 7
+#define buttonSquare 15    // Right 5
 
-  #define axisXHalf 16 // Left 14
-  #define axisXFull 17 // Left 14 // Both are part of the same byte
+#define axisRxHalf 16  // Left 14
+#define axisRxFull 17  // Left 14
 
-  #define axisYHalf 18 // Left 13
-  #define axisYFull 19 // Left 13 // Both are part of the same byte
+#define axisRyHalf 18  // Left 13
+#define axisRyFull 19  // Left 13
 
-  #define axisCxHalf 20 // left 15
-  #define axisCxFull 21 // left 15 // Both are part of the same byte
+#define axisLxHalf 20  // Left 15
+#define axisLxFull 21  // Left 15
 
-  #define axisCyHalf 22 // Left 16
-  #define axisCyFull 23 // Left 16 // Both are part of the same byte
+#define axisLyHalf 22  // Left 16
+#define axisLyFull 23  // Left 16
 
-  #define buttonMode 24 // Left 11 // Bit
-*/
-#define buttonLTrigger 10  // Left 7 // Bit
-#define buttonRTrigger 11  // Right 3 // Bit
-#define buttonZ 2      // Right 10 // Bit
-#define buttonStart 3  // Left 12 // Bit
+#define buttonAnalog 24  // Left 11
 
-#define buttonY 12  // Right 6 // Bit
-#define buttonX 13  // Right 8 // Bit
-#define buttonA 14  // Right 7 // Bit
-#define buttonB 15  // Right 5 // Bit
+#define leftMotor A0   // Left 9
+#define rightMotor A1  // Right 11
+#define analogLed A2   // Right 12
 
-#define axisLTrigger 8     // Left 8 // Bit
-#define axisRTrigger 9     // Right 4 // Bit
-#define buttonMacro 1  // Right 9 // Bit
-#define buttonTurbo 0  // Left 10 // Bit
-
-#define buttonDUp 4     // Left 3 // Bit
-#define buttonDDown 7   // Left 6 // Bit
-#define buttonDRight 5  // Left 4 // Bit
-#define buttonDLeft 6   // Left 5 // Bit
-
-#define axisXHalf 20  // left 15
-#define axisXFull 21  // left 15 // Both are part of the same byte
-
-#define axisYHalf 22  // Left 16
-#define axisYFull 23  // Left 16 // Both are part of the same byte
-
-#define axisCxHalf 18  // Left 14
-#define axisCxFull 19  // Left 14 // Both are part of the same byte
-
-#define axisCyHalf 16  // Left 13
-#define axisCyFull 17  // Left 13 // Both are part of the same byte
-
-#define buttonMode 24  // Left 11 // Bit
-/*
-  serial_rx_buffer[0] = 0x01; //  Preamble
-  serial_rx_buffer[1] = 0x00; //  Digital L Trigger, Digital R Trigger, Z, Start, Y, X, B, A
-  serial_rx_buffer[2] = 0x00; //  Analog L Trigger, Analog R Trigger, Macro (Bootleg), Turbo (Bootleg), DUp, DDown, DRight, DLeft
-  serial_rx_buffer[3] = 0x7F; //  Analog X Axis
-  serial_rx_buffer[4] = 0x7F; //  Analog Y Axis
-  serial_rx_buffer[5] = 0x7F; //  C X Axis
-  serial_rx_buffer[6] = 0x7F; //  C Y Axis
-  serial_rx_buffer[7] = 0x00; //  Mode (Bootleg), Buffer Array Element 7  //  All other bits in this Buffer Array Element are unused
-  serial_rx_buffer[8] = 0x00; //  Unused
-  serial_rx_buffer[9] = 0x00; //  Delay Byte 2
-  serial_rx_buffer[10] = 0x00; // Delay Byte 1
-  serial_rx_buffer[11] = 0x01; // Postamble
-*/
-/////////////////////////////////
+// Left 9 = Left Motor In = A0
+// Right 11 = Right Motor In = A1
+// Right 12 = Analog LED = A2
 
 const unsigned int startingMacroIndex = 0x04;
 const unsigned int endingMacroIndex = 0x64;
@@ -154,18 +77,10 @@ unsigned int howManyInnerLoopsMacroHas = 0;  //This variable is used to tell if 
 unsigned int macroMetadataIndex = 0;
 unsigned int isInnerLoop = 0;
 
-#define motorInput A0  // Left 9
-#define turboLed A1    // Right 11
-#define macroLed A2    // Right 12
-
-// Left 9 = Motor Input = A0
-// Right 11 = Turbo LED = A1
-// Right 12 = Macro LED = A2
-
-const bool defaultStatus[] = { HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH };
-bool inputStatus[] = { HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH };
-unsigned int commandArray[] = { buttonTurbo, buttonMacro, buttonZ, buttonStart, buttonDUp, buttonDRight, buttonDLeft, buttonDDown, axisLTrigger, axisRTrigger, buttonLTrigger, buttonRTrigger, buttonY, buttonX, buttonA, buttonB, axisCyHalf, axisCyFull, axisCxHalf, axisCxFull, axisXHalf, axisXFull, axisYHalf, axisYHalf, buttonMode, 25, 26, 27, 28, 29, 30, 31 };
-unsigned int motorArray[] = { motorInput, turboLed, macroLed };  // Motor, Turbo LED, Macro LED
+const bool defaultStatus[] = { LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW };
+bool inputStatus[] = { LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW };
+unsigned int commandArray[] = { buttonSelect, buttonL3, buttonR3, buttonStart, buttonDUp, buttonDRight, buttonDDown, buttonDLeft, buttonL2, buttonR2, buttonL1, buttonR1, buttonTriangle, buttonCircle, buttonCross, buttonSquare, axisRxHalf, axisRxFull, axisRyHalf, axisRyFull, axisLxHalf, axisLxFull, axisLyHalf, axisLyHalf, buttonAnalog, 25, 26, 27, 28, 29, 30, 31 };
+unsigned int motorArray[] = { leftMotor, rightMotor, analogLed };  // Big motor, Small Motor, Analog LED
 
 bool isInputting = false;
 bool isInputtingDelayed = false;
@@ -189,9 +104,9 @@ void setup() {
   digitalWrite(bootLed, HIGH);
   Serial.begin(baudRate);
 
-  pinMode(motorInput, INPUT);
-  pinMode(turboLed, INPUT);
-  pinMode(macroLed, INPUT);
+  pinMode(leftMotor, INPUT);
+  pinMode(rightMotor, INPUT);
+  pinMode(analogLed, INPUT);
 
   pinMode(latchPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
@@ -201,36 +116,6 @@ void setup() {
   for (int8_t i = 31; i >= 0; i--) {
     digitalWrite(clockPin, LOW);
     digitalWrite(dataPin, defaultStatus[i]);
-    digitalWrite(clockPin, HIGH);
-  }
-  digitalWrite(latchPin, HIGH);
-
-  // Press the buttons X, Y and Start for 2 to 3 seconds to reset the controller,
-  // this is a built in controller feature to make it easier to reset analog sticks and
-  // triggers without having to unplug the controller, thanks Nintendo, this feature is very useful!
-  inputStatus[buttonX] = LOW;
-  inputStatus[buttonY] = LOW;
-  inputStatus[buttonStart] = LOW;
-
-  digitalWrite(latchPin, LOW);
-  for (int8_t i = 31; i >= 0; i--) {
-    digitalWrite(clockPin, LOW);
-    digitalWrite(dataPin, inputStatus[i]);
-    digitalWrite(clockPin, HIGH);
-  }
-  digitalWrite(latchPin, HIGH);
-
-  delay(2000);  // Change this if the controller takes longer to reset
-
-  // Now we release the buttons X, Y and Start after 2 to 3 seconds have passed
-  inputStatus[buttonX] = HIGH;
-  inputStatus[buttonY] = HIGH;
-  inputStatus[buttonStart] = HIGH;
-
-  digitalWrite(latchPin, LOW);
-  for (int8_t i = 31; i >= 0; i--) {
-    digitalWrite(clockPin, LOW);
-    digitalWrite(dataPin, inputStatus[i]);
     digitalWrite(clockPin, HIGH);
   }
   digitalWrite(latchPin, HIGH);
@@ -695,98 +580,108 @@ void pressButtons() {
     //  Press Button
 
     //  First 8 buttons, Buffer Array Element 1
-    //  Digital L Trigger, Digital R Trigger, Z, Start, Y, X, B, A
-    inputStatus[buttonLTrigger] = !(current_macro_input[1] & B00000001);
-    inputStatus[buttonRTrigger] = !(current_macro_input[1] & B00000010);
-    inputStatus[buttonZ] = !(current_macro_input[1] & B00000100);
-    inputStatus[buttonStart] = !(current_macro_input[1] & B00001000);
-    inputStatus[buttonY] = !(current_macro_input[1] & B00010000);
-    inputStatus[buttonX] = !(current_macro_input[1] & B00100000);
-    inputStatus[buttonB] = !(current_macro_input[1] & B01000000);
-    inputStatus[buttonA] = !(current_macro_input[1] & B10000000);
+    //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
+    inputStatus[buttonSelect] = (current_macro_input[1] & B00000001);
+    inputStatus[buttonL3] = (current_macro_input[1] & B00000010);
+    inputStatus[buttonR3] = (current_macro_input[1] & B00000100);
+    inputStatus[buttonStart] = (current_macro_input[1] & B00001000);
+    inputStatus[buttonDUp] = (current_macro_input[1] & B00010000);
+    inputStatus[buttonDRight] = (current_macro_input[1] & B00100000);
+    inputStatus[buttonDDown] = (current_macro_input[1] & B01000000);
+    inputStatus[buttonDLeft] = (current_macro_input[1] & B10000000);
 
     //  Second 8 buttons, Buffer Array Element 2
-    //  Analog L Trigger, Analog R Trigger, Macro (Bootleg), Turbo (Bootleg), DUp, DDown, DRight, DLeft
-    //  Analog R and L Triggers have to be inverted (invert the logic level)
-    inputStatus[axisLTrigger] = (current_macro_input[2] & B00000001);
-    inputStatus[axisRTrigger] = (current_macro_input[2] & B00000010);
-    inputStatus[buttonMacro] = !(current_macro_input[2] & B00000100);
-    inputStatus[buttonTurbo] = !(current_macro_input[2] & B00001000);
-    inputStatus[buttonDUp] = !(current_macro_input[2] & B00010000);
-    inputStatus[buttonDDown] = !(current_macro_input[2] & B00100000);
-    inputStatus[buttonDRight] = !(current_macro_input[2] & B01000000);
-    inputStatus[buttonDLeft] = !(current_macro_input[2] & B10000000);
+    //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
+    inputStatus[buttonL2] = (current_macro_input[2] & B00000001);
+    inputStatus[buttonR2] = (current_macro_input[2] & B00000010);
+    inputStatus[buttonL1] = (current_macro_input[2] & B00000100);
+    inputStatus[buttonR1] = (current_macro_input[2] & B00001000);
+    inputStatus[buttonTriangle] = (current_macro_input[2] & B00010000);
+    inputStatus[buttonCircle] = (current_macro_input[2] & B00100000);
+    inputStatus[buttonCross] = (current_macro_input[2] & B01000000);
+    inputStatus[buttonSquare] = (current_macro_input[2] & B10000000);
 
     //  4 Axis, Buffer Array Elements 3, 4, 5, 6
-    //  X, Y, CX, CY
+    //  RX, RY, LX, LY
 
-    //X STICK
+    //RX STICK
     if (current_macro_input[3] > 127) {
-      // Push X Stick to Right
-      inputStatus[axisXHalf] = HIGH;
-      inputStatus[axisXFull] = HIGH;
+      // Push RX Stick to Right
+      inputStatus[axisRxHalf] = HIGH;
+      inputStatus[axisRxFull] = HIGH;
     }
+
     if (current_macro_input[3] < 127) {
-      // Push X Stick to Left
-      inputStatus[axisXHalf] = LOW;
-      inputStatus[axisXFull] = LOW;
+      // Push RX Stick to Left
+      inputStatus[axisRxHalf] = LOW;
+      inputStatus[axisRxFull] = LOW;
     }
+
     if (current_macro_input[3] == 127) {
-      // Keep X Stick Centered
-      inputStatus[axisXHalf] = HIGH;
-      inputStatus[axisXFull] = LOW;
+      // Keep RX Stick Centered
+      inputStatus[axisRxHalf] = HIGH;
+      inputStatus[axisRxFull] = LOW;
     }
-    //Y STICK
+
+    //RY STICK
     if (current_macro_input[4] > 127) {
-      // Push Y Stick to Up
-      inputStatus[axisYHalf] = LOW;
-      inputStatus[axisYFull] = LOW;
+      // Push RY Stick to Up
+      inputStatus[axisRyHalf] = HIGH;
+      inputStatus[axisRyFull] = HIGH;
     }
+
     if (current_macro_input[4] < 127) {
-      // Push Y Stick to Down
-      inputStatus[axisYHalf] = HIGH;
-      inputStatus[axisYFull] = HIGH;
+      // Push RY Stick to Down
+      inputStatus[axisRyHalf] = LOW;
+      inputStatus[axisRyFull] = LOW;
     }
+
     if (current_macro_input[4] == 127) {
-      // Keep Y Stick Centered
-      inputStatus[axisYHalf] = HIGH;
-      inputStatus[axisYFull] = LOW;
+      // Keep RY Stick Centered
+      inputStatus[axisRyHalf] = HIGH;
+      inputStatus[axisRyFull] = LOW;
     }
-    //CX STICK
+
+    //LX STICK
     if (current_macro_input[5] > 127) {
-      // Push CX Stick to Right
-      inputStatus[axisCxHalf] = HIGH;
-      inputStatus[axisCxFull] = HIGH;
+      // Push LX Stick to Right
+      inputStatus[axisLxHalf] = HIGH;
+      inputStatus[axisLxFull] = HIGH;
     }
+
     if (current_macro_input[5] < 127) {
-      // Push CX Stick to Left
-      inputStatus[axisCxHalf] = LOW;
-      inputStatus[axisCxFull] = LOW;
+      // Push LX Stick to Left
+      inputStatus[axisLxHalf] = LOW;
+      inputStatus[axisLxFull] = LOW;
     }
+
     if (current_macro_input[5] == 127) {
-      // Keep CX Stick Centered
-      inputStatus[axisCxHalf] = HIGH;
-      inputStatus[axisCxFull] = LOW;
+      // Keep LX Stick Centered
+      inputStatus[axisLxHalf] = HIGH;
+      inputStatus[axisLxFull] = LOW;
     }
-    //CY STICK
+
+    //LY STICK
     if (current_macro_input[6] > 127) {
-      // Push CY Stick to Down
-      inputStatus[axisCyHalf] = LOW;
-      inputStatus[axisCyFull] = LOW;
+      // Push LY Stick to Down
+      inputStatus[axisLyHalf] = HIGH;
+      inputStatus[axisLyFull] = HIGH;
     }
+
     if (current_macro_input[6] < 127) {
-      // Push CY Stick to Up
-      inputStatus[axisCyHalf] = HIGH;
-      inputStatus[axisCyFull] = HIGH;
+      // Push LY Stick to Up
+      inputStatus[axisLyHalf] = LOW;
+      inputStatus[axisLyFull] = LOW;
     }
+
     if (current_macro_input[6] == 127) {
-      // Keep CY Stick Centered
-      inputStatus[axisCyHalf] = HIGH;
-      inputStatus[axisCyFull] = LOW;
+      // Keep LY Stick Centered
+      inputStatus[axisLyHalf] = HIGH;
+      inputStatus[axisLyFull] = LOW;
     }
-    //  Mode (Bootleg), Buffer Array Element 7
+    //  Analog button (Used to change between Digital and Analog modes in older games), Buffer Array Element 7
     //  All other bits in this Buffer Array Element are unused
-    inputStatus[buttonMode] = !(current_macro_input[7] & B00000001);
+    inputStatus[buttonAnalog] = (current_macro_input[7] & B00000001);
 
     digitalWrite(latchPin, LOW);
     for (int8_t i = 31; i >= 0; i--) {
@@ -876,98 +771,108 @@ void pressButtons() {
           }
           Serial.flush();
           //  First 8 buttons, Buffer Array Element 1
-          //  Digital L Trigger, Digital R Trigger, Z, Start, Y, X, B, A
-          inputStatus[buttonLTrigger] = !(current_macro_input[1] & B00000001);
-          inputStatus[buttonRTrigger] = !(current_macro_input[1] & B00000010);
-          inputStatus[buttonZ] = !(current_macro_input[1] & B00000100);
-          inputStatus[buttonStart] = !(current_macro_input[1] & B00001000);
-          inputStatus[buttonY] = !(current_macro_input[1] & B00010000);
-          inputStatus[buttonX] = !(current_macro_input[1] & B00100000);
-          inputStatus[buttonB] = !(current_macro_input[1] & B01000000);
-          inputStatus[buttonA] = !(current_macro_input[1] & B10000000);
+          //  SELECT, L3, R3, START, DUP, DRIGHT, DDOWN, DLEFT
+          inputStatus[buttonSelect] = (current_macro_input[1] & B00000001);
+          inputStatus[buttonL3] = (current_macro_input[1] & B00000010);
+          inputStatus[buttonR3] = (current_macro_input[1] & B00000100);
+          inputStatus[buttonStart] = (current_macro_input[1] & B00001000);
+          inputStatus[buttonDUp] = (current_macro_input[1] & B00010000);
+          inputStatus[buttonDRight] = (current_macro_input[1] & B00100000);
+          inputStatus[buttonDDown] = (current_macro_input[1] & B01000000);
+          inputStatus[buttonDLeft] = (current_macro_input[1] & B10000000);
 
           //  Second 8 buttons, Buffer Array Element 2
-          //  Analog L Trigger, Analog R Trigger, Macro (Bootleg), Turbo (Bootleg), DUp, DDown, DRight, DLeft
-          //  Analog R and L Triggers have to be inverted (invert the logic level)
-          inputStatus[axisLTrigger] = (current_macro_input[2] & B00000001);
-          inputStatus[axisRTrigger] = (current_macro_input[2] & B00000010);
-          inputStatus[buttonMacro] = !(current_macro_input[2] & B00000100);
-          inputStatus[buttonTurbo] = !(current_macro_input[2] & B00001000);
-          inputStatus[buttonDUp] = !(current_macro_input[2] & B00010000);
-          inputStatus[buttonDDown] = !(current_macro_input[2] & B00100000);
-          inputStatus[buttonDRight] = !(current_macro_input[2] & B01000000);
-          inputStatus[buttonDLeft] = !(current_macro_input[2] & B10000000);
+          //  L2, R2, L1, R1, Triangle/Delta, Circle/O, Cross/X, Square
+          inputStatus[buttonL2] = (current_macro_input[2] & B00000001);
+          inputStatus[buttonR2] = (current_macro_input[2] & B00000010);
+          inputStatus[buttonL1] = (current_macro_input[2] & B00000100);
+          inputStatus[buttonR1] = (current_macro_input[2] & B00001000);
+          inputStatus[buttonTriangle] = (current_macro_input[2] & B00010000);
+          inputStatus[buttonCircle] = (current_macro_input[2] & B00100000);
+          inputStatus[buttonCross] = (current_macro_input[2] & B01000000);
+          inputStatus[buttonSquare] = (current_macro_input[2] & B10000000);
 
           //  4 Axis, Buffer Array Elements 3, 4, 5, 6
-          //  X, Y, CX, CY
+          //  RX, RY, LX, LY
 
-          //X STICK
+          //RX STICK
           if (current_macro_input[3] > 127) {
-            // Push X Stick to Right
-            inputStatus[axisXHalf] = HIGH;
-            inputStatus[axisXFull] = HIGH;
+            // Push RX Stick to Right
+            inputStatus[axisRxHalf] = HIGH;
+            inputStatus[axisRxFull] = HIGH;
           }
+
           if (current_macro_input[3] < 127) {
-            // Push X Stick to Left
-            inputStatus[axisXHalf] = LOW;
-            inputStatus[axisXFull] = LOW;
+            // Push RX Stick to Left
+            inputStatus[axisRxHalf] = LOW;
+            inputStatus[axisRxFull] = LOW;
           }
+
           if (current_macro_input[3] == 127) {
-            // Keep X Stick Centered
-            inputStatus[axisXHalf] = HIGH;
-            inputStatus[axisXFull] = LOW;
+            // Keep RX Stick Centered
+            inputStatus[axisRxHalf] = HIGH;
+            inputStatus[axisRxFull] = LOW;
           }
-          //Y STICK
+
+          //RY STICK
           if (current_macro_input[4] > 127) {
-            // Push Y Stick to Up
-            inputStatus[axisYHalf] = LOW;
-            inputStatus[axisYFull] = LOW;
+            // Push RY Stick to Up
+            inputStatus[axisRyHalf] = HIGH;
+            inputStatus[axisRyFull] = HIGH;
           }
+
           if (current_macro_input[4] < 127) {
-            // Push Y Stick to Down
-            inputStatus[axisYHalf] = HIGH;
-            inputStatus[axisYFull] = HIGH;
+            // Push RY Stick to Down
+            inputStatus[axisRyHalf] = LOW;
+            inputStatus[axisRyFull] = LOW;
           }
+
           if (current_macro_input[4] == 127) {
-            // Keep Y Stick Centered
-            inputStatus[axisYHalf] = HIGH;
-            inputStatus[axisYFull] = LOW;
+            // Keep RY Stick Centered
+            inputStatus[axisRyHalf] = HIGH;
+            inputStatus[axisRyFull] = LOW;
           }
-          //CX STICK
+
+          //LX STICK
           if (current_macro_input[5] > 127) {
-            // Push CX Stick to Right
-            inputStatus[axisCxHalf] = HIGH;
-            inputStatus[axisCxFull] = HIGH;
+            // Push LX Stick to Right
+            inputStatus[axisLxHalf] = HIGH;
+            inputStatus[axisLxFull] = HIGH;
           }
+
           if (current_macro_input[5] < 127) {
-            // Push CX Stick to Left
-            inputStatus[axisCxHalf] = LOW;
-            inputStatus[axisCxFull] = LOW;
+            // Push LX Stick to Left
+            inputStatus[axisLxHalf] = LOW;
+            inputStatus[axisLxFull] = LOW;
           }
+
           if (current_macro_input[5] == 127) {
-            // Keep CX Stick Centered
-            inputStatus[axisCxHalf] = HIGH;
-            inputStatus[axisCxFull] = LOW;
+            // Keep LX Stick Centered
+            inputStatus[axisLxHalf] = HIGH;
+            inputStatus[axisLxFull] = LOW;
           }
-          //CY STICK
+
+          //LY STICK
           if (current_macro_input[6] > 127) {
-            // Push CY Stick to Down
-            inputStatus[axisCyHalf] = LOW;
-            inputStatus[axisCyFull] = LOW;
+            // Push LY Stick to Down
+            inputStatus[axisLyHalf] = HIGH;
+            inputStatus[axisLyFull] = HIGH;
           }
+
           if (current_macro_input[6] < 127) {
-            // Push CY Stick to Up
-            inputStatus[axisCyHalf] = HIGH;
-            inputStatus[axisCyFull] = HIGH;
+            // Push LY Stick to Up
+            inputStatus[axisLyHalf] = LOW;
+            inputStatus[axisLyFull] = LOW;
           }
+
           if (current_macro_input[6] == 127) {
-            // Keep CY Stick Centered
-            inputStatus[axisCyHalf] = HIGH;
-            inputStatus[axisCyFull] = LOW;
+            // Keep LY Stick Centered
+            inputStatus[axisLyHalf] = HIGH;
+            inputStatus[axisLyFull] = LOW;
           }
-          //  Mode (Bootleg), Buffer Array Element 7
+          //  Analog button (Used to change between Digital and Analog modes in older games), Buffer Array Element 7
           //  All other bits in this Buffer Array Element are unused
-          inputStatus[buttonMode] = !(current_macro_input[7] & B00000001);
+          inputStatus[buttonAnalog] = (current_macro_input[7] & B00000001);
           // Sometimes buttons are considered as released by the console between inputs, the pieces of code below will hopefully make it so buttons are only released at the end of the final iteration of a loopable macro, or released at the final input of a non-loopable macro, or released at the end of a basic input
           if (loopMacro <= 0) {
             if (currentMacroIndexRunning == macroInputsToRun) {
