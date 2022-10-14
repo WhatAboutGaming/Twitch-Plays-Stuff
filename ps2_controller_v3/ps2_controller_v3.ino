@@ -56,6 +56,8 @@
 #define rightMotor A1  // Right 11
 #define analogLed A2   // Right 12
 
+#define attentionPin A3
+
 // Left 9 = Left Motor In = A0
 // Right 11 = Right Motor In = A1
 // Right 12 = Analog LED = A2
@@ -107,6 +109,8 @@ void setup() {
   pinMode(leftMotor, INPUT);
   pinMode(rightMotor, INPUT);
   pinMode(analogLed, INPUT);
+
+  pinMode(attentionPin, INPUT);
 
   pinMode(latchPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
