@@ -194,7 +194,21 @@ var advancedInputMetadata = {
   macro_inputs_to_run: 0,
   current_macro_index_running: 0,
   times_to_loop: 0,
-  loop_counter: 0
+  loop_counter: 0,
+  how_many_inner_loops_macro_has: 0,
+  macro_metadata_index: 0,
+  is_inner_loop: 0
+};
+
+var innerLoopMetadata = {
+  inner_loop_inputs_to_run: 0,
+  inner_loop_input_index: 0,
+  inner_loop_times_to_repeat: 0,
+  inner_loop_repeat_counter: 0,
+  where_does_next_inner_loop_start_index: 0,
+  where_does_inner_loop_start_index: 0,
+  where_does_inner_loop_end_index: 0,
+  how_many_inner_loops_to_execute_after_this: 0
 };
 
 var inputCountsObject = {
@@ -274,6 +288,11 @@ function setup() {
     //console.log(data);
     advancedInputMetadata = data;
     //console.log(advancedInputMetadata);
+  });
+  socket.on("inner_loop_metadata", function(data) {
+    //console.log(data);
+    innerLoopMetadata = data;
+    //console.log(innerLoopMetadata);
   });
   socket.on("controller_graphics", function(data) {
     //console.log(data);
@@ -577,7 +596,21 @@ function draw() {
       macro_inputs_to_run: 0,
       current_macro_index_running: 0,
       times_to_loop: 0,
-      loop_counter: 0
+      loop_counter: 0,
+      how_many_inner_loops_macro_has: 0,
+      macro_metadata_index: 0,
+      is_inner_loop: 0
+    };
+
+    innerLoopMetadata = {
+      inner_loop_inputs_to_run: 0,
+      inner_loop_input_index: 0,
+      inner_loop_times_to_repeat: 0,
+      inner_loop_repeat_counter: 0,
+      where_does_next_inner_loop_start_index: 0,
+      where_does_inner_loop_start_index: 0,
+      where_does_inner_loop_end_index: 0,
+      how_many_inner_loops_to_execute_after_this: 0
     };
 
     inputCountsObject = {
@@ -872,27 +905,57 @@ function draw() {
       }
     }
     if (advancedInputString != "") {
-      if (advancedInputMetadata.loop_macro == 0) {
-        textAlign(CENTER, TOP);
-        textLeading(textDefaultLeadingToUse);
-        text("Input\n" + advancedInputMetadata.current_macro_index_running + "/" + advancedInputMetadata.macro_inputs_to_run, 896, 100);
+      if (advancedInputMetadata.is_inner_loop == 0) {
+        if (advancedInputMetadata.loop_macro == 0) {
+          textAlign(CENTER, TOP);
+          textLeading(textDefaultLeadingToUse);
+          text("Input\n" + advancedInputMetadata.current_macro_index_running + "/" + advancedInputMetadata.macro_inputs_to_run, 896, 100);
+        }
+        if (advancedInputMetadata.loop_macro == 1) {
+          textAlign(CENTER, TOP);
+          textLeading(textDefaultLeadingToUse);
+          text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\n\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1), 896, 100);
+        }
+        if (advancedInputString.length > 12) {
+          textAlign(CENTER, TOP);
+          scale(0.5, 1);
+          textLeading(textDefaultLeadingToUse);
+          text("\n" + advancedInputString, 896 * 2, 224);
+          scale(2, 1);
+        }
+        if (advancedInputString.length <= 12 && advancedInputString.length > 0) {
+          textAlign(CENTER, TOP);
+          textLeading(textDefaultLeadingToUse);
+          text("\n" + advancedInputString, 896, 224);
+        }
       }
-      if (advancedInputMetadata.loop_macro == 1) {
-        textAlign(CENTER, TOP);
-        textLeading(textDefaultLeadingToUse);
-        text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\n\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1), 896, 100);
-      }
-      if (advancedInputString.length > 12) {
-        textAlign(CENTER, TOP);
-        scale(0.5, 1);
-        textLeading(textDefaultLeadingToUse);
-        text("\n" + advancedInputString, 896 * 2, 224);
-        scale(2, 1);
-      }
-      if (advancedInputString.length <= 12 && advancedInputString.length > 0) {
-        textAlign(CENTER, TOP);
-        textLeading(textDefaultLeadingToUse);
-        text("\n" + advancedInputString, 896, 224);
+      if (advancedInputMetadata.is_inner_loop == 1) {
+        let innerLoopCurrentInputIndex = innerLoopMetadata.inner_loop_input_index - innerLoopMetadata.where_does_inner_loop_start_index;
+        if (innerLoopCurrentInputIndex <= 0) {
+          innerLoopCurrentInputIndex = 0;
+        }
+        if (advancedInputMetadata.loop_macro == 0) {
+          textAlign(CENTER, TOP);
+          textLeading(textDefaultLeadingToUse);
+          text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896, 60);
+        }
+        if (advancedInputMetadata.loop_macro == 1) {
+          textAlign(CENTER, TOP);
+          textLeading(textDefaultLeadingToUse);
+          text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1) + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896, 40);
+        }
+        if (advancedInputString.length > 12) {
+          textAlign(CENTER, TOP);
+          scale(0.5, 1);
+          textLeading(textDefaultLeadingToUse);
+          text("\n" + advancedInputString, 896 * 2, 266);
+          scale(2, 1);
+        }
+        if (advancedInputString.length <= 12 && advancedInputString.length > 0) {
+          textAlign(CENTER, TOP);
+          textLeading(textDefaultLeadingToUse);
+          text("\n" + advancedInputString, 896, 266);
+        }
       }
     }
   }

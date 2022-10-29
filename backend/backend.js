@@ -126,8 +126,25 @@ var advancedInputMetadata = {
   macro_inputs_to_run: 0,
   current_macro_index_running: 0,
   times_to_loop: 0,
-  loop_counter: 0
+  loop_counter: 0,
+  how_many_inner_loops_macro_has: 0,
+  macro_metadata_index: 0,
+  is_inner_loop: 0
 };
+
+var innerLoopMetadata = {
+  inner_loop_inputs_to_run: 0,
+  inner_loop_input_index: 0,
+  inner_loop_times_to_repeat: 0,
+  inner_loop_repeat_counter: 0,
+  where_does_next_inner_loop_start_index: 0,
+  where_does_inner_loop_start_index: 0,
+  where_does_inner_loop_end_index: 0,
+  how_many_inner_loops_to_execute_after_this: 0
+};
+
+var channelToSendMessageTo = "";
+var usernameToSendMessageTo = "";
 
 var server = http.createServer(handleRequest);
 server.listen(globalConfig.webserver_port);
@@ -208,7 +225,7 @@ io.sockets.on("connection",
     helpMessageSavingMacros = globalConfig.help_message_saving_macros; // This help message can only be used in advanced mode
     currentRunEndgameGoals = globalConfig.current_run_endgame_goals;
     periodicalNewsMessages = globalConfig.periodical_news_messages;
-    
+
     //acceptInputs = globalConfig.initial_accept_inputs;
     //acceptTts = globalConfig.initial_accept_tts;
     //inputMode = globalConfig.initial_input_mode;
@@ -245,6 +262,7 @@ io.sockets.on("connection",
     }
     io.to(socket.id).emit("input_counts_object", inputCountsObject);
     io.to(socket.id).emit("advanced_input_metadata", advancedInputMetadata);
+    io.to(socket.id).emit("inner_loop_metadata", innerLoopMetadata);
     io.to(socket.id).emit("controller_graphics", controllerConfig.controller_graphics);
     io.to(socket.id).emit("game_title", globalConfig.game_title);
     io.to(socket.id).emit("game_title_short", globalConfig.game_title_short);
@@ -1500,13 +1518,29 @@ parser.on("data", async function(data) {
             }
           }
         }
+        if (data[0] >= controllerConfig.initial_macro_inner_loop && data[0] <= (controllerConfig.final_macro_inner_loop - 1)) {
+          innerLoopMetadata = {
+            inner_loop_inputs_to_run: data[1],
+            inner_loop_input_index: data[2],
+            inner_loop_times_to_repeat: data[3],
+            inner_loop_repeat_counter: data[4],
+            where_does_next_inner_loop_start_index: data[5],
+            where_does_inner_loop_start_index: data[6],
+            where_does_inner_loop_end_index: data[7],
+            how_many_inner_loops_to_execute_after_this: data[8]
+          };
+          io.sockets.emit("inner_loop_metadata", innerLoopMetadata);
+        }
         if (data[0] == controllerConfig.final_macro_preamble) {
           advancedInputMetadata = {
             loop_macro: data[2],
             macro_inputs_to_run: data[1],
             current_macro_index_running: data[3],
             times_to_loop: data[4],
-            loop_counter: data[5]
+            loop_counter: data[5],
+            how_many_inner_loops_macro_has: data[6],
+            macro_metadata_index: data[7],
+            is_inner_loop: data[8]
           };
           io.sockets.emit("advanced_input_metadata", advancedInputMetadata);
           // Data that says where in the macro chain the arduino is
@@ -1998,10 +2032,12 @@ function onRawMessageHandler(messageCloned, message) {
 //client.connect();
 // Connect to Twitch:
 if (client.readyState() === "CLOSED") {
+  console.log(new Date().toISOString() + " [checkChatConnection A CHAT READY STATES] chatLogger.readyState() = " + chatLogger.readyState() + " client.readyState() = " + client.readyState() + " clientReconnectAttempts = " + clientReconnectAttempts + " chatLoggerReconnectAttempts = " + chatLoggerReconnectAttempts);
   client.connect();
 }
 if (chatLogger.readyState() === "CLOSED") {
   if (chatConfig.log_chat_as_receiver == true) {
+    console.log(new Date().toISOString() + " [checkChatConnection B CHAT READY STATES] chatLogger.readyState() = " + chatLogger.readyState() + " client.readyState() = " + client.readyState() + " clientReconnectAttempts = " + clientReconnectAttempts + " chatLoggerReconnectAttempts = " + chatLoggerReconnectAttempts);
     chatLogger.connect();
   }
 }
@@ -2214,7 +2250,7 @@ function updateStreamTime() {
               let randomPeriodicalNewsMessageToSend = periodicalNewsMessages[randomPeriodicalNewsMessage];
 
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
-              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_short}})+/ig,globalConfig.next_game_title_short);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + " (" + nextStartTimeISOString + ")");
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + " (" + streamEndTimeISOString + ")");
 
@@ -2241,7 +2277,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24, stream is briefly going offline, don't go anywhere!");
+              client.say(chatConfig.main_channel, ".announce " + globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24, stream is briefly going offline, don't go anywhere!");
             }
           }
           if (currentHour == hourToCheckPm) {
@@ -2253,7 +2289,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + playTimeDays + ", Hour 0 to Hour 12, stream is briefly going offline, don't go anywhere!");
+              client.say(chatConfig.main_channel, ".announce " + globalConfig.game_title + " Day " + playTimeDays + ", Hour 0 to Hour 12, stream is briefly going offline, don't go anywhere!");
             }
           }
           /*
@@ -2339,7 +2375,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24, stream is briefly going offline, don't go anywhere!");
+              client.say(chatConfig.main_channel, ".announce " + globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24, stream is briefly going offline, don't go anywhere!");
             }
           }
           if (currentHour == hourToCheckPm) {
@@ -2351,7 +2387,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + (playTimeDays + 1) + ", Hour 0 to Hour 12, stream is briefly going offline, don't go anywhere!");
+              client.say(chatConfig.main_channel, ".announce " + globalConfig.game_title + " Day " + (playTimeDays + 1) + ", Hour 0 to Hour 12, stream is briefly going offline, don't go anywhere!");
             }
           }
           /*
@@ -2510,7 +2546,7 @@ function getTwitchTokenStatus(twitchAccessTokenObject) {
   req.end();
 }
 
-setInterval(checkChatConnection, 60000); // I wanted to change the delay to 5000 but I don't know if that's a good idea, it'll probably break stuff
+setInterval(checkChatConnection, 60000); // I wanted to change the delay to 5000 but I don't know if that's a good idea, it'll probably break stuff (eg: sometimes the same bot reconnects multiple times, still happens even if interval is super high, it must not be my code's fault, but something tmi.js is doing on its own)
 
 function checkChatConnection() {
   //console.log(client.readyState());
@@ -2520,16 +2556,18 @@ function checkChatConnection() {
   }
   if (client.readyState() === "CLOSED") {
     clientReconnectAttempts++;
-    console.log(new Date().toISOString() + " [checkChatConnection A CHAT READY STATES] chatLogger.readyState() = " + chatLogger.readyState() + " client.readyState() = " + client.readyState() + " clientReconnectAttempts = " + clientReconnectAttempts + " chatLoggerReconnectAttempts = " + chatLoggerReconnectAttempts);
+    console.log(new Date().toISOString() + " [checkChatConnection C CHAT READY STATES] chatLogger.readyState() = " + chatLogger.readyState() + " client.readyState() = " + client.readyState() + " clientReconnectAttempts = " + clientReconnectAttempts + " chatLoggerReconnectAttempts = " + chatLoggerReconnectAttempts);
     client.connect();
   }
   if (chatLogger.readyState() === "OPEN") {
     chatLogger.raw("PING");
   }
   if (chatLogger.readyState() === "CLOSED") {
-    chatLoggerReconnectAttempts++;
-    console.log(new Date().toISOString() + " [checkChatConnection B CHAT READY STATES] chatLogger.readyState() = " + chatLogger.readyState() + " client.readyState() = " + client.readyState() + " clientReconnectAttempts = " + clientReconnectAttempts + " chatLoggerReconnectAttempts = " + chatLoggerReconnectAttempts);
-    chatLogger.connect();
+    if (chatConfig.log_chat_as_receiver == true) {
+      chatLoggerReconnectAttempts++;
+      console.log(new Date().toISOString() + " [checkChatConnection D CHAT READY STATES] chatLogger.readyState() = " + chatLogger.readyState() + " client.readyState() = " + client.readyState() + " clientReconnectAttempts = " + clientReconnectAttempts + " chatLoggerReconnectAttempts = " + chatLoggerReconnectAttempts);
+      chatLogger.connect();
+    }
   }
 }
 
@@ -2587,6 +2625,7 @@ async function onMessageHandler(target, tags, message, self) {
   let userColor = tags["color"];
   let userColorInverted = "#000000";
   let isFirstTwitchMessage = tags["first-msg"];
+  let isReturningChatter = tags["returning-chatter"];
   let twitchUserColor = userColor;
   let messageId = tags["id"];
   let twitchMessageTimestamp = tags["tmi-sent-ts"];
@@ -2596,6 +2635,7 @@ async function onMessageHandler(target, tags, message, self) {
   let savedMacroNameToExecute = "";
   let savedMacroContentsToExecute = "";
   let savedMacroTimesWasUsed = 0;
+  channelToSendMessageTo = target;
   //console.log(messageType);
   //console.log(JSON.stringify(tags));
   if (isNaN(parseInt(twitchMessageTimestamp, 10)) == false) {
@@ -2620,6 +2660,7 @@ async function onMessageHandler(target, tags, message, self) {
   displayName = displayName.replace(/(\\s)+/ig, "");
   displayName = displayName.replace(/\s+/ig, "");
   let usernameToPing = (username.toLowerCase() == displayName.toLowerCase()) ? displayName : username;
+  usernameToSendMessageTo = usernameToPing;
   let randomColorIndex = Math.floor(Math.random() * defaultColors.length);
   let randomColor = defaultColors[randomColorIndex];
   //console.log("randomColor = " + randomColor);
@@ -2717,21 +2758,22 @@ async function onMessageHandler(target, tags, message, self) {
     //console.log("replaceCyrillicsWithLatin");
     //console.log(replaceCyrillicsWithLatin);
     replaceCyrillicsWithLatin = replaceCyrillicsWithLatin.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
-    let singleMessageSpamBots = [/((b+u+y+)|(b+e+s+t+)|(g+e+t+))+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+\W*\s*((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))*\s+(a+n+d+)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+    let singleMessageSpamBots = [/(((f+o+l+o+w+\w*)+|(p+r+i+m+e+\w*)+|(v+i+e+w+\w*)+)+\W*\s*((f+o+l+o+w+\w*)*|(p+r+i+m+e+\w*)*|(v+i+e+w+\w*)*)*\W*\s+(a+n+d+)+\s+((f+o+l+o+w+\w*)+|(p+r+i+m+e+\w*)+|(v+i+e+w+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       ///(w+a+n+\w+)+\s*(t*o*)*\s+(b+e+c+o+m+e)+\s+(f+a+m+o+u+s+\W*)+\s+(b+u+y+)+\s+(f+o+l+o+w+\w*)+\W*\s*(p*r*i*m*e*\w*)*\s+(a+n+d+)+\s+(v+i+e+w+\w*)+\s+(\w*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(t+w+\w*t+c+h+)+\s+(((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))\s*b+o+t+\w*)+\s+(s+o+f+t+w+a+r+e+\w*\W*)+\s*(d+o+)+\s+(a+n+y+)+\s*(o+n+l+i+n+e+)*\s+(\w*)\s+(a+n+y+)+\s+(s+t+r+e+a+m+[^\s]*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(h+e+y+[^\s]*)+\s+(n+i+c+e+)+\s+(s+t+r+e+a+m+[^\s]*)+\s+(y+\w*)+\s+(s+h+\w*)+\s+(f+o+r+)+\s+(s+u+r+e+)+\s+(j+o+i+n+)+\s+(\w*)\s+(s+t+r+e+a+m+[^\s]*)+\s+(c+o+m+u+n+i+t+y+)+\s+(\w*)\s+(j+u+s+t+)+\s+(f+o+u+n+d+)+\s+(\w*)\s+(d+i+s+c+o+r+d+)+\s+(y+e+s+t+e+r+d+a+y+)+\s+([^\s]*)\s+(c+h+e+c+k+)+\s+(i+t+)+\s+(o+u+t+)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(d+o+)+\s+(y+o+\w*)+\s+(w+a+n+\w+)+\s*(t*o*)*\s*(b*e*c*o*m*e*)*\s+(p+o+p+u+l+a+r+\w*[^\s]*|f+a+m+o+u+s+\W*[^\s]*)+\s+(b+u+y+)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+\s+(a+n+d+)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+\s+(\w+)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(d+o+)+\s+(y+o+\w*)+\s+(w+a+n+\w+)+\s*(t*o*)*\s*(b*e*c*o*m*e*)*\s+(p+o+p+u+l+a+r+\w*[^\s]*|f+a+m+o+u+s+\W*[^\s]*)+\s+((b+u+y+)+|(b+e+s+t+)+|(g+e+t+)+)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+\s+(a+n+d+)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+\s+(\w+)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(a+f+i+l+i+a+t+e+)+\s+(f+o+\w*)+\s+(f+r+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       ///([^\s]*)\s*([^\s]+)\s+(a+f+i+l+i+a+t+e+)+\s+(f+o+\w*)+\s+(f+r+e+)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(s+u+\w+e+r+\w*)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+\s+(s+u+b+\w*)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /([^\s]*)\s*(h+e+l+o+[^\s]*)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(r+e+a+l+)\s+(f+r+e+)+\s+(a+n+d+)+\s+(h+i+g+h+)+\s+(q+u+a+l+i+t+y+)+\s+(s+e+r+v+i+c+e+s*)+\s+(t+\w*)+\s+(i+n+c+r+e+a+s+e+)+\s+(y+o+u+\w*)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(h+e+l+o+[^\s]*)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(r+e+a+l+)\s+(f+r+e+)+\s+(a+n+d+)+\s+(h+i+g+h+)+\s+(q+u+a+l+i+t+y+)+\s+(s+e+r+v+i+c+e+s*)+\s+(t+\w*)+\s+(i+n+c+r+e+a+s+e+)+\s+(y+o+u+\w*)+\s+((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(c+u+t+)+\s*(\.+|d+o+t+)*\s*(l+y+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(b+i+g+)+\s*(\.+|d+o+t+)*\s*((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(c+h+i+l+p+|b+i+g+\s*((f+o+l+o+w+\w*)|(p+r+i+m+e+\w*)|(v+i+e+w+\w*))+)+\s*(\.+|d+o+t+)*\s*(c+o+m+|i+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       ///(b+i+g+\s*f+o+l+o+w+\w*)+\s*(\.+|d+o+t+)*\s*(c+o+m+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(h+e+l+o+[^\s]*)+\s+(i+)+\s+(d+o+)+\s+(g+r+a+p+h+i+c+)+\s+(d+e+s+i+g+n+)+\s+(\w+o+)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(w+o+r+k+)+\s+(d+o+n+e+)+\s+(l+i+k+e+)+\s+(\w+)+\s+(l+o+g+o+[^\s]*)+\s+(b+a+n+e+r+[^\s]*)+\s+(p+a+n+e+l+[^\s]*)+\s+(o+v+e+r+l+a+y+[^\s]*)+\s+(e+t+c+[^\s]*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(c+o+d+e+)+\s+(f+o+r+)+\s+(\w+)+\s+(v+i+e+w+e+r+\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
+      /((c+o+d+e+)+\s*(f+o+r+)*\s*(\w+)+\s+(v+i+e+w+e+r+\w*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /((t+w+[l1\!\|]+t+c+h+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
     let multiMessageSpamBotTypeA = [/((i+t+)+\s*(i+s+)|(i+t+\W*s+))+\s+(n+i+c+e+)+\s+(t+o+)+\s+(m+e+t+)+\s+(y+\w*)+\s+(\w+\W*v+e+)+\s+(w+a+t+c+h+e+d+)+\s+(y+\w*)+\s+([^\s]*)+\s+(t+w+\w*t+c+h+)\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(y+\w*)+\s+(s+i+r+\W*)+\s+(h+a+v+e+)+\s+(f+l+o+w+\W*)+\s+(i+t+\W*s+)+\s+(a+w+e+s+\w+m+e\W*)+\s+(\w+)+\s+(l+i+k+e+)+\s+(y+\w*)+\s+(s+t+r+e+a+m+\w*\W*\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -2741,12 +2783,113 @@ async function onMessageHandler(target, tags, message, self) {
     let multiMessageSpamBotTypeB = [/(h+e+y+)+\s+(t+h+e+r+e+\W*)+\s+(w+h+a+t+\W*s+\s*n+e+w+)+\s+(\w+)+\s+(c+h+e+c+k+e+d+)+\s+(o+u+t+)+\s+(y+\w*)+\s+([^\s]*)+\s+(c+h+a+n+e+l+\w*)+\s+(h+e+r+e+)+\s+(\w+)+\s+(t+w+\w*t+c+h+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /^(a*b+o+u+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(k+e+e+p+)+\s+(u+p+)+\s+(t+h+e+)+\s+(g+o+d+)+\s+(s+t+r+e+a+m\w*\W*\w*)+\s+(m+a+n+)+\s+((\w+\W*\s*a+m+)|(\w+\W*\s*m+))+\s+(g+o+i+n+g+)+\s+(t+o+)+\s+(d+o+)+\s+(a+n+i+m+a+t+e+d+)+\s+(b+r+b+\W*)+\s+(i+n+t+r+o\W*)+\s+(a+n+d+)+\s+(o+f+l+i+n+e+)+\s+(s+c+r+e+n+)+\s+(f+o+r+)+\s+(y+\w*)+\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(t+a+k+e+)+\s+(\w+)+\s+(l+o+k+)+\s+((a*t*|i*n*|o*n*)*\s*(t+h+e+)+)+\s+(u+r+l+)+\s+(\w*)+\s+(m+y+)+\s+(a+c+o+u+n+t+\W*\w*)+\s+(i+m+a+g+e+)+\s+(p+r+o+b+a+b+l+y+)+\s+(t+h+e+)+\s+(b+e+s+t+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
+      /(t+a+k+e+)+\s+(\w+)+\s+(l+o+k+)+\s+((a*t*|i*n*|o*n*)*\s*(t+h+e+)+)+\s+(u+r+l+)+\s+(\w*)+\s+(m+y+)+\s+(a+c+o+u+n+t+\W*\w*)+\s+(i+m+a+g+e+)+\s+(p+r+o+b+a+b+l+y+)+\s+(t+h+e+)+\s+(((b+u+y+)|(b+e+s+t+)|(g+e+t+))+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
-    //let slurDetection = /((\bn+[^\s]+g+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")); // User will be instantly permabanned, no matter how known the user is, currently only the N word is implemented, more words will be added as they happen
-    let slurDetection = false; // Todo: improve nword detection because currently it has a lot of false positives // I am not really happy with any solution because no matter what I do, there will always be false positives, and the fact that the n-word can be reduced to its first 3 letters makes this really hard, also there is a country name that starts with the first 3 letters of the n-word // I'm starting to think that this has to be moderated manually by a human that can tell what's inappropriate based on the context
+    let slurDetection = /((((n+\s*[AEIOUYaeiouy0123456789\!\|]+\s*g+)+)+)|(((f+\s*[AEIOUYaeiouy0123456789\!\|]+\s*g+)+)+)|(((r+\s*[AEIOUYaeiouy0123456789\!\|]+\s*t+\s*[AEIOUYaeiouy0123456789\!\|]+\s*r+\s*d+)+)+))/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")); // User will be instantly permabanned, no matter how known the user is, currently only the N word is implemented, more words will be added as they happen
+    let messageToCountLetters = replaceCyrillicsWithLatin;
+    let doesMessageHaveTooManyUpperCaseLetters = false;
+    messageToCountLetters = messageToCountLetters.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "");
+    let removeUpperCaseLetters = messageToCountLetters;
+    removeUpperCaseLetters = removeUpperCaseLetters.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "");
+    removeUpperCaseLetters = removeUpperCaseLetters.normalize("NFD").replace(/[A-Z]+/g, "");
+    let removeLowerCaseLetters = messageToCountLetters;
+    removeLowerCaseLetters = removeLowerCaseLetters.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "");
+    removeLowerCaseLetters = removeLowerCaseLetters.normalize("NFD").replace(/[a-z]+/g, "");
+    let upperCaseLettersCount = removeLowerCaseLetters.length;
+    let lowerCaseLettersCount = removeUpperCaseLetters.length;
+    let originalMessageLetterCount = messageToCountLetters.length;
+    let upperCaseLettersRatio = 0;
+    let lowerCaseLettersRatio = 0;
+    let upperCaseLettersToLowerCaseLettersRatio = 0;
+    let upperCaseLettersRatioNeededToTriggerTimeout = globalConfig.all_caps_message_ratio; // Timeout if 90% or more of characters are upper case
+    let upperCaseMessageLength = globalConfig.all_caps_message_length;
+    /*
+    console.log("messageToCountLetters");
+    console.log(messageToCountLetters);
+    console.log("removeUpperCaseLetters");
+    console.log(removeUpperCaseLetters);
+    console.log("removeLowerCaseLetters");
+    console.log(removeLowerCaseLetters);
+    console.log("upperCaseLettersCount");
+    console.log(upperCaseLettersCount);
+    console.log("lowerCaseLettersCount");
+    console.log(lowerCaseLettersCount);
+    console.log("originalMessageLetterCount");
+    console.log(originalMessageLetterCount);
+    console.log("upperCaseLettersRatioNeededToTriggerTimeout");
+    console.log(upperCaseLettersRatioNeededToTriggerTimeout);
+    console.log("upperCaseMessageLength");
+    console.log(upperCaseMessageLength);
+    */
+    if (originalMessageLetterCount <= 0) {
+      // No letters found here
+      //console.log("No need to do maths, message has " + originalMessageLetterCount + " characters");
+      doesMessageHaveTooManyUpperCaseLetters = false;
+    }
+    if (originalMessageLetterCount > 0) {
+      //console.log("We have " + originalMessageLetterCount + " characters in the message");
+      if (originalMessageLetterCount >= upperCaseMessageLength) {
+        //
+        //console.log("Message length is enough to timeout");
+        if (upperCaseLettersCount > 0) {
+          upperCaseLettersRatio = (upperCaseLettersCount / originalMessageLetterCount);
+          lowerCaseLettersRatio = (lowerCaseLettersCount / originalMessageLetterCount);
+          //console.log("There are " + upperCaseLettersCount + " upper case letters, let's fucking gooooooooooooooooooooooo");
+          if (upperCaseLettersRatio >= upperCaseLettersRatioNeededToTriggerTimeout) {
+            //
+            //console.log("Hell yeah we met all criteria needed to timeout a long all caps message");
+            doesMessageHaveTooManyUpperCaseLetters = true;
+          }
+          if (upperCaseLettersRatio < upperCaseLettersRatioNeededToTriggerTimeout) {
+            //
+            //console.log("Ratio not big enough, sadge");
+            doesMessageHaveTooManyUpperCaseLetters = false;
+          }
+        }
+        if (upperCaseLettersCount <= 0) {
+          //console.log("There are " + upperCaseLettersCount + " upper case letters, sadge");
+          doesMessageHaveTooManyUpperCaseLetters = false;
+        }
+      }
+      if (originalMessageLetterCount < upperCaseMessageLength) {
+        //
+        //console.log("Message length is not enough, needs more letters");
+        doesMessageHaveTooManyUpperCaseLetters = false;
+      }
+      // uhh yeah what do we do now
+      //upperCaseLettersToLowerCaseLettersRatio = upperCaseLettersCount / lowerCaseLettersCount;
+      /*
+      console.log("upperCaseLettersRatio");
+      console.log(upperCaseLettersRatio);
+      console.log("lowerCaseLettersRatio");
+      console.log(lowerCaseLettersRatio);
+      */
+    }
+    //console.log("doesMessageHaveTooManyUpperCaseLetters");
+    //console.log(doesMessageHaveTooManyUpperCaseLetters);
+    /*
+    if (upperCaseLettersCount <= 0) {
+      //
+    }
+    if (upperCaseLettersCount > 0) {
+      //
+    }
+    if (lowerCaseLettersCount <= 0) {
+      //
+    }
+    if (lowerCaseLettersCount > 0) {
+      //
+    }
+    let upperCaseLettersRatio = (upperCaseLettersCount / originalMessageLetterCount);
+    let lowerCaseLettersRatio = (lowerCaseLettersCount / originalMessageLetterCount);
+    let upperCaseLettersToLowerCaseLettersRatio = upperCaseLettersCount / lowerCaseLettersCount;
+    */
+
+    //let slurDetection = false; // Todo: improve nword detection because currently it has a lot of false positives // I am not really happy with any solution because no matter what I do, there will always be false positives, and the fact that the n-word can be reduced to its first 3 letters makes this really hard, also there is a country name that starts with the first 3 letters of the n-word // I'm starting to think that this has to be moderated manually by a human that can tell what's inappropriate based on the context
     //console.log("singleMessageSpamBots");
     //console.log(singleMessageSpamBots);
+    //console.log("slurDetection");
+    //console.log(slurDetection);
     //console.log("multiMessageSpamBotTypeA");
     //console.log(multiMessageSpamBotTypeA);
     //console.log("multiMessageSpamBotTypeB");
@@ -2822,6 +2965,7 @@ async function onMessageHandler(target, tags, message, self) {
               messages_sent: 1,
 
               is_first_twitch_message: isFirstTwitchMessage,
+              is_returning_chatter: isReturningChatter,
 
               first_message_sent_id: messageId,
               first_message_sent: originalMessage,
@@ -2877,6 +3021,9 @@ async function onMessageHandler(target, tags, message, self) {
             };
             if (isFirstMessageSpam == false) {
               if (dataToInsert.first_message_sent_id == dataToInsert.last_message_sent_id) {
+                if (doesMessageHaveTooManyUpperCaseLetters == true) {
+                  dataToInsert.timeout_count = dataToInsert.timeout_count + 1;
+                }
                 if (dataToInsert.first_message_length >= globalConfig.long_message_length) {
                   if (globalConfig.permaban_if_first_message_is_long == true) {
                     dataToInsert.ban_count = dataToInsert.ban_count + 1;
@@ -2952,12 +3099,121 @@ async function onMessageHandler(target, tags, message, self) {
                     userColor = databaseToReadFromResult.randomly_generated_color;
                   }
                   if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
-                    console.log("New user successfully added to database");
+                    console.log("New user successfully added to database A");
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, welcome back! It's possible things have changed a lot since you were last here. If you need a refresher, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
                     if (chatConfig.send_debug_channel_messages == true) {
                       //console.log("chatConfig.debug_channel = " + chatConfig.debug_channel);
-                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                      randomColorName = Math.floor(Math.random() * defaultColors.length);
                       client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot);
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot);
+                    }
+                  }
+                  if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
+                    console.log("First message ID is different from last message ID A");
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                      console.log("Do not send message here A");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, welcome back! It's possible things have changed a lot since you were last here. If you need a refresher, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                      console.log("Do not send message here B");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                      console.log("Do not send message here C");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                      console.log("Do not send message here D");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                      console.log("Do not send message here E");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                      console.log("Do not send message here F");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
                     }
                   }
                   if (databaseToReadFromResult.is_account_blacklisted == true) {
@@ -2970,8 +3226,19 @@ async function onMessageHandler(target, tags, message, self) {
                   if (databaseToReadFromResult.is_account_blacklisted == false) {
                     if (databaseToReadFromResult.is_spam_bot == false) {
                       if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
+                        if (databaseToReadFromResult.first_message_length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                          let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                          client.say(target, ".color " + defaultColorNames[randomColorName]);
+                          client.say(target, ".timeout " + databaseToReadFromResult.last_known_username + " " + globalConfig.all_caps_message_timeout + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!");
+                          client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!");
+                          client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down! This whisper was sent from " + target + ".");
+                          client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
+                          if (chatConfig.send_debug_channel_messages == true) {
+                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Timeout, first message contains too many caps.");
+                          }
+                        }
                         if (databaseToReadFromResult.first_message_length >= globalConfig.long_message_length) {
-                          console.log("First message is too long, do something about it");
+                          console.log("First message is too long, do something about it A");
                           if (globalConfig.permaban_if_first_message_is_long == true) {
                             let randomColorName = Math.floor(Math.random() * defaultColors.length);
                             client.say(target, ".color " + defaultColorNames[randomColorName]);
@@ -2980,7 +3247,7 @@ async function onMessageHandler(target, tags, message, self) {
                             client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from " + target + ".");
                             client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                             if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, first message too long.");
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, first message too long.");
                             }
                           }
                           if (globalConfig.permaban_if_first_message_is_long == false) {
@@ -2991,7 +3258,7 @@ async function onMessageHandler(target, tags, message, self) {
                             client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down! This whisper was sent from " + target + ".");
                             client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                             if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Timeout, first message too long.");
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Timeout, first message too long.");
                             }
                           }
                         }
@@ -3007,7 +3274,7 @@ async function onMessageHandler(target, tags, message, self) {
                     client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot. This whisper was sent from " + target + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.");
                     client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                     if (chatConfig.send_debug_channel_messages == true) {
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message  + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, detected as spam bot.");
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, detected as spam bot.");
                     }
                   }
                   if (databaseToReadFromResult.is_first_message_spam_bot == true) {
@@ -3017,10 +3284,10 @@ async function onMessageHandler(target, tags, message, self) {
                     // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
                     client.say(target, ".color " + defaultColorNames[randomColorName]);
                     client.say(target, ".ban " + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.");
-                    client.action(target, "@" + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.");
-                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from " + target + ".");
+                    client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.");
+                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from " + target + ".");
                     if (chatConfig.send_debug_channel_messages == true) {
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message  + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, sent a slur.");
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, sent a slur.");
                     }
                   }
                 });
@@ -3057,6 +3324,9 @@ async function onMessageHandler(target, tags, message, self) {
                 messages_sent: result.messages_sent + 1,
 
                 is_first_twitch_message: result.is_first_twitch_message,
+                is_returning_chatter: result.is_returning_chatter,
+                //is_first_twitch_message: isFirstTwitchMessage,
+                //is_returning_chatter: isReturningChatter,
 
                 last_message_sent_id: messageId,
                 last_message_sent: originalMessage,
@@ -3093,6 +3363,12 @@ async function onMessageHandler(target, tags, message, self) {
                 is_spam_bot: result.is_spam_bot
               }
             };
+            if (dataToUpdate.$set.is_returning_chatter === "" || dataToUpdate.$set.is_returning_chatter === null || dataToUpdate.$set.is_returning_chatter === undefined || dataToUpdate.$set.is_returning_chatter === "null" || dataToUpdate.$set.is_returning_chatter === "undefined") {
+              // Change this value in case user already exists but the user didn't have the value in their database entry
+              console.log("Changing dataToUpdate.$set.is_returning_chatter for user_id " + dataToUpdate.$set.user_id + " from " + dataToUpdate.$set.is_returning_chatter);
+              dataToUpdate.$set.is_returning_chatter = false;
+              console.log("To " + dataToUpdate.$set.is_returning_chatter);
+            }
             if (dataToUpdate.$set.shortest_message_length > originalMessage.length) {
               console.log("Shorter message");
               dataToUpdate.$set.shortest_message_sent_id = messageId;
@@ -3191,12 +3467,121 @@ async function onMessageHandler(target, tags, message, self) {
                     userColor = databaseToReadFromResult.randomly_generated_color;
                   }
                   if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
-                    console.log("New user successfully added to database");
+                    console.log("New user successfully added to database B");
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, welcome back! It's possible things have changed a lot since you were last here. If you need a refresher, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
                     if (chatConfig.send_debug_channel_messages == true) {
                       //console.log("chatConfig.debug_channel = " + chatConfig.debug_channel);
-                      let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                      randomColorName = Math.floor(Math.random() * defaultColors.length);
                       client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot);
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot);
+                    }
+                  }
+                  if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
+                    console.log("First message ID is different from last message ID B");
+                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                      console.log("Do not send message here G");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, welcome back! It's possible things have changed a lot since you were last here. If you need a refresher, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                      console.log("Do not send message here H");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                      console.log("Do not send message here I");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                      console.log("Do not send message here J");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                      console.log("Do not send message here K");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    /*
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                      console.log("Do not send message here L");
+                      //client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
+                    }
+                    */
+                    if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                      client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
                     }
                   }
                   if (databaseToReadFromResult.is_account_blacklisted == true) {
@@ -3210,7 +3595,7 @@ async function onMessageHandler(target, tags, message, self) {
                     if (databaseToReadFromResult.is_spam_bot == false) {
                       if (databaseToReadFromResult.last_message_length >= globalConfig.long_message_length) {
                         // This should never happen
-                        console.log("First message is too long, do something about it");
+                        console.log("First message is too long, do something about it B");
                         if (globalConfig.timeout_if_message_is_long == true) {
                           /*
                           let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -3220,7 +3605,7 @@ async function onMessageHandler(target, tags, message, self) {
                           client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from " + target + ".");
                           client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                           if (chatConfig.send_debug_channel_messages == true) {
-                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Timeout, message too long.");
+                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Timeout, message too long.");
                           }
                           */
                         }
@@ -3237,9 +3622,20 @@ async function onMessageHandler(target, tags, message, self) {
                   if (databaseToReadFromResult.is_account_blacklisted == false) {
                     if (databaseToReadFromResult.is_spam_bot == false) {
                       if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
+                        if (databaseToReadFromResult.first_message_length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                          let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                          client.say(target, ".color " + defaultColorNames[randomColorName]);
+                          client.say(target, ".timeout " + databaseToReadFromResult.last_known_username + " " + globalConfig.all_caps_message_timeout + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!");
+                          client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!");
+                          client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down! This whisper was sent from " + target + ".");
+                          client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
+                          if (chatConfig.send_debug_channel_messages == true) {
+                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Timeout, first message contains too many caps.");
+                          }
+                        }
                         if (databaseToReadFromResult.first_message_length >= globalConfig.long_message_length) {
                           // This should never happen
-                          console.log("First message is too long, do something about it");
+                          console.log("First message is too long, do something about it C");
                           if (globalConfig.permaban_if_first_message_is_long == true) {
                             let randomColorName = Math.floor(Math.random() * defaultColors.length);
                             client.say(target, ".color " + defaultColorNames[randomColorName]);
@@ -3248,7 +3644,7 @@ async function onMessageHandler(target, tags, message, self) {
                             client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from " + target + ".");
                             client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                             if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, first message too long.");
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, first message too long.");
                             }
                           }
                           if (globalConfig.permaban_if_first_message_is_long == false) {
@@ -3259,7 +3655,7 @@ async function onMessageHandler(target, tags, message, self) {
                             client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down! This whisper was sent from " + target + ".");
                             client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                             if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Timeout, first message too long.");
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Timeout, first message too long.");
                             }
                           }
                         }
@@ -3276,7 +3672,7 @@ async function onMessageHandler(target, tags, message, self) {
                     client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot. This whisper was sent from " + target + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.");
                     client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                     if (chatConfig.send_debug_channel_messages == true) {
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, detected as spam bot.");
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, detected as spam bot.");
                     }
                   }
                   if (databaseToReadFromResult.is_first_message_spam_bot == true) {
@@ -3291,7 +3687,7 @@ async function onMessageHandler(target, tags, message, self) {
                           client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot. This whisper was sent from " + target + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.");
                           client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You sent: \"" + originalMessage + "\".");
                           if (chatConfig.send_debug_channel_messages == true) {
-                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, detected as spam bot.");
+                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, detected as spam bot.");
                           }
                         }
                       }
@@ -3302,10 +3698,10 @@ async function onMessageHandler(target, tags, message, self) {
                     // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
                     client.say(target, ".color " + defaultColorNames[randomColorName]);
                     client.say(target, ".ban " + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.");
-                    client.action(target, "@" + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.");
-                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_known_username + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from " + target + ".");
+                    client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.");
+                    client.whisper(databaseToReadFromResult.last_known_username, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from " + target + ".");
                     if (chatConfig.send_debug_channel_messages == true) {
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message  + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, sent a slur.");
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + " Banned, sent a slur.");
                     }
                   }
                 });
@@ -3406,7 +3802,7 @@ async function onMessageHandler(target, tags, message, self) {
     let inputsUsed = 0;
     let processedMessage = "";
     //var usernameToPing = (username.toLowerCase() == displayName.toLowerCase()) ? displayName : username;
-    let precisionInputs = [];
+    let precisionInputs = "";
     let precisionInputsObjArr = [];
     let processedPrecisionInputs = [];
     let precisionInputsDelay = [];
@@ -3741,7 +4137,7 @@ async function onMessageHandler(target, tags, message, self) {
       if (acceptInputs == true) {
         if (messageWords.length > 0) {
           let renameMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((rename\s*macro)+|(update\s*macro\s*name)+|(edit\s*macro\s*name)+|(update\s*name)+|(edit\s*name)+)+/ig.test(originalMessage); // 2 Parameters: Old Macro Name and New Macro Name
-          let createMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((create\s*macro)+|(save\s*macro)+|(store\s*macro)+|(update\s*macro)+|(edit\s*macro)+|(make\s*macro)+|(new\s*macro)+|(set\s*macro)+|(add\s*macro)+)+/ig.test(originalMessage);// 2 Parameters: Macro Name and Inputs
+          let createMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((create\s*macro)+|(save\s*macro)+|(store\s*macro)+|(update\s*macro)+|(edit\s*macro)+|(make\s*macro)+|(new\s*macro)+|(set\s*macro)+|(add\s*macro)+)+/ig.test(originalMessage); // 2 Parameters: Macro Name and Inputs
           let toggleMacroEditabilityPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((toggle\s*macro\s*editability)+|(toggle\s*editability)+)+/ig.test(originalMessage); // Used to toggle can_macro_be_edited_by_anyone between true and false // 0 Parameters
           let listAllMacrosSavedPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((list\s*all\s*macros)+|(show\s*all\s*macros)+|(view\s*all\s*macros)+|(display\s*all\s*macros)+|(all\s*macros)+|(list\s*saved\s*macros)+|(list\s*stored\s*macros)+|(show\s*saved\s*macros)+|(show\s*stored\s*macros)+|(view\s*saved\s*macros)+|(view\s*stored\s*macros)+|(display\s*saved\s*macros)+|(display\s*stored\s*macros)+|(saved\s*macros)+|(stored\s*macros)+|(list\s*all\s*saved\s*macros)+|(list\s*all\s*stored\s*macros)+|(show\s*all\s*saved\s*macros)+|(show\s*all\s*stored\s*macros)+|(view\s*all\s*saved\s*macros)+|(view\s*all\s*stored\s*macros)+|(display\s*all\s*saved\s*macros)+|(display\s*all\s*stored\s*macros)+|(all\s*saved\s*macros)+|(all\s*stored\s*macros)+|(list\s*all\s*macros\s*saved)+|(list\s*all\s*macros\s*stored)+|(show\s*all\s*macros\s*saved)+|(show\s*all\s*macros\s*stored)+|(view\s*all\s*macros\s*saved)+|(view\s*all\s*macros\s*stored)+|(display\s*all\s*macros\s*saved)+|(display\s*all\s*macros\s*stored)+|(all\s*macros\s*saved)+|(all\s*macros\s*stored)+)+/ig.test(originalMessage); // Used to list all macros saved // 0 Parameters
           let showContentsOfSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((list\s*macro)+|(show\s*macro)+|(view\s*macro)+|(display\s*macro)+)+/ig.test(originalMessage); // 1 Parameter: Macro Name
@@ -3749,6 +4145,10 @@ async function onMessageHandler(target, tags, message, self) {
           let listSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(list\s*settable\s*macro)+/ig.test(originalMessage);
           //console.log("listSettablePrefixCheck = " + listSettablePrefixCheck);
           if (createMacroPrefixCheck == true) {
+            let randomColorName = Math.floor(Math.random() * defaultColors.length);
+            client.say(target, ".color " + defaultColorNames[randomColorName]);
+            client.action(target, "@" + usernameToPing + " This command is currently disabled because it is unstable. It will return for the next run.");
+            /*
             // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
             if (originalMessageWords[1] === "" || originalMessageWords[1] === undefined || originalMessageWords[1] === null || originalMessageWords[1].toLowerCase() === "null" || originalMessageWords[1].toLowerCase() === "undefined") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -3797,7 +4197,7 @@ async function onMessageHandler(target, tags, message, self) {
                   // Use the function to tidy up and make the macro contents "advanced input compliant" before saving and after reading it (DONE)
                   // Make it so the flag can_macro_be_edited_by_anyone can be edited by the owner ONLY (Needs another command to do this) (DONE)
                   // Add command to execute saved macro (DONE)
-                  console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                  //console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
                   let randomColorName = Math.floor(Math.random() * defaultColors.length);
                   client.say(target, ".color " + defaultColorNames[randomColorName]);
                   client.action(target, "@" + usernameToPing + " The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
@@ -3818,7 +4218,7 @@ async function onMessageHandler(target, tags, message, self) {
                   //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                   //console.log("macroContentsToEnter = ");
                   //console.log(macroContentsToEnter);
-                  let macroContentsProcessed = tidyUpAdvancedInputString(macroContentsToEnter);
+                  let macroContentsProcessed = tidyUpAdvancedInputString(macroContentsToEnter).input_string_to_display;
                   //console.log(macroContentsProcessed);
                   macroContentsToEnter = macroContentsProcessed;
                   macroContentsToEnter = macroContentsToEnter.replace(/(\s*\*\d*)+$/ig, "*0");
@@ -3907,7 +4307,7 @@ async function onMessageHandler(target, tags, message, self) {
                                   client.say(target, ".color " + defaultColorNames[randomColorName]);
                                   //console.log("BEFORE databaseToReadFromResult.macro_contents = ");
                                   //console.log(databaseToReadFromResult.macro_contents);
-                                  let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(databaseToReadFromResult.macro_contents);
+                                  let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(databaseToReadFromResult.macro_contents).input_string_to_display;
                                   //console.log("A advancedInputCleanedUpFromDatabase = ");
                                   //console.log(advancedInputCleanedUpFromDatabase);
                                   //console.log("AFTER databaseToReadFromResult.macro_contents = ");
@@ -4142,7 +4542,7 @@ async function onMessageHandler(target, tags, message, self) {
                                       console.log(userDbResult);
                                       let randomColorName = Math.floor(Math.random() * defaultColors.length);
                                       client.say(target, ".color " + defaultColorNames[randomColorName]);
-                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents).input_string_to_display;
                                       advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
                                       let advancedInputSplitInMultipleStrings = [];
                                       if (advancedInputCleanedUpFromDatabase.length >= 200) {
@@ -4170,7 +4570,7 @@ async function onMessageHandler(target, tags, message, self) {
                                       console.log(userDbResult);
                                       let randomColorName = Math.floor(Math.random() * defaultColors.length);
                                       client.say(target, ".color " + defaultColorNames[randomColorName]);
-                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents).input_string_to_display;
                                       advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
                                       let advancedInputSplitInMultipleStrings = [];
                                       if (advancedInputCleanedUpFromDatabase.length >= 200) {
@@ -4254,7 +4654,7 @@ async function onMessageHandler(target, tags, message, self) {
                                       console.log(userDbResult);
                                       let randomColorName = Math.floor(Math.random() * defaultColors.length);
                                       client.say(target, ".color " + defaultColorNames[randomColorName]);
-                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents).input_string_to_display;
                                       advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
                                       let advancedInputSplitInMultipleStrings = [];
                                       if (advancedInputCleanedUpFromDatabase.length >= 200) {
@@ -4284,7 +4684,7 @@ async function onMessageHandler(target, tags, message, self) {
                                       console.log(userDbResult);
                                       let randomColorName = Math.floor(Math.random() * defaultColors.length);
                                       client.say(target, ".color " + defaultColorNames[randomColorName]);
-                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents).input_string_to_display;
                                       advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
                                       let advancedInputSplitInMultipleStrings = [];
                                       if (advancedInputCleanedUpFromDatabase.length >= 200) {
@@ -4367,7 +4767,7 @@ async function onMessageHandler(target, tags, message, self) {
                                       console.log(userDbResult);
                                       let randomColorName = Math.floor(Math.random() * defaultColors.length);
                                       client.say(target, ".color " + defaultColorNames[randomColorName]);
-                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents).input_string_to_display;
                                       advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
                                       let advancedInputSplitInMultipleStrings = [];
                                       if (advancedInputCleanedUpFromDatabase.length >= 200) {
@@ -4397,7 +4797,7 @@ async function onMessageHandler(target, tags, message, self) {
                                       console.log(userDbResult);
                                       let randomColorName = Math.floor(Math.random() * defaultColors.length);
                                       client.say(target, ".color " + defaultColorNames[randomColorName]);
-                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents);
+                                      let advancedInputCleanedUpFromDatabase = tidyUpAdvancedInputString(dataToUpdate.$set.macro_contents).input_string_to_display;
                                       advancedInputCleanedUpFromDatabase = advancedInputCleanedUpFromDatabase.replace(/(\s*\*\d*)+$/ig, "*0");
                                       let advancedInputSplitInMultipleStrings = [];
                                       if (advancedInputCleanedUpFromDatabase.length >= 200) {
@@ -4461,8 +4861,13 @@ async function onMessageHandler(target, tags, message, self) {
                 }
               }
             }
+            */
           }
           if (renameMacroPrefixCheck == true) {
+            let randomColorName = Math.floor(Math.random() * defaultColors.length);
+            client.say(target, ".color " + defaultColorNames[randomColorName]);
+            client.action(target, "@" + usernameToPing + " This command is currently disabled because it is unstable. It will return for the next run.");
+            /*
             // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
             if (originalMessageWords[1] === "" || originalMessageWords[1] === undefined || originalMessageWords[1] === null || originalMessageWords[1].toLowerCase() === "null" || originalMessageWords[1].toLowerCase() === "undefined") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -4502,7 +4907,7 @@ async function onMessageHandler(target, tags, message, self) {
                 // Macro name has acceptable length
                 let checkIfMacroNameHasIllegalCharacters = /[^A-Za-z0-9\-\_]+/ig.test(macroNameToLookup);
                 if (checkIfMacroNameHasIllegalCharacters == true) {
-                  console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                  //console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
                   let randomColorName = Math.floor(Math.random() * defaultColors.length);
                   client.say(target, ".color " + defaultColorNames[randomColorName]);
                   client.action(target, "@" + usernameToPing + " The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
@@ -4550,7 +4955,7 @@ async function onMessageHandler(target, tags, message, self) {
                       // New Macro name has acceptable length
                       let checkIfNewMacroNameHasIllegalCharacters = /[^A-Za-z0-9\-\_]+/ig.test(newMacroNameToEnter);
                       if (checkIfNewMacroNameHasIllegalCharacters == true) {
-                        console.log("The new macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                        //console.log("The new macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
                         let randomColorName = Math.floor(Math.random() * defaultColors.length);
                         client.say(target, ".color " + defaultColorNames[randomColorName]);
                         client.action(target, "@" + usernameToPing + " The new macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
@@ -5000,8 +5405,13 @@ async function onMessageHandler(target, tags, message, self) {
                 }
               }
             }
+            */
           }
           if (toggleMacroEditabilityPrefixCheck == true) {
+            let randomColorName = Math.floor(Math.random() * defaultColors.length);
+            client.say(target, ".color " + defaultColorNames[randomColorName]);
+            client.action(target, "@" + usernameToPing + " This command is currently disabled because it is unstable. It will return for the next run.");
+          /*
             // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, let the user know it doesn't exist
             if (originalMessageWords[1] === "" || originalMessageWords[1] === undefined || originalMessageWords[1] === null || originalMessageWords[1].toLowerCase() === "null" || originalMessageWords[1].toLowerCase() === "undefined") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -5041,7 +5451,7 @@ async function onMessageHandler(target, tags, message, self) {
                 // Macro name has acceptable length
                 let checkIfMacroNameHasIllegalCharacters = /[^A-Za-z0-9\-\_]+/ig.test(macroNameToLookup);
                 if (checkIfMacroNameHasIllegalCharacters == true) {
-                  console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                  //console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
                   let randomColorName = Math.floor(Math.random() * defaultColors.length);
                   client.say(target, ".color " + defaultColorNames[randomColorName]);
                   client.action(target, "@" + usernameToPing + " The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
@@ -5339,8 +5749,13 @@ async function onMessageHandler(target, tags, message, self) {
                 }
               }
             }
+            */
           }
           if (listAllMacrosSavedPrefixCheck == true) {
+            let randomColorName = Math.floor(Math.random() * defaultColors.length);
+            client.say(target, ".color " + defaultColorNames[randomColorName]);
+            client.action(target, "@" + usernameToPing + " This command is currently disabled because it is unstable. It will return for the next run.");
+            /*
             console.log("Someone wants to see the list of macros");
             mongoClient.connect(mongoUrl, {
               useUnifiedTopology: true
@@ -5376,7 +5791,8 @@ async function onMessageHandler(target, tags, message, self) {
                     let savedMacrosToList = [];
                     console.log("There are macros saved");
                     for (let savedMacroIndex = 0; savedMacroIndex < macroDbResult.length; savedMacroIndex++) {
-                      savedMacrosToList.push(macroDbResult[savedMacroIndex].macro_name);savedMacrosToList
+                      savedMacrosToList.push(macroDbResult[savedMacroIndex].macro_name);
+                      savedMacrosToList
                       //console.log(macroDbResult[savedMacroIndex].macro_name + " at index " + savedMacroIndex);
                     }
                     //console.log("A savedMacrosToList.length = " + savedMacrosToList.length);
@@ -5424,8 +5840,13 @@ async function onMessageHandler(target, tags, message, self) {
                 macroDb.close();
               });
             });
+            */
           }
           if (showContentsOfSavedMacroPrefixCheck == true) {
+            let randomColorName = Math.floor(Math.random() * defaultColors.length);
+            client.say(target, ".color " + defaultColorNames[randomColorName]);
+            client.action(target, "@" + usernameToPing + " This command is currently disabled because it is unstable. It will return for the next run.");
+            /*
             // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
             if (originalMessageWords[1] === "" || originalMessageWords[1] === undefined || originalMessageWords[1] === null || originalMessageWords[1].toLowerCase() === "null" || originalMessageWords[1].toLowerCase() === "undefined") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -5465,7 +5886,7 @@ async function onMessageHandler(target, tags, message, self) {
                 // Macro name has acceptable length
                 let checkIfMacroNameHasIllegalCharacters = /[^A-Za-z0-9\-\_]+/ig.test(macroNameToLookup);
                 if (checkIfMacroNameHasIllegalCharacters == true) {
-                  console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                  //console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
                   let randomColorName = Math.floor(Math.random() * defaultColors.length);
                   client.say(target, ".color " + defaultColorNames[randomColorName]);
                   client.action(target, "@" + usernameToPing + " The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
@@ -5497,7 +5918,7 @@ async function onMessageHandler(target, tags, message, self) {
                         console.log("Looks like this macro database entry exists, nice");
                         //console.log(result);
                         //console.log(result.macro_contents);
-                        let advancedInputToShow = tidyUpAdvancedInputString(result.macro_contents);
+                        let advancedInputToShow = tidyUpAdvancedInputString(result.macro_contents).input_string_to_display;
                         let advancedInputToShowArray = [];
                         advancedInputToShow = advancedInputToShow.replace(/(\s*\*\d*)+$/ig, "*0");
                         let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -5527,8 +5948,13 @@ async function onMessageHandler(target, tags, message, self) {
                 }
               }
             }
+            */
           }
           if (executeSavedMacroPrefixCheck == true) {
+            let randomColorName = Math.floor(Math.random() * defaultColors.length);
+            client.say(target, ".color " + defaultColorNames[randomColorName]);
+            client.action(target, "@" + usernameToPing + " This command is currently disabled because it is unstable. It will return for the next run.");
+            /*
             // The database stuff below checks if a macro exist, if it does, return that macro, if it doesn't, create that macro
             if (originalMessageWords[1] === "" || originalMessageWords[1] === undefined || originalMessageWords[1] === null || originalMessageWords[1].toLowerCase() === "null" || originalMessageWords[1].toLowerCase() === "undefined") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -5568,7 +5994,7 @@ async function onMessageHandler(target, tags, message, self) {
                 // Macro name has acceptable length
                 let checkIfMacroNameHasIllegalCharacters = /[^A-Za-z0-9\-\_]+/ig.test(macroNameToLookup);
                 if (checkIfMacroNameHasIllegalCharacters == true) {
-                  console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
+                  //console.log("The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
                   let randomColorName = Math.floor(Math.random() * defaultColors.length);
                   client.say(target, ".color " + defaultColorNames[randomColorName]);
                   client.action(target, "@" + usernameToPing + " The macro name you entered contains illegal characters, only letters (A-Z a-z), numbers (0-9), hyphen/dash/minus (-) and underscore/underline (_) are allowed in macro names!");
@@ -5728,7 +6154,7 @@ async function onMessageHandler(target, tags, message, self) {
                                 console.log(new Date().toISOString() + " B savedMacroContentsToExecute = " + savedMacroContentsToExecute);
                                 savedMacroContentsToExecute = savedMacroContentsToExecute.replace(/(\s*\*\d*)+$/ig, "*" + macroRepeatCountToEnter);
                                 console.log(new Date().toISOString() + " C savedMacroContentsToExecute = " + savedMacroContentsToExecute);
-                                savedMacroContentsToExecute = tidyUpAdvancedInputString(savedMacroContentsToExecute);
+                                savedMacroContentsToExecute = tidyUpAdvancedInputString(savedMacroContentsToExecute).input_string_to_display;
                                 console.log(new Date().toISOString() + " D savedMacroContentsToExecute = " + savedMacroContentsToExecute);
                                 savedMacroTimesWasUsed = databaseToReadFromResult.times_macro_was_used;
                               });
@@ -5741,12 +6167,12 @@ async function onMessageHandler(target, tags, message, self) {
                         // macroRepeatCountToEnter
                         let advancedInputToShow = result.macro_contents;
                         advancedInputToShow = advancedInputToShow.replace(/(\s*\*\d*)+$/ig, "*" + macroRepeatCountToEnter);
-                        advancedInputToShow = tidyUpAdvancedInputString(advancedInputToShow);
+                        advancedInputToShow = tidyUpAdvancedInputString(advancedInputToShow).input_string_to_display;
                         let advancedInputToShowArray = [];
                         //advancedInputToShow = advancedInputToShow.replace(/(\s*\*\d*)+$/ig, "*0");
                         let randomColorName = Math.floor(Math.random() * defaultColors.length);
                         client.say(target, ".color " + defaultColorNames[randomColorName]);
-                        /*
+                        
                         if (advancedInputToShow.length >= 200) {
                           // Split in multiple messages
                           advancedInputToShowArray = advancedInputToShow.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
@@ -5765,7 +6191,7 @@ async function onMessageHandler(target, tags, message, self) {
                           // Do not split, send as it is
                           //client.action(target, "@" + usernameToPing + " " + result.macro_name + " = " + advancedInputToShow);
                         }
-                        */
+                        
                         //isExecutingSavedMacro = true;
                         //savedMacroNameToExecute = result.macro_name;
                         //savedMacroContentsToExecute = advancedInputToShow;
@@ -5785,6 +6211,7 @@ async function onMessageHandler(target, tags, message, self) {
             if (isExecutingSavedMacro == true) {
               message = savedMacroContentsToExecute;
             }
+            */
           }
           /*
           await sleep(5000);
@@ -6379,148 +6806,246 @@ async function onMessageHandler(target, tags, message, self) {
           // 3) repeat that block 4 times
           // 4) after the block is executed 4 times, go to up+right;2000
           // 5) and finally, repeate the entire block 255 times
+          // a+b;266 [l+r;266 x+y;266 *255]*4 up+right;2000 *255 a b [b x;16ms *255]*255ms [a [b x] y]16ms
+          //message.match(/\[.*?\]/ig); // or ((\[+[^\[\]]+\]+[\*x]*\d*)+|[^\s]+)+ (this matches every "word" (a word is one or more characters surrounded by spaces or at the beginning or end of string)) or (\[+[^\[\]]+\]+[\*x]*\d*)+ or (\[+.*?\]+[\*x]*\d*)+ or (\[+.*?\]+)+
+          let innerLoopsArray = [];
+          let innerLoopsArrayStep1 = [];
+          let innerLoopsArrayStep2 = [];
+          let isInputStillValid = true;
+          let innerLoopFinalString = "";
+          let innerLoopFinalRepeatCount = 0;
+          let innerLoopTotalDuration = 0;
+          let howManyInnerLoopsMacroHas = 0;
+          let howManyInputsMacroHas = 0;
+          let innerLoopMetadataArray = []; // Object array that contains information such as Preamble, Inputs to execute (0) (number of inputs that should be executed in this inner loop), Current input index (0), Times to repeat (number of times this inner loop should be executed, before going to the next inner loop, if any), Repeat counter (0) (number of times this inner loop was executed), Where is the next inner loop's first input (index 0 input for the next inner loop, aka the index for the input in the macro_buffer array) (Continue normally if value is 0, or do nothing if there are no more inputs to be executed), Where to start (index of the starting input) (Inclusive), Where to end (index of the ending input) (Inclusive), How many inner loops that should be executed after this (if <=0, don't execute inner loops any inner loops after this, and move on as normal, if there are normal inputs to be exeucuted, execute those, if there's nothing else to do, go back to the beginning of the main loop, if > 0, execute n inner loops after this), Unused, Unused, Postamble
+          innerLoopsArray = message.replace(/[\s\.\,]+/ig, " ");
+          //innerLoopsArray = innerLoopsArray.match(/(\[+.*?\]+[\*x]*\d*)+/ig);
+          innerLoopsArray = innerLoopsArray.replace(/(\]+)/ig, "] ");
+          innerLoopsArray = innerLoopsArray.match(/((\[+.*?\]+([\*x]*\d*)*)+|[^\s]+)+/ig);
+          //innerLoopsArray = innerLoopsArray.match(/\[+.*?\]+([\*x]*\d*)*/ig);
+          // ((\[+.*?\]+[\*x]*\d*)+[^\s]+)+
           /*
-          let innerLoopsFound = [];
-          let innerLoopsCleanedUp = [];
-          let areThereInnerLoops = false;
-          console.log("START  innerLoopsFound = ");
-          console.log(innerLoopsFound);
-          console.log("START  innerLoopsFound.length = ");
-          console.log(innerLoopsFound.length);
-          console.log("START  innerLoopsCleanedUp = ");
-          console.log(innerLoopsCleanedUp);
-          console.log("START  innerLoopsCleanedUp.length = ");
-          console.log(innerLoopsCleanedUp.length);
-          innerLoopsFound = message.match(/\[.*?\]/ig);
-          console.log("message = ");
-          console.log(message);
-          console.log("BEFORE innerLoopsFound = ");
-          console.log(innerLoopsFound);
-          if (innerLoopsFound === null || innerLoopsFound === undefined || innerLoopsFound === "" || innerLoopsFound === [] || innerLoopsFound === "[]") {
-            console.log("No inner loops found");
-            innerLoopsFound = [];
-            innerLoopsCleanedUp = [];
+          if (innerLoopsArray === null || innerLoopsArray === undefined || innerLoopsArray === "" || innerLoopsArray === [] || innerLoopsArray === "[]") {
+            console.log("No Inner Loops Found A");
           }
           */
-          /*
-          if (innerLoopsFound !== null && innerLoopsFound !== undefined && innerLoopsFound !== "" && innerLoopsFound !== [] && innerLoopsFound !== "[]") {
-            console.log("There were inner loops found? idk check the array size");
-            if (innerLoopsFound.length <= 0) {
-              console.log("Nope, no inner loops found");
-              innerLoopsFound = [];
-              innerLoopsCleanedUp = [];
+          if (innerLoopsArray !== null && innerLoopsArray !== undefined && innerLoopsArray !== "" && innerLoopsArray !== [] && innerLoopsArray !== "[]") {
+            /*
+            if (innerLoopsArray.length <= 0) {
+              console.log("No Inner Loops Found B");
             }
-            if (innerLoopsFound.length > 0) {
-              console.log("At least one inner loop found");
-              console.log(innerLoopsFound.length);
-              for (var innerLoopsFoundIndex = 0; innerLoopsFoundIndex < innerLoopsFound.length; innerLoopsFoundIndex++) {
-                //console.log("BEFORE innerLoopsFoundIndex = " + innerLoopsFoundIndex);
-                //console.log(innerLoopsFound[innerLoopsFoundIndex]);
-                innerLoopsFound[innerLoopsFoundIndex] = innerLoopsFound[innerLoopsFoundIndex].replace(/([\[+\]+]+)+/ig, "");
-                innerLoopsFound[innerLoopsFoundIndex] = innerLoopsFound[innerLoopsFoundIndex].replace(/[\s\.\,]+/ig, " ");
-                innerLoopsFound[innerLoopsFoundIndex] = innerLoopsFound[innerLoopsFoundIndex].trim();
-                //console.log("AFTER  innerLoopsFoundIndex = " + innerLoopsFoundIndex);
-                //console.log(innerLoopsFound[innerLoopsFoundIndex]);
-                if (innerLoopsFound[innerLoopsFoundIndex] !== null && innerLoopsFound[innerLoopsFoundIndex] !== undefined && innerLoopsFound[innerLoopsFoundIndex] !== "" && innerLoopsFound[innerLoopsFoundIndex] !== "[]" && innerLoopsFound[innerLoopsFoundIndex] !== []) {
-                  innerLoopsCleanedUp.push(innerLoopsFound[innerLoopsFoundIndex]);
-                  console.log("VALID inner loop, use this");
+            */
+            if (innerLoopsArray.length > 0) {
+              for (var innerLoopsArrayIndex = 0; innerLoopsArrayIndex < innerLoopsArray.length; innerLoopsArrayIndex++) {
+                if (innerLoopsArrayIndex < innerLoopsArray.length - 1) {
+                  innerLoopsArray[innerLoopsArrayIndex] = innerLoopsArray[innerLoopsArrayIndex].replace(/(\]+[^\s]*)+$/ig, "]");
                 }
-                
-                if (innerLoopsFound[innerLoopsFoundIndex] === null || innerLoopsFound[innerLoopsFoundIndex] === undefined || innerLoopsFound[innerLoopsFoundIndex] === "" || innerLoopsFound[innerLoopsFoundIndex] === "[]" || innerLoopsFound[innerLoopsFoundIndex] === []) {
-                  console.log("Invalid inner loop, don't use this");
-                }
-                
-              }
-              console.log("innerLoopsCleanedUp = ");
-              console.log(innerLoopsCleanedUp);
-              if (innerLoopsCleanedUp === null || innerLoopsCleanedUp === undefined || innerLoopsCleanedUp === "" || innerLoopsCleanedUp === [] || innerLoopsCleanedUp === "[]") {
-                console.log("No inner loops found STILL");
-                console.log("innerLoopsCleanedUp = ");
-                console.log(innerLoopsCleanedUp);
-                console.log("innerLoopsCleanedUp.length = ");
-                console.log(innerLoopsCleanedUp.length);
-                innerLoopsFound = [];
-                innerLoopsCleanedUp = [];
-              }
-              if (innerLoopsCleanedUp !== null && innerLoopsCleanedUp !== undefined && innerLoopsCleanedUp !== "" && innerLoopsCleanedUp !== [] && innerLoopsCleanedUp !== "[]") {
-                console.log("There were inner loops found? idk check the array size STILL");
-                console.log("innerLoopsCleanedUp = ");
-                console.log(innerLoopsCleanedUp);
-                console.log("innerLoopsCleanedUp.length = ");
-                console.log(innerLoopsCleanedUp.length);
-                if (innerLoopsCleanedUp.length <= 0) {
-                  console.log("Nope, no inner loops found STILL");
-                  console.log("innerLoopsCleanedUp = ");
-                  console.log(innerLoopsCleanedUp);
-                  console.log("innerLoopsCleanedUp.length = ");
-                  console.log(innerLoopsCleanedUp.length);
-                  innerLoopsFound = [];
-                  innerLoopsCleanedUp = [];
-                }
-                if (innerLoopsCleanedUp.length > 0) {
-                  console.log("At least one inner loop found STILL");
-                  console.log("innerLoopsCleanedUp = ");
-                  console.log(innerLoopsCleanedUp);
-                  console.log("innerLoopsCleanedUp.length = ");
-                  console.log(innerLoopsCleanedUp.length);
-                  for (var innerLoopsCleanedUpIndex = 0; innerLoopsCleanedUpIndex < innerLoopsCleanedUp.length; innerLoopsCleanedUpIndex++) {
-                    console.log("innerLoopsCleanedUpIndex = " + innerLoopsCleanedUpIndex);
-                    console.log("innerLoopsCleanedUp[innerLoopsCleanedUpIndex] = ");
-                    console.log(innerLoopsCleanedUp[innerLoopsCleanedUpIndex]);
+                innerLoopsArray[innerLoopsArrayIndex] = innerLoopsArray[innerLoopsArrayIndex].trim();
+                innerLoopsArray[innerLoopsArrayIndex] = innerLoopsArray[innerLoopsArrayIndex].replace(/\s+/ig, " ");
+                innerLoopsArray[innerLoopsArrayIndex] = innerLoopsArray[innerLoopsArrayIndex].trim();
+                innerLoopsArray[innerLoopsArrayIndex] = innerLoopsArray[innerLoopsArrayIndex].replace(/[\[\]]+/ig, " ");
+                innerLoopsArray[innerLoopsArrayIndex] = innerLoopsArray[innerLoopsArrayIndex].trim();
+                innerLoopsArray[innerLoopsArrayIndex] = innerLoopsArray[innerLoopsArrayIndex].replace(/\s+/ig, " ");
+                innerLoopsArray[innerLoopsArrayIndex] = innerLoopsArray[innerLoopsArrayIndex].trim();
+                if (isInputStillValid == true) {
+                  let innerLoopCleanedUp = tidyUpAdvancedInputString(innerLoopsArray[innerLoopsArrayIndex]);
+                  if (innerLoopCleanedUp.input_count > 0) {
+                    innerLoopsArrayStep1.push(innerLoopCleanedUp);
+                    innerLoopsArrayStep2.push(innerLoopCleanedUp.input_string_to_display_without_repeat_count);
                   }
-                  innerLoopsFound = innerLoopsCleanedUp;
+                  if (innerLoopCleanedUp.input_count <= 0) {
+                    /*
+                    if (innerLoopsArrayStep1.length <= 0) {
+                      console.log("Do not push to array");
+                    }
+                    */
+                    if (innerLoopsArrayStep1.length > 0) {
+                      /*
+                      if (innerLoopCleanedUp.repeat_count <= 0) {
+                        console.log("Do not push to array, this is not a valid main loop repeat count");
+                      }
+                      */
+                      if (innerLoopCleanedUp.repeat_count > 0) {
+                        innerLoopsArrayStep1.push(innerLoopCleanedUp);
+                        innerLoopsArrayStep2.push(innerLoopCleanedUp.input_string_to_display_without_repeat_count);
+                      }
+                    }
+                    isInputStillValid = false;
+                  }
                 }
               }
             }
           }
-          */
           /*
-          console.log("AFTER  innerLoopsFound = ");
-          console.log(innerLoopsFound);
-          if (innerLoopsFound === null || innerLoopsFound === undefined || innerLoopsFound === "" || innerLoopsFound === [] || innerLoopsFound === "[]") {
-            console.log("No inner loops found STILL STILL");
-            innerLoopsFound = [];
-            innerLoopsCleanedUp = [];
-          }
-          if (innerLoopsFound !== null && innerLoopsFound !== undefined && innerLoopsFound !== "" && innerLoopsFound !== [] && innerLoopsFound !== "[]") {
-            console.log("There were inner loops found? idk check the array size STILL STILL");
-            if (innerLoopsFound.length <= 0) {
-              console.log("Nope, no inner loops found STILL STILL");
-              innerLoopsFound = [];
-              innerLoopsCleanedUp = [];
-            }
-            if (innerLoopsFound.length > 0) {
-              console.log("At least one inner loop found STILL STILL hell yeah use this to parse the inner loops found");
-              console.log(innerLoopsFound.length);
-              areThereInnerLoops = true;
-            }
+          if (innerLoopsArrayStep1 === null || innerLoopsArrayStep1 === undefined || innerLoopsArrayStep1 === "" || innerLoopsArrayStep1 === [] || innerLoopsArrayStep1 === "[]") {
+            console.log("No Inner Loops Found C");
           }
           */
-          //console.log("AFTER  innerLoopsFound.length = ");
-          //console.log(innerLoopsFound.length);
-          /*
-          for (var innerLoopsFoundIndex = 0; innerLoopsFoundIndex < innerLoopsFound.length; innerLoopsFoundIndex++) {
-            innerLoopsFound[innerLoopsFoundIndex] = innerLoopsFound[innerLoopsFoundIndex].replace(/[\s\.\,]+/ig, " ");
-            innerLoopsFound[innerLoopsFoundIndex] = innerLoopsFound[innerLoopsFoundIndex].trim();
-            console.log("innerLoopsFoundIndex = " + innerLoopsFoundIndex);
-            console.log(innerLoopsFound[innerLoopsFoundIndex]);
-            let innerLoopsSplit = innerLoopsFound[innerLoopsFoundIndex].split(/\s+/ig);
-            for (var innerLoopsSplitIndex = 0; innerLoopsSplitIndex < innerLoopsSplit.length; innerLoopsSplitIndex++) {
-              console.log("innerLoopsSplitIndex = " + innerLoopsSplitIndex);
-              console.log(innerLoopsSplit[innerLoopsSplitIndex]);
+          if (innerLoopsArrayStep1 !== null && innerLoopsArrayStep1 !== undefined && innerLoopsArrayStep1 !== "" && innerLoopsArrayStep1 !== [] && innerLoopsArrayStep1 !== "[]") {
+            /*
+            if (innerLoopsArrayStep1.length <= 0) {
+              console.log("No Inner Loops Found D");
+            }
+            */
+            if (innerLoopsArrayStep1.length > 0) {
+              // With this, we now have a preprocessed list of inner loops, but we don't know where they start or where they end yet
+              innerLoopsArrayStep2 = innerLoopsArrayStep2.join(" ");
+              innerLoopsArrayStep2 = innerLoopsArrayStep2.trim();
+              innerLoopsArrayStep2 = innerLoopsArrayStep2.replace(/\s+/ig, " ");
+              innerLoopsArrayStep2 = innerLoopsArrayStep2.trim();
+              innerLoopsArrayStep2 = innerLoopsArrayStep2.replace(/[\[\]]+/ig, " ");
+              innerLoopsArrayStep2 = innerLoopsArrayStep2.trim();
+              innerLoopsArrayStep2 = innerLoopsArrayStep2.replace(/\s+/ig, " ");
+              innerLoopsArrayStep2 = innerLoopsArrayStep2.trim();
+              /*
+              if (innerLoopsArrayStep1[innerLoopsArrayStep1.length - 1].input_count > 1) {
+                // uhh do not append this to the string?
+                console.log("Case 1A");
+                if (innerLoopsArrayStep1[innerLoopsArrayStep1.length - 1].repeat_count > 0) {
+                  // append input string as well as repeat count (do not do anything? this is inner loop counter)
+                  console.log("Case 1B");
+                }
+                if (innerLoopsArrayStep1[innerLoopsArrayStep1.length - 1].repeat_count <= 0) {
+                  // append just input string (do not do anything? this is inner loop counter)
+                  console.log("Case 1C");
+                }
+              }
+              */
+              if (innerLoopsArrayStep1[innerLoopsArrayStep1.length - 1].input_count <= 1) {
+                // use the repeat count as main loop repeat count ?
+                if (innerLoopsArrayStep1[innerLoopsArrayStep1.length - 1].repeat_count > 0) {
+                  // use the repeat count (append)
+                  innerLoopsArrayStep2 = innerLoopsArrayStep2 + " *" + innerLoopsArrayStep1[innerLoopsArrayStep1.length - 1].repeat_count;
+                  innerLoopFinalRepeatCount = innerLoopsArrayStep1[innerLoopsArrayStep1.length - 1].repeat_count;
+                }
+                /*
+                if (innerLoopsArrayStep1[innerLoopsArrayStep1.length - 1].repeat_count <= 0) {
+                  //  do not use the repeat count (do not append)
+                  console.log("Case 2C");
+                }
+                */
+              }
+              precisionInputs = innerLoopsArrayStep2;
+              for (var innerLoopsArrayStep1Index = 0; innerLoopsArrayStep1Index < innerLoopsArrayStep1.length; innerLoopsArrayStep1Index++) {
+                let innerLoopDuration = 0;
+                let whereDoesInnerLoopStart = 0;
+                let whereDoesInnerLoopEnd = 0;
+                howManyInputsMacroHas = howManyInputsMacroHas + innerLoopsArrayStep1[innerLoopsArrayStep1Index].input_count;
+                if (innerLoopsArrayStep1[innerLoopsArrayStep1Index].is_inner_loop == true) {
+                  let innerLoopParameters = [controllerConfig.initial_macro_inner_loop, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.initial_macro_inner_loop];
+                  //
+                  for (var inputDurationArrayIndex = 0; inputDurationArrayIndex < innerLoopsArrayStep1[innerLoopsArrayStep1Index].input_duration_array.length; inputDurationArrayIndex++) {
+                    innerLoopDuration = innerLoopDuration + innerLoopsArrayStep1[innerLoopsArrayStep1Index].input_duration_array[inputDurationArrayIndex];
+                  }
+                  innerLoopDuration = innerLoopDuration * innerLoopsArrayStep1[innerLoopsArrayStep1Index].repeat_count;
+                  innerLoopTotalDuration = innerLoopTotalDuration + innerLoopDuration;
+                  innerLoopFinalString = innerLoopFinalString + "[" + innerLoopsArrayStep1[innerLoopsArrayStep1Index].input_string_to_display + "] ";
+                  whereDoesInnerLoopStart = howManyInputsMacroHas - innerLoopsArrayStep1[innerLoopsArrayStep1Index].input_count;
+                  whereDoesInnerLoopEnd = howManyInputsMacroHas - 1;
+
+                  innerLoopParameters[0] = controllerConfig.initial_macro_inner_loop + howManyInnerLoopsMacroHas; // Preamble (Index of the current inner loop)
+                  innerLoopParameters[1] = innerLoopsArrayStep1[innerLoopsArrayStep1Index].input_count; // Inputs to execute (number of inputs that should be executed in this inner loop)
+                  innerLoopParameters[2] = 0x00; // Current input index (Returned by the Arduino)
+                  innerLoopParameters[3] = innerLoopsArrayStep1[innerLoopsArrayStep1Index].repeat_count; // Times to repeat (number of times this inner loop should be executed, before going to the next inner loop, if any)
+                  innerLoopParameters[4] = 0x00; // Repeat counter (number of times this inner loop was executed) (Returned by the Arduino)
+                  innerLoopParameters[5] = 0x00; // Where is the next inner loop's first input (index 0 input for the next inner loop, aka the index for the input in the macro_buffer array) (Continue normally if value is 0, or do nothing if there are no more inputs to be executed)
+                  innerLoopParameters[6] = whereDoesInnerLoopStart; // Where to start (index of the starting input) (Inclusive)
+                  innerLoopParameters[7] = whereDoesInnerLoopEnd; // Where to end (index of the ending input) (Inclusive)
+                  innerLoopParameters[8] = 0x00; // How many inner loops that should be executed after this (if <=0, don't execute inner loops any inner loops after this, and move on as normal, if there are normal inputs to be exeucuted, execute those, if there's nothing else to do, go back to the beginning of the larger loop, if > 0, execute n inner loops after this)
+                  innerLoopParameters[9] = 0x00; // Unused for pre/postamble controllerConfig.initial_macro_inner_loop
+                  innerLoopParameters[10] = 0x00; // Unused for pre/postamble controllerConfig.initial_macro_inner_loop
+                  innerLoopParameters[11] = controllerConfig.initial_macro_inner_loop + howManyInnerLoopsMacroHas; // Postamble (Index of the current inner loop)
+
+                  innerLoopMetadataArray.push(innerLoopParameters);
+
+                  howManyInnerLoopsMacroHas++;
+                }
+                if (innerLoopsArrayStep1[innerLoopsArrayStep1Index].is_inner_loop == false) {
+                  for (var inputDurationArrayIndex = 0; inputDurationArrayIndex < innerLoopsArrayStep1[innerLoopsArrayStep1Index].input_duration_array.length; inputDurationArrayIndex++) {
+                    innerLoopDuration = innerLoopDuration + innerLoopsArrayStep1[innerLoopsArrayStep1Index].input_duration_array[inputDurationArrayIndex];
+                  }
+                  //innerLoopDuration = innerLoopDuration * innerLoopsArrayStep1[innerLoopsArrayStep1Index].repeat_count;
+                  innerLoopTotalDuration = innerLoopTotalDuration + innerLoopDuration;
+                  innerLoopFinalString = innerLoopFinalString + innerLoopsArrayStep1[innerLoopsArrayStep1Index].input_string_to_display_without_repeat_count + " ";
+                }
+              }
+              innerLoopFinalString = innerLoopFinalString.trim();
+              innerLoopFinalString = innerLoopFinalString.replace(/\s+/ig, " ");
+              innerLoopFinalString = innerLoopFinalString.trim();
+              innerLoopFinalString = innerLoopFinalString.replace(/\s+/ig, " ");
+              innerLoopFinalString = innerLoopFinalString.trim();
+
+              innerLoopFinalString = innerLoopFinalString + "*" + innerLoopFinalRepeatCount;
+              //innerLoopTotalDuration = innerLoopTotalDuration * (innerLoopFinalRepeatCount + 1);
+
+              let whereDoesNextInnerLoopStart = 0;
+              for (var innerLoopMetadataArrayIndex = innerLoopMetadataArray.length - 1; innerLoopMetadataArrayIndex >= 0; innerLoopMetadataArrayIndex--) {
+                //
+                innerLoopMetadataArray[innerLoopMetadataArrayIndex][5] = whereDoesNextInnerLoopStart;
+                whereDoesNextInnerLoopStart = innerLoopMetadataArray[innerLoopMetadataArrayIndex][6];
+                innerLoopMetadataArray[innerLoopMetadataArrayIndex][8] = (innerLoopMetadataArray.length - innerLoopMetadataArrayIndex) - 1;
+                let innerLoopParametersToWrite = innerLoopMetadataArray[innerLoopMetadataArrayIndex];
+                await sleep(1);
+
+                // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
+                port.flush(function(err, results) {
+                  //console.log(new Date().toISOString() + " I [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+                  if (err) {
+                    if (client.readyState() === "OPEN") {
+                      if (chatConfig.send_debug_channel_messages == true) {
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                      }
+                    }
+                    console.log(new Date().toISOString() + " [SERIAL PORT] Failed to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                    return console.log(err);
+                  }
+                  //console.log(new Date().toISOString() + " flush results " + results);
+                });
+
+                port.drain(function(err, results) {
+                  //console.log(new Date().toISOString() + " J [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+                  if (err) {
+                    if (client.readyState() === "OPEN") {
+                      if (chatConfig.send_debug_channel_messages == true) {
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                      }
+                    }
+                    console.log(new Date().toISOString() + " [SERIAL PORT] Failed to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                    return console.log(err);
+                  }
+                  //console.log(new Date().toISOString() + " drain results " + results);
+                });
+
+                // Write data to Arduino here
+                port.write(innerLoopParametersToWrite, function(err) {
+                  if (err) {
+                    if (client.readyState() === "OPEN") {
+                      if (chatConfig.send_debug_channel_messages == true) {
+                        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                        client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                      }
+                    }
+                    console.log(new Date().toISOString() + " [SERIAL PORT] Failed to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters) + ", err.message=" + err.message);
+                    return console.log("Error on write: " + err.message);
+                  }
+                });
+
+              }
             }
           }
-          console.log("AFTER  innerLoopsFound = ");
-          console.log(innerLoopsFound);
-          */
           //message = message.replace(/\s*\[+\s*/ig, "");
           //message = message.replace(/\s*\]+\s*/ig, "");
           let macroDelayUsed = 0; // This variable keeps track of how many inputs have custom delay in the macro chain, if it's 0, set the first param in the last input of the macro chain to be repeat, if it's not 0, set the first param in the last input of the macro chain to be delay (only really used on a macro chain that has more than one input)
-          precisionInputs = [];
+          //precisionInputs = [];
           //console.log("messageWords[0] Before " + messageWords[0]);
           //console.log("A message = ");
           //console.log(message);
-          precisionInputs = message.replace(/[\s\.\,]+/ig, " ");
+          precisionInputs = precisionInputs.replace(/[\s\.\,]+/ig, " ");
           //console.log("A precisionInputs = ");
           //console.log(precisionInputs);
           precisionInputs = precisionInputs.trim();
@@ -6821,7 +7346,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"));
                 //console.log("currentMacroChainIndex:" + currentMacroChainIndex)
                 if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
-                  await sleep(1); // Have to sleep here because if we sent messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
+                  await sleep(1); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
                   let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, true);
                   if (macroChainInputObject.is_valid_input == false) {
                     // idk do the thing to do the replacmenet thing
@@ -6880,6 +7405,7 @@ async function onMessageHandler(target, tags, message, self) {
                     //console.log(precisionInputStringToDisplay2);
                     //console.log(macroChainInputObject);
                     precisionInputSingleLoopDuration = precisionInputSingleLoopDuration + macroChainInputObject.processed_macro_input_delay;
+                    precisionInputSingleLoopDuration = innerLoopTotalDuration;
                     currentMacroChainIndex++;
                   }
                 }
@@ -7231,12 +7757,12 @@ async function onMessageHandler(target, tags, message, self) {
               macroParametersToWrite[0] = controllerConfig.final_macro_preamble; // controllerConfig.final_macro_preamble Preamble is used to tell the arduino how an input macro should be executed
               macroParametersToWrite[1] = currentMacroChainIndex; // How many inputs to iterate through
               //macroParametersToWrite[2] = 0x00; // Loop or no Loop 0 == No loop, 1 == Loop
-              macroParametersToWrite[3] = 0x00; // Current Macro index (always set this to 0 to start at the beginning, otherwise you can specify where it should start)
+              macroParametersToWrite[3] = 0x00; // Current Macro index (always set this to 0 to start at the beginning, otherwise you can specify where it should start) (used to keep track of how many inputs the arduino has executed in the current loop)
               macroParametersToWrite[4] = precisionInputsPreProcessed.input_repeat_count; // Times to loop
-              macroParametersToWrite[5] = 0x00; // Loop counter (Always set this to 0)
-              macroParametersToWrite[6] = 0x00; // Unused for pre/postamble controllerConfig.final_macro_preamble
-              macroParametersToWrite[7] = 0x00; // Unused for pre/postamble controllerConfig.final_macro_preamble
-              macroParametersToWrite[8] = 0x00; // Unused for pre/postamble controllerConfig.final_macro_preamble
+              macroParametersToWrite[5] = 0x00; // Loop counter (Always set this to 0) (used to keep track of how many loops the arduino has executed)
+              macroParametersToWrite[6] = howManyInnerLoopsMacroHas; // How many Inner Loops macro has
+              macroParametersToWrite[7] = 0x00; // Macro Metadata Index (Which inner loop is current being executed)
+              macroParametersToWrite[8] = 0x00; // is inner loop (If the input the arduino is executing is part of any inner loop, 1 = is inner loop, 0 = it's not inner loop)
               macroParametersToWrite[9] = 0x00; // Unused for pre/postamble controllerConfig.final_macro_preamble
               macroParametersToWrite[10] = 0x00; // Unused for pre/postamble controllerConfig.final_macro_preamble
               macroParametersToWrite[11] = controllerConfig.final_macro_preamble; // controllerConfig.final_macro_preamble Postamble is used to tell the arduino how an input macro should be executed
@@ -7244,6 +7770,7 @@ async function onMessageHandler(target, tags, message, self) {
               precisionInputStringToDisplay.repeat_count = precisionInputsPreProcessed.input_repeat_count;
               precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/[\.\,]+$/ig, "");
               precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + "*" + precisionInputsPreProcessed.input_repeat_count;
+              precisionInputStringToDisplay2 = innerLoopFinalString;
               //console.log(macroParametersToWrite);
               //console.log(precisionInputStringToDisplay);
               //console.log(precisionInputStringToDisplay.macro_array.join("."));
@@ -7255,6 +7782,7 @@ async function onMessageHandler(target, tags, message, self) {
               let splitInputsInMultipleStrings = [];
               if (precisionInputStringToDisplay2.length >= 200) {
                 //let splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/.{100}/ig);
+                precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/(\s*\*+)+/ig, "*");
                 splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/(?:[^\s]+\s){0,15}[^\s]+/ig);
                 //console.log(splitInputsInMultipleStrings);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
@@ -7278,6 +7806,7 @@ async function onMessageHandler(target, tags, message, self) {
                   if (splitInputsInMultipleStringsIndex == splitInputsInMultipleStrings.length - 1) {
                     precisionInputTotalTimesToLoop = macroParametersToWrite[4] + 1;
                     precisionInputTotalDuration = precisionInputTotalTimesToLoop * precisionInputSingleLoopDuration;
+                    //precisionInputTotalDuration = precisionInputTotalTimesToLoop * innerLoopTotalDuration;
                     if (isExecutingSavedMacro == false) {
                       client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs");
                     }
@@ -7295,6 +7824,8 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(splitInputsInMultipleStrings);
                 precisionInputTotalTimesToLoop = macroParametersToWrite[4] + 1;
                 precisionInputTotalDuration = precisionInputTotalTimesToLoop * precisionInputSingleLoopDuration;
+                //precisionInputTotalDuration = precisionInputTotalTimesToLoop * innerLoopTotalDuration;
+                precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/(\s*\*+)+/ig, "*");
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
                 if (isExecutingSavedMacro == false) {
                   client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs");
@@ -7919,7 +8450,7 @@ async function onMessageHandler(target, tags, message, self) {
                   if (tempInputArray2[1] === undefined) {
                     //console.log(new Date().toISOString() + " NO WHAT THE FUCK 3 " + tempInputArray2);
                     //splitToFindCustomAnalogStickPosition[0] = splitToFindCustomAnalogStickPosition[0] + " " + tempInputArray2[0];
-                    let inputContainsDashesAtTheEnd2 = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig.test(tempInputArray2[0]);
+                    let inputContainsDashesAtTheEnd2 = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$|^(p+r+e+s+)+|(p+r+e+s+)+$|^(t+a+p+)+|(t+a+p+)+$/ig.test(tempInputArray2[0]);
                     if (inputContainsDashesAtTheEnd2 == true) {
                       splitToFindCustomAnalogStickPosition[0] = splitToFindCustomAnalogStickPosition[0] + "-";
                       //console.log(splitToFindCustomAnalogStickPosition[0] + "-");
@@ -8042,8 +8573,8 @@ async function onMessageHandler(target, tags, message, self) {
 
               //let inputContainsDashes = /[\-\=]+/ig.test(messageInputs[messageInputIndex]);
               //let inputContainsDashesAtTheEnd = /[\-\=]+$/ig.test(messageInputs[messageInputIndex]);
-              let inputContainsDashes = /[\-\=\‒\–\—\­\˗\−\－\̠]+|(h+o+l+d+)+|(h+e+l+d+)+|(r+u+n+)+|(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+|(s+p+r+i+n+t+)+|(k+e+p+)+|(b+i+g+)+|(l+o+n+g+)+|(p+e+r+m+a+n*e*n*t*l*y*)+|(h+a+r+d+)+/ig.test(tempInputArray[0]);
-              let inputContainsDashesAtTheEnd = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig.test(tempInputArray[0]);
+              let inputContainsDashes = /[\-\=\‒\–\—\­\˗\−\－\̠]+|(h+o+l+d+)+|(h+e+l+d+)+|(r+u+n+)+|(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+|(s+p+r+i+n+t+)+|(k+e+p+)+|(b+i+g+)+|(l+o+n+g+)+|(p+e+r+m+a+n*e*n*t*l*y*)+|(h+a+r+d+)+|(p+r+e+s+)+|(t+a+p+)+/ig.test(tempInputArray[0]);
+              let inputContainsDashesAtTheEnd = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$|^(p+r+e+s+)+|(p+r+e+s+)+$|^(t+a+p+)+|(t+a+p+)+$/ig.test(tempInputArray[0]);
 
               //var testComparison = inputContainsDashes ? "Message contains dashes " + inputContainsDashes + " " + messageInputs[messageInputIndex] : "Message doesn't contain dashes " + inputContainsDashes + " " + messageInputs[messageInputIndex];
               //var testComparison2 = inputContainsDashesAtTheEnd ? "Message contains dashes at the end " + inputContainsDashesAtTheEnd + " " + messageInputs[messageInputIndex] : "Message doesn't contain dashes at the end " + inputContainsDashesAtTheEnd + " " + messageInputs[messageInputIndex];
@@ -8053,7 +8584,7 @@ async function onMessageHandler(target, tags, message, self) {
 
               if (inputContainsDashes == true) {
                 if (inputContainsDashesAtTheEnd == true) {
-                  removedDashesAtTheEnd = tempInputArray[0].replace(/[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig, "");
+                  removedDashesAtTheEnd = tempInputArray[0].replace(/[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$|^(p+r+e+s+)+|(p+r+e+s+)+$|^(t+a+p+)+|(t+a+p+)+$/ig, "");
                   processedMessage = removedDashesAtTheEnd;
                   setHold = true;
                   //console.log("removedDashesAtTheEnd: " + removedDashesAtTheEnd);
@@ -8418,6 +8949,9 @@ async function onMessageHandler(target, tags, message, self) {
             // if (inputsUsed == messageInputs.length)
             if (isBlacklistedCombo == true) {
               //console.log(new Date().toISOString() + " Blacklisted combos detected, dropping input!");
+              let randomColorName = Math.floor(Math.random() * defaultColors.length);
+              client.say(target, ".color " + defaultColorNames[randomColorName]);
+              client.action(target, "@" + usernameToPing + " Your input was not executed because it contains a combination of inputs that is not allowed.");
             }
             if (isBlacklistedCombo == false) {
               inputString = inputString.replace(/[\+\_\|\#\,\.\s]+$/ig, "");
@@ -9356,7 +9890,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
           if (tempInputArray2[1] === undefined) {
             //console.log(new Date().toISOString() + " NO WHAT THE FUCK 3 " + tempInputArray2);
             //splitToFindCustomAnalogStickPosition[0] = splitToFindCustomAnalogStickPosition[0] + " " + tempInputArray2[0];
-            let inputContainsDashesAtTheEnd2 = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig.test(tempInputArray2[0]);
+            let inputContainsDashesAtTheEnd2 = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$|^(p+r+e+s+)+|(p+r+e+s+)+$|^(t+a+p+)+|(t+a+p+)+$/ig.test(tempInputArray2[0]);
             if (inputContainsDashesAtTheEnd2 == true) {
               splitToFindCustomAnalogStickPosition[0] = splitToFindCustomAnalogStickPosition[0] + "-";
               //console.log(splitToFindCustomAnalogStickPosition[0] + "-");
@@ -9392,8 +9926,8 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
       //console.log(new Date().toISOString() + " TEST " + splitToFindCustomAnalogStickPosition);
       //console.log(new Date().toISOString() + " TOAST " + processedMessage);
 
-      var inputContainsDashes = /[\-\=\‒\–\—\­\˗\−\－\̠]+|(h+o+l+d+)+|(h+e+l+d+)+|(r+u+n+)+|(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+|(s+p+r+i+n+t+)+|(k+e+p+)+|(b+i+g+)+|(l+o+n+g+)+|(p+e+r+m+a+n*e*n*t*l*y*)+|(h+a+r+d+)+/ig.test(macroStringArray[messageInputIndex]);
-      var inputContainsDashesAtTheEnd = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig.test(macroStringArray[messageInputIndex]);
+      var inputContainsDashes = /[\-\=\‒\–\—\­\˗\−\－\̠]+|(h+o+l+d+)+|(h+e+l+d+)+|(r+u+n+)+|(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+|(s+p+r+i+n+t+)+|(k+e+p+)+|(b+i+g+)+|(l+o+n+g+)+|(p+e+r+m+a+n*e*n*t*l*y*)+|(h+a+r+d+)+|(p+r+e+s+)+|(t+a+p+)+/ig.test(macroStringArray[messageInputIndex]);
+      var inputContainsDashesAtTheEnd = /[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$|^(p+r+e+s+)+|(p+r+e+s+)+$|^(t+a+p+)+|(t+a+p+)+$/ig.test(macroStringArray[messageInputIndex]);
 
       //var testComparison = inputContainsDashes ? "Message contains dashes " + inputContainsDashes + " " + macroStringArray[messageInputIndex] : "Message doesn't contain dashes " + inputContainsDashes + " " + macroStringArray[messageInputIndex];
       //var testComparison2 = inputContainsDashesAtTheEnd ? "Message contains dashes at the end " + inputContainsDashesAtTheEnd + " " + macroStringArray[messageInputIndex] : "Message doesn't contain dashes at the end " + inputContainsDashesAtTheEnd + " " + macroStringArray[messageInputIndex];
@@ -9403,7 +9937,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
 
       if (inputContainsDashes == true) {
         if (inputContainsDashesAtTheEnd == true) {
-          removedDashesAtTheEnd = macroStringArray[messageInputIndex].replace(/[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$/ig, "");
+          removedDashesAtTheEnd = macroStringArray[messageInputIndex].replace(/[\-\=\‒\–\—\­\˗\−\－\̠]+$|(h+o+l+d+)+$|(h+e+l+d+)+$|(r+u+n+)+$|(c+o+n+t+i+n+u+o+u+s+l*y*)+$|^[\-\=\‒\–\—\­\˗\−\－\̠]+|^(h+o+l+d+)+|^(h+e+l+d+)+|^(r+u+n+)+|^(c+o+n+t+i+n+u+o+u+s+l*y*)+|(d+a+s+h+)+$|(s+p+r+i+n+t+)+$|^(d+a+s+h+)+|^(s+p+r+i+n+t+)+|^(k+e+p+)+|(k+e+p+)+$|^(b+i+g+)+|(b+i+g+)+$|^(l+o+n+g+)+|(l+o+n+g+)+$|^(p+e+r+m+a+n*e*n*t*l*y*)+|(p+e+r+m+a+n*e*n*t*l*y*)+$|^(h+a+r+d+)+|(h+a+r+d+)+$|^(p+r+e+s+)+|(p+r+e+s+)+$|^(t+a+p+)+|(t+a+p+)+$/ig, "");
           processedMessage = removedDashesAtTheEnd;
           setHold = true;
           //console.log("removedDashesAtTheEnd: " + removedDashesAtTheEnd);
@@ -9661,6 +10195,9 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
       if (isBlacklistedCombo == true) {
         //isValidInput = false;
         //console.log(new Date().toISOString() + " Blacklisted combos detected, dropping input!");
+        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+        client.say(channelToSendMessageTo, ".color " + defaultColorNames[randomColorName]);
+        client.action(channelToSendMessageTo, "@" + usernameToSendMessageTo + " Your input was not executed because it contains a combination of inputs that is not allowed.");
       }
       // if (inputsUsed == macroStringArray.length)
       //if (isBlacklistedCombo == false)
@@ -9796,6 +10333,14 @@ function tidyUpAdvancedInputString(inputStringToProcess) {
 
   let hasInvalidPrecisionInput = false;
   let isValidPrecisionInputRepeat = false;
+
+  let preProcessedInputArraySeparatedBySpaces = []; // There are empty arrays so we have to make sure that it returns the right number, or arrays that contain one string that's empty
+  let preProcessedInputArraySeparatedBySpacesWithoutRepeatCount = []; // There are empty arrays so we have to make sure that it returns the right number, or arrays that contain one string that's empty
+  let howManyInputsDoesThisPreProcessedInputHave = 0;
+  let isInnerLoop = false;
+  let inputDurationArray = [];
+  let inputDataArray = [];
+
   //console.log("inputStringToProcess Before " + inputStringToProcess);
   inputStringToProcess = inputStringToProcess.replace(/\s+/ig, " ")
   inputStringToProcess = inputStringToProcess.replace(/\s*\++\s*/ig, "+");
@@ -9827,6 +10372,7 @@ function tidyUpAdvancedInputString(inputStringToProcess) {
     repeat_count: 0
   };
   let precisionInputStringToDisplay2 = "";
+  let precisionInputStringToDisplay2WithoutRepeatCount = "";
 
   let macroDelayUsed = 0; // This variable keeps track of how many inputs have custom delay in the macro chain, if it's 0, set the first param in the last input of the macro chain to be repeat, if it's not 0, set the first param in the last input of the macro chain to be delay (only really used on a macro chain that has more than one input)
   precisionInputs = inputStringToProcess.replace(/[\s\.\,]+/ig, " ");
@@ -10014,6 +10560,10 @@ function tidyUpAdvancedInputString(inputStringToProcess) {
       if (hasInvalidPrecisionInput == false) {
         if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
           let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, false);
+          inputDurationArray.push(macroChainInputObject.processed_macro_input_delay);
+          inputDataArray.push(macroChainInputObject.input_data);
+          //console.log("macroChainInputObject " + preprocessedArrayIndex + " out of " + precisionInputsPreProcessed.input_array.length);
+          //console.log(macroChainInputObject);
           if (macroChainInputObject.is_valid_input == false) {
             // idk do the thing to do the replacmenet thing
             //console.log(new Date().toISOString() + " [ISVALIDPRECISIONINPUTREPEAT] isValidPrecisionInputRepeat = " + isValidPrecisionInputRepeat);
@@ -10065,10 +10615,66 @@ function tidyUpAdvancedInputString(inputStringToProcess) {
       //console.log("IS THIS VALID INPUT?");
       precisionInputStringToDisplay.repeat_count = precisionInputsPreProcessed.input_repeat_count;
       precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/[\.\,]+$/ig, "");
+      //precisionInputStringToDisplay2WithoutRepeatCount = precisionInputStringToDisplay2;
       precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + "*" + precisionInputsPreProcessed.input_repeat_count;
     }
   }
   //console.log("precisionInputStringToDisplay2 = ");
   //console.log(precisionInputStringToDisplay2);
-  return precisionInputStringToDisplay2;
+  //console.log("precisionInputsPreProcessed.input_repeat_count");
+  //console.log(precisionInputsPreProcessed.input_repeat_count);
+  precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/(\s*\*+)+/ig, "*");
+  precisionInputStringToDisplay2WithoutRepeatCount = precisionInputStringToDisplay2.replace(/(\s*\*+\d+)+/ig, "");
+  preProcessedInputArraySeparatedBySpaces = []; // There are empty arrays so we have to make sure that it returns the right number, or arrays that contain one string that's empty
+  preProcessedInputArraySeparatedBySpacesWithoutRepeatCount = []; // There are empty arrays so we have to make sure that it returns the right number, or arrays that contain one string that's empty
+  howManyInputsDoesThisPreProcessedInputHave = 0;
+  isInnerLoop = false;
+  if (precisionInputStringToDisplay2.toLowerCase() === "" || precisionInputStringToDisplay2 === null || precisionInputStringToDisplay2 === undefined || precisionInputStringToDisplay2.toLowerCase() === "null" || precisionInputStringToDisplay2.toLowerCase() === "undefined") {
+    //console.log("This is an empty string, ignore this, set howManyInputsDoesThisPreProcessedInputHave to 0");
+    howManyInputsDoesThisPreProcessedInputHave = 0;
+  }
+  if (precisionInputStringToDisplay2.toLowerCase() !== "" && precisionInputStringToDisplay2 !== null && precisionInputStringToDisplay2 !== undefined && precisionInputStringToDisplay2.toLowerCase() !== "null" && precisionInputStringToDisplay2.toLowerCase() !== "undefined") {
+    preProcessedInputArraySeparatedBySpaces = precisionInputStringToDisplay2.split(/[\s\.\,]+/ig);
+    preProcessedInputArraySeparatedBySpacesWithoutRepeatCount = precisionInputStringToDisplay2WithoutRepeatCount.split(/[\s\.\,]+/ig);
+    //console.log("Valid string? have to double check");
+    if (preProcessedInputArraySeparatedBySpaces === null || preProcessedInputArraySeparatedBySpaces === undefined || preProcessedInputArraySeparatedBySpaces === "" || preProcessedInputArraySeparatedBySpaces === [] || preProcessedInputArraySeparatedBySpaces === "[]") {
+      //console.log("This is an empty or invalid array, ignore this, set howManyInputsDoesThisPreProcessedInputHave to 0");
+      howManyInputsDoesThisPreProcessedInputHave = 0;
+    }
+    if (preProcessedInputArraySeparatedBySpaces !== null && preProcessedInputArraySeparatedBySpaces !== undefined && preProcessedInputArraySeparatedBySpaces !== "" && preProcessedInputArraySeparatedBySpaces !== [] && preProcessedInputArraySeparatedBySpaces !== "[]") {
+      //console.log("Valid array? have to double check");
+      if (preProcessedInputArraySeparatedBySpaces.length <= 0) {
+        //console.log("This array has 0 elements in it, ignore this, set howManyInputsDoesThisPreProcessedInputHave to 0");
+        howManyInputsDoesThisPreProcessedInputHave = 0;
+      }
+      if (preProcessedInputArraySeparatedBySpaces.length > 0) {
+        //console.log("This array has more than 0 elements in it, So this is definitely valid");
+        howManyInputsDoesThisPreProcessedInputHave = preProcessedInputArraySeparatedBySpaces.length;
+      }
+    }
+  }
+  //
+  if (howManyInputsDoesThisPreProcessedInputHave <= 1) {
+    isInnerLoop = false;
+  }
+  if (howManyInputsDoesThisPreProcessedInputHave > 1) {
+    if (precisionInputsPreProcessed.input_repeat_count <= 0) {
+      isInnerLoop = false;
+    }
+    if (precisionInputsPreProcessed.input_repeat_count > 0) {
+      isInnerLoop = true;
+    }
+  }
+
+  return {
+    input_string_to_display: precisionInputStringToDisplay2,
+    input_string_to_display_without_repeat_count: precisionInputStringToDisplay2WithoutRepeatCount,
+    input_count: howManyInputsDoesThisPreProcessedInputHave,
+    repeat_count: precisionInputsPreProcessed.input_repeat_count,
+    input_array: preProcessedInputArraySeparatedBySpaces,
+    input_array_without_repeat_count: preProcessedInputArraySeparatedBySpacesWithoutRepeatCount,
+    input_duration_array: inputDurationArray,
+    input_data_array: inputDataArray,
+    is_inner_loop: isInnerLoop
+  };
 }

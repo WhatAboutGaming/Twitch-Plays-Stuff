@@ -9,7 +9,9 @@
     "node-cmd": "^3.0.0",
     "serialport": "^9.2.4",
     "socket.io": "^2.3.0",
-    "sound-play": "^1.0.5",
+    "sound-play": "^1.0.5"
+  },
+  "devDependencies": {
     "tmi.js": "^1.8.5"
   }
 }
