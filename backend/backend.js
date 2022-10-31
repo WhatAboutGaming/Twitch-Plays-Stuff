@@ -2277,7 +2277,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.say(chatConfig.main_channel, ".announce " + globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24, stream is briefly going offline, don't go anywhere!");
+              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24, stream is briefly going offline, don't go anywhere!");
             }
           }
           if (currentHour == hourToCheckPm) {
@@ -2289,7 +2289,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.say(chatConfig.main_channel, ".announce " + globalConfig.game_title + " Day " + playTimeDays + ", Hour 0 to Hour 12, stream is briefly going offline, don't go anywhere!");
+              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + playTimeDays + ", Hour 0 to Hour 12, stream is briefly going offline, don't go anywhere!");
             }
           }
           /*
@@ -2375,7 +2375,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.say(chatConfig.main_channel, ".announce " + globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24, stream is briefly going offline, don't go anywhere!");
+              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + playTimeDays + ", Hour 12 to Hour 24, stream is briefly going offline, don't go anywhere!");
             }
           }
           if (currentHour == hourToCheckPm) {
@@ -2387,7 +2387,7 @@ function updateStreamTime() {
             if (client.readyState() === "OPEN") {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
-              client.say(chatConfig.main_channel, ".announce " + globalConfig.game_title + " Day " + (playTimeDays + 1) + ", Hour 0 to Hour 12, stream is briefly going offline, don't go anywhere!");
+              client.action(chatConfig.main_channel, globalConfig.game_title + " Day " + (playTimeDays + 1) + ", Hour 0 to Hour 12, stream is briefly going offline, don't go anywhere!");
             }
           }
           /*
@@ -3323,10 +3323,10 @@ async function onMessageHandler(target, tags, message, self) {
 
                 messages_sent: result.messages_sent + 1,
 
-                is_first_twitch_message: result.is_first_twitch_message,
-                is_returning_chatter: result.is_returning_chatter,
-                //is_first_twitch_message: isFirstTwitchMessage,
-                //is_returning_chatter: isReturningChatter,
+                //is_first_twitch_message: result.is_first_twitch_message,
+                //is_returning_chatter: result.is_returning_chatter,
+                is_first_twitch_message: isFirstTwitchMessage,
+                is_returning_chatter: isReturningChatter,
 
                 last_message_sent_id: messageId,
                 last_message_sent: originalMessage,
