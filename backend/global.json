@@ -40,15 +40,16 @@
   "run_id": 3,
   "notes:": "To test server: Set game_title as TEST RUN 0, set stream_title as TEST RUN 1, set next_game_title as TEST RUN 2, set main_database_name as test_database_main, set chatters_collection_name as test_database_chatters, set run_name as test_database_run_name, set global_database_name as test_database_global, set inputter_database_name as test_database_inputters, set macro_database_name as test_database_macro, set run_id as -1",
   "overlay_header_text": "Twitch Plays (Viewers play\/Chat plays) Chrono Trigger on\nSNES Wii VC !help !discord",
-  "overlay_advanced_mode_help_message_to_display": "\n\n\n!help to learn how to play\n\n\n!discord and go to #polls\nto vote for next game",
+  "overlay_advanced_mode_help_message_to_display": "\n\n\n!help to learn how to play\n\n\ntype !discord and go to\n#polls to vote for next game",
   "overlay_text_rotation": [
     "Type !help or !commands to learn how to play",
     "Type !macrohelp to learn how to save macros and\nexecute saved macros",
     "Type !runendgameconditions to see what you have to do\nto beat the game",
-    "Type !discord to get a link to the stream Discord server",
+    "Type !discord to get a link to the stream Discord server\nand go to #polls to vote for next game",
     "Please, don't delete any files, and please save regularly",
     "Attempting to delete or deleting any file will earn you an\nunappealable permanent ban",
-    "Current goal: Beat Yakra",
+    "Current goal: Beat Dragon Tank",
+    "Yakra: 01d 02h 09m 39s (2022-10-31T02:09:39Z)!",
     "If anything breaks, please ping @WhatAboutGamingLive",
     "The Endgame Conditions are: In order to beat the game, you\nhave to do the following tasks in the following order:",
     "1) Beat all main bosses, order in which bosses are beaten\nDOES NOT MATTER",
@@ -65,7 +66,8 @@
     "All of the code used on this stream is open source and can be found here: https://github.com/WhatAboutGaming/Twitch-Plays-Stuff",
     "We have a Discord server and there is currently a poll up for which game to be played after this (Date TBD), the options are: The Legend of Zelda: A Link to the Past (Super NES) (Previously tied with Chrono Trigger), Final Fantasy 6 (Super NES) (known as Final Fantasy 3 in North America) and Final Fantasy (NES), you can vote for more than one option, Discord server link here: https://discord.gg/yHETNuZCUK",
     "We're currently playing Chrono Trigger. Save files for this run can be found here: https://github.com/WhatAboutGaming/Twitch-Plays-Stuff/tree/master/Save%20Files/Chrono%20Trigger and the videos for this run can be found on this playlist: https://www.twitch.tv/collections/up1rJa14IhfQLQ",
-    "Current goal: Beat Yakra"
+    "Current goal: Beat Dragon Tank",
+    "Video: Beating Yakra https://www.twitch.tv/videos/1639300240 01d 02h 09m 39s (2022-10-31T02:09:39Z)"
   ],
   "help_message_saving_macros": [
     "You can save or edit a macro by using the command !savemacro <macro name> <macro inputs>. Example: !savemacro WalkInCircles Up Right Down Left will save or edit the macro WalkInCircles with the inputs Up Right Down Left, which can then be used later.",

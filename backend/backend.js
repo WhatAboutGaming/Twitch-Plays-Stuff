@@ -2785,7 +2785,7 @@ async function onMessageHandler(target, tags, message, self) {
       /(k+e+e+p+)+\s+(u+p+)+\s+(t+h+e+)+\s+(g+o+d+)+\s+(s+t+r+e+a+m\w*\W*\w*)+\s+(m+a+n+)+\s+((\w+\W*\s*a+m+)|(\w+\W*\s*m+))+\s+(g+o+i+n+g+)+\s+(t+o+)+\s+(d+o+)+\s+(a+n+i+m+a+t+e+d+)+\s+(b+r+b+\W*)+\s+(i+n+t+r+o\W*)+\s+(a+n+d+)+\s+(o+f+l+i+n+e+)+\s+(s+c+r+e+n+)+\s+(f+o+r+)+\s+(y+\w*)+\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(t+a+k+e+)+\s+(\w+)+\s+(l+o+k+)+\s+((a*t*|i*n*|o*n*)*\s*(t+h+e+)+)+\s+(u+r+l+)+\s+(\w*)+\s+(m+y+)+\s+(a+c+o+u+n+t+\W*\w*)+\s+(i+m+a+g+e+)+\s+(p+r+o+b+a+b+l+y+)+\s+(t+h+e+)+\s+(((b+u+y+)|(b+e+s+t+)|(g+e+t+))+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
-    let slurDetection = /((((n+\s*[AEIOUYaeiouy0123456789\!\|]+\s*g+)+)+)|(((f+\s*[AEIOUYaeiouy0123456789\!\|]+\s*g+)+)+)|(((r+\s*[AEIOUYaeiouy0123456789\!\|]+\s*t+\s*[AEIOUYaeiouy0123456789\!\|]+\s*r+\s*d+)+)+))/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")); // User will be instantly permabanned, no matter how known the user is, currently only the N word is implemented, more words will be added as they happen
+    let slurDetection = /((((n+\s*[Ii1Oo0\!\|]\s*[Gg6\!\|]+)+)+)|(((f+\s*[Aa4\!\|]\s*[Gg6\!\|]+)+)+)|(((r+\s*[Ee3\!\|]\s*t+\s*[Aa4\!\|]\s*r+\s*d+)+)+))/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")); // User will be instantly permabanned, no matter how known the user is, currently only the N word is implemented, more words will be added as they happen
     let messageToCountLetters = replaceCyrillicsWithLatin;
     let doesMessageHaveTooManyUpperCaseLetters = false;
     messageToCountLetters = messageToCountLetters.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "");
@@ -6750,7 +6750,7 @@ async function onMessageHandler(target, tags, message, self) {
               //
               //let randomColorName = Math.floor(Math.random() * defaultColors.length);
               //client.say(target, ".color " + defaultColorNames[randomColorName]);
-              //client.action(target, "@" + usernameToPing + " Executing the first " + playSettableInputCount + " inputs (starting position is 0) and repeating " + playSettableRepeatCount + " times. Type Stop or Wait to stop execution of inputs.");
+              //client.action(target, "@" + usernameToPing + " Executing the first " + playSettableInputCount + " inputs (starting position is 0) and repeating " + playSettableRepeatCount + " times. Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
               inputsToListPlayback = inputsToListPlayback.replace(/[\.\,]+$/ig, "");
               //console.log("inputsToListPlayback = " + inputsToListPlayback);
               let splitInputsToListInMultipleStringsPlayback = [];
@@ -6763,7 +6763,7 @@ async function onMessageHandler(target, tags, message, self) {
                 for (let splitInputsInMultipleStringsPlaybackIndex = 0; splitInputsInMultipleStringsPlaybackIndex < splitInputsToListInMultipleStringsPlayback.length; splitInputsInMultipleStringsPlaybackIndex++) {
                   if (splitInputsInMultipleStringsPlaybackIndex == 0) {
                     //console.log("CASE A");
-                    client.action(target, "@" + usernameToPing + " Executing the first " + playSettableInputCount + " inputs (starting position is 0) and repeating " + playSettableRepeatCount + " times. Type Stop or Wait to stop execution of inputs. " + splitInputsToListInMultipleStringsPlayback[splitInputsInMultipleStringsPlaybackIndex]);
+                    client.action(target, "@" + usernameToPing + " Executing the first " + playSettableInputCount + " inputs (starting position is 0) and repeating " + playSettableRepeatCount + " times. Type Stop or Wait to stop execution of inputs if inputs are still being executed. " + splitInputsToListInMultipleStringsPlayback[splitInputsInMultipleStringsPlaybackIndex]);
                   }
                   if (splitInputsInMultipleStringsPlaybackIndex > 0) {
                     //console.log("CASE B");
@@ -6780,7 +6780,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(splitInputsToListInMultipleStringsPlayback);
                 let randomColorName = Math.floor(Math.random() * defaultColors.length);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
-                client.action(target, "@" + usernameToPing + " Executing the first " + playSettableInputCount + " inputs (starting position is 0) and repeating " + playSettableRepeatCount + " times. Type Stop or Wait to stop execution of inputs. " + inputsToListPlayback);
+                client.action(target, "@" + usernameToPing + " Executing the first " + playSettableInputCount + " inputs (starting position is 0) and repeating " + playSettableRepeatCount + " times. Type Stop or Wait to stop execution of inputs if inputs are still being executed. " + inputsToListPlayback);
                 //client.action(target, "@" + usernameToPing + " Your input was interpreted as " + inputsToListPlayback);
               }
             }
@@ -7808,10 +7808,10 @@ async function onMessageHandler(target, tags, message, self) {
                     precisionInputTotalDuration = precisionInputTotalTimesToLoop * precisionInputSingleLoopDuration;
                     //precisionInputTotalDuration = precisionInputTotalTimesToLoop * innerLoopTotalDuration;
                     if (isExecutingSavedMacro == false) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs");
+                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
                     }
                     if (isExecutingSavedMacro == true) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs");
+                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
                     }
                   }
                 }
@@ -7828,10 +7828,10 @@ async function onMessageHandler(target, tags, message, self) {
                 precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/(\s*\*+)+/ig, "*");
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
                 if (isExecutingSavedMacro == false) {
-                  client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs");
+                  client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
                 }
                 if (isExecutingSavedMacro == true) {
-                  client.action(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs");
+                  client.action(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
                 }
                 //client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2);
               }

@@ -25,7 +25,7 @@
   "simultaneous_different_basic_buttons_allowed": 4,
   "controller_graphics": "gcn_controller_graphics.png",
   "help_message_basic": [
-    "Valid inputs are A, B, X, Y, L, R, Z, Start (Buttons and triggers), Up, Down, Left, Right (Analog Stick), Cup, Cdown, Cleft, Cright (C Stick), and Dup, Ddown, Dleft, Dright, (D Pad). Typos work too!",
+    "Valid inputs are A, B, X, Y, L, R, Z, Start (Buttons and triggers), Up, Down, Left, Right (Analog Stick), Cup, Cdown, Cleft, Cright (C Stick), and Dup, Ddown, Dleft, Dright, (D Pad). It's exactly what you'd see if you looked at a Gamecube controller! Typos work too!",
     "Up to 4 different inputs can be executed at the same time by using + to combine inputs. Example: B+Up+Cright will press the B Button, pull Up on the Analog Stick and pull Right on the C Stick. It is not needed to start your message with ! mark.",
     "Normal duration of inputs is 266 milliseconds, but you can end your input with - to execute the inputs indefinitely until the next input comes. Alternatively, you can type Wait or Stop to stop the execution of a held input. Maximum duration for an input is 65535 milliseconds. ",
     "Example: A+Z+Right- will hold the Buttons A and Z and will pull Right on the Analog Stick. Commands are NOT case sensitive: left and lEft will both pull Left on the Analog Stick.",
