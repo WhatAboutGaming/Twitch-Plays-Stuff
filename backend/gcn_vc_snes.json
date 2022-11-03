@@ -25,7 +25,7 @@
   "simultaneous_different_basic_buttons_allowed": 5,
   "controller_graphics": "gcn_controller_graphics.png",
   "help_message_basic": [
-    "Valid inputs are A, B, X, Y, L, R, Select, Start (Buttons and triggers), Up, Down, Left, Right (D Pad). It's exactly what you'd see if you looked at a Super NES controller! Typos work too!",
+    "Valid inputs are A, B, X, Y, L, R, Select, Start (Buttons), Up, Down, Left, Right (D Pad). It's exactly what you'd see if you looked at a Super NES controller! Typos work too! You can also find this help message in the stream description.",
     "Up to 5 different inputs can be executed at the same time by using + to combine inputs. Example: B+Up+Right will press the B Button, press Up and press Right on the D Pad. It is not needed to start your message with ! mark.",
     "Normal duration of inputs is 266 milliseconds, but you can end your input with - to execute the inputs indefinitely until the next input comes. Alternatively, you can type Wait or Stop to stop the execution of a held input. Maximum duration for an input is 65535 milliseconds.",
     "Example: B+X+Right- will hold the Buttons B and X and will hold Right on the D Pad. Commands are NOT case sensitive: left and lEft will both press Left on the D Pad.",
@@ -34,7 +34,7 @@
   ],
   "simultaneous_different_advanced_buttons_allowed": 5,
   "help_message_advanced": [
-    "Valid inputs are A, B, X, Y, L, R, Select, Start (Buttons and triggers), Up, Down, Left, Right (D Pad). Typos work too!",
+    "Valid inputs are A, B, X, Y, L, R, Select, Start (Buttons and triggers), Up, Down, Left, Right (D Pad). It's exactly what you'd see if you looked at a Super NES controller! Typos work too! You can also find this help message in the stream description.",
     "Up to 5 different inputs can be executed at the same time by using + to combine inputs. Example: B+Up+Right will press the B Button, press Up and press Right on the D Pad. It is not needed to start your message with ! mark. Commands are NOT case sensitive: left and lEft will both press Left on the D Pad.",
     "Normal duration of inputs is 266 milliseconds. You can separate multiple inputs by using spaces or commas to execute multiple inputs in rapid succession.",
     "Example: Up+Right+B;2000 A+X+Down;1000 *5 Will press Up and Right on the D Pad and press the B Button for 2000 milliseconds (2 seconds), then press the A and X Buttons and press Down on the D Pad for 1000 milliseconds (1 second), and *5 means the input will be executed once, then it will be repeated 5 times. There is no delay between inputs.",

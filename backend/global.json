@@ -24,7 +24,7 @@
   "advanced_allowed_period_millis": 300000,
   "voting_allowed_period_millis": 300000,
   "vote_expiration_time_millis": 300000,
-  "help_message_cooldown_millis": 2000,
+  "help_message_cooldown_millis": 5000,
   "game_title": "Chrono Trigger",
   "game_title_short": "Chrono Trigger",
   "stream_title": "Twitch Plays (Viewers play\/Chat plays) Chrono Trigger on an actual Wii",
@@ -48,8 +48,9 @@
     "Type !discord to get a link to the stream Discord server\nand go to #polls to vote for next game",
     "Please, don't delete any files, and please save regularly",
     "Attempting to delete or deleting any file will earn you an\nunappealable permanent ban",
-    "Current goal: Beat Dragon Tank",
+    "Current goal: Beat Guardian",
     "Yakra: 01d 02h 09m 39s (2022-10-31T02:09:39Z)!",
+    "Dragon Tank: 02d 06h 04m 36s (2022-11-01T06:04:36Z)!",
     "If anything breaks, please ping @WhatAboutGamingLive",
     "The Endgame Conditions are: In order to beat the game, you\nhave to do the following tasks in the following order:",
     "1) Beat all main bosses, order in which bosses are beaten\nDOES NOT MATTER",
@@ -66,8 +67,9 @@
     "All of the code used on this stream is open source and can be found here: https://github.com/WhatAboutGaming/Twitch-Plays-Stuff",
     "We have a Discord server and there is currently a poll up for which game to be played after this (Date TBD), the options are: The Legend of Zelda: A Link to the Past (Super NES) (Previously tied with Chrono Trigger), Final Fantasy 6 (Super NES) (known as Final Fantasy 3 in North America) and Final Fantasy (NES), you can vote for more than one option, Discord server link here: https://discord.gg/yHETNuZCUK",
     "We're currently playing Chrono Trigger. Save files for this run can be found here: https://github.com/WhatAboutGaming/Twitch-Plays-Stuff/tree/master/Save%20Files/Chrono%20Trigger and the videos for this run can be found on this playlist: https://www.twitch.tv/collections/up1rJa14IhfQLQ",
-    "Current goal: Beat Dragon Tank",
-    "Video: Beating Yakra https://www.twitch.tv/videos/1639300240 01d 02h 09m 39s (2022-10-31T02:09:39Z)"
+    "Current goal: Beat Guardian",
+    "Video: Beating Yakra https://www.twitch.tv/videos/1639300240 01d 02h 09m 39s (2022-10-31T02:09:39Z)",
+    "Video: Beating Dragon Tank https://www.twitch.tv/videos/1640556311 02d 06h 04m 36s (2022-11-01T06:04:36Z)"
   ],
   "help_message_saving_macros": [
     "You can save or edit a macro by using the command !savemacro <macro name> <macro inputs>. Example: !savemacro WalkInCircles Up Right Down Left will save or edit the macro WalkInCircles with the inputs Up Right Down Left, which can then be used later.",
