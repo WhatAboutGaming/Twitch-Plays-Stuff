@@ -48,10 +48,11 @@
     "Type !discord to get a link to the stream Discord server\nand go to #polls to vote for next game",
     "Please, don't delete any files, and please save regularly",
     "Attempting to delete or deleting any file will earn you an\nunappealable permanent ban",
-    "Current goal: Beat R-Series",
+    "Current goal: Beat Heckran",
     "Yakra: 01d 02h 09m 39s (2022-10-31T02:09:39Z)!",
     "Dragon Tank: 02d 06h 04m 36s (2022-11-01T06:04:36Z)!",
     "Guardian: 04d 18h 03m 58s (2022-11-03T18:03:58Z)!",
+    "R-Series: 05d 17h 05m 51s (2022-11-04T17:05:51Z)!",
     "If anything breaks, please ping @WhatAboutGamingLive",
     "The Endgame Conditions are: In order to beat the game, you\nhave to do the following tasks in the following order:",
     "1) Beat all main bosses, order in which bosses are beaten\nDOES NOT MATTER",
@@ -68,11 +69,12 @@
     "All of the code used on this stream is open source and can be found here: https://github.com/WhatAboutGaming/Twitch-Plays-Stuff",
     "We have a Discord server and there is currently a poll up for which game to be played after this (Date TBD), the options are: The Legend of Zelda: A Link to the Past (Super NES) (Previously tied with Chrono Trigger), Final Fantasy 6 (Super NES) (known as Final Fantasy 3 in North America) and Final Fantasy (NES), you can vote for more than one option, Discord server link here: https://discord.gg/yHETNuZCUK",
     "We're currently playing Chrono Trigger. Save files for this run can be found here: https://github.com/WhatAboutGaming/Twitch-Plays-Stuff/tree/master/Save%20Files/Chrono%20Trigger and the videos for this run can be found on this playlist: https://www.twitch.tv/collections/up1rJa14IhfQLQ",
-    "Current goal: Beat R-Series",
+    "Current goal: Beat Heckran",
     "Video: Beating Yakra https://www.twitch.tv/videos/1639300240 01d 02h 09m 39s (2022-10-31T02:09:39Z)",
     "Video: Beating Dragon Tank https://www.twitch.tv/videos/1640556311 02d 06h 04m 36s (2022-11-01T06:04:36Z)",
     "Video: Beating Guardian https://www.twitch.tv/videos/1642809998 04d 18h 03m 58s (2022-11-03T18:03:58Z)",
-    "Clip: How to catch the rat https://clips.twitch.tv/OddSuaveMarjoramRitzMitz-7hAfoCa9CTmARZvO 04d 19h 33m 37s (2022-11-03T19:33:37Z)"
+    "Clip: How to catch the rat https://clips.twitch.tv/OddSuaveMarjoramRitzMitz-7hAfoCa9CTmARZvO 04d 19h 33m 37s (2022-11-03T19:33:37Z)",
+    "Video: Beating R-Series https://www.twitch.tv/videos/1643414090 05d 17h 05m 51s (2022-11-04T17:05:51Z)"
   ],
   "help_message_saving_macros": [
     "You can save or edit a macro by using the command !savemacro <macro name> <macro inputs>. Example: !savemacro WalkInCircles Up Right Down Left will save or edit the macro WalkInCircles with the inputs Up Right Down Left, which can then be used later.",
