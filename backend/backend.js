@@ -2787,6 +2787,7 @@ async function onMessageHandler(target, tags, message, self) {
       /(t+a+k+e+)+\s+(\w+)+\s+(l+o+k+)+\s+((a*t*|i*n*|o*n*)*\s*(t+h+e+)+)+\s+(u+r+l+)+\s+(\w*)+\s+(m+y+)+\s+(a+c+o+u+n+t+\W*\w*)+\s+(i+m+a+g+e+)+\s+(p+r+o+b+a+b+l+y+)+\s+(t+h+e+)+\s+(((b+u+y+)|(b+e+s+t+)|(g+e+t+))+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
     let slurDetection = /((((n+[IiOo][Gg]+)+)+)|(((f+[Aa][Gg]+)+)+)|(((r+[Ee]t+[Aa]r+d+)+)+))/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")); // User will be instantly permabanned, no matter how known the user is, currently only the N word is implemented, more words will be added as they happen
+    slurDetection = false;
     let messageToCountLetters = replaceCyrillicsWithLatin;
     let doesMessageHaveTooManyUpperCaseLetters = false;
     messageToCountLetters = messageToCountLetters.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "");
