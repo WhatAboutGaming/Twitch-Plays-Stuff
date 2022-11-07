@@ -50,6 +50,10 @@ var settableMacroChain = [];
 //settableMacroChain.fill(undefined);
 //console.log(settableMacroChain);
 
+var streamStartedAt = ""; // This is a string that can then be converted to time in milliseconds
+var isStreamLive = false;
+var streamStartedAtMillis = 0;
+
 var neutralController;
 var isControllerBusy = false;
 var isTtsBusy = false;
@@ -2075,7 +2079,14 @@ function getStreamViewerCount(twitchCredentialsObject, twitchAccessTokenObject) 
       //console.log(" dataSize = " + dataSize);
       if (dataSize > 0) {
         // The stream is LIVE!
+        //console.log(JSON.parse(rawOutputData.toString("utf8")).data[0]);
         currentViewerCount = JSON.parse(rawOutputData.toString("utf8")).data[0].viewer_count;
+        streamStartedAt = JSON.parse(rawOutputData.toString("utf8")).data[0].started_at;
+        isStreamLive = true;
+        streamStartedAtMillis = Date.parse(streamStartedAt);
+        //console.log(streamStartedAt);
+        //console.log(isStreamLive);
+        //console.log(streamStartedAtMillis);
         //console.log(new Date().toISOString() + " [STREAM OFFLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
         if (currentViewerCount != oldViewerCount) {
           // Viewer Count Changed
@@ -2094,6 +2105,12 @@ function getStreamViewerCount(twitchCredentialsObject, twitchAccessTokenObject) 
       }
       if (dataSize <= 0) {
         // Stream is probably offline or the Twitch API fucked up (Or the OAuth Token expired, or failed to connect for whatever reason)
+        streamStartedAt = "";
+        isStreamLive = false;
+        streamStartedAtMillis = 0;
+        //console.log(streamStartedAt);
+        //console.log(isStreamLive);
+        //console.log(streamStartedAtMillis);
         currentViewerCount = -1;
         //console.log(new Date().toISOString() + " [STREAM OFFLINE] oldViewerCount = " + oldViewerCount + " currentViewerCount = " + currentViewerCount);
         if (currentViewerCount != oldViewerCount) {
@@ -2786,8 +2803,8 @@ async function onMessageHandler(target, tags, message, self) {
       /(k+e+e+p+)+\s+(u+p+)+\s+(t+h+e+)+\s+(g+o+d+)+\s+(s+t+r+e+a+m\w*\W*\w*)+\s+(m+a+n+)+\s+((\w+\W*\s*a+m+)|(\w+\W*\s*m+))+\s+(g+o+i+n+g+)+\s+(t+o+)+\s+(d+o+)+\s+(a+n+i+m+a+t+e+d+)+\s+(b+r+b+\W*)+\s+(i+n+t+r+o\W*)+\s+(a+n+d+)+\s+(o+f+l+i+n+e+)+\s+(s+c+r+e+n+)+\s+(f+o+r+)+\s+(y+\w*)+\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(t+a+k+e+)+\s+(\w+)+\s+(l+o+k+)+\s+((a*t*|i*n*|o*n*)*\s*(t+h+e+)+)+\s+(u+r+l+)+\s+(\w*)+\s+(m+y+)+\s+(a+c+o+u+n+t+\W*\w*)+\s+(i+m+a+g+e+)+\s+(p+r+o+b+a+b+l+y+)+\s+(t+h+e+)+\s+(((b+u+y+)|(b+e+s+t+)|(g+e+t+))+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
-    let slurDetection = /((((n+[IiOo][Gg]+)+)+)|(((f+[Aa][Gg]+)+)+)|(((r+[Ee]t+[Aa]r+d+)+)+))/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")); // User will be instantly permabanned, no matter how known the user is, currently only the N word is implemented, more words will be added as they happen
-    slurDetection = false;
+    let slurDetection = /((((n+\s*[IiOo01]+(\s*[Gg6]+)+\s*[Ee3]+\s*[r]+)+)+)|(((f+\s*[Aa4]+(\s*[Gg6]+)+\s*[Oo0]+\s*[t]+)+)+)|(((r+\s*[Ee3]+\s*t+\s*[Aa4]+\s*r+\s*d+)+)+)+)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")); // User will be instantly permabanned, no matter how known the user is, currently only the N word is implemented, more words will be added as they happen
+    //slurDetection = false;
     let messageToCountLetters = replaceCyrillicsWithLatin;
     let doesMessageHaveTooManyUpperCaseLetters = false;
     messageToCountLetters = messageToCountLetters.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "");
@@ -3931,15 +3948,33 @@ async function onMessageHandler(target, tags, message, self) {
             let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
             let playTimeString = playTimeDays + "day " + playTimeHours + "hr " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
             //
+            let streamDeltaUptime = timeUptimeWasRequested - streamStartedAtMillis;
+            let streamUptimeDays = (parseInt(streamDeltaUptime / 86400000)).toString().padStart(2, "0");
+            let streamUptimeHours = (parseInt(streamDeltaUptime / 3600000) % 24).toString().padStart(2, "0");
+            let streamUptimeMinutes = (parseInt(streamDeltaUptime / 60000) % 60).toString().padStart(2, "0");
+            let streamUptimeSeconds = (parseInt(streamDeltaUptime / 1000) % 60).toString().padStart(2, "0");
+            let streamUptimeMillis = (streamDeltaUptime % 1000).toString().padStart(3, "0");
+            let streamUptimeString = streamUptimeDays + "day " + streamUptimeHours + "hr " + streamUptimeMinutes + "min " + streamUptimeSeconds + "sec " + streamUptimeMillis + "msec";
+            //
             if (hasRunStarted == false) {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " The server has been up for " + uptimeString + ". The next run starts in " + playTimeString + ".");
+              if (isStreamLive == true) {
+                client.action(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". The next run starts in " + playTimeString + ". The stream has been up for " + streamUptimeString + ".");
+              }
+              if (isStreamLive == false) {
+                client.action(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". The next run starts in " + playTimeString + ". The stream is currently offline.");
+              }
             }
             if (hasRunStarted == true) {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " The server has been up for " + uptimeString + ". This run has been going for " + playTimeString + ".");
+              if (isStreamLive == true) {
+                client.action(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". This run has been going for " + playTimeString + ". The stream has been up for " + streamUptimeString + ".");
+              }
+              if (isStreamLive == false) {
+                client.action(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". This run has been going for " + playTimeString + ". The stream is currently offline.");
+              }
             }
 
           }
