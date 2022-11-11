@@ -1683,7 +1683,7 @@ function onRaid(channel, username, viewers, tags) {
   */
   let randomColorName = Math.floor(Math.random() * defaultColors.length);
   client.say(channel, ".color " + defaultColorNames[randomColorName]);
-  client.action(chatConfig.debug_channel, systemMsg);
+  //client.action(chatConfig.debug_channel, systemMsg);
   //client.action(chatConfig.debug_channel, new Date().toISOString() + " [RAID] channel=" + channel + ", username=" + username + ",viewers=" + viewers + ", tags=" + tags);
   //client.whisper(chatConfig.channel_owner, new Date().toISOString() + " [RAID] channel=" + channel + ", username=" + username + ",viewers=" + viewers + ", tags=" + tags);
   //client.action(chatConfig.debug_channel, new Date().toISOString() + " [RAID] channel=" + channel + ", username=" + username + ",viewers=" + viewers + ", tags=" + JSON.stringify(tags));
@@ -2791,6 +2791,7 @@ async function onMessageHandler(target, tags, message, self) {
       /(h+e+l+o+[^\s]*)+\s+(i+)+\s+(d+o+)+\s+(g+r+a+p+h+i+c+)+\s+(d+e+s+i+g+n+)+\s+(\w+o+)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(w+o+r+k+)+\s+(d+o+n+e+)+\s+(l+i+k+e+)+\s+(\w+)+\s+(l+o+g+o+[^\s]*)+\s+(b+a+n+e+r+[^\s]*)+\s+(p+a+n+e+l+[^\s]*)+\s+(o+v+e+r+l+a+y+[^\s]*)+\s+(e+t+c+[^\s]*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((c+o+d+e+)+\s*(f+o+r+)*\s*(\w+)+\s+((f+o+l+o+w+\w*)+|(p+r+i+m+e+\w*)+|(v+i+e+w+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((p+r+o+m+o+t*i*o*n*a*l*)+\s*(c+o+d+e+)+\s*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /((g+\s*e+\s*t+)+\s*(v+\s*i+\s*e+\s*w+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((t+w+[l1\!\|]+t+c+h+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((t+w+[li1\!\|]+t+c+h+\s*\-+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
@@ -3121,7 +3122,7 @@ async function onMessageHandler(target, tags, message, self) {
                   if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
                     console.log("New user successfully added to database A");
                     let randomColorName = Math.floor(Math.random() * defaultColors.length);
-                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    client.say(target, ".color " + defaultColorNames[randomColorName]);
                     if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
                       client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help or !commands, you can also read the stream description, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
                     }
@@ -3174,7 +3175,7 @@ async function onMessageHandler(target, tags, message, self) {
                   if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
                     console.log("First message ID is different from last message ID A");
                     let randomColorName = Math.floor(Math.random() * defaultColors.length);
-                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    client.say(target, ".color " + defaultColorNames[randomColorName]);
                     /*
                     if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
                       console.log("Do not send message here A");
@@ -3489,7 +3490,7 @@ async function onMessageHandler(target, tags, message, self) {
                   if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
                     console.log("New user successfully added to database B");
                     let randomColorName = Math.floor(Math.random() * defaultColors.length);
-                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    client.say(target, ".color " + defaultColorNames[randomColorName]);
                     if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
                       client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help or !commands, you can also read the stream description, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
                     }
@@ -3542,7 +3543,7 @@ async function onMessageHandler(target, tags, message, self) {
                   if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
                     console.log("First message ID is different from last message ID B");
                     let randomColorName = Math.floor(Math.random() * defaultColors.length);
-                    client.say(chatConfig.debug_channel, ".color " + defaultColorNames[randomColorName]);
+                    client.say(target, ".color " + defaultColorNames[randomColorName]);
                     /*
                     if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
                       console.log("Do not send message here G");
