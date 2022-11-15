@@ -78,6 +78,9 @@
     "Atropos XR: 14d 08h 06m 32s (2022-11-13T08:06:32Z)!",
     "Mother Brain: 14d 08h 32m 21s (2022-11-13T08:32:21Z)!",
     "Mega Mutant: 14d 22h 30m 29s (2022-11-13T22:30:29Z)!",
+    "Rust Tyrano: 15d 02h 43m 10s (2022-11-14T02:43:10Z)!",
+    "Yakra XIII: 15d 05h 31m 19s (2022-11-14T05:31:19Z)!",
+    "Retinite: 15d 06h 14m 29s (2022-11-14T06:14:29Z)!",
     "If anything breaks, please ping @WhatAboutGamingLive",
     "The Endgame Conditions are: In order to beat the game, you\nhave to do the following tasks in the following order:",
     "1) Beat all main bosses, order in which bosses are beaten\nDOES NOT MATTER",
@@ -121,7 +124,10 @@
     "Video: Beating Son of Sun https://www.twitch.tv/videos/1650123172 12d 17h 47m 16s (2022-11-11T17:47:16Z)",
     "Video: Beating Atropos XR https://www.twitch.tv/videos/1652214270 14d 08h 06m 32s (2022-11-13T08:06:32Z)",
     "Video: Beating Mother Brain https://www.twitch.tv/videos/1652214271 14d 08h 32m 21s (2022-11-13T08:32:21Z)",
-    "Video: Beating Mega Mutant https://www.twitch.tv/videos/1652214822 14d 22h 30m 29s (2022-11-13T22:30:29Z)"
+    "Video: Beating Mega Mutant https://www.twitch.tv/videos/1652214822 14d 22h 30m 29s (2022-11-13T22:30:29Z)",
+    "Video: Beating Rust Tyrano https://www.twitch.tv/videos/1653127625 15d 02h 43m 10s (2022-11-14T02:43:10Z)",
+    "Video: Beating Yakra XIII https://www.twitch.tv/videos/1653127627 15d 05h 31m 19s (2022-11-14T05:31:19Z)",
+    "Video: Beating Retinite https://www.twitch.tv/videos/1653127626 15d 06h 14m 29s (2022-11-14T06:14:29Z)"
   ],
   "help_message_saving_macros": [
     "You can save or edit a macro by using the command !savemacro <macro name> <macro inputs>. Example: !savemacro WalkInCircles Up Right Down Left will save or edit the macro WalkInCircles with the inputs Up Right Down Left, which can then be used later.",
