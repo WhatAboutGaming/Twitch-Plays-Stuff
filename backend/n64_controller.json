@@ -21034,7 +21034,8 @@
     "input_value": "0x00007F7F00000080L",
     "input_name": "YOU WIN!",
     "input_alias": [
-      "Win"
+      "Win",
+      "Clear"
     ],
     "color_value": "#FFFFFF",
     "is_blacklisted": false,
