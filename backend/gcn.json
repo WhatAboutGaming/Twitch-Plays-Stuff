@@ -330,6 +330,46 @@
       ]
     },
     {
+      "blacklisted_combo_input_string": "L+R+Z+Start+Y+X+B+A",
+      "blacklisted_combo_input_size": 8,
+      "blacklisted_combo_input_value": "0xFF037F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 10",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "L",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Z",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Start",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Y",
+          "component_input_value": "0x10007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "X",
+          "component_input_value": "0x20007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "A",
+          "component_input_value": "0x80007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
       "blacklisted_combo_input_string": "L+R+Z+Start+CUp",
       "blacklisted_combo_input_size": 5,
       "blacklisted_combo_input_value": "0x0F037F7F7F000000L",

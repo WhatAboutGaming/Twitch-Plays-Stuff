@@ -20854,7 +20854,7 @@
     "is_blacklisted": false,
     "opposite_input_value": "0x00007F7F7F7F0020L",
     "has_opposite": false,
-    "input_type": 0,
+    "input_type": 3,
     "keyboard_value": null,
     "keyboard_key_name": null
   },
@@ -20881,7 +20881,7 @@
     "is_blacklisted": false,
     "opposite_input_value": "0x00007F7F7F7F0040L",
     "has_opposite": false,
-    "input_type": 0,
+    "input_type": 3,
     "keyboard_value": null,
     "keyboard_key_name": null
   },
@@ -20896,7 +20896,7 @@
     "is_blacklisted": false,
     "opposite_input_value": "0x00007F7F7F7F0080L",
     "has_opposite": false,
-    "input_type": 0,
+    "input_type": 3,
     "keyboard_value": null,
     "keyboard_key_name": null
   }

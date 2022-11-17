@@ -20681,7 +20681,7 @@
     "is_blacklisted": false,
     "opposite_input_value": "0x0000000000000020L",
     "has_opposite": false,
-    "input_type": 0,
+    "input_type": 3,
     "keyboard_value": null,
     "keyboard_key_name": null
   },
@@ -20708,7 +20708,7 @@
     "is_blacklisted": false,
     "opposite_input_value": "0x0000000000000040L",
     "has_opposite": false,
-    "input_type": 0,
+    "input_type": 3,
     "keyboard_value": null,
     "keyboard_key_name": null
   },
@@ -20723,7 +20723,7 @@
     "is_blacklisted": false,
     "opposite_input_value": "0x0000000000000080L",
     "has_opposite": false,
-    "input_type": 0,
+    "input_type": 3,
     "keyboard_value": null,
     "keyboard_key_name": null
   }
