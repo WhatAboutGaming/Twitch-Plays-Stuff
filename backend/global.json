@@ -96,6 +96,7 @@
     "Lavos 2 New Game+: 17d 05h 51m 26s (2022-11-16T05:51:26Z)!",
     "Lavos 2nd Form New Game+: 17d 06h 02m 13s\n(2022-11-16T06:02:13Z)!",
     "Lavos Core New Game+: 17d 06h 13m 29s\n(2022-11-16T06:13:29Z)!",
+    "Frog Ending: 17d 17h 52m 50s (2022-11-16T17:52:50Z)!",
     "Stream goes offline in {{stream_end_time}} (The 20 day mark)",
     "{{next_game_title}} (starts in\n{{next_run_start_time}})",
     "If anything breaks, please ping @WhatAboutGamingLive",
@@ -152,7 +153,8 @@
     "Video: Beating TerraMutant https://www.twitch.tv/videos/1655021833 16d 06h 43m 52s (2022-11-15T06:43:52Z)",
     "Video: Beating Zeal 1, Mammon Machine, Zeal 2, Lavos 1, Lavos 2 https://www.twitch.tv/videos/1655021832 16d 07h 50m 59s (2022-11-15T07:50:59Z)",
     "Video: Beating Lavos 2nd Form, Lavos Core https://www.twitch.tv/videos/1655021831 16d 18h 50m 04s (2022-11-15T18:50:04Z)",
-    "Video: Beating Lavos 2 New Game+, Lavos 2nd Form New Game+, Lavos Core New Game+ https://www.twitch.tv/videos/1655021835 17d 06h 13m 29s (2022-11-16T06:13:29Z)"
+    "Video: Beating Lavos 2 New Game+, Lavos 2nd Form New Game+, Lavos Core New Game+ https://www.twitch.tv/videos/1655021835 17d 06h 13m 29s (2022-11-16T06:13:29Z)",
+    "Video: Frog Ending https://www.twitch.tv/videos/1655819298 17d 17h 52m 50s (2022-11-16T17:52:50Z)"
   ],
   "help_message_saving_macros": [
     "You can save or edit a macro by using the command !savemacro <macro name> <macro inputs>. Example: !savemacro WalkInCircles Up Right Down Left will save or edit the macro WalkInCircles with the inputs Up Right Down Left, which can then be used later.",
