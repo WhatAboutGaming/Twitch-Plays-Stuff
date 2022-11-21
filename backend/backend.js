@@ -6274,7 +6274,7 @@ async function onMessageHandler(target, tags, message, self) {
             if (settableMacroChain.length == 0) {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " There are no inputs set, use !setsettablemacro a+b;300 0, where a+b can be replaced with any input that's listed in !help, 300 is the duration in milliseconds, which can replaced with the duration from 1 to 65535 milliseconds, duration is an optional parameter, default is 266, and 0 can be replaced with the position you want to set the input, starting at 0 and ending at 95.");
+              client.action(target, "@" + usernameToPing + " There are no inputs set, use !setsettablemacro a+b;300 0, where a+b can be replaced with any input that's listed in !help, 300 is the duration in milliseconds, which can replaced with the duration from 1 to 65535 milliseconds, duration is an optional parameter, default is 266, and 0 can be replaced with the position you want to set the input, starting at 0 and ending at 63.");
             }
             if (settableMacroChain.length > 0) {
               if (isNaN(parseInt(messageWords[1], 10)) == false) {
@@ -6550,7 +6550,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //
                 let randomColorName = Math.floor(Math.random() * defaultColors.length);
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
-                client.action(target, "@" + usernameToPing + " Invalid position, please make sure there are no typos, and please make sure the positions before the position you entered were already assigned with inputs. First position is 0, last position is 95. Negative positions don't work, and positions higher than 95 can't be assigned.");
+                client.action(target, "@" + usernameToPing + " Invalid position, please make sure there are no typos, and please make sure the positions before the position you entered were already assigned with inputs. First position is 0, last position is 63. Negative positions don't work, and positions higher than 63 can't be assigned.");
               }
               //console.log("settableMacroChain.length = " + settableMacroChain.length);
               //console.log(settableMacroChain);
@@ -6655,7 +6655,7 @@ async function onMessageHandler(target, tags, message, self) {
             if (isValidInputCount == false) {
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(target, ".color " + defaultColorNames[randomColorName]);
-              client.action(target, "@" + usernameToPing + " Invalid ending position, please make sure there are no typos, and please make sure the positions before the position you entered were already assigned with inputs. First position is 0, last position is the position you entered. (It'll play the inputs starting from the position 0 and will end at the position you entered.) Negative positions don't work, and positions higher than 95 can't be used.");
+              client.action(target, "@" + usernameToPing + " Invalid ending position, please make sure there are no typos, and please make sure the positions before the position you entered were already assigned with inputs. First position is 0, last position is the position you entered. (It'll play the inputs starting from the position 0 and will end at the position you entered.) Negative positions don't work, and positions higher than 63 can't be used.");
             }
             if (isValidInputCount == true) {
               let inputsToListPlayback = "";
@@ -6840,7 +6840,7 @@ async function onMessageHandler(target, tags, message, self) {
           // 1)a+b;266 2)[2a)l+r;266 2b)x+y;266]3)*4 4)up+right;2000 5)*255
           // Explanation:
           // 1) A+B will be executed once for 266ms
-          // 2) we enter the inner loop containing the chain "l+r;266 x+y;266" (the chain in square brackets "[]", "[" starts an inner loop, "]" ends an inner loop, inputs in inner loop use up the total amount of inputs allowed, max of 95 inputs allowed in an entire chain, in total, there are 4 inputs used in this chain)
+          // 2) we enter the inner loop containing the chain "l+r;266 x+y;266" (the chain in square brackets "[]", "[" starts an inner loop, "]" ends an inner loop, inputs in inner loop use up the total amount of inputs allowed, max of 63 inputs allowed in an entire chain, in total, there are 4 inputs used in this chain)
           // 2a) we execute l+r;266
           // 2b) then we execute x+y;266
           // 3) repeat that block 4 times
