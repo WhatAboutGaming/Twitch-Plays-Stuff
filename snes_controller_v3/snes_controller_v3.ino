@@ -35,7 +35,7 @@
 #define buttonRFull 13  // Left 14
 
 const unsigned int startingMacroIndex = 0x04;
-const unsigned int endingMacroIndex = 0x64;
+const unsigned int endingMacroIndex = 0x44;
 const unsigned int macroBufferSize = endingMacroIndex - startingMacroIndex;
 const unsigned int startingMacroMetadataIndex = endingMacroIndex + 1;
 const unsigned int endingMacroMetadataIndex = startingMacroMetadataIndex + macroBufferSize;

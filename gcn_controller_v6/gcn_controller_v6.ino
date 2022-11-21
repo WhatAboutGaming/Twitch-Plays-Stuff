@@ -1,6 +1,6 @@
 // This project uses 4 8-bit shift register, such as 74HC595 or HCF4094, in cascading format
 /*
-  GCN Controller for Arduino UNO by WhatAboutGaming NOTE: THIS CODE HAD TO BE MODIFIED TO WORK WITH MEGA 2560 BECAUSE UNO RAN OUT OF RAM, THIS CODE NEEDS TO BE OPTIMIZED TO SAVE RAM, I DON'T KNOW WHERE TO EVEN START TO OPTIMIZE THE CODE, TO ME, EVERYTHING LOOKS FINE BUT I'M A NOOB
+  GCN Controller for Arduino UNO by WhatAboutGaming
   For use in the Twitch.TV stream TwitchTriesToPlay.
   https://www.twitch.tv/twitchtriestoplay
   https://github.com/WhatAboutGaming/Twitch-Plays-Stuff
@@ -138,7 +138,7 @@
 /////////////////////////////////
 
 const unsigned int startingMacroIndex = 0x04;
-const unsigned int endingMacroIndex = 0x64;
+const unsigned int endingMacroIndex = 0x44;
 const unsigned int macroBufferSize = endingMacroIndex - startingMacroIndex;
 const unsigned int startingMacroMetadataIndex = endingMacroIndex + 1;
 const unsigned int endingMacroMetadataIndex = startingMacroMetadataIndex + macroBufferSize;
