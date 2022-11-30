@@ -8295,6 +8295,8 @@
       "2L",
       "LT",
       "TL",
+      "ZL",
+      "LZ",
       "LeftTrigger",
       "TriggerLeft"
     ],
@@ -8314,6 +8316,8 @@
       "2R",
       "RT",
       "TR",
+      "ZR",
+      "RZ",
       "RightTrigger",
       "TriggerRight"
     ],
@@ -8333,6 +8337,7 @@
       "1L",
       "LB",
       "BL",
+      "L",
       "LeftBumper",
       "BumperLeft",
       "LeftShoulder",
@@ -8354,6 +8359,7 @@
       "1R",
       "RB",
       "BR",
+      "R",
       "RightBumper",
       "BumperRight",
       "RightShoulder",
@@ -8373,6 +8379,8 @@
     "input_alias": [
       "Tri",
       "△",
+      "Triaglne",
+      "Traiglne",
       "Trailgne",
       "Trialgne",
       "Tirangle",

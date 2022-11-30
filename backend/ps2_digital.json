@@ -83,10 +83,42 @@
       ]
     },
     {
+      "blacklisted_combo_input_string": "L3+R3+L2+R2+L1+R1",
+      "blacklisted_combo_input_size": 6,
+      "blacklisted_combo_input_value": "0x0F0F7F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 1",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "L3",
+          "component_input_value": "0x02007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R3",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L1",
+          "component_input_value": "0x00047F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R1",
+          "component_input_value": "0x00087F7F7F7F0000L"
+        }
+      ]
+    },
+    {
       "blacklisted_combo_input_string": "Select+L3+R3+Start+L2+R2+L1+R1",
       "blacklisted_combo_input_size": 8,
       "blacklisted_combo_input_value": "0x0F0F7F7F7F7F0000L",
-      "blacklisted_combo_input_description": "Turn system off 1",
+      "blacklisted_combo_input_description": "Turn system off 2",
       "blacklisted_combo_input_components": [
         {
           "component_input_alias": "Select",
