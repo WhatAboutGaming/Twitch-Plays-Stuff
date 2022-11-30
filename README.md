@@ -36,3 +36,9 @@ Reference for SNES controller:
 
 1) https://github.com/marcosassis/gamepaduino/wiki/SNES-controller-interface
 2) https://www.repairfaq.org/REPAIR/F_SNES.html
+
+Reference for PS2 controller:
+1) https://gist.github.com/scanlime/5042071
+2) http://store.curiousinventor.com/guides/PS2/
+3) http://www.lynxmotion.com/images/files/ps2cmd01.txt
+4) http://procrastineering.blogspot.com/2010/12/simulated-ps2-controller-for.html
