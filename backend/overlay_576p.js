@@ -221,6 +221,13 @@ var inputCountsObject = {
   total_inputs_executed: 0
 };
 
+var displayFramerate = false;
+
+let frameDataToDisplayObject = {
+  frame_count_to_display: 0,
+  frame_rate_to_display: 0
+};
+
 function preload() {
   //soundFormats("mp3");
   //font = loadFont("Pokemon_DPPt_mod2.ttf");
@@ -280,6 +287,12 @@ function setup() {
   createCanvas(1024, 576);
   background("#00000000");
   socket = io.connect();
+  socket.on("frame_data_to_display_object", function(data) {
+    frameDataToDisplayObject = data;
+  });
+  socket.on("display_framerate", function(data) {
+    displayFramerate = data;
+  });
   socket.on("input_counts_object", function(data) {
     inputCountsObject = data;
     //console.log(inputCountsObject);
@@ -968,11 +981,21 @@ function draw() {
   fill("#FFFFFFFF");
   if (viewerCount == 1) {
     textLeading(textDefaultLeadingToUse);
-    text(viewerCount + " Viewer", 768, 346);
+    if (displayFramerate == true) {
+      text(viewerCount + " Viewer    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+    }
+    if (displayFramerate == false) {
+      text(viewerCount + " Viewer", 768, 346);
+    }
   }
   if (viewerCount != 1) {
     textLeading(textDefaultLeadingToUse);
-    text(viewerCount + " Viewers", 768, 346);
+    if (displayFramerate == true) {
+      text(viewerCount + " Viewers    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+    }
+    if (displayFramerate == false) {
+      text(viewerCount + " Viewers", 768, 346);
+    }
   }
   //tint(255, 127);
   //image(controllerGraphics, 40, 40, 13, 19, 13, 50, 13, 19); // Position X on Canvas, Position Y on Canvas, Width on Canvas, Height on Canvas, Origin X on Image, Origin Y on Image, Width on image, Height on Image

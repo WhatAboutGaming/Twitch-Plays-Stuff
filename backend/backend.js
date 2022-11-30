@@ -150,6 +150,9 @@ var innerLoopMetadata = {
 var channelToSendMessageTo = "";
 var usernameToSendMessageTo = "";
 
+var frameCountToDisplay = 0;
+var frameRateToDisplay = 0;
+
 var server = http.createServer(handleRequest);
 server.listen(globalConfig.webserver_port);
 
@@ -264,10 +267,16 @@ io.sockets.on("connection",
       io.to(socket.id).emit("advanced_input_string", advancedInputString);
       io.to(socket.id).emit("end_input_string", endInputString);
     }
+    let frameDataToDisplayObject = {
+      frame_count_to_display: frameCountToDisplay,
+      frame_rate_to_display: frameRateToDisplay
+    };
+    io.to(socket.id).emit("frame_data_to_display_object", frameDataToDisplayObject);
     io.to(socket.id).emit("input_counts_object", inputCountsObject);
     io.to(socket.id).emit("advanced_input_metadata", advancedInputMetadata);
     io.to(socket.id).emit("inner_loop_metadata", innerLoopMetadata);
     io.to(socket.id).emit("controller_graphics", controllerConfig.controller_graphics);
+    io.to(socket.id).emit("display_framerate", controllerConfig.display_framerate);
     io.to(socket.id).emit("game_title", globalConfig.game_title);
     io.to(socket.id).emit("game_title_short", globalConfig.game_title_short);
     io.to(socket.id).emit("next_game_title", globalConfig.next_game_title);
@@ -805,7 +814,7 @@ parser.on("data", async function(data) {
               inputArrayToDisplay = inputArrayToDisplay + "-";
             }
             if ((inputDurationToDisplay != controllerConfig.normal_delay) && (inputDurationToDisplay != controllerConfig.held_delay)) {
-              inputArrayToDisplay = inputArrayToDisplay + " " + inputDurationToDisplay + "ms";
+              inputArrayToDisplay = inputArrayToDisplay + ";" + inputDurationToDisplay + controllerConfig.time_unit_short;
             }
             //console.log(new Date().toISOString() + " " + inputArrayToDisplay);
             endInputString = inputArrayToDisplay;
@@ -1015,7 +1024,7 @@ parser.on("data", async function(data) {
                 inputArrayToDisplay = inputArrayToDisplay + "-";
               }
               if ((inputDurationToDisplay != controllerConfig.normal_delay) && (inputDurationToDisplay != controllerConfig.held_delay)) {
-                inputArrayToDisplay = inputArrayToDisplay + " " + inputDurationToDisplay + "ms";
+                inputArrayToDisplay = inputArrayToDisplay + ";" + inputDurationToDisplay + controllerConfig.time_unit_short;
               }
               //console.log(new Date().toISOString() + " " + inputArrayToDisplay);
               basicInputString = inputArrayToDisplay;
@@ -1168,6 +1177,16 @@ parser.on("data", async function(data) {
               */
             }
           }
+        }
+        if (data[0] == 3) {
+          // Framerate preamble and postamble hardcoded to be 0x03, can be changed later to config file if needed
+          frameCountToDisplay = (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | (data[4]);
+          frameRateToDisplay = (data[5] << 24) | (data[6] << 16) | (data[7] << 8) | (data[8]);
+          let frameDataToDisplayObject = {
+            frame_count_to_display: frameCountToDisplay,
+            frame_rate_to_display: frameRateToDisplay
+          };
+          io.sockets.emit("frame_data_to_display_object", frameDataToDisplayObject);
         }
         if (data[0] >= controllerConfig.initial_macro_preamble && data[0] <= (controllerConfig.final_macro_preamble - 1)) {
           if (inputMode != 2) {
@@ -1368,7 +1387,7 @@ parser.on("data", async function(data) {
                 inputArrayToDisplay = inputArrayToDisplay + "-";
               }
               if ((inputDurationToDisplay != controllerConfig.default_duration_per_precision_input_millis) && (inputDurationToDisplay != controllerConfig.held_duration_per_precision_input_millis)) {
-                inputArrayToDisplay = inputArrayToDisplay + " " + inputDurationToDisplay + "ms";
+                inputArrayToDisplay = inputArrayToDisplay + ";" + inputDurationToDisplay + controllerConfig.time_unit_short;
               }
               //console.log(new Date().toISOString() + " " + inputArrayToDisplay);
               advancedInputString = inputArrayToDisplay;
@@ -2238,7 +2257,7 @@ function updateStreamTime() {
               let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
               let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
               let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
-              let playTimeString = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s " + playTimeMillis + "ms";
+              let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
 
               let nextStartTimeISOString = new Date(nextRunStartTime).toISOString();
               let nextStartTimeRemaining = currentTimeMillis - nextRunStartTime;
@@ -2248,7 +2267,7 @@ function updateStreamTime() {
               let nextStartTimeRemainingMinutes = (parseInt(nextStartTimeRemaining / 60000) % 60).toString().padStart(2, "0");
               let nextStartTimeRemainingSeconds = (parseInt(nextStartTimeRemaining / 1000) % 60).toString().padStart(2, "0");
               let nextStartTimeRemainingMillis = (nextStartTimeRemaining % 1000).toString().padStart(3, "0");
-              let nextStartTimeRemainingString = nextStartTimeRemainingDays + "d " + nextStartTimeRemainingHours + "h " + nextStartTimeRemainingMinutes + "m " + nextStartTimeRemainingSeconds + "s " + nextStartTimeRemainingMillis + "ms";
+              let nextStartTimeRemainingString = nextStartTimeRemainingDays + "day " + nextStartTimeRemainingHours + "hour " + nextStartTimeRemainingMinutes + "min " + nextStartTimeRemainingSeconds + "sec " + nextStartTimeRemainingMillis + "msec";
 
               let streamEndTimeISOString = new Date(streamEndTime).toISOString();
               let streamEndTimeRemaining = currentTimeMillis - streamEndTime;
@@ -2258,7 +2277,7 @@ function updateStreamTime() {
               let streamEndTimeRemainingMinutes = (parseInt(streamEndTimeRemaining / 60000) % 60).toString().padStart(2, "0");
               let streamEndTimeRemainingSeconds = (parseInt(streamEndTimeRemaining / 1000) % 60).toString().padStart(2, "0");
               let streamEndTimeRemainingMillis = (streamEndTimeRemaining % 1000).toString().padStart(3, "0");
-              let streamEndTimeRemainingString = streamEndTimeRemainingDays + "d " + streamEndTimeRemainingHours + "h " + streamEndTimeRemainingMinutes + "m " + streamEndTimeRemainingSeconds + "s " + streamEndTimeRemainingMillis + "ms";
+              let streamEndTimeRemainingString = streamEndTimeRemainingDays + "day " + streamEndTimeRemainingHours + "hour " + streamEndTimeRemainingMinutes + "min " + streamEndTimeRemainingSeconds + "sec " + streamEndTimeRemainingMillis + "msec";
 
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
@@ -2336,7 +2355,7 @@ function updateStreamTime() {
               let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
               let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
               let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
-              let playTimeString = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s " + playTimeMillis + "ms";
+              let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
 
               let nextStartTimeISOString = new Date(nextRunStartTime).toISOString();
               let nextStartTimeRemaining = currentTimeMillis - nextRunStartTime;
@@ -2346,7 +2365,7 @@ function updateStreamTime() {
               let nextStartTimeRemainingMinutes = (parseInt(nextStartTimeRemaining / 60000) % 60).toString().padStart(2, "0");
               let nextStartTimeRemainingSeconds = (parseInt(nextStartTimeRemaining / 1000) % 60).toString().padStart(2, "0");
               let nextStartTimeRemainingMillis = (nextStartTimeRemaining % 1000).toString().padStart(3, "0");
-              let nextStartTimeRemainingString = nextStartTimeRemainingDays + "d " + nextStartTimeRemainingHours + "h " + nextStartTimeRemainingMinutes + "m " + nextStartTimeRemainingSeconds + "s " + nextStartTimeRemainingMillis + "ms";
+              let nextStartTimeRemainingString = nextStartTimeRemainingDays + "day " + nextStartTimeRemainingHours + "hour " + nextStartTimeRemainingMinutes + "min " + nextStartTimeRemainingSeconds + "sec " + nextStartTimeRemainingMillis + "msec";
 
               let streamEndTimeISOString = new Date(streamEndTime).toISOString();
               let streamEndTimeRemaining = currentTimeMillis - streamEndTime;
@@ -2356,7 +2375,7 @@ function updateStreamTime() {
               let streamEndTimeRemainingMinutes = (parseInt(streamEndTimeRemaining / 60000) % 60).toString().padStart(2, "0");
               let streamEndTimeRemainingSeconds = (parseInt(streamEndTimeRemaining / 1000) % 60).toString().padStart(2, "0");
               let streamEndTimeRemainingMillis = (streamEndTimeRemaining % 1000).toString().padStart(3, "0");
-              let streamEndTimeRemainingString = streamEndTimeRemainingDays + "d " + streamEndTimeRemainingHours + "h " + streamEndTimeRemainingMinutes + "m " + streamEndTimeRemainingSeconds + "s " + streamEndTimeRemainingMillis + "ms";
+              let streamEndTimeRemainingString = streamEndTimeRemainingDays + "day " + streamEndTimeRemainingHours + "hour " + streamEndTimeRemainingMinutes + "min " + streamEndTimeRemainingSeconds + "sec " + streamEndTimeRemainingMillis + "msec";
 
               let randomColorName = Math.floor(Math.random() * defaultColors.length);
               client.say(chatConfig.main_channel, ".color " + defaultColorNames[randomColorName]);
@@ -2794,7 +2813,12 @@ async function onMessageHandler(target, tags, message, self) {
       /((g+[\s\-]*e+[\s\-]*t+)+[\s\-]*(v+[\s\-]*i+[\s\-]*e+[\s\-]*w+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((g+[\s\-]*\-+[\s\-]*t+)+[\s\-]*(v+[\s\-]*\-+[\s\-]*e+[\s\-]*w+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((t+w+[l1\!\|]+t+c+h+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /((t+w+[li1\!\|]+t+c+h+\s*\-+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
+      /((t+w+[li1\!\|]+t+c+h+\s*\-+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(((f+o+l+o+w+\w*)+|(p+r+i+m+e+\w*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+o+t+\w*)+)+\W*\s*((f+o+l+o+w+\w*)+|(p+r+i+m+e+\w*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+o+t+\w*)+)+\W*\s*((f+o+l+o+w+\w*)+|(p+r+i+m+e+\w*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+o+t+\w*)+)+\W*\s*((f+o+l+o+w+\w*)+|(p+r+i+m+e+\w*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+o+t+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(d+o+g+e+\s*h+y+p+e+)+\s*(\.+|d+o+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(o+f+e+r+\s*\w*\s*p+r+o+m+o+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(p+r+i+c+e+\s+i+s+\s+l+o+w+e+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(l+o+w+e+r+\s+p+r+i+c+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
     let multiMessageSpamBotTypeA = [/((i+t+)+\s*(i+s+)|(i+t+\W*s+))+\s+(n+i+c+e+)+\s+(t+o+)+\s+(m+e+t+)+\s+(y+\w*)+\s+(\w+\W*v+e+)+\s+(w+a+t+c+h+e+d+)+\s+(y+\w*)+\s+([^\s]*)+\s+(t+w+\w*t+c+h+)\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(y+\w*)+\s+(s+i+r+\W*)+\s+(h+a+v+e+)+\s+(f+l+o+w+\W*)+\s+(i+t+\W*s+)+\s+(a+w+e+s+\w+m+e\W*)+\s+(\w+)+\s+(l+i+k+e+)+\s+(y+\w*)+\s+(s+t+r+e+a+m+\w*\W*\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -3122,8 +3146,8 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
                     console.log("New user successfully added to database A");
-                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
-                    client.say(target, ".color " + defaultColorNames[randomColorName]);
+                    //let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    //client.say(target, ".color " + defaultColorNames[randomColorName]);
                     if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
                       client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help or !commands, you can also read the stream description, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
                     }
@@ -3175,8 +3199,8 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
                     console.log("First message ID is different from last message ID A");
-                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
-                    client.say(target, ".color " + defaultColorNames[randomColorName]);
+                    //let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    //client.say(target, ".color " + defaultColorNames[randomColorName]);
                     /*
                     if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
                       console.log("Do not send message here A");
@@ -3490,8 +3514,8 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
                     console.log("New user successfully added to database B");
-                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
-                    client.say(target, ".color " + defaultColorNames[randomColorName]);
+                    //let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    //client.say(target, ".color " + defaultColorNames[randomColorName]);
                     if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
                       client.action(target, "@" + databaseToReadFromResult.last_username_to_ping + " Hello, I see you're new here! If you want to learn how to play, type !help or !commands, you can also read the stream description, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!");
                     }
@@ -3543,8 +3567,8 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
                     console.log("First message ID is different from last message ID B");
-                    let randomColorName = Math.floor(Math.random() * defaultColors.length);
-                    client.say(target, ".color " + defaultColorNames[randomColorName]);
+                    //let randomColorName = Math.floor(Math.random() * defaultColors.length);
+                    //client.say(target, ".color " + defaultColorNames[randomColorName]);
                     /*
                     if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
                       console.log("Do not send message here G");
@@ -4128,6 +4152,14 @@ async function onMessageHandler(target, tags, message, self) {
         }
       }
     }
+    if (controllerConfig.display_framerate == true) {
+      let frameRatePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(frame\s*rate)+/ig.test(originalMessage);
+      if (frameRatePrefixCheck == true) {
+        let randomColorName = Math.floor(Math.random() * defaultColors.length);
+        client.say(target, ".color " + defaultColorNames[randomColorName]);
+        client.action(target, "@" + usernameToPing + " The framerate is currently " + frameRateToDisplay + "fps.");
+      }
+    }
     let discordPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(discord)+/ig.test(originalMessage);
     if (discordPrefixCheck == true) {
       let randomColorName = Math.floor(Math.random() * defaultColors.length);
@@ -4144,11 +4176,24 @@ async function onMessageHandler(target, tags, message, self) {
           let randomColorName = Math.floor(Math.random() * defaultColors.length);
           client.say(target, ".color " + defaultColorNames[randomColorName]);
           for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+            let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
             if (helpMessageIndex == 0) {
-              client.action(target, "@" + usernameToPing + " " + helpMessageAdvanced[helpMessageIndex]);
+              client.action(target, "@" + usernameToPing + " " + advancedHelpMessageToSend);
             }
             if (helpMessageIndex != 0) {
-              client.action(target, helpMessageAdvanced[helpMessageIndex]);
+              client.action(target, advancedHelpMessageToSend);
             }
           }
           helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
@@ -6333,13 +6378,13 @@ async function onMessageHandler(target, tags, message, self) {
               if (isValidIndex == false) {
                 for (let settableInputsIndex = 0; settableInputsIndex < settableMacroChain.length; settableInputsIndex++) {
                   //console.log(new Date().toISOString() + " [AZ] settableInputsIndex=" + settableInputsIndex + ", settableMacroChain.length=" + settableMacroChain.length + ", listablePrecisionInputIndex=" + listablePrecisionInputIndex);
-                  inputsToList = inputsToList + settableMacroChain[settableInputsIndex].processed_macro_input_string + ";" + settableMacroChain[settableInputsIndex].processed_macro_input_delay + "ms,";
+                  inputsToList = inputsToList + settableMacroChain[settableInputsIndex].processed_macro_input_string + ";" + settableMacroChain[settableInputsIndex].processed_macro_input_delay + controllerConfig.time_unit_short + ",";
                 }
               }
               if (isValidIndex == true) {
                 for (let settableInputsIndex = 0; settableInputsIndex < listablePrecisionInputIndex; settableInputsIndex++) {
                   //console.log(new Date().toISOString() + " [BZ] settableInputsIndex=" + settableInputsIndex + ", settableMacroChain.length=" + settableMacroChain.length + ", listablePrecisionInputIndex=" + listablePrecisionInputIndex);
-                  inputsToList = inputsToList + settableMacroChain[settableInputsIndex].processed_macro_input_string + ";" + settableMacroChain[settableInputsIndex].processed_macro_input_delay + "ms,";
+                  inputsToList = inputsToList + settableMacroChain[settableInputsIndex].processed_macro_input_string + ";" + settableMacroChain[settableInputsIndex].processed_macro_input_delay + controllerConfig.time_unit_short + ",";
                 }
               }
               inputsToList = inputsToList.replace(/[\.\,]+$/ig, "");
@@ -6415,7 +6460,7 @@ async function onMessageHandler(target, tags, message, self) {
                 if (parseInt(tempSettableInputArray[1], 10) >= 0) {
                   if (parseInt(tempSettableInputArray[1], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
                     settablePrecisionInputHold = parseInt(tempSettableInputArray[1], 10);
-                    if (settablePrecisionInputHold <= 10) {
+                    if (settablePrecisionInputHold <= controllerConfig.millis_to_seconds_conversion_threshold) {
                       settablePrecisionInputHold = settablePrecisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                     }
                   }
@@ -6508,7 +6553,7 @@ async function onMessageHandler(target, tags, message, self) {
                     //
                     let randomColorName = Math.floor(Math.random() * defaultColors.length);
                     client.say(target, ".color " + defaultColorNames[randomColorName]);
-                    client.action(target, "@" + usernameToPing + " Your input was interpreted as " + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_string + ";" + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_delay + "ms and was added to position " + settablePrecisionInputIndex + ".");
+                    client.action(target, "@" + usernameToPing + " Your input was interpreted as " + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_string + ";" + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_delay + controllerConfig.time_unit_short + " and was added to position " + settablePrecisionInputIndex + ".");
                   }
                   if (processedSingleInput.is_valid_input == false) {
                     //console.log("Invalid input, warn user");
@@ -6529,7 +6574,7 @@ async function onMessageHandler(target, tags, message, self) {
                     //
                     let randomColorName = Math.floor(Math.random() * defaultColors.length);
                     client.say(target, ".color " + defaultColorNames[randomColorName]);
-                    client.action(target, "@" + usernameToPing + " Your input was interpreted as " + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_string + ";" + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_delay + "ms and was added to position " + settablePrecisionInputIndex + ".");
+                    client.action(target, "@" + usernameToPing + " Your input was interpreted as " + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_string + ";" + settableMacroChain[settablePrecisionInputIndex].processed_macro_input_delay + controllerConfig.time_unit_short + " and was added to position " + settablePrecisionInputIndex + ".");
                   }
                   if (processedSingleInput.is_valid_input == false) {
                     //console.log("Invalid input, warn user");
@@ -6668,7 +6713,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log("playSettableInputCount = " + playSettableInputCount);
                 //console.log("playSettableInputCount + 1 = " + (playSettableInputCount + 1));
                 //console.log(settableMacroChain[settableInputsIndex]);
-                inputsToListPlayback = inputsToListPlayback + settableMacroChain[settableInputsIndex].processed_macro_input_string + ";" + settableMacroChain[settableInputsIndex].processed_macro_input_delay + "ms,";
+                inputsToListPlayback = inputsToListPlayback + settableMacroChain[settableInputsIndex].processed_macro_input_string + ";" + settableMacroChain[settableInputsIndex].processed_macro_input_delay + controllerConfig.time_unit_short + ",";
                 //
 
                 // Clear the incoming serial data from arduino before setting settable advanced input
@@ -7138,7 +7183,7 @@ async function onMessageHandler(target, tags, message, self) {
                         if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
                           if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
                             precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
-                            if (precisionInputHold <= 10) {
+                            if (precisionInputHold <= controllerConfig.millis_to_seconds_conversion_threshold) {
                               precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                             }
                           }
@@ -7176,7 +7221,7 @@ async function onMessageHandler(target, tags, message, self) {
                           if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
                             if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
                               precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
-                              if (precisionInputHold <= 10) {
+                              if (precisionInputHold <= controllerConfig.millis_to_seconds_conversion_threshold) {
                                 precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                               }
                             }
@@ -7211,7 +7256,7 @@ async function onMessageHandler(target, tags, message, self) {
                           if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
                             if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
                               precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
-                              if (precisionInputHold <= 10) {
+                              if (precisionInputHold <= controllerConfig.millis_to_seconds_conversion_threshold) {
                                 precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                               }
                             }
@@ -7276,7 +7321,7 @@ async function onMessageHandler(target, tags, message, self) {
                           if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
                             if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
                               precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
-                              if (precisionInputHold <= 10) {
+                              if (precisionInputHold <= controllerConfig.millis_to_seconds_conversion_threshold) {
                                 precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                               }
                             }
@@ -7431,7 +7476,7 @@ async function onMessageHandler(target, tags, message, self) {
                   if (macroChainInputObject.is_valid_input == true) {
                     precisionInputStringToDisplay.macro_array.push(macroChainInputObject);
                     //precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_string + ";";
-                    precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_string + ";" + macroChainInputObject.processed_macro_input_delay + "ms";
+                    precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_string + ";" + macroChainInputObject.processed_macro_input_delay + controllerConfig.time_unit_short;
                     if (preprocessedArrayIndex < precisionInputsPreProcessed.input_array.length - 1) {
                       precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + " ";
                       //precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_delay + "\n";
@@ -7441,7 +7486,7 @@ async function onMessageHandler(target, tags, message, self) {
                       //precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_delay;
                     }
                     //precisionInputStringToDisplay2.concat(macroChainInputObject.processed_macro_input_string)
-                    //precisionInputStringToDisplay2.concat(macroChainInputObject.processed_macro_input_delay + "ms ")
+                    //precisionInputStringToDisplay2.concat(macroChainInputObject.processed_macro_input_delay + controllerConfig.time_unit_short + " ")
                     //console.log(precisionInputStringToDisplay2);
                     //console.log(macroChainInputObject);
                     precisionInputSingleLoopDuration = precisionInputSingleLoopDuration + macroChainInputObject.processed_macro_input_delay;
@@ -7848,10 +7893,10 @@ async function onMessageHandler(target, tags, message, self) {
                     precisionInputTotalDuration = precisionInputTotalTimesToLoop * precisionInputSingleLoopDuration;
                     //precisionInputTotalDuration = precisionInputTotalTimesToLoop * innerLoopTotalDuration;
                     if (isExecutingSavedMacro == false) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
+                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
                     }
                     if (isExecutingSavedMacro == true) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
+                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
                     }
                   }
                 }
@@ -7868,10 +7913,10 @@ async function onMessageHandler(target, tags, message, self) {
                 precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/(\s*\*+)+/ig, "*");
                 client.say(target, ".color " + defaultColorNames[randomColorName]);
                 if (isExecutingSavedMacro == false) {
-                  client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
+                  client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
                 }
                 if (isExecutingSavedMacro == true) {
-                  client.action(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + "ms Total Duration: " + precisionInputTotalDuration + "ms. Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
+                  client.action(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs if inputs are still being executed.");
                 }
                 //client.action(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2);
               }
@@ -7963,11 +8008,24 @@ async function onMessageHandler(target, tags, message, self) {
           let randomColorName = Math.floor(Math.random() * defaultColors.length);
           client.say(target, ".color " + defaultColorNames[randomColorName]);
           for (let helpMessageIndex = 0; helpMessageIndex < helpMessageBasic.length; helpMessageIndex++) {
+            let basicHelpMessageToSend = helpMessageBasic[helpMessageIndex];
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
             if (helpMessageIndex == 0) {
-              client.action(target, "@" + usernameToPing + " " + helpMessageBasic[helpMessageIndex]);
+              client.action(target, "@" + usernameToPing + " " + basicHelpMessageToSend);
             }
             if (helpMessageIndex != 0) {
-              client.action(target, helpMessageBasic[helpMessageIndex]);
+              client.action(target, basicHelpMessageToSend);
             }
           }
           helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
@@ -8533,7 +8591,7 @@ async function onMessageHandler(target, tags, message, self) {
                           //console.log("A Outcome A");
                           adjustableInputDelay = parseInt(tempInputArray[tempInputArrayIndex], 10);
                           isValidInputDelay = true;
-                          if (adjustableInputDelay <= 10) {
+                          if (adjustableInputDelay <= controllerConfig.millis_to_seconds_conversion_threshold) {
                             adjustableInputDelay = adjustableInputDelay * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                           }
                         }
@@ -8574,7 +8632,7 @@ async function onMessageHandler(target, tags, message, self) {
                       //console.log("B Outcome A");
                       adjustableInputDelay = parseInt(messageWords[1], 10);
                       isValidInputDelay = true;
-                      if (adjustableInputDelay <= 10) {
+                      if (adjustableInputDelay <= controllerConfig.millis_to_seconds_conversion_threshold) {
                         adjustableInputDelay = adjustableInputDelay * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                       }
                     }
@@ -8808,7 +8866,7 @@ async function onMessageHandler(target, tags, message, self) {
                             //console.log("C Outcome A");
                             adjustableInputDelay = parseInt(messageInputs[messageInputIndex], 10);
                             isValidInputDelay = true;
-                            if (adjustableInputDelay <= 10) {
+                            if (adjustableInputDelay <= controllerConfig.millis_to_seconds_conversion_threshold) {
                               adjustableInputDelay = adjustableInputDelay * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                             }
                           }
@@ -8851,7 +8909,7 @@ async function onMessageHandler(target, tags, message, self) {
                       if (parseInt(messageWords[1], 10) <= controllerConfig.max_delay) {
                         console.log("D Outcome A");
                         adjustableInputDelay = parseInt(messageWords[1], 10);
-                        if (adjustableInputDelay <= 10) {
+                        if (adjustableInputDelay <= controllerConfig.millis_to_seconds_conversion_threshold) {
                           adjustableInputDelay = adjustableInputDelay * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                         }
                       }
@@ -9003,7 +9061,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //inputString = inputString + "-";
               }
               if ((inputDelay != controllerConfig.normal_delay) && (inputDelay != controllerConfig.held_delay)) {
-                inputString = inputString + " " + inputDelay + "ms";
+                inputString = inputString + ";" + inputDelay + controllerConfig.time_unit_short;
               }
               //console.log(usernameToPing + " " + inputString);
               //inputQueue.push(dataToWrite);
@@ -10441,7 +10499,7 @@ function tidyUpAdvancedInputString(inputStringToProcess) {
                 if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
                   if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
                     precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
-                    if (precisionInputHold <= 10) {
+                    if (precisionInputHold <= controllerConfig.millis_to_seconds_conversion_threshold) {
                       precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                     }
                   }
@@ -10466,7 +10524,7 @@ function tidyUpAdvancedInputString(inputStringToProcess) {
                   if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
                     if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
                       precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
-                      if (precisionInputHold <= 10) {
+                      if (precisionInputHold <= controllerConfig.millis_to_seconds_conversion_threshold) {
                         precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                       }
                     }
@@ -10489,7 +10547,7 @@ function tidyUpAdvancedInputString(inputStringToProcess) {
                   if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
                     if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
                       precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
-                      if (precisionInputHold <= 10) {
+                      if (precisionInputHold <= controllerConfig.millis_to_seconds_conversion_threshold) {
                         precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                       }
                     }
@@ -10532,7 +10590,7 @@ function tidyUpAdvancedInputString(inputStringToProcess) {
                   if (parseInt(tempInputArray[tempInputArrayIndex], 10) >= 0) {
                     if (parseInt(tempInputArray[tempInputArrayIndex], 10) <= controllerConfig.max_duration_per_precision_input_millis) {
                       precisionInputHold = parseInt(tempInputArray[tempInputArrayIndex], 10);
-                      if (precisionInputHold <= 10) {
+                      if (precisionInputHold <= controllerConfig.millis_to_seconds_conversion_threshold) {
                         precisionInputHold = precisionInputHold * 1000; // People will intuitively enter seconds as delay, this fixes that so seconds are valid, but only if the desired delay is less than or equals 10 seconds
                       }
                     }
@@ -10637,7 +10695,7 @@ function tidyUpAdvancedInputString(inputStringToProcess) {
           if (macroChainInputObject.is_valid_input == true) {
             precisionInputStringToDisplay.macro_array.push(macroChainInputObject);
             //precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_string + ";";
-            precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_string + ";" + macroChainInputObject.processed_macro_input_delay + "ms";
+            precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_string + ";" + macroChainInputObject.processed_macro_input_delay + controllerConfig.time_unit_short;
             if (preprocessedArrayIndex < precisionInputsPreProcessed.input_array.length - 1) {
               precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + " ";
               //precisionInputStringToDisplay2 = precisionInputStringToDisplay2 + macroChainInputObject.processed_macro_input_delay + "\n";
