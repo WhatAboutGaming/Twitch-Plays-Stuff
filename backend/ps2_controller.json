@@ -52,6 +52,7 @@
     "input_alias": [
       "L3",
       "3L",
+      "LS",
       "LeftStick",
       "StickLeft",
       "LeftClick",
@@ -71,6 +72,7 @@
     "input_alias": [
       "R3",
       "3R",
+      "RS",
       "RightStick",
       "StickRight",
       "RightClick",
@@ -6800,7 +6802,6 @@
       "Rv",
       "R↓",
       "RSouth",
-      "RS",
       "R▼",
       "Rdiwn",
       "Rdwin",
@@ -14100,7 +14101,6 @@
       "Lv",
       "L↓",
       "LSouth",
-      "LS",
       "L▼",
       "Ldiwn",
       "Ldwin",
