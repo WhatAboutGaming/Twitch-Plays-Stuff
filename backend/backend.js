@@ -2821,7 +2821,8 @@ async function onMessageHandler(target, tags, message, self) {
       /(l+o+w+e+r+\s+p+r+i+c+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((m+y+\s*s+t+r+m+)+|(m+y+\s*s+t+r+e+a+m+)+|(m+y+\s*s+t+r+a+e+m+)+|(m+y+\s*s+t+r+e+m+)+|(m+y+\s*s+t+r+a+m+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((\.+|d+o+t+)+\s*(s+t+o+r+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /((a+l+)+\s*(f+o+r+)\s*(y+\w*)\s*((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
+      /((a+l+)+\s*(f+o+r+)+\s*(y+\w*)\s*((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(((u+p+(\s*g*r*a*d*e*)*)+|(u+p+(\s*d*a*t*e*)*)+)+\s*(y+\w*)\s*((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
     let multiMessageSpamBotTypeA = [/((i+t+)+\s*(i+s+)|(i+t+\W*s+))+\s+(n+i+c+e+)+\s+(t+o+)+\s+(m+e+t+)+\s+(y+\w*)+\s+(\w+\W*v+e+)+\s+(w+a+t+c+h+e+d+)+\s+(y+\w*)+\s+([^\s]*)+\s+(t+w+\w*t+c+h+)\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(y+\w*)+\s+(s+i+r+\W*)+\s+(h+a+v+e+)+\s+(f+l+o+w+\W*)+\s+(i+t+\W*s+)+\s+(a+w+e+s+\w+m+e\W*)+\s+(\w+)+\s+(l+i+k+e+)+\s+(y+\w*)+\s+(s+t+r+e+a+m+\w*\W*\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -2935,8 +2936,8 @@ async function onMessageHandler(target, tags, message, self) {
     */
 
     //let slurDetection = false; // Todo: improve nword detection because currently it has a lot of false positives // I am not really happy with any solution because no matter what I do, there will always be false positives, and the fact that the n-word can be reduced to its first 3 letters makes this really hard, also there is a country name that starts with the first 3 letters of the n-word // I'm starting to think that this has to be moderated manually by a human that can tell what's inappropriate based on the context
-    //console.log("singleMessageSpamBots");
-    //console.log(singleMessageSpamBots);
+    console.log("singleMessageSpamBots");
+    console.log(singleMessageSpamBots);
     //console.log("slurDetection");
     //console.log(slurDetection);
     //console.log("multiMessageSpamBotTypeA");
