@@ -31,7 +31,7 @@
   "chat_config": "chat_config.json",
   "run_start_time": 1680480000000,
   "next_run_start_time": 1680480000000,
-  "stream_end_time": 1680480000000,
+  "stream_end_time": 1682294400000,
   "initial_accept_inputs": false,
   "initial_accept_tts": false,
   "initial_input_mode": 2,
@@ -64,13 +64,13 @@
   "shortest_macro_name_length_allowed": 5,
   "longest_macro_name_length_allowed": 250,
   "reason_macro_database_is_disabled": "This command still hasn't been fixed. I said it would have returned for this run but I had no time to fix it. It will return for the next run.",
-  "discord_url": "https://discord.gg/yHETNuZCUK Go to the #polls channel to vote for the next run! The options are: Final Fantasy (NES), Final Fantasy 4 (Super NES, known as Final Fantasy 2 in North America) and Final Fantasy 6 (Super NES, known as Final Fantasy 3 in North America), you can vote for more than one option!",
+  "discord_url": "https://discord.gg/yHETNuZCUK Go to the #polls channel to vote for the next run! The options are: Final Fantasy (NES), Final Fantasy 4 (Super NES, known as Final Fantasy 2 in North America, not to be confused with Final Fantasy 2 NES) and Final Fantasy 6 (Super NES, known as Final Fantasy 3 in North America), you can vote for more than one option!",
   "github_message": "The source code for everything used on this stream can be found here:",
   "github_repo": "https://github.com/WhatAboutGaming/Twitch-Plays-Stuff",
   "run_id": 4,
   "notes": "To test server: Set game_title as TEST RUN 0, set stream_title as TEST RUN 1, set next_game_title as TEST RUN 2, set main_database_name as test_database_main, set chatters_collection_name as test_database_chatters, set run_name as test_database_run_name, set global_database_name as test_database_global, set inputter_database_name as test_database_inputters, set macro_database_name as test_database_macro, set run_id as -1",
   "overlay_header_text": "Twitch Plays(Viewers play\/Chat plays){{game_title_short}} on SNES Wii VC !help !discord",
-  "overlay_advanced_mode_help_message_to_display": "\n\n\n!help to learn how to play\n\n\n!discord and go to #polls\nto vote for next game",
+  "overlay_advanced_mode_help_message_to_display": "!help to learn how to play\nStream goes offline in\n{{stream_end_time}}\n(The {{play_time:1682294400000}} day mark)\n\n!discord and go to #polls\nto vote for next game",
   "overlay_text_rotation": [
     "Type !help or !commands to learn how to play",
     "Type !macrohelp to learn how to save macros and\nexecute saved macros",
@@ -82,22 +82,26 @@
     "If anything breaks, please ping @WhatAboutGamingLive",
     "The Endgame Conditions for this run are a bit different\nthan usual: You're free to do whatever you want.",
     "You're free to use any glitches you want to get things\ndone. You can warp straight to credits if you want!",
-    "The run will not end when credits roll. You have 15 days\nto do whatever you want.",
+    "The run will not end when credits roll. You have 21 days\nto do whatever you want.",
+    "That is because this game plays very differently than\nany other game ever played on this stream.",
+    "I don't know how far you'll get, and I don't expect\nyou to get far at all.",
     "There'll be extra time if there is enough interest in the\nrun.",
+    "Stream goes offline in {{stream_end_time}} (The {{play_time:1682294400000}} day mark)",
     "More details will be revealed later if there is enough\ninterest in the run.",
     "Glitches are allowed as long as they don't break or crash\nthe game, or leave the game in an unplayable state.",
     "There will be extra time for post game and sidequests, so\ntake your time!"
   ],
   "current_run_endgame_goals": [
-    "The Endgame Conditions for this run are a bit different than usual: You're free to do whatever you want. You're free to use any glitches you want to get things done. You can warp straight to credits if you want! The run will not end when credits roll. You have 15 days to do whatever you want.",
-    "There'll be extra time if there is enough interest in the run. More details will be revealed later if there is enough interest in the run. Glitches are allowed as long as they don't break or crash the game, or leave the game in an unplayable state. There will be extra time for post game and sidequests, so take your time!"
+    "The Endgame Conditions for this run are a bit different than usual: You're free to do whatever you want. You're free to use any glitches you want to get things done. You can warp straight to credits if you want! The run will not end when credits roll. You have 21 days to do whatever you want. And that is because this game plays very differently than any other game played on this stream.",
+    "I don't know how far you'll get, and I don't expect you to get far at all. There'll be extra time if there is enough interest in the run. More details will be revealed later if there is enough interest in the run. Glitches are allowed as long as they don't break or crash the game, or leave the game in an unplayable state. There will be extra time for post game and sidequests, so take your time!"
   ],
   "periodical_news_messages": [
     "Not sure how to play? You can type !help or !commands in chat at any time to have a help message sent straight to chat.",
     "You can type !macrohelp to learn how to save and execute saved macros.",
     "All of the code used on this stream is open source and can be found here: https://github.com/WhatAboutGaming/Twitch-Plays-Stuff",
-    "We have a Discord server and there is currently a poll up for which game to be played after this (Date TBD), the options are: Final Fantasy (NES), Final Fantasy 4 (Super NES, known as Final Fantasy 2 in North America) and Final Fantasy 6 (Super NES, known as Final Fantasy 3 in North America), you can vote for more than one option, Discord server link here: https://discord.gg/yHETNuZCUK",
+    "We have a Discord server and there is currently a poll up for which game to be played after this (Date TBD), the options are: Final Fantasy (NES), Final Fantasy 4 (Super NES, known as Final Fantasy 2 in North America, not to be confused with Final Fantasy 2 NES) and Final Fantasy 6 (Super NES, known as Final Fantasy 3 in North America), you can vote for more than one option, Discord server link here: https://discord.gg/yHETNuZCUK",
     "We're currently playing {{game_title}}. Save files for this run can be found here: https://github.com/WhatAboutGaming/Twitch-Plays-Stuff/tree/master/Save%20Files/Zelda%20ALTTP and the videos for this run can be found on this playlist: https://www.twitch.tv/collections/szSSO9O5URdFmg",
+    "Stream goes offline in {{stream_end_time}} (The {{play_time:1682294400000}} day mark)",
     "Current goal: Start the game"
   ],
   "help_message_saving_macros": [
