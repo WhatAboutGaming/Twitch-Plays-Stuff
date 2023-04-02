@@ -1,6 +1,6 @@
 {
   "name": "Twitch-Plays-Stuff-Backend",
-  "version": "1.0.0",
+  "version": "1.4.0",
   "description": "Twitch-Plays-Stuff-Backend",
   "dependencies": {
     "get-audio-duration": "^2.0.3",
