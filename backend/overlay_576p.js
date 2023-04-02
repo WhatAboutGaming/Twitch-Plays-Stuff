@@ -92,6 +92,134 @@ var fontStrokeLeading1px = (fontSizeMultiplier) * (differenceBetweenDefaultAndSt
 var textSizeToUse = fontDefaultSize * fontSizeMultiplier;
 var textDefaultLeadingToUse = ((fontDefaultLeading * fontSizeMultiplier) - fontDefaultLeading1px) + fontStrokeWeight;
 var textStrokeLeadingToUse = ((fontStrokeLeading * fontSizeMultiplier) - fontStrokeLeading1px) + fontStrokeWeight;
+
+var globalConfig = {
+  controller_config: "",
+  linux_restart_command: "",
+  windows_restart_command: "",
+  enable_slur_detection: true,
+  permaban_when_slur_is_detected: true,
+  slur_detection_timeout: 600,
+  long_message_length: 250,
+  long_message_timeout: 300,
+  all_caps_message_length: 175,
+  all_caps_message_ratio: 0.9,
+  all_caps_message_timeout: 300,
+  permaban_if_first_message_is_long: true,
+  timeout_if_message_is_long: false,
+  warn_if_message_is_long: true,
+  enable_updating_stream_title_automatically: true,
+  enable_check_uptime: true,
+  enable_check_moderators: true,
+  enable_check_followage: true,
+  send_introductory_messages_to_new_users: true,
+  send_help_messages_to_new_users: false,
+  introductory_message_to_new_users: "",
+  introductory_message_to_new_users_with_help_messages: "",
+  introductory_message_to_returning_users: "",
+  introductory_message_to_returning_users_with_help_messages: "",
+  webserver_port: 8080,
+  chat_config: "",
+  run_start_time: new Date().getTime(),
+  next_run_start_time: new Date().getTime(),
+  stream_end_time: new Date().getTime(),
+  initial_accept_inputs: false,
+  initial_accept_tts: false,
+  initial_input_mode: 2,
+  voting_enabled: true,
+  threshold_to_change_mode: 0.75,
+  is_advanced_mode_temporary: false,
+  is_voting_temporary: false,
+  is_advanced_cooldown_enabled: true,
+  is_voting_cooldown_enabled: true,
+  advanced_allowed_period_millis: 300000,
+  voting_allowed_period_millis: 300000,
+  vote_expiration_time_millis: 300000,
+  help_message_cooldown_millis: 5000,
+  game_title: "Game Title",
+  game_title_short: "Game Title Short",
+  game_title_shorter: "Game Title Shorter",
+  stream_title: "Stream Title",
+  stream_going_offline_message: "Stream Going Offline Message",
+  send_stream_going_offline_message: true,
+  next_game_title: "Next Game Title",
+  next_game_title_short: "Next Game Title Short",
+  next_game_title_shorter: "Next Game Title Shorter",
+  main_database_name: "",
+  chatters_collection_name: "",
+  run_name: "",
+  global_database_name: "",
+  inputter_database_name: "",
+  macro_database_name: "",
+  use_macro_database: false,
+  reason_macro_database_is_disabled: "",
+  discord_url: "",
+  github_message: "",
+  github_repo: "",
+  run_id: -1,
+  notes: "To test server: Set game_title as TEST RUN 0, set stream_title as TEST RUN 1, set next_game_title as TEST RUN 2, set main_database_name as test_database_main, set chatters_collection_name as test_database_chatters, set run_name as test_database_run_name, set global_database_name as test_database_global, set inputter_database_name as test_database_inputters, set macro_database_name as test_database_macro, set run_id as -1",
+  overlay_header_text: "Restarting overlay",
+  overlay_advanced_mode_help_message_to_display: "\n\n\n\n\n!help to learn how to play",
+  overlay_text_rotation: [
+   "Hi Chat :)"
+  ],
+  current_run_endgame_goals: [
+    "Hi Chat :)"
+  ],
+  periodical_news_messages: [
+    "Hi Chat :)"
+  ],
+  help_message_saving_macros: [
+    "Hi Chat :)"
+  ],
+  sassy_replies: [
+    "Used to reply to certain users when they send a message or ping the bot or ping the streamer or ping the channel owner??? This is not implemented yet"
+  ]
+};
+
+var controllerConfig = {
+  com_port: "COM4",
+  com_port_parameters: {
+    autoOpen: false,
+    baudRate: 500000
+  },
+  time_unit: "milliseconds",
+  time_unit_alternate: "seconds",
+  time_unit_short: "ms",
+  millis_to_seconds_conversion_threshold: 10,
+  display_framerate: false,
+  normal_delay: 266,
+  max_delay: 65535,
+  held_delay: 0,
+  stick_minimum: 0,
+  stick_maximum: 255,
+  stick_center: 127,
+  stick_limit: 0,
+  initial_macro_preamble: 4,
+  final_macro_preamble: 68,
+  initial_macro_inner_loop: 69,
+  final_macro_inner_loop: 133,
+  advanced_input_macros_allowed: 64,
+  advanced_input_macro_inner_loops_allowed: 64,
+  max_duration_per_precision_input_millis: 65535,
+  default_duration_per_precision_input_millis: 266,
+  held_duration_per_precision_input_millis: 533,
+  max_times_to_repeat_macro: 255,
+  controller_object: "",
+  simultaneous_different_basic_buttons_allowed: 5,
+  controller_graphics: "gcn_controller_graphics.png",
+  use_controller_graphics: false,
+  help_message_basic: [
+    "Hi Chat :)"
+  ],
+  simultaneous_different_advanced_buttons_allowed: 5,
+  help_message_advanced: [
+    "Hi Chat :)"
+  ],
+  blacklisted_combos: [
+  ]
+};
+
 //textDefaultLeadingToUse = textDefaultLeadingToUse + fontStrokeWeight;
 /*
 console.log("fontStrokeLeading1px = " + fontStrokeLeading1px);
@@ -111,9 +239,10 @@ console.log("fontName = " + fontName);
 //var ttsAudioStatus = true;
 //var ttsAudioStatusPrevious = true;
 //var startTimeMillis = 1611211608000;
-var startTimeMillis = new Date().getTime();
-var nextStartTimeMillis = new Date().getTime();
-var streamEndTimeMillis = new Date().getTime();
+var startTimeMillis = globalConfig.run_start_time;
+var nextStartTimeMillis = globalConfig.next_run_start_time;
+var streamEndTimeMillis = globalConfig.stream_end_time;
+var currentTimeMillis = new Date().getTime();
 var playTimeTotal = 0;
 
 var acceptInputs = false;
@@ -122,9 +251,9 @@ var acceptInputs = false;
 //var helpMessages = ["Type “!help” or “!commands” to learn how to play!", "Please, don’t delete any files!", "Please save regularly!"];
 //var helpMessages = ["Type \"!help\" or \"!commands\" to learn how to play!", "Please, don\'t delete any files, and please save regularly!", "Attempting to delete or deleting any file will earn you\na permaban", "If you\'re caught AFK botting, you\'ll be timed out for\none day.", "If anything breaks, please ping @WhatAboutGamingLive", "Paper Mario Main quest took 8d10h01m47s!\nEnded at 2021-01-29T16:48:35Z!", "Congrats to everyone who participated!", "Current goal: Play SM64 until I decide what the next game\nis!"];
 //var helpMessages = ["Type “!help” or “!commands” to learn how to play!", "Please, don’t delete any files, and please save regularly!", "Deliberately deleting any file will result in a ban", "If anything breaks, please ping @WhatAboutGamingLive", "The Twitch Plays file is File 4 named “Ponjos”", "Main quest took 8d10h01m47s! Ended at 2021-01-29T16:48:35Z!", "Congrats to everyone who participated!", "Current goal: Do sidequests until I decide what the next game is!"];
-var helpMessages = ["Hi Chat :)"];
-var headerText = "Restarting overlay";
-var advancedModeHelpMessageToDisplay = "\n\n\n\n\n!help to learn how to play";
+var helpMessages = globalConfig.overlay_text_rotation;
+var headerText = globalConfig.overlay_header_text;
+var advancedModeHelpMessageToDisplay = globalConfig.overlay_advanced_mode_help_message_to_display;
 
 var secondCurrent = 0;
 var secondOld = 0;
@@ -152,10 +281,10 @@ var stepsToMoveUp = 0;
 
 var viewerCount = -1;
 
-var gameTitle = "Game Title";
-var gameTitleShort = "Game Title Short"
-var nextGameTitle = "Next Game Title";
-var nextGameTitleShort = "Next Game Title Short";
+var gameTitle = globalConfig.game_title;
+var gameTitleShort = globalConfig.game_title_short;
+var nextGameTitle = globalConfig.next_game_title;
+var nextGameTitleShort = globalConfig.next_game_title_short;
 
 var votingBarSize = 200;
 var votingBarCenterPosition = 896;
@@ -233,7 +362,9 @@ function preload() {
   //font = loadFont("Pokemon_DPPt_mod2.ttf");
   font = loadFont(fontName);
   offlineImg = loadImage("tttp_brb_screen_lq.png");
-  controllerGraphics = loadImage("gcn_controller_graphics.png");
+  if (controllerConfig.use_controller_graphics == true) {
+    controllerGraphics = loadImage(controllerConfig.controller_graphics);
+  }
   //ttsAudio = loadSound("output.mp3");
 }
 
@@ -281,12 +412,174 @@ function recalculateFont(newFontSizeMultiplier, newFontStrokeWeightMultiplier) {
   textStrokeLeadingToUse = ((fontStrokeLeading * fontSizeMultiplier) - fontStrokeLeading1px) + fontStrokeWeight;
 }
 
+function getPlayTimeFromHelpMessageString(helpMessageInputString, runStartTimeAsMilliseconds, displayMilliseconds, displayAlternateUnitAbbreviation) {
+  let numberToExtractFromPlayTime = helpMessageInputString.match(/({{play_time:\d+}})+/ig);
+  if (numberToExtractFromPlayTime !== "" && numberToExtractFromPlayTime !== undefined && numberToExtractFromPlayTime !== null && numberToExtractFromPlayTime !== [] && numberToExtractFromPlayTime !== "[]" && numberToExtractFromPlayTime !== {} && numberToExtractFromPlayTime !== "{}" && numberToExtractFromPlayTime !== "null" && numberToExtractFromPlayTime !== "undefined") {
+    if (numberToExtractFromPlayTime.length > 0) {
+      if (numberToExtractFromPlayTime[0] !== "" && numberToExtractFromPlayTime[0] !== undefined && numberToExtractFromPlayTime[0] !== null && numberToExtractFromPlayTime[0] !== [] && numberToExtractFromPlayTime[0] !== "[]" && numberToExtractFromPlayTime[0] !== {} && numberToExtractFromPlayTime[0] !== "{}" && numberToExtractFromPlayTime[0] !== "null" && numberToExtractFromPlayTime[0] !== "undefined") {
+        numberToExtractFromPlayTime = numberToExtractFromPlayTime[0].split(/\:+/ig);
+        if (numberToExtractFromPlayTime[1] !== "" && numberToExtractFromPlayTime[1] !== undefined && numberToExtractFromPlayTime[1] !== null && numberToExtractFromPlayTime[1] !== [] && numberToExtractFromPlayTime[1] !== "[]" && numberToExtractFromPlayTime[1] !== {} && numberToExtractFromPlayTime[1] !== "{}" && numberToExtractFromPlayTime[1] !== "null" && numberToExtractFromPlayTime[1] !== "undefined") {
+          numberToExtractFromPlayTime = numberToExtractFromPlayTime[1];
+          numberToExtractFromPlayTime = numberToExtractFromPlayTime.replace(/([\{\}])+/ig, "");
+          if (numberToExtractFromPlayTime.length > 0 ) {
+            if (numberToExtractFromPlayTime !== "" && numberToExtractFromPlayTime !== undefined && numberToExtractFromPlayTime !== null && numberToExtractFromPlayTime !== [] && numberToExtractFromPlayTime !== "[]" && numberToExtractFromPlayTime !== {} && numberToExtractFromPlayTime !== "{}" && numberToExtractFromPlayTime !== "null" && numberToExtractFromPlayTime !== "undefined") {
+              numberToExtractFromPlayTime = parseInt(numberToExtractFromPlayTime);
+              let checkIfnumberToExtractFromPlayTimeIsNotANumber = isNaN(numberToExtractFromPlayTime);
+              if (checkIfnumberToExtractFromPlayTimeIsNotANumber == false) {
+                // Now we parse this number into usable timestamp
+                let helpMessagePlayTimeTotal = numberToExtractFromPlayTime - runStartTimeAsMilliseconds;
+                helpMessagePlayTimeTotal = Math.abs(helpMessagePlayTimeTotal);
+                let helpMessagePlayTimeDays = (parseInt(helpMessagePlayTimeTotal / 86400000)).toString().padStart(2, "0");
+                let helpMessagePlayTimeHours = (parseInt(helpMessagePlayTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+                let helpMessagePlayTimeMinutes = (parseInt(helpMessagePlayTimeTotal / 60000) % 60).toString().padStart(2, "0");
+                let helpMessagePlayTimeSeconds = (parseInt(helpMessagePlayTimeTotal / 1000) % 60).toString().padStart(2, "0");
+                let helpMessagePlayTimeMillis = (helpMessagePlayTimeTotal % 1000).toString().padStart(3, "0");
+                if (displayMilliseconds == true) {
+                  if (displayAlternateUnitAbbreviation == true) {
+                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "day " + helpMessagePlayTimeHours + "hr " + helpMessagePlayTimeMinutes + "min " + helpMessagePlayTimeSeconds + "sec " + helpMessagePlayTimeMillis + "msec";
+                    helpMessageInputString = helpMessageInputString.replace(/({{play_time:\d+}})+/ig, helpMessagePlayTimeString);
+                    return helpMessageInputString;
+                  }
+                  if (displayAlternateUnitAbbreviation == false) {
+                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "d " + helpMessagePlayTimeHours + "h " + helpMessagePlayTimeMinutes + "m " + helpMessagePlayTimeSeconds + "s " + helpMessagePlayTimeMillis + "ms";
+                    helpMessageInputString = helpMessageInputString.replace(/({{play_time:\d+}})+/ig, helpMessagePlayTimeString);
+                    return helpMessageInputString;
+                  }
+                }
+                if (displayMilliseconds == false) {
+                  if (displayAlternateUnitAbbreviation == true) {
+                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "day " + helpMessagePlayTimeHours + "hr " + helpMessagePlayTimeMinutes + "min " + helpMessagePlayTimeSeconds + "sec";
+                    helpMessageInputString = helpMessageInputString.replace(/({{play_time:\d+}})+/ig, helpMessagePlayTimeString);
+                    return helpMessageInputString;
+                  }
+                  if (displayAlternateUnitAbbreviation == false) {
+                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "d " + helpMessagePlayTimeHours + "h " + helpMessagePlayTimeMinutes + "m " + helpMessagePlayTimeSeconds + "s";
+                    helpMessageInputString = helpMessageInputString.replace(/({{play_time:\d+}})+/ig, helpMessagePlayTimeString);
+                    return helpMessageInputString;
+                  }
+                }
+              }
+              if (checkIfnumberToExtractFromPlayTimeIsNotANumber == true) {
+                numberToExtractFromPlayTime = 0;
+                return helpMessageInputString;
+              }
+            }
+            if (numberToExtractFromPlayTime === "" || numberToExtractFromPlayTime === undefined || numberToExtractFromPlayTime === null || numberToExtractFromPlayTime === [] || numberToExtractFromPlayTime === "[]" || numberToExtractFromPlayTime === {} || numberToExtractFromPlayTime === "{}" || numberToExtractFromPlayTime === "null" || numberToExtractFromPlayTime === "undefined") {
+              numberToExtractFromPlayTime = 0;
+              return helpMessageInputString;
+            }
+          }
+          if (numberToExtractFromPlayTime.length <= 0 ) {
+            numberToExtractFromPlayTime = 0;
+            return helpMessageInputString;
+          }
+        }
+        if (numberToExtractFromPlayTime[1] === "" || numberToExtractFromPlayTime[1] === undefined || numberToExtractFromPlayTime[1] === null || numberToExtractFromPlayTime[1] === [] || numberToExtractFromPlayTime[1] === "[]" || numberToExtractFromPlayTime[1] === {} || numberToExtractFromPlayTime[1] === "{}" || numberToExtractFromPlayTime[1] === "null" || numberToExtractFromPlayTime[1] === "undefined") {
+          numberToExtractFromPlayTime = 0;
+          return helpMessageInputString;
+        }
+      }
+      if (numberToExtractFromPlayTime[0] === "" || numberToExtractFromPlayTime[0] === undefined || numberToExtractFromPlayTime[0] === null || numberToExtractFromPlayTime[0] === [] || numberToExtractFromPlayTime[0] === "[]" || numberToExtractFromPlayTime[0] === {} || numberToExtractFromPlayTime[0] === "{}" || numberToExtractFromPlayTime[0] === "null" || numberToExtractFromPlayTime[0] === "undefined") {
+        numberToExtractFromPlayTime = 0;
+        return helpMessageInputString;
+      }
+    }
+    if (numberToExtractFromPlayTime.length <= 0) {
+      numberToExtractFromPlayTime = 0
+      return helpMessageInputString;
+    }
+  }
+  if (numberToExtractFromPlayTime === "" || numberToExtractFromPlayTime === undefined || numberToExtractFromPlayTime === null || numberToExtractFromPlayTime === [] || numberToExtractFromPlayTime === "[]" || numberToExtractFromPlayTime === {} || numberToExtractFromPlayTime === "{}" || numberToExtractFromPlayTime === "null" || numberToExtractFromPlayTime === "undefined") {
+    numberToExtractFromPlayTime = 0;
+    return helpMessageInputString;
+  }
+  numberToExtractFromPlayTime = 0;
+  return helpMessageInputString;
+}
+
+function getAbsoluteTimeAsISOStringFromHelpMessageString(helpMessageInputString, displayMilliseconds) {
+  let numberToExtractFromAbsoluteTime = helpMessageInputString.match(/({{absolute_time:\d+}})+/ig);
+  if (numberToExtractFromAbsoluteTime !== "" && numberToExtractFromAbsoluteTime !== undefined && numberToExtractFromAbsoluteTime !== null && numberToExtractFromAbsoluteTime !== [] && numberToExtractFromAbsoluteTime !== "[]" && numberToExtractFromAbsoluteTime !== {} && numberToExtractFromAbsoluteTime !== "{}" && numberToExtractFromAbsoluteTime !== "null" && numberToExtractFromAbsoluteTime !== "undefined") {
+    if (numberToExtractFromAbsoluteTime.length > 0) {
+      if (numberToExtractFromAbsoluteTime[0] !== "" && numberToExtractFromAbsoluteTime[0] !== undefined && numberToExtractFromAbsoluteTime[0] !== null && numberToExtractFromAbsoluteTime[0] !== [] && numberToExtractFromAbsoluteTime[0] !== "[]" && numberToExtractFromAbsoluteTime[0] !== {} && numberToExtractFromAbsoluteTime[0] !== "{}" && numberToExtractFromAbsoluteTime[0] !== "null" && numberToExtractFromAbsoluteTime[0] !== "undefined") {
+        numberToExtractFromAbsoluteTime = numberToExtractFromAbsoluteTime[0].split(/\:+/ig);
+        if (numberToExtractFromAbsoluteTime[1] !== "" && numberToExtractFromAbsoluteTime[1] !== undefined && numberToExtractFromAbsoluteTime[1] !== null && numberToExtractFromAbsoluteTime[1] !== [] && numberToExtractFromAbsoluteTime[1] !== "[]" && numberToExtractFromAbsoluteTime[1] !== {} && numberToExtractFromAbsoluteTime[1] !== "{}" && numberToExtractFromAbsoluteTime[1] !== "null" && numberToExtractFromAbsoluteTime[1] !== "undefined") {
+          numberToExtractFromAbsoluteTime = numberToExtractFromAbsoluteTime[1];
+          numberToExtractFromAbsoluteTime = numberToExtractFromAbsoluteTime.replace(/([\{\}])+/ig, "");
+          if (numberToExtractFromAbsoluteTime.length > 0 ) {
+            if (numberToExtractFromAbsoluteTime !== "" && numberToExtractFromAbsoluteTime !== undefined && numberToExtractFromAbsoluteTime !== null && numberToExtractFromAbsoluteTime !== [] && numberToExtractFromAbsoluteTime !== "[]" && numberToExtractFromAbsoluteTime !== {} && numberToExtractFromAbsoluteTime !== "{}" && numberToExtractFromAbsoluteTime !== "null" && numberToExtractFromAbsoluteTime !== "undefined") {
+              numberToExtractFromAbsoluteTime = parseInt(numberToExtractFromAbsoluteTime);
+              let checkIfNumberToExtractFromAbsoluteTimeIsNotANumber = isNaN(numberToExtractFromAbsoluteTime);
+              if (checkIfNumberToExtractFromAbsoluteTimeIsNotANumber == false) {
+                // Now we parse this number into usable timestamp
+                if (displayMilliseconds == true) {
+                  let numberToExtractFromAbsoluteTimeToISOString = new Date(numberToExtractFromAbsoluteTime).toISOString();
+                  helpMessageInputString = helpMessageInputString.replace(/({{absolute_time:\d+}})+/ig, numberToExtractFromAbsoluteTimeToISOString);
+                  return helpMessageInputString;
+                }
+                if (displayMilliseconds == false) {
+                  let numberToExtractFromAbsoluteTimeToISOString = new Date(numberToExtractFromAbsoluteTime).toISOString().split(/\.+/ig)[0] + "Z";
+                  helpMessageInputString = helpMessageInputString.replace(/({{absolute_time:\d+}})+/ig, numberToExtractFromAbsoluteTimeToISOString);
+                  return helpMessageInputString;
+                }
+              }
+              if (checkIfNumberToExtractFromAbsoluteTimeIsNotANumber == true) {
+                numberToExtractFromAbsoluteTime = 0;
+                return helpMessageInputString;
+              }
+            }
+            if (numberToExtractFromAbsoluteTime === "" || numberToExtractFromAbsoluteTime === undefined || numberToExtractFromAbsoluteTime === null || numberToExtractFromAbsoluteTime === [] || numberToExtractFromAbsoluteTime === "[]" || numberToExtractFromAbsoluteTime === {} || numberToExtractFromAbsoluteTime === "{}" || numberToExtractFromAbsoluteTime === "null" || numberToExtractFromAbsoluteTime === "undefined") {
+              numberToExtractFromAbsoluteTime = 0;
+              return helpMessageInputString;
+            }
+          }
+          if (numberToExtractFromAbsoluteTime.length <= 0 ) {
+            numberToExtractFromAbsoluteTime = 0;
+            return helpMessageInputString;
+          }
+        }
+        if (numberToExtractFromAbsoluteTime[1] === "" || numberToExtractFromAbsoluteTime[1] === undefined || numberToExtractFromAbsoluteTime[1] === null || numberToExtractFromAbsoluteTime[1] === [] || numberToExtractFromAbsoluteTime[1] === "[]" || numberToExtractFromAbsoluteTime[1] === {} || numberToExtractFromAbsoluteTime[1] === "{}" || numberToExtractFromAbsoluteTime[1] === "null" || numberToExtractFromAbsoluteTime[1] === "undefined") {
+          numberToExtractFromAbsoluteTime = 0;
+          return helpMessageInputString;
+        }
+      }
+      if (numberToExtractFromAbsoluteTime[0] === "" || numberToExtractFromAbsoluteTime[0] === undefined || numberToExtractFromAbsoluteTime[0] === null || numberToExtractFromAbsoluteTime[0] === [] || numberToExtractFromAbsoluteTime[0] === "[]" || numberToExtractFromAbsoluteTime[0] === {} || numberToExtractFromAbsoluteTime[0] === "{}" || numberToExtractFromAbsoluteTime[0] === "null" || numberToExtractFromAbsoluteTime[0] === "undefined") {
+        numberToExtractFromAbsoluteTime = 0;
+        return helpMessageInputString;
+      }
+    }
+    if (numberToExtractFromAbsoluteTime.length <= 0) {
+      numberToExtractFromAbsoluteTime = 0
+      return helpMessageInputString;
+    }
+  }
+  if (numberToExtractFromAbsoluteTime === "" || numberToExtractFromAbsoluteTime === undefined || numberToExtractFromAbsoluteTime === null || numberToExtractFromAbsoluteTime === [] || numberToExtractFromAbsoluteTime === "[]" || numberToExtractFromAbsoluteTime === {} || numberToExtractFromAbsoluteTime === "{}" || numberToExtractFromAbsoluteTime === "null" || numberToExtractFromAbsoluteTime === "undefined") {
+    numberToExtractFromAbsoluteTime = 0;
+    return helpMessageInputString;
+  }
+  numberToExtractFromAbsoluteTime = 0;
+  return helpMessageInputString;
+}
+
 function setup() {
   noSmooth();
   frameRate(30);
   createCanvas(1024, 576);
   background("#00000000");
   socket = io.connect();
+  socket.on("controller_config", function(data) {
+    controllerConfig = data;
+    if (controllerConfig.use_controller_graphics == true) {
+      controllerGraphics = loadImage(controllerConfig.controller_graphics);
+    }
+    //console.log("CONTROLLER CONFIG");
+    //console.log(controllerConfig);
+  });
+  socket.on("global_config", function(data) {
+    globalConfig = data;
+    //console.log("GLOBAL CONFIG");
+    //console.log(globalConfig);
+  });
   socket.on("frame_data_to_display_object", function(data) {
     frameDataToDisplayObject = data;
   });
@@ -309,7 +602,9 @@ function setup() {
   });
   socket.on("controller_graphics", function(data) {
     //console.log(data);
-    controllerGraphics = loadImage(data);
+    if (controllerConfig.use_controller_graphics == true) {
+      controllerGraphics = loadImage(data);
+    }
   });
   socket.on("input_state_from_arduino", function(data) {
     //console.log(data);
@@ -429,15 +724,17 @@ function setup() {
 
 function draw() {
   //tint(255, 255);
-  let currentTimeMillis = new Date().getTime();
-  playTimeTotal = currentTimeMillis - startTimeMillis;
-  //console.log(currentTimeMillis - startTimeMillis);
+  currentTimeMillis = new Date().getTime();
+  playTimeTotal = currentTimeMillis - globalConfig.run_start_time;
+  //console.log(currentTimeMillis - globalConfig.run_start_time);
   let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
   let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
   let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
   let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
   let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
   let playTimeString = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s " + playTimeMillis + "ms";
+  let playTimeStringShort = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s " + playTimeMillis + "ms";
+  let playTimeStringNoMillis = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s";
   //console.log(playTimeDays + "d" + playTimeHours + "h" + playTimeMinutes + "m" + playTimeSeconds + "s" + playTimeMillis + "ms");
   secondCurrent = new Date().getUTCSeconds();
   //ttsAudioStatus = ttsAudio.isLoaded();
@@ -445,8 +742,8 @@ function draw() {
   inputToHighlight = inputQueueLength - inputQueue.length;
   inputToHighlight = currentInputInQueue - inputToHighlight;
 
-  let nextStartTimeISOString = new Date(nextStartTimeMillis).toISOString();
-  let nextStartTimeRemaining = currentTimeMillis - nextStartTimeMillis;
+  let nextStartTimeISOString = new Date(globalConfig.next_run_start_time).toISOString();
+  let nextStartTimeRemaining = currentTimeMillis - globalConfig.next_run_start_time;
   nextStartTimeRemaining = Math.abs(nextStartTimeRemaining);
   let nextStartTimeRemainingDays = (parseInt(nextStartTimeRemaining / 86400000)).toString().padStart(2, "0");
   let nextStartTimeRemainingHours = (parseInt(nextStartTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
@@ -455,8 +752,8 @@ function draw() {
   let nextStartTimeRemainingMillis = (nextStartTimeRemaining % 1000).toString().padStart(3, "0");
   let nextStartTimeRemainingString = nextStartTimeRemainingDays + "d " + nextStartTimeRemainingHours + "h " + nextStartTimeRemainingMinutes + "m " + nextStartTimeRemainingSeconds + "s " + nextStartTimeRemainingMillis + "ms";
 
-  let streamEndTimeISOString = new Date(streamEndTimeMillis).toISOString();
-  let streamEndTimeRemaining = currentTimeMillis - streamEndTimeMillis;
+  let streamEndTimeISOString = new Date(globalConfig.stream_end_time).toISOString();
+  let streamEndTimeRemaining = currentTimeMillis - globalConfig.stream_end_time;
   streamEndTimeRemaining = Math.abs(streamEndTimeRemaining);
   let streamEndTimeRemainingDays = (parseInt(streamEndTimeRemaining / 86400000)).toString().padStart(2, "0");
   let streamEndTimeRemainingHours = (parseInt(streamEndTimeRemaining / 3600000) % 24).toString().padStart(2, "0");
@@ -485,15 +782,15 @@ function draw() {
   strokeWeight(fontStrokeWeight);
   textLeading(textDefaultLeadingToUse);
   */
-  //console.log(new Date().toISOString() + " A " + textDefaultLeadingToUse);
-  //text(playTimeString + "\n" + new Date().toISOString(), 768, 551);
+  //console.log(new Date(currentTimeMillis).toISOString() + " A " + textDefaultLeadingToUse);
+  //text(playTimeString + "\n" + new Date(currentTimeMillis).toISOString(), 768, 551);
   if (socket.connected == true) {
     if (playTimeTotal >= 0) {
       recalculateFont(2, 1);
       textSize(textSizeToUse);
       strokeWeight(fontStrokeWeight);
       textLeading(textDefaultLeadingToUse);
-      text(playTimeString + "\n" + new Date().toISOString(), 768, 551);
+      text(playTimeString + "\n" + new Date(currentTimeMillis).toISOString(), 768, 551);
       /*
       recalculateFont(4, 2);
       textSize(textSizeToUse);
@@ -502,7 +799,7 @@ function draw() {
       textAlign(CENTER, TOP);
       fill("#FFFFFFFF");
       textLeading(textDefaultLeadingToUse);
-      text(gameTitle + "\nstarts in " + playTimeString, 384, 288);
+      text(globalConfig.game_title + "\nstarts in " + playTimeString, 384, 288);
       */
     }
     if (playTimeTotal < 0) {
@@ -514,12 +811,13 @@ function draw() {
       playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
       playTimeString = playTimeDays + "day " + playTimeHours + "hr " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
       playTimeStringShort = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s " + playTimeMillis + "ms";
+      playTimeStringNoMillis = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s";
       if (acceptInputs == false) {
         recalculateFont(2, 1);
         textSize(textSizeToUse);
         strokeWeight(fontStrokeWeight);
         textLeading(textDefaultLeadingToUse);
-        text("\n" + new Date().toISOString(), 768, 551);
+        text("\n" + new Date(currentTimeMillis).toISOString(), 768, 551);
         recalculateFont(4, 2);
         textSize(textSizeToUse);
         strokeWeight(fontStrokeWeight);
@@ -527,14 +825,14 @@ function draw() {
         textAlign(CENTER, TOP);
         fill("#FFFFFFFF");
         textLeading(textDefaultLeadingToUse);
-        text(gameTitle + "\nstarts in " + playTimeString, 384, 288);
+        text(globalConfig.game_title + "\nstarts in " + playTimeString, 384, 288);
       }
       if (acceptInputs == true) {
         recalculateFont(2, 1);
         textSize(textSizeToUse);
         strokeWeight(fontStrokeWeight);
         textLeading(textDefaultLeadingToUse);
-        text("\n" + new Date().toISOString(), 768, 551);
+        text("\n" + new Date(currentTimeMillis).toISOString(), 768, 551);
         /*
         recalculateFont(4, 2);
         textSize(textSizeToUse);
@@ -543,7 +841,7 @@ function draw() {
         textAlign(CENTER, TOP);
         fill("#FFFFFFFF");
         textLeading(textDefaultLeadingToUse);
-        text(gameTitle + "\nstarts in " + playTimeString, 384, 288);
+        text(globalConfig.game_title + "\nstarts in " + playTimeString, 384, 288);
         */
         if (advancedInputString == "") {
           if (voteDataObject.input_mode == 2) {
@@ -554,7 +852,7 @@ function draw() {
             scale(0.5, 1);
             textLeading(textDefaultLeadingToUse);
             //text("Stream goes offline in\n" + streamEndTimeRemainingString + "\n(" + streamEndTimeISOString  + ")\n(The 31 day mark)\n\n Super Mario RPG:\nLegend of the Seven Stars\nStarts in\n" + nextStartTimeRemainingString + "\n(" + nextStartTimeISOString + ")", 896 * 2, 60);
-            text(gameTitleShort + "\nstarts in\n" + playTimeStringShort, 896 * 2, 60);
+            text(globalConfig.game_title_short + "\nstarts in\n" + playTimeStringShort, 896 * 2, 60);
             scale(2, 1);
           }
         }
@@ -563,15 +861,22 @@ function draw() {
     //recalculateFont(2, 1);
     //textSize(textSizeToUse);
     //strokeWeight(fontStrokeWeight);
-    //text(new Date().toISOString(), 768, 564);
+    //text(new Date(currentTimeMillis).toISOString(), 768, 564);
     recalculateFont(3, 2);
     textAlign(LEFT, TOP);
     textSize(textSizeToUse);
     strokeWeight(fontStrokeWeight);
     textLeading(textDefaultLeadingToUse);
-    //console.log(new Date().toISOString() + " B " + textDefaultLeadingToUse);
+    //console.log(new Date(currentTimeMillis).toISOString() + " B " + textDefaultLeadingToUse);
     //text("Twitch Plays (Viewers play/Chat plays) Super Mario 64 on a\nreal N64 console, please don\'t delete any files", 2, 2);
-    text(headerText, 2, 2);
+    let headerText2 = globalConfig.overlay_header_text;
+    headerText2 = headerText2.replace(/({{game_title}})+/ig, globalConfig.game_title);
+    headerText2 = headerText2.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
+    headerText2 = headerText2.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+    headerText2 = headerText2.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
+    headerText2 = headerText2.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
+    headerText2 = headerText2.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+    text(headerText2, 2, 2);
   }
   //recalculateFont(3, 2);
   //textSize(textSizeToUse);
@@ -648,11 +953,11 @@ function draw() {
     return;
   }
 
-  if (helpMessages.length > 0) {
+  if (globalConfig.overlay_text_rotation.length > 0) {
     if (secondCurrent != secondOld) {
       if (secondCurrent % 3 == 0) {
         currentValueToDisplay++;
-        if (currentValueToDisplay > helpMessages.length - 1) {
+        if (currentValueToDisplay > globalConfig.overlay_text_rotation.length - 1) {
           currentValueToDisplay = 0;
         }
       }
@@ -666,7 +971,7 @@ function draw() {
         //}
       }
       //stepsToMoveUp++;
-      //console.log(new Date().toISOString());
+      //console.log(new Date(currentTimeMillis).toISOString());
     }
   }
   /*
@@ -696,10 +1001,20 @@ function draw() {
   */
   //if (isTtsBusy == false) {
     //inputQueue[currentInputInQueue].tts_message;
-    if (helpMessages.length > 0) {
-      let helpMessageToDisplay = helpMessages[currentValueToDisplay];
-      helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title}})+/ig, nextGameTitle);
-      helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title_short}})+/ig, nextGameTitleShort);
+    if (globalConfig.overlay_text_rotation.length > 0) {
+      let helpMessageToDisplay = globalConfig.overlay_text_rotation[currentValueToDisplay];
+      helpMessageToDisplay = getAbsoluteTimeAsISOStringFromHelpMessageString(helpMessageToDisplay, false);
+      helpMessageToDisplay = getPlayTimeFromHelpMessageString(helpMessageToDisplay, globalConfig.run_start_time, false, false);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{game_title}})+/ig, globalConfig.game_title);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{current_time}})+/ig, new Date(currentTimeMillis).toISOString());
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{play_time_total_string}})+/ig, playTimeString);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{current_time_no_millis}})+/ig, new Date(currentTimeMillis).toISOString().split(/\.+/ig)[0] + "Z");
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{play_time_total_string_no_millis}})+/ig, playTimeStringNoMillis);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + " (" + nextStartTimeISOString + ")");
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + "\n(" + streamEndTimeISOString + ")");
       /*
@@ -758,7 +1073,7 @@ function draw() {
   stroke("#FFFFFFFF");
   fill("#FFFFFF7F");
   rect(votingBarLeftEdgePosition, 2, votingBarSize, 19);
-  //console.log(new Date().toISOString() + " " + votingBarLeftEdgePosition + " " + votingBarSize);
+  //console.log(new Date(currentTimeMillis).toISOString() + " " + votingBarLeftEdgePosition + " " + votingBarSize);
 
   recalculateFont(3, 1);
   textFont(font);
@@ -906,12 +1221,22 @@ function draw() {
         scale(0.5, 1);
         textLeading(textDefaultLeadingToUse);
         //text("Stream goes offline in\n" + streamEndTimeRemainingString + "\n(" + streamEndTimeISOString  + ")\n(The 31 day mark)\n\n Super Mario RPG:\nLegend of the Seven Stars\nStarts in\n" + nextStartTimeRemainingString + "\n(" + nextStartTimeISOString + ")", 896 * 2, 60);
-        let advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay;
-        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title}})+/ig, nextGameTitle);
-        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title_short}})+/ig, nextGameTitleShort);
+        let advancedModeHelpMessageToDisplay2 = globalConfig.overlay_advanced_mode_help_message_to_display;
+        advancedModeHelpMessageToDisplay2 = getAbsoluteTimeAsISOStringFromHelpMessageString(advancedModeHelpMessageToDisplay2, false);
+        advancedModeHelpMessageToDisplay2 = getPlayTimeFromHelpMessageString(advancedModeHelpMessageToDisplay2, globalConfig.run_start_time, false, false);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{game_title}})+/ig, globalConfig.game_title);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{current_time}})+/ig, new Date(currentTimeMillis).toISOString());
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{play_time_total_string}})+/ig, playTimeString);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{current_time_no_millis}})+/ig, new Date(currentTimeMillis).toISOString().split(/\.+/ig)[0] + "Z");
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{play_time_total_string_no_millis}})+/ig, playTimeStringNoMillis);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + "\n(" + nextStartTimeISOString + ")");
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + "\n(" + streamEndTimeISOString + ")");
-        //console.log(advancedModeHelpMessageToDisplay);
+        //console.log(globalConfig.overlay_advanced_mode_help_message_to_display);
         //console.log(advancedModeHelpMessageToDisplay2);
         text(advancedModeHelpMessageToDisplay2, 896 * 2, 60);
         scale(2, 1);
@@ -979,26 +1304,46 @@ function draw() {
   stroke("#000000FF");
   textAlign(LEFT, TOP); // 4x5 font isn't kind to CENTER, LEFT, text gets blurry, so I have to do LEFT, TOP and kinda hardcode the text position so it looks like it is centered, ugly hack but it works
   fill("#FFFFFFFF");
+  if (viewerCount < 0) {
+    textLeading(textDefaultLeadingToUse);
+    if (controllerConfig.display_framerate == true) {
+      text("OFFLINE    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+    }
+    if (controllerConfig.display_framerate == false) {
+      text("OFFLINE", 768, 346);
+    }
+  }
+  if (viewerCount == 0) {
+    textLeading(textDefaultLeadingToUse);
+    if (controllerConfig.display_framerate == true) {
+      text(viewerCount + " Viewers    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+    }
+    if (controllerConfig.display_framerate == false) {
+      text(viewerCount + " Viewers", 768, 346);
+    }
+  }
   if (viewerCount == 1) {
     textLeading(textDefaultLeadingToUse);
-    if (displayFramerate == true) {
+    if (controllerConfig.display_framerate == true) {
       text(viewerCount + " Viewer    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
     }
-    if (displayFramerate == false) {
+    if (controllerConfig.display_framerate == false) {
       text(viewerCount + " Viewer", 768, 346);
     }
   }
-  if (viewerCount != 1) {
+  if (viewerCount > 1) {
     textLeading(textDefaultLeadingToUse);
-    if (displayFramerate == true) {
+    if (controllerConfig.display_framerate == true) {
       text(viewerCount + " Viewers    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
     }
-    if (displayFramerate == false) {
+    if (controllerConfig.display_framerate == false) {
       text(viewerCount + " Viewers", 768, 346);
     }
   }
   //tint(255, 127);
-  //image(controllerGraphics, 40, 40, 13, 19, 13, 50, 13, 19); // Position X on Canvas, Position Y on Canvas, Width on Canvas, Height on Canvas, Origin X on Image, Origin Y on Image, Width on image, Height on Image
+  if (controllerConfig.use_controller_graphics == true) {
+    //image(controllerGraphics, 40, 40, 13, 19, 13, 50, 13, 19); // Position X on Canvas, Position Y on Canvas, Width on Canvas, Height on Canvas, Origin X on Image, Origin Y on Image, Width on image, Height on Image    
+  }
   secondOld = secondCurrent;
   isTtsBusyPrevious = isTtsBusy;
   //ttsAudioStatusPrevious = ttsAudioStatus;

@@ -1,7 +1,7 @@
 {
   "options": {
     "debug": true,
-    "messagesLogLevel": "trace"
+    "messagesLogLevel": "info"
   },
   "connection": {
     "reconnect": true,
@@ -18,10 +18,19 @@
   "log_chat_as_receiver": true,
   "send_debug_channel_messages": true,
   "main_channel": "main_channel_name",
+  "main_channel_id": "main_channel_id",
   "debug_channel": "debug_channel_name",
+  "debug_channel_id": "debug_channel_id",
   "channel_owner": "channel_owner_name",
+  "channel_owner_id": "channel_owner_id",
   "resend_whisper_to_channel_owner": true,
   "resend_whisper_to_debug_channel": true,
+  "change_user_color_before_sending_message": false,
+  "check_chat_connection_periodically": false,
+  "check_chat_connection_period_millis": 60000,
+  "send_ping_periodically": true,
+  "send_ping_period_millis": 60000,
+  "send_ping_independently_from_check_chat_connection": true,
   "channels_to_listen": [
     "channel_to_listen_userid"
   ],
