@@ -17,7 +17,7 @@
   "ban_spambots": true,
   "send_messages_to_moderated_user": true,
   "send_whispers_to_moderated_user": true,
-  "enable_updating_stream_title_automatically": true,
+  "enable_updating_stream_title_automatically": false,
   "enable_check_uptime": true,
   "enable_check_moderators": true,
   "enable_check_followage": true,
