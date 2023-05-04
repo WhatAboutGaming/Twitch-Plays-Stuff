@@ -139,12 +139,16 @@ var globalConfig = {
   game_title: "Game Title",
   game_title_short: "Game Title Short",
   game_title_shorter: "Game Title Shorter",
+  game_title_shorter_2: "Game Title Shorter 2",
+  game_title_shorter_3: "Game Title Shorter 3",
   stream_title: "Stream Title",
   stream_going_offline_message: "Stream Going Offline Message",
   send_stream_going_offline_message: true,
   next_game_title: "Next Game Title",
   next_game_title_short: "Next Game Title Short",
   next_game_title_shorter: "Next Game Title Shorter",
+  next_game_title_shorter_2: "Next Game Title Shorter 2",
+  next_game_title_shorter_3: "Next Game Title Shorter 3",
   main_database_name: "",
   chatters_collection_name: "",
   run_name: "",
@@ -315,7 +319,7 @@ var voteDataObject = {
   advanced_vote_count_ratio: 0,
   basic_vote_count_ratio: 0,
   input_modes_array: inputModesArray,
-  input_mode: 0
+  input_mode: 2
 };
 
 var advancedInputMetadata = {
@@ -436,7 +440,7 @@ function getPlayTimeFromHelpMessageString(helpMessageInputString, runStartTimeAs
                 let helpMessagePlayTimeMillis = (helpMessagePlayTimeTotal % 1000).toString().padStart(3, "0");
                 if (displayMilliseconds == true) {
                   if (displayAlternateUnitAbbreviation == true) {
-                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "day " + helpMessagePlayTimeHours + "hr " + helpMessagePlayTimeMinutes + "min " + helpMessagePlayTimeSeconds + "sec " + helpMessagePlayTimeMillis + "msec";
+                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "day " + helpMessagePlayTimeHours + "hour " + helpMessagePlayTimeMinutes + "min " + helpMessagePlayTimeSeconds + "sec " + helpMessagePlayTimeMillis + "msec";
                     helpMessageInputString = helpMessageInputString.replace(/({{play_time:\d+}})+/ig, helpMessagePlayTimeString);
                     return helpMessageInputString;
                   }
@@ -448,7 +452,7 @@ function getPlayTimeFromHelpMessageString(helpMessageInputString, runStartTimeAs
                 }
                 if (displayMilliseconds == false) {
                   if (displayAlternateUnitAbbreviation == true) {
-                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "day " + helpMessagePlayTimeHours + "hr " + helpMessagePlayTimeMinutes + "min " + helpMessagePlayTimeSeconds + "sec";
+                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "day " + helpMessagePlayTimeHours + "hour " + helpMessagePlayTimeMinutes + "min " + helpMessagePlayTimeSeconds + "sec";
                     helpMessageInputString = helpMessageInputString.replace(/({{play_time:\d+}})+/ig, helpMessagePlayTimeString);
                     return helpMessageInputString;
                   }
@@ -750,7 +754,8 @@ function draw() {
   let nextStartTimeRemainingMinutes = (parseInt(nextStartTimeRemaining / 60000) % 60).toString().padStart(2, "0");
   let nextStartTimeRemainingSeconds = (parseInt(nextStartTimeRemaining / 1000) % 60).toString().padStart(2, "0");
   let nextStartTimeRemainingMillis = (nextStartTimeRemaining % 1000).toString().padStart(3, "0");
-  let nextStartTimeRemainingString = nextStartTimeRemainingDays + "d " + nextStartTimeRemainingHours + "h " + nextStartTimeRemainingMinutes + "m " + nextStartTimeRemainingSeconds + "s " + nextStartTimeRemainingMillis + "ms";
+  //let nextStartTimeRemainingString = nextStartTimeRemainingDays + "d " + nextStartTimeRemainingHours + "h " + nextStartTimeRemainingMinutes + "m " + nextStartTimeRemainingSeconds + "s " + nextStartTimeRemainingMillis + "ms";
+  let nextStartTimeRemainingString = nextStartTimeRemainingDays + "d " + nextStartTimeRemainingHours + "h " + nextStartTimeRemainingMinutes + "m " + nextStartTimeRemainingSeconds + "s";
 
   let streamEndTimeISOString = new Date(globalConfig.stream_end_time).toISOString();
   let streamEndTimeRemaining = currentTimeMillis - globalConfig.stream_end_time;
@@ -809,7 +814,7 @@ function draw() {
       playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
       playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
       playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
-      playTimeString = playTimeDays + "day " + playTimeHours + "hr " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+      playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
       playTimeStringShort = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s " + playTimeMillis + "ms";
       playTimeStringNoMillis = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s";
       if (acceptInputs == false) {
@@ -873,9 +878,13 @@ function draw() {
     headerText2 = headerText2.replace(/({{game_title}})+/ig, globalConfig.game_title);
     headerText2 = headerText2.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
     headerText2 = headerText2.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+    headerText2 = headerText2.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+    headerText2 = headerText2.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
     headerText2 = headerText2.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
     headerText2 = headerText2.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
     headerText2 = headerText2.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+    headerText2 = headerText2.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+    headerText2 = headerText2.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
     text(headerText2, 2, 2);
   }
   //recalculateFont(3, 2);
@@ -906,7 +915,7 @@ function draw() {
       advanced_vote_count_ratio: 0,
       basic_vote_count_ratio: 0,
       input_modes_array: inputModesArray,
-      input_mode: 0
+      input_mode: 2
     };
     
     advancedInputMetadata = {
@@ -1008,6 +1017,8 @@ function draw() {
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{game_title}})+/ig, globalConfig.game_title);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{current_time}})+/ig, new Date(currentTimeMillis).toISOString());
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{play_time_total_string}})+/ig, playTimeString);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{current_time_no_millis}})+/ig, new Date(currentTimeMillis).toISOString().split(/\.+/ig)[0] + "Z");
@@ -1015,6 +1026,8 @@ function draw() {
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+      helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + " (" + nextStartTimeISOString + ")");
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + "\n(" + streamEndTimeISOString + ")");
       /*
@@ -1081,7 +1094,7 @@ function draw() {
   strokeWeight(fontStrokeWeight);
   stroke("#FFFFFFFF");
   textAlign(LEFT, TOP);
-  fill("#0000FFFF");
+  fill("#00FF00FF");
   textLeading(textDefaultLeadingToUse);
   //text("B                         A", 767 + 3, 4);
   text("B\n" + parseInt(voteDataObject.basic_vote_count_ratio * 100) + "%\n" + voteDataObject.basic_vote_count + " Vote", 767 + 3, 4);
@@ -1150,7 +1163,7 @@ function draw() {
     strokeWeight(fontStrokeWeight);
     stroke("#FFFFFFFF");
     textAlign(LEFT, TOP); // 4x5 font isn't kind to CENTER, LEFT, text gets blurry, so I have to do LEFT, TOP and kinda hardcode the text position so it looks like it is centered, ugly hack but it works
-    fill("#0000FFFF");
+    fill("#00FF00FF");
     textLeading(textDefaultLeadingToUse);
     text("\nBASIC", 864, 4);
     stroke("#000000FF");
@@ -1202,7 +1215,7 @@ function draw() {
     text(inputCountsObject.advanced_inputs_sent + " Adv. inputs", 768, 328);
 
     stroke("#FFFFFFFF");
-    fill("#0000FFFF");
+    fill("#00FF00FF");
     votingBarSlider = (votingBarLeftEdgePosition + 1) + (votingBarSize * (1 - voteDataObject.threshold_to_change_mode));
     textAlign(CENTER, TOP);
     textLeading(textDefaultLeadingToUse);
@@ -1227,6 +1240,8 @@ function draw() {
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{game_title}})+/ig, globalConfig.game_title);
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{current_time}})+/ig, new Date(currentTimeMillis).toISOString());
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{play_time_total_string}})+/ig, playTimeString);
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{current_time_no_millis}})+/ig, new Date(currentTimeMillis).toISOString().split(/\.+/ig)[0] + "Z");
@@ -1234,6 +1249,8 @@ function draw() {
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+        advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + "\n(" + nextStartTimeISOString + ")");
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + "\n(" + streamEndTimeISOString + ")");
         //console.log(globalConfig.overlay_advanced_mode_help_message_to_display);

@@ -1710,12 +1710,13 @@ function onClearMsg(channel, username, deletedMessage, tags) {
     return;
   }
   if (globalConfig.send_whispers_to_moderated_user == true) {
-    channel = channel.replace(/\#+/ig, "");
-    username = username.replace(/(\\s)+/ig, "");
-    username = username.replace(/\s+/ig, "");
-    updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-    sendTwitchWhisper(tags["target-user-id"], "Your message was deleted from the channel " + channel + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-    sendTwitchWhisper(tags["target-user-id"], "You sent: " + deletedMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+    //channel = channel.replace(/\#+/ig, "");
+    //username = username.replace(/(\\s)+/ig, "");
+    //username = username.replace(/\s+/ig, "");
+    // Can't send whispers from here anymore because Twitch doesn't expose the user ids for message deletion (CLEARMSG command). Why? Nobody knows. (Soon enough they'll do the same thing for ban and time out (CLEARCHAT command))
+    //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+    //sendTwitchWhisper(tags["target-user-id"], "Your message was deleted from the channel " + channel + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+    //sendTwitchWhisper(tags["target-user-id"], "You sent: " + deletedMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
   }
 }
 
@@ -1732,7 +1733,6 @@ function rawMessageLogger(messageCloned, message) {
   let rawLineTimestampMonth = new Date(rawLineMillis).getUTCMonth() + 1;
   let rawLineTimestampYear = new Date(rawLineMillis).getUTCFullYear();
   let chatLogDate = rawLineTimestampYear + "-" + rawLineTimestampMonth + "-" + rawLineTimestampDate;
-  //console.log(rawLineTimestamp + " [RAW CHAT LINE] " + JSON.stringify(message));
   //console.log(__dirname + path.sep);
 
   //let dirName = __dirname + path.sep + "logs" + path.sep + "chat" + path.sep + rawLineTimestampYear + path.sep + rawLineTimestampMonth + path.sep + rawLineTimestampDate;
@@ -1753,6 +1753,7 @@ function rawMessageLogger(messageCloned, message) {
   let roomId = message.tags["room-id"];
   let userId = message.tags["user-id"];
   let threadId = message.tags["thread-id"]; // Used to keep track of whispers
+  //rawLineParam0 = roomId;
   //console.log(rawLineTimestamp + " [RAW LINE PARAM0] " + rawLineParam0);
   if (message.params.length === 0) {
     rawLineParam0 = "";
@@ -1764,7 +1765,8 @@ function rawMessageLogger(messageCloned, message) {
   // This block logs chat from a viewer's (receiver only) point of view
   // I have to do this because I need to listen and log all messages sent to chat, including messages sent by this application, as the receiver, not the sender
   // Is there a better way to do this without connecting two clients (having two instances of tmi.js running) to twitch?
-  //console.log(new Date().toISOString() + " [RAW CHAT LINE] " + messageCloned);
+  //console.log(rawLineTimestamp + " [RAW CHAT LINE]");
+  //console.log(messageCloned);
   if (rawLineParam0 === "" || rawLineParam0 === undefined || rawLineParam0 === null || rawLineParam0 === "*") {
     return; // We don't want the first parameter to be an empty string, this param is either the channel name or the whisperer name, we don't want it to be undefined either, but it's possible that it is "undefined", we don't want it to be "*" because that's a twitch control line, and we don't want to log that
   }
@@ -1772,7 +1774,8 @@ function rawMessageLogger(messageCloned, message) {
     return; // Should I filter PART and JOIN? And maybe ROOMSTATE too? Yes, too much unecessary logging otherwise
   }
   rawLineParam0 = rawLineParam0.replace(/\#+/ig, "");
-  //console.log(rawLineTimestamp + " [RAW CHAT LINE] " + JSON.stringify(message));
+  //console.log(rawLineTimestamp + " [RAW CHAT LINE]");
+  //console.log(message);
   if (rawLineCommand === "WHISPER") {
     // Doing this multiple times because I'm using an old version of node that doesn't support recursive folder creation (There was a reason for using this old version but I can't remember what, I think there were compatibility issues with either the serial port module or tmi.js module)
     folderToMake = __dirname + path.sep + "logs";
@@ -1865,7 +1868,8 @@ function rawMessageLogger(messageCloned, message) {
   }
   // And that's how you log twitch raw lines on an older version of nodejs
   // How would I go about saving this to a mongo database?
-  //console.log(rawLineTimestamp + " [RAW CHAT LINE] " + JSON.stringify(message));
+  //console.log(rawLineTimestamp + " [RAW CHAT LINE]");
+  //console.log(message);
   //console.log(new Date().toISOString() + " [rawMessageLogger CHAT READY STATES] chatLogger.readyState() = " + chatLogger.readyState() + " client.readyState() = " + client.readyState() + " clientReconnectAttempts = " + clientReconnectAttempts + " chatLoggerReconnectAttempts = " + chatLoggerReconnectAttempts);
 }
 
@@ -1891,7 +1895,6 @@ function onRawMessageHandler(messageCloned, message) {
   let rawLineTimestampMonth = new Date(rawLineMillis).getUTCMonth() + 1;
   let rawLineTimestampYear = new Date(rawLineMillis).getUTCFullYear();
   let chatLogDate = rawLineTimestampYear + "-" + rawLineTimestampMonth + "-" + rawLineTimestampDate;
-  //console.log(rawLineTimestamp + " [RAW CHAT LINE] " + JSON.stringify(message));
   //console.log(__dirname + path.sep);
 
   //let dirName = __dirname + path.sep + "logs" + path.sep + "chat" + path.sep + rawLineTimestampYear + path.sep + rawLineTimestampMonth + path.sep + rawLineTimestampDate;
@@ -1912,6 +1915,7 @@ function onRawMessageHandler(messageCloned, message) {
   let roomId = message.tags["room-id"];
   let userId = message.tags["user-id"];
   let threadId = message.tags["thread-id"]; // Used to keep track of whispers
+  //rawLineParam0 = roomId;
   //console.log(rawLineTimestamp + " [RAW LINE PARAM0] " + rawLineParam0);
   if (message.params.length === 0) {
     rawLineParam0 = "";
@@ -1923,7 +1927,8 @@ function onRawMessageHandler(messageCloned, message) {
   // This block logs chat from the bot's (sender (logging moderation messages), moderator and partial receiver (it can't see its own messages)) point of view
   // I have to do this because I need to listen and log all messages sent to chat, including messages sent by this application, as the receiver, not the sender (disregard this, this is a copypaste)
   // Is there a better way to do this without connecting two clients (having two instances of tmi.js running) to twitch?
-  //console.log(new Date().toISOString() + " [RAW CHAT LINE] " + messageCloned);
+  //console.log(rawLineTimestamp + " [RAW CHAT LINE]");
+  //console.log(messageCloned);
   if (rawLineParam0 === "" || rawLineParam0 === undefined || rawLineParam0 === null || rawLineParam0 === "*") {
     return; // We don't want the first parameter to be an empty string, this param is either the channel name or the whisperer name, we don't want it to be undefined either, but it's possible that it is "undefined", we don't want it to be "*" because that's a twitch control line, and we don't want to log that
   }
@@ -1931,7 +1936,8 @@ function onRawMessageHandler(messageCloned, message) {
     return; // Should I filter PART and JOIN? And maybe ROOMSTATE too? Yes, too much unecessary logging otherwise
   }
   rawLineParam0 = rawLineParam0.replace(/\#+/ig, "");
-  //console.log(rawLineTimestamp + " [RAW CHAT LINE] " + JSON.stringify(message));
+  //console.log(rawLineTimestamp + " [RAW CHAT LINE]");
+  //console.log(message);
   if (rawLineCommand === "WHISPER") {
     // Doing this multiple times because I'm using an old version of node that doesn't support recursive folder creation (There was a reason for using this old version but I can't remember what, I think there were compatibility issues with either the serial port module or tmi.js module)
     folderToMake = __dirname + path.sep + "logs";
@@ -2024,7 +2030,8 @@ function onRawMessageHandler(messageCloned, message) {
   }
   // And that's how you log twitch raw lines on an older version of nodejs
   // How would I go about saving this to a mongo database?
-  //console.log(rawLineTimestamp + " [RAW CHAT LINE] " + JSON.stringify(message));
+  //console.log(rawLineTimestamp + " [RAW CHAT LINE]");
+  //console.log(message);
   //console.log(new Date().toISOString() + " [onRawMessageHandler CHAT READY STATES] chatLogger.readyState() = " + chatLogger.readyState() + " client.readyState() = " + client.readyState() + " clientReconnectAttempts = " + clientReconnectAttempts + " chatLoggerReconnectAttempts = " + chatLoggerReconnectAttempts);
 }
 //client.connect();
@@ -2223,7 +2230,7 @@ function getPlayTimeFromHelpMessageString(helpMessageInputString, runStartTimeAs
                 let helpMessagePlayTimeMillis = (helpMessagePlayTimeTotal % 1000).toString().padStart(3, "0");
                 if (displayMilliseconds == true) {
                   if (displayAlternateUnitAbbreviation == true) {
-                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "day " + helpMessagePlayTimeHours + "hr " + helpMessagePlayTimeMinutes + "min " + helpMessagePlayTimeSeconds + "sec " + helpMessagePlayTimeMillis + "msec";
+                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "day " + helpMessagePlayTimeHours + "hour " + helpMessagePlayTimeMinutes + "min " + helpMessagePlayTimeSeconds + "sec " + helpMessagePlayTimeMillis + "msec";
                     helpMessageInputString = helpMessageInputString.replace(/({{play_time:\d+}})+/ig, helpMessagePlayTimeString);
                     return helpMessageInputString;
                   }
@@ -2235,7 +2242,7 @@ function getPlayTimeFromHelpMessageString(helpMessageInputString, runStartTimeAs
                 }
                 if (displayMilliseconds == false) {
                   if (displayAlternateUnitAbbreviation == true) {
-                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "day " + helpMessagePlayTimeHours + "hr " + helpMessagePlayTimeMinutes + "min " + helpMessagePlayTimeSeconds + "sec";
+                    let helpMessagePlayTimeString = helpMessagePlayTimeDays + "day " + helpMessagePlayTimeHours + "hour " + helpMessagePlayTimeMinutes + "min " + helpMessagePlayTimeSeconds + "sec";
                     helpMessageInputString = helpMessageInputString.replace(/({{play_time:\d+}})+/ig, helpMessagePlayTimeString);
                     return helpMessageInputString;
                   }
@@ -2370,8 +2377,8 @@ function updateStreamTime() {
   let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60);
   let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60);
   let playTimeMillis = (playTimeTotal % 1000);
-  let playTimeString = playTimeDays + "day " + playTimeHours + "hr " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
-  let playTimeStringNoMillis = playTimeDays + "day " + playTimeHours + "hr " + playTimeMinutes + "min " + playTimeSeconds + "sec";
+  let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+  let playTimeStringNoMillis = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec";
   //console.log(playTimeString);
   //console.log(playTimeTotal);
   //playTimeDays = -1;
@@ -2441,6 +2448,8 @@ function updateStreamTime() {
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title}})+/ig, globalConfig.game_title);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{current_time}})+/ig, new Date(currentTimeMillis).toISOString());
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{play_time_total_string}})+/ig, playTimeString);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{current_time_no_millis}})+/ig, new Date(currentTimeMillis).toISOString().split(/\.+/ig)[0] + "Z");
@@ -2448,6 +2457,8 @@ function updateStreamTime() {
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + " (" + nextStartTimeISOString + ")");
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + " (" + streamEndTimeISOString + ")");
 
@@ -2475,9 +2486,13 @@ function updateStreamTime() {
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title}})+/ig, globalConfig.game_title);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{play_time_days}})+/ig, playTimeDays.toString().padStart(2, "0"));
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{hour_low}})+/ig, "12");
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{hour_high}})+/ig, "24");
@@ -2489,9 +2504,13 @@ function updateStreamTime() {
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title}})+/ig, globalConfig.game_title);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{play_time_days}})+/ig, playTimeDays.toString().padStart(2, "0"));
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{hour_low}})+/ig, "12");
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{hour_high}})+/ig, "24");
@@ -2510,9 +2529,13 @@ function updateStreamTime() {
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title}})+/ig, globalConfig.game_title);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{play_time_days}})+/ig, playTimeDays.toString().padStart(2, "0"));
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{hour_low}})+/ig, "00");
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{hour_high}})+/ig, "12");
@@ -2524,9 +2547,13 @@ function updateStreamTime() {
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title}})+/ig, globalConfig.game_title);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{play_time_days}})+/ig, playTimeDays.toString().padStart(2, "0"));
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{hour_low}})+/ig, "00");
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{hour_high}})+/ig, "12");
@@ -2595,6 +2622,8 @@ function updateStreamTime() {
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title}})+/ig, globalConfig.game_title);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{current_time}})+/ig, new Date(currentTimeMillis).toISOString());
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{play_time_total_string}})+/ig, playTimeString);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{current_time_no_millis}})+/ig, new Date(currentTimeMillis).toISOString().split(/\.+/ig)[0] + "Z");
@@ -2602,6 +2631,8 @@ function updateStreamTime() {
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+              randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{next_run_start_time}})+/ig, nextStartTimeRemainingString + " (" + nextStartTimeISOString + ")");
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + " (" + streamEndTimeISOString + ")");
 
@@ -2629,9 +2660,13 @@ function updateStreamTime() {
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title}})+/ig, globalConfig.game_title);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{play_time_days}})+/ig, playTimeDays.toString().padStart(2, "0"));
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{hour_low}})+/ig, "12");
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{hour_high}})+/ig, "24");
@@ -2643,9 +2678,13 @@ function updateStreamTime() {
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title}})+/ig, globalConfig.game_title);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{play_time_days}})+/ig, playTimeDays.toString().padStart(2, "0"));
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{hour_low}})+/ig, "12");
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{hour_high}})+/ig, "24");
@@ -2664,9 +2703,13 @@ function updateStreamTime() {
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title}})+/ig, globalConfig.game_title);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+              newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{play_time_days}})+/ig, (playTimeDays + 1).toString().padStart(2, "0"));
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{hour_low}})+/ig, "00");
               newStreamTitleToUpdateStreamTitleWith = newStreamTitleToUpdateStreamTitleWith.replace(/({{hour_high}})+/ig, "12");
@@ -2678,9 +2721,13 @@ function updateStreamTime() {
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title}})+/ig, globalConfig.game_title);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter_2}})+/ig, globalConfig.game_title_shorter_2);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{game_title_shorter_3}})+/ig, globalConfig.game_title_shorter_3);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title}})+/ig, globalConfig.next_game_title);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_short}})+/ig, globalConfig.next_game_title_short);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter}})+/ig, globalConfig.next_game_title_shorter);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter_2}})+/ig, globalConfig.next_game_title_shorter_2);
+                streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{next_game_title_shorter_3}})+/ig, globalConfig.next_game_title_shorter_3);
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{play_time_days}})+/ig, (playTimeDays + 1).toString().padStart(2, "0"));
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{hour_low}})+/ig, "00");
                 streamGoingOfflineMessageToSend = streamGoingOfflineMessageToSend.replace(/({{hour_high}})+/ig, "12");
@@ -2810,6 +2857,7 @@ function updateStreamTitleTest() {
 function updateStreamTitle(newStreamTitle, twitchCredentialsObject, twitchAccessTokenObject) {
   // ONLY THE ACCOUNT OWNER (THE STREAMER IN THIS CASE) CAN UPDATE THE STREAM TITLE, NO ONE ELSE CAN EVEN IF THEY HAVE PERMISSION TO ACCESS THE STREAMER'S DASHBOARD
   console.log("Attempting to update stream title to: " + newStreamTitle);
+  let twitchApiStatusCode = -1;
   let rawOutputData = "";
   let twitchClientId = twitchCredentialsObject.twitch_client_id;
   let twitchChannelId = twitchCredentialsObject.twitch_channel_id;
@@ -2829,7 +2877,8 @@ function updateStreamTitle(newStreamTitle, twitchCredentialsObject, twitchAccess
   };
   streamTitleToUpdate = JSON.stringify(streamTitleToUpdate);
   let req = https.request(options, function(res) {
-    console.log("STREAM TITLE statusCode: " + res.statusCode);
+    twitchApiStatusCode = res.statusCode;
+    console.log("STREAM TITLE statusCode: " + twitchApiStatusCode);
     res.on("data", function(d) {
       //console.log("STREAM TITLE DATA RECEIVED");
       //console.log(d.toString("utf8"));
@@ -2839,11 +2888,16 @@ function updateStreamTitle(newStreamTitle, twitchCredentialsObject, twitchAccess
       //console.log(d);
     });
     res.on("end", function() {
-      if (res.statusCode < 200 || res.statusCode > 299) {
-        console.log(new Date().toISOString() + " STREAM TITLE RESPONSE ERROR res.statusCode = " + res.statusCode);
+      if (twitchApiStatusCode < 200 || twitchApiStatusCode > 299) {
+        if (client.readyState() === "OPEN") {
+          if (chatConfig.send_debug_channel_messages == true) {
+            client.action(chatConfig.debug_channel, new Date().toISOString() + " [STREAM TITLE RESPONSE ERROR] Failed to update stream title. statusCode = " + twitchApiStatusCode);
+          }
+        }
+        console.log(new Date().toISOString() + " STREAM TITLE RESPONSE ERROR twitchApiStatusCode = " + twitchApiStatusCode);
         console.log(rawOutputData.toString("utf8"));
       }
-      if (res.statusCode >= 200 && res.statusCode <= 299) {
+      if (twitchApiStatusCode >= 200 && twitchApiStatusCode <= 299) {
         console.log("STREAM TITLE END");
         //console.log(JSON.parse(rawOutputData.toString("utf8")));
         console.log(rawOutputData.toString("utf8"));
@@ -2853,7 +2907,12 @@ function updateStreamTitle(newStreamTitle, twitchCredentialsObject, twitchAccess
     });
   });
   req.on("error", function(error) {
-    console.log(new Date().toISOString() + " STREAM TITLE CONNECTION ERROR");
+    if (client.readyState() === "OPEN") {
+      if (chatConfig.send_debug_channel_messages == true) {
+        client.action(chatConfig.debug_channel, new Date().toISOString() + " [STREAM TITLE CONNECTION ERROR] Failed to update stream title. statusCode = " + twitchApiStatusCode);
+      }
+    }
+    console.log(new Date().toISOString() + " [STREAM TITLE CONNECTION ERROR] Failed to update stream title. statusCode = " + twitchApiStatusCode);
     console.error(error);
   });
   req.write(streamTitleToUpdate);
@@ -3110,7 +3169,7 @@ function getTwitchUserFollowingChannelStatus(broadcasterId, userId, username, ch
             let userFollowTimeMinutes = (parseInt(userFollowTimeDelta / 60000) % 60).toString().padStart(2, "0");
             let userFollowTimeSeconds = (parseInt(userFollowTimeDelta / 1000) % 60).toString().padStart(2, "0");
             let userFollowTimeMillis = (userFollowTimeDelta % 1000).toString().padStart(3, "0");
-            let userFollowTimeString = userFollowTimeYears + "yr " + userFollowTimeDays + "day " + userFollowTimeHours + "hr " + userFollowTimeMinutes + "min " + userFollowTimeSeconds + "sec " + userFollowTimeMillis + "msec";
+            let userFollowTimeString = userFollowTimeYears + "yr " + userFollowTimeDays + "day " + userFollowTimeHours + "hour " + userFollowTimeMinutes + "min " + userFollowTimeSeconds + "sec " + userFollowTimeMillis + "msec";
             if (client.readyState() === "OPEN") {
               updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
               client.reply(channel, "@" + username + " You have been following " + channel + " for " + userFollowTimeString + ". You have been following since " + userFollowedAt + ". The time is " + new Date(currentTime).toISOString() + ".", msgId);
@@ -3214,14 +3273,14 @@ function getTwitchStreamStatus(broadcasterId, userId, username, channel, msgId, 
             let uptimeMinutes = (parseInt(uptimeTotal / 60000) % 60).toString().padStart(2, "0");
             let uptimeSeconds = (parseInt(uptimeTotal / 1000) % 60).toString().padStart(2, "0");
             let uptimeMillis = (uptimeTotal % 1000).toString().padStart(3, "0");
-            let uptimeString = uptimeDays + "day " + uptimeHours + "hr " + uptimeMinutes + "min " + uptimeSeconds + "sec " + uptimeMillis + "msec";
+            let uptimeString = uptimeDays + "day " + uptimeHours + "hour " + uptimeMinutes + "min " + uptimeSeconds + "sec " + uptimeMillis + "msec";
             //
             let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
             let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
             let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
             let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
             let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
-            let playTimeString = playTimeDays + "day " + playTimeHours + "hr " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+            let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
             //
             let streamStatusDeltaUptime = timeUptimeWasRequested - streamStatusStartedAtMillis;
             let streamStatusUptimeDays = (parseInt(streamStatusDeltaUptime / 86400000)).toString().padStart(2, "0");
@@ -3229,15 +3288,15 @@ function getTwitchStreamStatus(broadcasterId, userId, username, channel, msgId, 
             let streamStatusUptimeMinutes = (parseInt(streamStatusDeltaUptime / 60000) % 60).toString().padStart(2, "0");
             let streamStatusUptimeSeconds = (parseInt(streamStatusDeltaUptime / 1000) % 60).toString().padStart(2, "0");
             let streamStatusUptimeMillis = (streamStatusDeltaUptime % 1000).toString().padStart(3, "0");
-            let streamStatusUptimeString = streamStatusUptimeDays + "day " + streamStatusUptimeHours + "hr " + streamStatusUptimeMinutes + "min " + streamStatusUptimeSeconds + "sec " + streamStatusUptimeMillis + "msec";
+            let streamStatusUptimeString = streamStatusUptimeDays + "day " + streamStatusUptimeHours + "hour " + streamStatusUptimeMinutes + "min " + streamStatusUptimeSeconds + "sec " + streamStatusUptimeMillis + "msec";
             //
             if (client.readyState() === "OPEN") {
               updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
               if (hasRunStarted == false) {
-                client.reply(channel, "@" + username + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". " + globalConfig.game_title + " starts in " + playTimeString + ". " + channel + "\'s stream has been up for " + streamStatusUptimeString + ". " + channel + "\'s stream started at " + streamStatusStartedAt + ". There are " + streamStatusViewerCount + " viewers.", msgId);
+                client.reply(channel, "@" + username + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". The server has been up since " + new Date(serverStartTime).toISOString() + ". " + globalConfig.game_title + " starts in " + playTimeString + ". " + channel + "\'s stream has been up for " + streamStatusUptimeString + ". " + channel + "\'s stream started at " + streamStatusStartedAt + ". There are " + streamStatusViewerCount + " viewers.", msgId);
               }
               if (hasRunStarted == true) {
-                client.reply(channel, "@" + username + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". " + globalConfig.game_title + " has been going for " + playTimeString + ". " + channel + "\'s stream has been up for " + streamStatusUptimeString + ". " + channel + "\'s stream started at " + streamStatusStartedAt + ". There are " + streamStatusViewerCount + " viewers.", msgId);
+                client.reply(channel, "@" + username + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". The server has been up since " + new Date(serverStartTime).toISOString() + ". " + globalConfig.game_title + " has been going for " + playTimeString + ". " + channel + "\'s stream has been up for " + streamStatusUptimeString + ". " + channel + "\'s stream started at " + streamStatusStartedAt + ". There are " + streamStatusViewerCount + " viewers.", msgId);
               }
             }
           }
@@ -3266,22 +3325,22 @@ function getTwitchStreamStatus(broadcasterId, userId, username, channel, msgId, 
             let uptimeMinutes = (parseInt(uptimeTotal / 60000) % 60).toString().padStart(2, "0");
             let uptimeSeconds = (parseInt(uptimeTotal / 1000) % 60).toString().padStart(2, "0");
             let uptimeMillis = (uptimeTotal % 1000).toString().padStart(3, "0");
-            let uptimeString = uptimeDays + "day " + uptimeHours + "hr " + uptimeMinutes + "min " + uptimeSeconds + "sec " + uptimeMillis + "msec";
+            let uptimeString = uptimeDays + "day " + uptimeHours + "hour " + uptimeMinutes + "min " + uptimeSeconds + "sec " + uptimeMillis + "msec";
             //
             let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
             let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
             let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
             let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
             let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
-            let playTimeString = playTimeDays + "day " + playTimeHours + "hr " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+            let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
             //
             if (client.readyState() === "OPEN") {
               updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
               if (hasRunStarted == false) {
-                client.reply(channel, "@" + username + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". " + globalConfig.game_title + " starts in " + playTimeString + ". " + channel + " is currently offline.", msgId);
+                client.reply(channel, "@" + username + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". The server has been up since " + new Date(serverStartTime).toISOString() + ". " + globalConfig.game_title + " starts in " + playTimeString + ". " + channel + " is currently offline.", msgId);
               }
               if (hasRunStarted == true) {
-                client.reply(channel, "@" + username + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". " + globalConfig.game_title + " has been going for " + playTimeString + ". " + channel + " is currently offline.", msgId);
+                client.reply(channel, "@" + username + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". The server has been up since " + new Date(serverStartTime).toISOString() + ". " + globalConfig.game_title + " has been going for " + playTimeString + ". " + channel + " is currently offline.", msgId);
               }
             }
           }
@@ -3335,7 +3394,7 @@ function sendTwitchWhisper(userIdToSendWhisperTo, whisperToSend, twitchCredentia
     });
     res.on("end", function() {
       if (res.statusCode < 200 || res.statusCode > 299) {
-        console.log(new Date().toISOString() + " WHISPER REPONSE ERROR res.statusCode = " + res.statusCode);
+        console.log(new Date().toISOString() + " WHISPER RESPONSE ERROR res.statusCode = " + res.statusCode);
         console.log(rawOutputData.toString("utf8"));
       }
       if (res.statusCode >= 200 && res.statusCode <= 299) {
@@ -3819,7 +3878,8 @@ async function onMessageHandler(target, tags, message, self) {
       /((t+w+[li1\!\|]+t+c+h+s*\s*\-+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(d+o+g+e+\s*h+y+p+e+)+\s*(\.+|d+o+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(o+f+e+r+\s*\w*\s*p+r+o+m+o+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(((o+f+e+r+)+|(c+a+t+c+h+)+)+\s*\w*\s*p+r+o+m+o+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(((f+r+e+)+\s+(v+i+e+w+\w*)+)+|((v+i+e+w+\w*)+\s*\w*\s*(f+r+e+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(r+u+s+t+[\s\-]*e+v+e+n+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       ///((r+u+s+t+)+|(g+i+f+t+)+|(c+o+d+e+)+|(e+v+e+n+t+)+|(a+w+a+r+d+)+|(c+o+n+e+c+t+)+|(c+s+\W*g+o+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(p+r+i+c+e+\s+i+s+\s+l+o+w+e+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -3842,7 +3902,7 @@ async function onMessageHandler(target, tags, message, self) {
     let slurDetection = false; // User will be instantly permabanned, no matter how known the user is, more words will be added as they happen
     if (globalConfig.enable_slur_detection == true) {
       //console.log("Slur Detection is enabled, run the regex");
-      slurDetection = /((((n+\s*[IiOo01]+(\s*[Gg6]+)+\s*[Ee3]+\s*[r]+)+)+)|(((n+\s*[IiOo01]+(\s*[Gg6]+)+\s*[Aa4]+)+)+)|(((t+\s*r+\s*a+(\s*i+)*(\s*n+)+\s*y+)+)+)|(((t+\s*r+\s*a+(\s*i+)*(\s*n+)+\s*o+\s*i+(\s*n+)*\s*d+)+)+)|(((f+\s*[Aa4]+(\s*[Gg6]+)+\s*[Oo0]+\s*[t]+)+)+)|(((r+\s*[Ee3]+\s*t+\s*[Aa4]+\s*r+\s*d+)+)+)+)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")); // User will be instantly permabanned, no matter how known the user is, more words will be added as they happen
+      slurDetection = /(\b(((n+\s*[IiOo01]+(\s*[Gg6]+)+\s*[Ee3]+\s*[r]+)+)+)\b|\b(((n+\s*[IiOo01]+(\s*[Gg6]+)+\s*[Aa4]+)+)+)\b|\b(((t+\s*r+\s*a+(\s*i+)*(\s*n+)+\s*y+)+)+)\b|\b(((t+\s*r+\s*a+(\s*i+)*(\s*n+)+\s*o+\s*i+(\s*n+)*\s*d+)+)+)\b|\b(((f+\s*[Aa4]+(\s*[Gg6]+)+\s*[Oo0]+\s*[t]+)+)+)\b|\b(((r+\s*[Ee3]+\s*t+\s*[Aa4]+\s*r+\s*d+)+)+)+\b)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")); // User will be instantly permabanned, no matter how known the user is, more words will be added as they happen
     }
     if (globalConfig.enable_slur_detection == false) {
       //console.log("Slur Detection is not enabled, ignore all messages");
@@ -3977,6 +4037,20 @@ async function onMessageHandler(target, tags, message, self) {
         //console.log("We have a multimessage spambot type B, we have to check all the messages it sends tho for confirmation");
       }
     }
+
+    if (isSingleMessageSpamBot == false && slurDetection == false && doesMessageHaveTooManyUpperCaseLetters == false) {
+      if (globalConfig.send_introductory_messages_to_new_users_using_twitch_tags == true) {
+        if (isFirstTwitchMessage == true) {
+          client.reply(target, "@" + usernameToPing + " " + globalConfig.introductory_message_to_new_users, messageId);
+        }
+      }
+      if (globalConfig.send_welcome_back_messages_to_returning_users_using_twitch_tags == true) {
+        if (isReturningChatter == true) {
+          client.reply(target, "@" + usernameToPing + " " + globalConfig.introductory_message_to_returning_users, messageId);
+        }
+      }
+    }
+
     //console.log("isSingleMessageSpamBot = " + isSingleMessageSpamBot);
 
     // The database checks below checks if an user exists
@@ -5889,9 +5963,9 @@ async function onMessageHandler(target, tags, message, self) {
     message = message.replace(/\s*\#+\s*/ig, "+");
     //message = message.replace(/\s*\[+\s*/ig, "+");
     //message = message.replace(/\s*\]+\s*/ig, "+");
-    message = message.replace(/\s*(and)+\s*/ig, "+");
-    message = message.replace(/\s*(adn)+\s*/ig, "+");
-    message = message.replace(/\s*(then)+\s*/ig, ",");
+    //message = message.replace(/\s*(and)+\s*/ig, "+");
+    //message = message.replace(/\s*(adn)+\s*/ig, "+");
+    //message = message.replace(/\s*(then)+\s*/ig, ",");
     message = message.replace(/\s*[\.\,]+\s*/ig, ",");
     //message = message.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "");
     message = message.normalize("NFD");
@@ -6187,14 +6261,14 @@ async function onMessageHandler(target, tags, message, self) {
       let uptimeMinutes = (parseInt(uptimeTotal / 60000) % 60).toString().padStart(2, "0");
       let uptimeSeconds = (parseInt(uptimeTotal / 1000) % 60).toString().padStart(2, "0");
       let uptimeMillis = (uptimeTotal % 1000).toString().padStart(3, "0");
-      let uptimeString = uptimeDays + "day " + uptimeHours + "hr " + uptimeMinutes + "min " + uptimeSeconds + "sec " + uptimeMillis + "msec";
+      let uptimeString = uptimeDays + "day " + uptimeHours + "hour " + uptimeMinutes + "min " + uptimeSeconds + "sec " + uptimeMillis + "msec";
       //
       let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
       let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
       let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
       let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
       let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
-      let playTimeString = playTimeDays + "day " + playTimeHours + "hr " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+      let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
       //
       let streamDeltaUptime = timeUptimeWasRequested - streamStartedAtMillis;
       let streamUptimeDays = (parseInt(streamDeltaUptime / 86400000)).toString().padStart(2, "0");
@@ -6202,24 +6276,24 @@ async function onMessageHandler(target, tags, message, self) {
       let streamUptimeMinutes = (parseInt(streamDeltaUptime / 60000) % 60).toString().padStart(2, "0");
       let streamUptimeSeconds = (parseInt(streamDeltaUptime / 1000) % 60).toString().padStart(2, "0");
       let streamUptimeMillis = (streamDeltaUptime % 1000).toString().padStart(3, "0");
-      let streamUptimeString = streamUptimeDays + "day " + streamUptimeHours + "hr " + streamUptimeMinutes + "min " + streamUptimeSeconds + "sec " + streamUptimeMillis + "msec";
+      let streamUptimeString = streamUptimeDays + "day " + streamUptimeHours + "hour " + streamUptimeMinutes + "min " + streamUptimeSeconds + "sec " + streamUptimeMillis + "msec";
       //
       if (hasRunStarted == false) {
         updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
         if (isStreamLive == true) {
-          client.reply(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". " + globalConfig.game_title + " starts in " + playTimeString + ". The stream has been up for " + streamUptimeString + ". The stream started at " + streamStartedAt + ".", messageId);
+          client.reply(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". The server has been up since " + new Date(serverStartTime).toISOString() + ". " + globalConfig.game_title + " starts in " + playTimeString + ". The stream has been up for " + streamUptimeString + ". The stream started at " + streamStartedAt + ".", messageId);
         }
         if (isStreamLive == false) {
-          client.reply(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". " + globalConfig.game_title + " starts in " + playTimeString + ". The stream is currently offline.", messageId);
+          client.reply(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". The server has been up since " + new Date(serverStartTime).toISOString() + ". " + globalConfig.game_title + " starts in " + playTimeString + ". The stream is currently offline.", messageId);
         }
       }
       if (hasRunStarted == true) {
         updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
         if (isStreamLive == true) {
-          client.reply(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". " + globalConfig.game_title + " has been going for " + playTimeString + ". The stream has been up for " + streamUptimeString + ". The stream started at " + streamStartedAt ".", messageId);
+          client.reply(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". The server has been up since " + new Date(serverStartTime).toISOString() + ". " + globalConfig.game_title + " has been going for " + playTimeString + ". The stream has been up for " + streamUptimeString + ". The stream started at " + streamStartedAt ".", messageId);
         }
         if (isStreamLive == false) {
-          client.reply(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". " + globalConfig.game_title + " has been going for " + playTimeString + ". The stream is currently offline.", messageId);
+          client.reply(target, "@" + usernameToPing + " The time is " + new Date(timeUptimeWasRequested).toISOString() + ". The server has been up for " + uptimeString + ". The server has been up since " + new Date(serverStartTime).toISOString() + ". " + globalConfig.game_title + " has been going for " + playTimeString + ". The stream is currently offline.", messageId);
         }
       }
       */
@@ -12544,9 +12618,9 @@ function tidyUpAdvancedInputString(inputStringToProcess, sendToArduino, reverseI
   inputStringToProcess = inputStringToProcess.replace(/\s*\#+\s*/ig, "+");
   //inputStringToProcess = inputStringToProcess.replace(/\s*\[+\s*/ig, "+");
   //inputStringToProcess = inputStringToProcess.replace(/\s*\]+\s*/ig, "+");
-  inputStringToProcess = inputStringToProcess.replace(/\s*(and)+\s*/ig, "+");
-  inputStringToProcess = inputStringToProcess.replace(/\s*(adn)+\s*/ig, "+");
-  inputStringToProcess = inputStringToProcess.replace(/\s*(then)+\s*/ig, ",");
+  //inputStringToProcess = inputStringToProcess.replace(/\s*(and)+\s*/ig, "+");
+  //inputStringToProcess = inputStringToProcess.replace(/\s*(adn)+\s*/ig, "+");
+  //inputStringToProcess = inputStringToProcess.replace(/\s*(then)+\s*/ig, ",");
   inputStringToProcess = inputStringToProcess.replace(/\s*[\.\,]+\s*/ig, ",");
   //inputStringToProcess = inputStringToProcess.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "");
   inputStringToProcess = inputStringToProcess.normalize("NFD");
