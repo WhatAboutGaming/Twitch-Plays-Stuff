@@ -137,22 +137,22 @@
 */
 /////////////////////////////////
 
-const unsigned int startingMacroIndex = 0x04;
-const unsigned int endingMacroIndex = 0x44;
-const unsigned int macroBufferSize = endingMacroIndex - startingMacroIndex;
-const unsigned int startingMacroMetadataIndex = endingMacroIndex + 1;
-const unsigned int endingMacroMetadataIndex = startingMacroMetadataIndex + macroBufferSize;
-const unsigned int macroMetadataSize = endingMacroMetadataIndex - startingMacroMetadataIndex;  // Using define on these variables for some reason was making it return wrong values
+const uint16_t startingMacroIndex = 0x04;
+const uint16_t endingMacroIndex = 0x44;
+const uint16_t macroBufferSize = endingMacroIndex - startingMacroIndex;
+const uint16_t startingMacroMetadataIndex = endingMacroIndex + 1;
+const uint16_t endingMacroMetadataIndex = startingMacroMetadataIndex + macroBufferSize;
+const uint16_t macroMetadataSize = endingMacroMetadataIndex - startingMacroMetadataIndex;  // Using define on these variables for some reason was making it return wrong values
 
-unsigned int macroIndex = 0;
-unsigned int currentMacroIndexRunning = 0;
-unsigned int macroInputsToRun = 0;
-unsigned int loopMacro = 0;    //0 = Don't loop, 1 = loop
-unsigned int timesToLoop = 0;  //0 = Loop indefinitely, >0 = loop n times
-unsigned int loopCounter = 0;
-unsigned int howManyInnerLoopsMacroHas = 0;  //This variable is used to tell if the macro has inner loops (eg: a+b,[wait b]255) and how many there are // 0 = There are NO inner loops !0 = There are n inner loops, where n is this variable
-unsigned int macroMetadataIndex = 0;
-unsigned int isInnerLoop = 0;
+uint16_t macroIndex = 0;
+uint16_t currentMacroIndexRunning = 0;
+uint16_t macroInputsToRun = 0;
+uint16_t loopMacro = 0;    //0 = Don't loop, 1 = loop
+uint16_t timesToLoop = 0;  //0 = Loop indefinitely, >0 = loop n times
+uint16_t loopCounter = 0;
+uint16_t howManyInnerLoopsMacroHas = 0;  //This variable is used to tell if the macro has inner loops (eg: a+b,[wait b]255) and how many there are // 0 = There are NO inner loops !0 = There are n inner loops, where n is this variable
+uint16_t macroMetadataIndex = 0;
+uint16_t isInnerLoop = 0;
 
 #define motorInput A0  // Left 9
 #define turboLed A1    // Right 11
@@ -164,25 +164,25 @@ unsigned int isInnerLoop = 0;
 
 const bool defaultStatus[] = { HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH };
 bool inputStatus[] = { HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH };
-unsigned int commandArray[] = { buttonTurbo, buttonMacro, buttonZ, buttonStart, buttonDUp, buttonDRight, buttonDLeft, buttonDDown, axisLTrigger, axisRTrigger, buttonLTrigger, buttonRTrigger, buttonY, buttonX, buttonA, buttonB, axisCyHalf, axisCyFull, axisCxHalf, axisCxFull, axisXHalf, axisXFull, axisYHalf, axisYHalf, buttonMode, 25, 26, 27, 28, 29, 30, 31 };
-unsigned int motorArray[] = { motorInput, turboLed, macroLed };  // Motor, Turbo LED, Macro LED
+uint16_t commandArray[] = { buttonTurbo, buttonMacro, buttonZ, buttonStart, buttonDUp, buttonDRight, buttonDLeft, buttonDDown, axisLTrigger, axisRTrigger, buttonLTrigger, buttonRTrigger, buttonY, buttonX, buttonA, buttonB, axisCyHalf, axisCyFull, axisCxHalf, axisCxFull, axisXHalf, axisXFull, axisYHalf, axisYHalf, buttonMode, 25, 26, 27, 28, 29, 30, 31 };
+uint16_t motorArray[] = { motorInput, turboLed, macroLed };  // Motor, Turbo LED, Macro LED
 
 bool isInputting = false;
 bool isInputtingDelayed = false;
 
 bool didInputChange = false;
 
-uint32_t inputDelay = 0;
-uint32_t previousInputDelay = 0;
+uint32_t inputDelay = 0UL;
+uint32_t previousInputDelay = 0UL;
 
-uint32_t baudRate = 500000;
+uint32_t baudRate = 500000UL;
 
 uint8_t serial_rx_buffer[12];
 uint8_t current_macro_input[12];
 uint8_t old_macro_input[12];
 uint8_t macro_buffer[macroBufferSize][12];
 uint8_t inner_loop_metadata[macroMetadataSize][12];  // Contains informations such as how many times to repeat a portion of a macro, and where to start and end
-uint32_t controller = 0;
+uint32_t controller = 0UL;
 
 void setup() {
   pinMode(bootLed, OUTPUT);
@@ -220,7 +220,7 @@ void setup() {
   }
   digitalWrite(latchPin, HIGH);
 
-  delay(2000);  // Change this if the controller takes longer to reset
+  delay(2000);  // Change this if the controller takes longer to reset (GameCube game manuals say that you should hold the buttons for 3 seconds, but I found out that 2 seconds is enough)
 
   // Now we release the buttons X, Y and Start after 2 to 3 seconds have passed
   inputStatus[buttonX] = HIGH;
@@ -380,17 +380,17 @@ void loop() {
         }
         if (howManyInnerLoopsMacroHas > 0) {
           // If we entered this block, that means we still have to test the other inner loops
-          unsigned int howManyInnerLoopsMacroHasInternalTesting = 0;
+          uint16_t howManyInnerLoopsMacroHasInternalTesting = 0;
           bool countValidInnerLoops = true;
-          //unsigned int whereDoesTheNextInnerLoopStart = 0; // Not used yet (should definitely be used (Now that I think about it, it's completely optional) )
-          unsigned int whereDoesTheCurrentInnerLoopStart = 0;  // Used
-          //unsigned int whereDoesTheCurrentInnerLoopEnd = 0; // Not used yet (can be used, but not really necessary?)
-          unsigned int howManyInnerLoopsShouldBeExecutedAfterTheCurrentInnerLoop = 0;  // Used (should definitely be used (Now that I think about it, it's completely optional) )
+          //uint16_t whereDoesTheNextInnerLoopStart = 0; // Not used yet (should definitely be used (Now that I think about it, it's completely optional) )
+          uint16_t whereDoesTheCurrentInnerLoopStart = 0;  // Used
+          //uint16_t whereDoesTheCurrentInnerLoopEnd = 0; // Not used yet (can be used, but not really necessary?)
+          uint16_t howManyInnerLoopsShouldBeExecutedAfterTheCurrentInnerLoop = 0;  // Used (should definitely be used (Now that I think about it, it's completely optional) )
 
-          unsigned int whereDoesTheNextPreviousInnerLoopStart = 0;  // Used (should definitely be used (Now that I think about it, it's completely optional) ) // Confusing name is confusing
-          //unsigned int whereDoesThePreviousInnerLoopStart = 0; // Not used yet (can be used, but not really necessary?)
-          unsigned int whereDoesThePreviousInnerLoopEnd = 0;  // Used
-          //unsigned int howManyInnerLoopsShouldBeExecutedAfterThePreviousInnerLoop = 0; // Not used yet (should definitely be used (Now that I think about it, it's completely optional) )
+          uint16_t whereDoesTheNextPreviousInnerLoopStart = 0;  // Used (should definitely be used (Now that I think about it, it's completely optional) ) // Confusing name is confusing
+          //uint16_t whereDoesThePreviousInnerLoopStart = 0; // Not used yet (can be used, but not really necessary?)
+          uint16_t whereDoesThePreviousInnerLoopEnd = 0;  // Used
+          //uint16_t howManyInnerLoopsShouldBeExecutedAfterThePreviousInnerLoop = 0; // Not used yet (should definitely be used (Now that I think about it, it's completely optional) )
           for (uint8_t macroMetadataIndexInner = 0; macroMetadataIndexInner < howManyInnerLoopsMacroHas; macroMetadataIndexInner++) {
             if (inner_loop_metadata[macroMetadataIndexInner][1] > 0 && inner_loop_metadata[macroMetadataIndexInner][3] > 0) {
               if (inner_loop_metadata[macroMetadataIndexInner][6] < inner_loop_metadata[macroMetadataIndexInner][7]) {
@@ -1015,7 +1015,7 @@ void pressButtons() {
           isInputtingDelayed = false;
           isInputting = false;
           previousInputDelay += inputDelay;
-          inputDelay = 0;
+          inputDelay = 0UL;
         }
       }
     }
