@@ -62,6 +62,29 @@
 // Right 11 = Right Motor In = A1
 // Right 12 = Analog LED = A2
 
+uint16_t leftMotorLevel = 0;
+
+bool leftMotorLevelConvertedToBit = false;
+bool leftMotorLevelConvertedToBitPrevious = false;
+
+uint16_t rightMotorLevel = 0;
+
+bool rightMotorLevelConvertedToBit = false;
+bool rightMotorLevelConvertedToBitPrevious = false;
+
+bool analogLedLevel = LOW;
+bool analogLedLevelPrevious = LOW;
+
+bool analogLedLevel2 = LOW;
+bool analogLedLevelPrevious2 = LOW;
+
+bool readingsChanged = true;
+bool analogLedChanged = true;
+bool sendMotorsStatus = true;
+
+bool enableOverrideAnalogStatus = true;
+bool analogStatusToOverrideWith = true;
+
 bool attentionLevel = LOW;
 bool attentionLevelPrevious = LOW;
 
@@ -74,10 +97,10 @@ uint32_t ps2FrameMillisPrevious = 0UL;
 
 uint32_t ps2FramesThisSecond = 0UL;
 
-uint32_t secondsElapsed = 0UL;
-uint32_t secondsElapsedPrevious = 0UL;
+bool sendFrameData = true;
+uint32_t timeToSendNextFrameDataMillis = 0UL;
 
-const uint16_t  startingMacroIndex = 0x04;
+const uint16_t startingMacroIndex = 0x04;
 const uint16_t endingMacroIndex = 0x44;
 const uint16_t macroBufferSize = endingMacroIndex - startingMacroIndex;
 const uint16_t startingMacroMetadataIndex = endingMacroIndex + 1;
@@ -179,6 +202,12 @@ void setup() {
   old_macro_input[10] = 0x00;
   old_macro_input[11] = 0x00;
   digitalWrite(bootLed, LOW);
+
+  readAttentionPin();
+  getMotorsStatus();
+  readAttentionPin();
+  overrideAnalogStatus();
+  readAttentionPin();
 }
 
 void loop() {
@@ -439,11 +468,111 @@ void loop() {
   }
   runMacro();
   pressButtons();
+  getMotorsStatus();
+  overrideAnalogStatus();
   readAttentionPin();
 }  // Close Loop Function
 
+void overrideAnalogStatus() {
+  if (enableOverrideAnalogStatus == false) {
+    return;
+  }
+  analogLedLevel2 = !digitalRead(analogLed);
+  if (analogLedLevel2 != analogLedLevelPrevious2) {
+    analogLedChanged = true;
+  }
+  if (analogLedChanged == true) {
+    if (analogLedLevel != analogStatusToOverrideWith) {
+      inputStatus[buttonAnalog] = HIGH;
+
+      digitalWrite(latchPin, LOW);
+      for (int8_t i = 31; i >= 0; i--) {
+        digitalWrite(clockPin, LOW);
+        digitalWrite(dataPin, inputStatus[i]);
+        digitalWrite(clockPin, HIGH);
+      }
+      digitalWrite(latchPin, HIGH);
+    }
+    if (analogLedLevel == analogStatusToOverrideWith) {
+      inputStatus[buttonAnalog] = LOW;
+
+      digitalWrite(latchPin, LOW);
+      for (int8_t i = 31; i >= 0; i--) {
+        digitalWrite(clockPin, LOW);
+        digitalWrite(dataPin, inputStatus[i]);
+        digitalWrite(clockPin, HIGH);
+      }
+      digitalWrite(latchPin, HIGH);
+    }
+    analogLedChanged = false;
+  }
+  analogLedLevelPrevious2 = analogLedLevel2;
+}
+
+void getMotorsStatus() {
+  if (sendMotorsStatus == false) {
+    return;
+  }
+
+  leftMotorLevel = analogRead(leftMotor);
+  rightMotorLevel = analogRead(rightMotor);
+  analogLedLevel = !digitalRead(analogLed);
+
+  if (leftMotorLevel <= 7) {
+    // The left motor is not spinning here
+    leftMotorLevelConvertedToBit = false;
+  }
+  // Dont care about inbetween values
+  if (leftMotorLevel >= 35) {
+    // The left motor is spinning here
+    leftMotorLevelConvertedToBit = true;
+  }
+  if (leftMotorLevelConvertedToBit != leftMotorLevelConvertedToBitPrevious) {
+    readingsChanged = true;
+  }
+
+  if (rightMotorLevel <= 7) {
+    // The right motor is not spinning here
+    rightMotorLevelConvertedToBit = false;
+  }
+  // Dont care about inbetween values
+  if (rightMotorLevel >= 35) {
+    // The right motor is spinning here
+    rightMotorLevelConvertedToBit = true;
+  }
+  if (rightMotorLevelConvertedToBit != rightMotorLevelConvertedToBitPrevious) {
+    readingsChanged = true;
+  }
+
+  if (analogLedLevel != analogLedLevelPrevious) {
+    readingsChanged = true;
+    analogLedChanged = true;
+    overrideAnalogStatus();
+  }
+
+  leftMotorLevelConvertedToBitPrevious = leftMotorLevelConvertedToBit;
+  rightMotorLevelConvertedToBitPrevious = rightMotorLevelConvertedToBit;
+  analogLedLevelPrevious = analogLedLevel;
+
+  if (readingsChanged == true) {
+    // Store each value in its own byte even though they only take up one bit because adding stuff to the same byte is slower (Preamble/Postamble = 0x02)
+    Serial.write(0x02);
+    Serial.write(leftMotorLevelConvertedToBit);   // Motor 1
+    Serial.write(rightMotorLevelConvertedToBit);  // Motor 2
+    Serial.write(0x00);                           // Motor 3
+    Serial.write(0x00);                           // Motor 4
+    Serial.write(analogLedLevel);                 // LED 1
+    Serial.write(0x00);                           // LED 2
+    Serial.write(0x00);                           // LED 3
+    Serial.write(0x00);                           // LED 4
+    Serial.write(0x00);                           // Not Used
+    Serial.write(0x00);                           // Not Used
+    Serial.write(0x02);
+    readingsChanged = false;
+  }
+}
+
 void readAttentionPin() {
-  secondsElapsed = (millis() / 1000);
   attentionLevel = digitalRead(attentionPin);
   if (attentionLevel != attentionLevelPrevious) {
     if (attentionLevel == LOW) {
@@ -454,23 +583,25 @@ void readAttentionPin() {
       ps2FrameMillisPrevious = millis();
     }
   }
-  if (secondsElapsed != secondsElapsedPrevious) {
-    Serial.write(0x03);
-    Serial.write(((ps2FrameCount >> 24) & 0xFF));
-    Serial.write(((ps2FrameCount >> 16) & 0xFF));
-    Serial.write(((ps2FrameCount >> 8) & 0xFF));
-    Serial.write(((ps2FrameCount) & 0xFF));
-    Serial.write(((ps2FramesThisSecond >> 24) & 0xFF));
-    Serial.write(((ps2FramesThisSecond >> 16) & 0xFF));
-    Serial.write(((ps2FramesThisSecond >> 8) & 0xFF));
-    Serial.write(((ps2FramesThisSecond) & 0xFF));
-    Serial.write(0x00);
-    Serial.write(0x00);
-    Serial.write(0x03);
-    ps2FramesThisSecond = 0UL;
+  if (sendFrameData == true) {
+    if (millis() >= timeToSendNextFrameDataMillis) {
+      Serial.write(0x03);
+      Serial.write(((ps2FrameCount >> 24) & 0xFF));
+      Serial.write(((ps2FrameCount >> 16) & 0xFF));
+      Serial.write(((ps2FrameCount >> 8) & 0xFF));
+      Serial.write(((ps2FrameCount)&0xFF));
+      Serial.write(((ps2FramesThisSecond >> 24) & 0xFF));
+      Serial.write(((ps2FramesThisSecond >> 16) & 0xFF));
+      Serial.write(((ps2FramesThisSecond >> 8) & 0xFF));
+      Serial.write(((ps2FramesThisSecond)&0xFF));
+      Serial.write(0x00);
+      Serial.write(0x00);
+      Serial.write(0x03);
+      timeToSendNextFrameDataMillis = millis() + 1000;
+      ps2FramesThisSecond = 0UL;
+    }
   }
   attentionLevelPrevious = attentionLevel;
-  secondsElapsedPrevious = secondsElapsed;
 }
 
 void runMacro() {

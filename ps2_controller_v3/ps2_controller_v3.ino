@@ -58,48 +58,71 @@
 
 #define attentionPin A3
 
-// Left 9 = Left Motor In = A0
-// Right 11 = Right Motor In = A1
+// Left 9 = Left Motor In (Big Motor) = A0
+// Right 11 = Right Motor In (Small Motor) = A1
 // Right 12 = Analog LED = A2
 
-const unsigned int startingMacroIndex = 0x04;
-const unsigned int endingMacroIndex = 0x44;
-const unsigned int macroBufferSize = endingMacroIndex - startingMacroIndex;
-const unsigned int startingMacroMetadataIndex = endingMacroIndex + 1;
-const unsigned int endingMacroMetadataIndex = startingMacroMetadataIndex + macroBufferSize;
-const unsigned int macroMetadataSize = endingMacroMetadataIndex - startingMacroMetadataIndex;  // Using define on these variables for some reason was making it return wrong values
+uint16_t leftMotorLevel = 0;
 
-unsigned int macroIndex = 0;
-unsigned int currentMacroIndexRunning = 0;
-unsigned int macroInputsToRun = 0;
-unsigned int loopMacro = 0;    //0 = Don't loop, 1 = loop
-unsigned int timesToLoop = 0;  //0 = Loop indefinitely, >0 = loop n times
-unsigned int loopCounter = 0;
-unsigned int howManyInnerLoopsMacroHas = 0;  //This variable is used to tell if the macro has inner loops (eg: a+b,[wait b]255) and how many there are // 0 = There are NO inner loops !0 = There are n inner loops, where n is this variable
-unsigned int macroMetadataIndex = 0;
-unsigned int isInnerLoop = 0;
+bool leftMotorLevelConvertedToBit = false;
+bool leftMotorLevelConvertedToBitPrevious = false;
+
+uint16_t rightMotorLevel = 0;
+
+bool rightMotorLevelConvertedToBit = false;
+bool rightMotorLevelConvertedToBitPrevious = false;
+
+bool analogLedLevel = LOW;
+bool analogLedLevelPrevious = LOW;
+
+bool analogLedLevel2 = LOW;
+bool analogLedLevelPrevious2 = LOW;
+
+bool readingsChanged = true;
+bool analogLedChanged = true;
+bool sendMotorsStatus = true;
+
+bool enableOverrideAnalogStatus = true;
+bool analogStatusToOverrideWith = true;
+
+const uint16_t startingMacroIndex = 0x04;
+const uint16_t endingMacroIndex = 0x44;
+const uint16_t macroBufferSize = endingMacroIndex - startingMacroIndex;
+const uint16_t startingMacroMetadataIndex = endingMacroIndex + 1;
+const uint16_t endingMacroMetadataIndex = startingMacroMetadataIndex + macroBufferSize;
+const uint16_t macroMetadataSize = endingMacroMetadataIndex - startingMacroMetadataIndex;  // Using define on these variables for some reason was making it return wrong values
+
+uint16_t macroIndex = 0;
+uint16_t currentMacroIndexRunning = 0;
+uint16_t macroInputsToRun = 0;
+uint16_t loopMacro = 0;    //0 = Don't loop, 1 = loop
+uint16_t timesToLoop = 0;  //0 = Loop indefinitely, >0 = loop n times
+uint16_t loopCounter = 0;
+uint16_t howManyInnerLoopsMacroHas = 0;  //This variable is used to tell if the macro has inner loops (eg: a+b,[wait b]255) and how many there are // 0 = There are NO inner loops !0 = There are n inner loops, where n is this variable
+uint16_t macroMetadataIndex = 0;
+uint16_t isInnerLoop = 0;
 
 const bool defaultStatus[] = { LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW };
 bool inputStatus[] = { LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW };
-unsigned int commandArray[] = { buttonSelect, buttonL3, buttonR3, buttonStart, buttonDUp, buttonDRight, buttonDDown, buttonDLeft, buttonL2, buttonR2, buttonL1, buttonR1, buttonTriangle, buttonCircle, buttonCross, buttonSquare, axisRxHalf, axisRxFull, axisRyHalf, axisRyFull, axisLxHalf, axisLxFull, axisLyHalf, axisLyHalf, buttonAnalog, 25, 26, 27, 28, 29, 30, 31 };
-unsigned int motorArray[] = { leftMotor, rightMotor, analogLed };  // Big motor, Small Motor, Analog LED
+uint16_t commandArray[] = { buttonSelect, buttonL3, buttonR3, buttonStart, buttonDUp, buttonDRight, buttonDDown, buttonDLeft, buttonL2, buttonR2, buttonL1, buttonR1, buttonTriangle, buttonCircle, buttonCross, buttonSquare, axisRxHalf, axisRxFull, axisRyHalf, axisRyFull, axisLxHalf, axisLxFull, axisLyHalf, axisLyHalf, buttonAnalog, 25, 26, 27, 28, 29, 30, 31 };
+uint16_t motorArray[] = { leftMotor, rightMotor, analogLed };  // Big motor, Small Motor, Analog LED
 
 bool isInputting = false;
 bool isInputtingDelayed = false;
 
 bool didInputChange = false;
 
-uint32_t inputDelay = 0;
-uint32_t previousInputDelay = 0;
+uint32_t inputDelay = 0UL;
+uint32_t previousInputDelay = 0UL;
 
-uint32_t baudRate = 500000;
+uint32_t baudRate = 500000UL;
 
 uint8_t serial_rx_buffer[12];
 uint8_t current_macro_input[12];
 uint8_t old_macro_input[12];
 uint8_t macro_buffer[macroBufferSize][12];
 uint8_t inner_loop_metadata[macroMetadataSize][12];  // Contains informations such as how many times to repeat a portion of a macro, and where to start and end
-uint32_t controller = 0;
+uint32_t controller = 0UL;
 
 void setup() {
   pinMode(bootLed, OUTPUT);
@@ -164,6 +187,9 @@ void setup() {
   old_macro_input[10] = 0x00;
   old_macro_input[11] = 0x00;
   digitalWrite(bootLed, LOW);
+
+  getMotorsStatus();
+  overrideAnalogStatus();
 }
 
 void loop() {
@@ -269,17 +295,17 @@ void loop() {
         }
         if (howManyInnerLoopsMacroHas > 0) {
           // If we entered this block, that means we still have to test the other inner loops
-          unsigned int howManyInnerLoopsMacroHasInternalTesting = 0;
+          uint16_t howManyInnerLoopsMacroHasInternalTesting = 0;
           bool countValidInnerLoops = true;
-          //unsigned int whereDoesTheNextInnerLoopStart = 0; // Not used yet (should definitely be used (Now that I think about it, it's completely optional) )
-          unsigned int whereDoesTheCurrentInnerLoopStart = 0;  // Used
-          //unsigned int whereDoesTheCurrentInnerLoopEnd = 0; // Not used yet (can be used, but not really necessary?)
-          unsigned int howManyInnerLoopsShouldBeExecutedAfterTheCurrentInnerLoop = 0;  // Used (should definitely be used (Now that I think about it, it's completely optional) )
+          //uint16_t whereDoesTheNextInnerLoopStart = 0; // Not used yet (should definitely be used (Now that I think about it, it's completely optional) )
+          uint16_t whereDoesTheCurrentInnerLoopStart = 0;  // Used
+          //uint16_t whereDoesTheCurrentInnerLoopEnd = 0; // Not used yet (can be used, but not really necessary?)
+          uint16_t howManyInnerLoopsShouldBeExecutedAfterTheCurrentInnerLoop = 0;  // Used (should definitely be used (Now that I think about it, it's completely optional) )
 
-          unsigned int whereDoesTheNextPreviousInnerLoopStart = 0;  // Used (should definitely be used (Now that I think about it, it's completely optional) ) // Confusing name is confusing
-          //unsigned int whereDoesThePreviousInnerLoopStart = 0; // Not used yet (can be used, but not really necessary?)
-          unsigned int whereDoesThePreviousInnerLoopEnd = 0;  // Used
-          //unsigned int howManyInnerLoopsShouldBeExecutedAfterThePreviousInnerLoop = 0; // Not used yet (should definitely be used (Now that I think about it, it's completely optional) )
+          uint16_t whereDoesTheNextPreviousInnerLoopStart = 0;  // Used (should definitely be used (Now that I think about it, it's completely optional) ) // Confusing name is confusing
+          //uint16_t whereDoesThePreviousInnerLoopStart = 0; // Not used yet (can be used, but not really necessary?)
+          uint16_t whereDoesThePreviousInnerLoopEnd = 0;  // Used
+          //uint16_t howManyInnerLoopsShouldBeExecutedAfterThePreviousInnerLoop = 0; // Not used yet (should definitely be used (Now that I think about it, it's completely optional) )
           for (uint8_t macroMetadataIndexInner = 0; macroMetadataIndexInner < howManyInnerLoopsMacroHas; macroMetadataIndexInner++) {
             if (inner_loop_metadata[macroMetadataIndexInner][1] > 0 && inner_loop_metadata[macroMetadataIndexInner][3] > 0) {
               if (inner_loop_metadata[macroMetadataIndexInner][6] < inner_loop_metadata[macroMetadataIndexInner][7]) {
@@ -424,7 +450,108 @@ void loop() {
   }
   runMacro();
   pressButtons();
+  getMotorsStatus();
+  overrideAnalogStatus();
 }  // Close Loop Function
+
+void overrideAnalogStatus() {
+  if (enableOverrideAnalogStatus == false) {
+    return;
+  }
+  analogLedLevel2 = !digitalRead(analogLed);
+  if (analogLedLevel2 != analogLedLevelPrevious2) {
+    analogLedChanged = true;
+  }
+  if (analogLedChanged == true) {
+    if (analogLedLevel != analogStatusToOverrideWith) {
+      inputStatus[buttonAnalog] = HIGH;
+
+      digitalWrite(latchPin, LOW);
+      for (int8_t i = 31; i >= 0; i--) {
+        digitalWrite(clockPin, LOW);
+        digitalWrite(dataPin, inputStatus[i]);
+        digitalWrite(clockPin, HIGH);
+      }
+      digitalWrite(latchPin, HIGH);
+    }
+    if (analogLedLevel == analogStatusToOverrideWith) {
+      inputStatus[buttonAnalog] = LOW;
+
+      digitalWrite(latchPin, LOW);
+      for (int8_t i = 31; i >= 0; i--) {
+        digitalWrite(clockPin, LOW);
+        digitalWrite(dataPin, inputStatus[i]);
+        digitalWrite(clockPin, HIGH);
+      }
+      digitalWrite(latchPin, HIGH);
+    }
+    analogLedChanged = false;
+  }
+  analogLedLevelPrevious2 = analogLedLevel2;
+}
+
+void getMotorsStatus() {
+  if (sendMotorsStatus == false) {
+    return;
+  }
+
+  leftMotorLevel = analogRead(leftMotor);
+  rightMotorLevel = analogRead(rightMotor);
+  analogLedLevel = !digitalRead(analogLed);
+
+  if (leftMotorLevel <= 7) {
+    // The left motor is not spinning here
+    leftMotorLevelConvertedToBit = false;
+  }
+  // Dont care about inbetween values
+  if (leftMotorLevel >= 35) {
+    // The left motor is spinning here
+    leftMotorLevelConvertedToBit = true;
+  }
+  if (leftMotorLevelConvertedToBit != leftMotorLevelConvertedToBitPrevious) {
+    readingsChanged = true;
+  }
+
+  if (rightMotorLevel <= 7) {
+    // The right motor is not spinning here
+    rightMotorLevelConvertedToBit = false;
+  }
+  // Dont care about inbetween values
+  if (rightMotorLevel >= 35) {
+    // The right motor is spinning here
+    rightMotorLevelConvertedToBit = true;
+  }
+  if (rightMotorLevelConvertedToBit != rightMotorLevelConvertedToBitPrevious) {
+    readingsChanged = true;
+  }
+
+  if (analogLedLevel != analogLedLevelPrevious) {
+    readingsChanged = true;
+    analogLedChanged = true;
+    overrideAnalogStatus();
+  }
+
+  leftMotorLevelConvertedToBitPrevious = leftMotorLevelConvertedToBit;
+  rightMotorLevelConvertedToBitPrevious = rightMotorLevelConvertedToBit;
+  analogLedLevelPrevious = analogLedLevel;
+
+  if (readingsChanged == true) {
+    // Store each value in its own byte even though they only take up one bit because adding stuff to the same byte is slower (Preamble/Postamble = 0x02)
+    Serial.write(0x02);
+    Serial.write(leftMotorLevelConvertedToBit);   // Motor 1
+    Serial.write(rightMotorLevelConvertedToBit);  // Motor 2
+    Serial.write(0x00);                           // Motor 3
+    Serial.write(0x00);                           // Motor 4
+    Serial.write(analogLedLevel);                 // LED 1
+    Serial.write(0x00);                           // LED 2
+    Serial.write(0x00);                           // LED 3
+    Serial.write(0x00);                           // LED 4
+    Serial.write(0x00);                           // Not Used
+    Serial.write(0x00);                           // Not Used
+    Serial.write(0x02);
+    readingsChanged = false;
+  }
+}
 
 void runMacro() {
   if (isInputting == false) {
@@ -924,7 +1051,7 @@ void pressButtons() {
           isInputtingDelayed = false;
           isInputting = false;
           previousInputDelay += inputDelay;
-          inputDelay = 0;
+          inputDelay = 0UL;
         }
       }
     }

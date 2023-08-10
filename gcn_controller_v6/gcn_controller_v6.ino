@@ -90,18 +90,18 @@
 */
 #define buttonLTrigger 10  // Left 7 // Bit
 #define buttonRTrigger 11  // Right 3 // Bit
-#define buttonZ 2      // Right 10 // Bit
-#define buttonStart 3  // Left 12 // Bit
+#define buttonZ 2          // Right 10 // Bit
+#define buttonStart 3      // Left 12 // Bit
 
 #define buttonY 12  // Right 6 // Bit
 #define buttonX 13  // Right 8 // Bit
 #define buttonA 14  // Right 7 // Bit
 #define buttonB 15  // Right 5 // Bit
 
-#define axisLTrigger 8     // Left 8 // Bit
-#define axisRTrigger 9     // Right 4 // Bit
-#define buttonMacro 1  // Right 9 // Bit
-#define buttonTurbo 0  // Left 10 // Bit
+#define axisLTrigger 8  // Left 8 // Bit
+#define axisRTrigger 9  // Right 4 // Bit
+#define buttonMacro 1   // Right 9 // Bit
+#define buttonTurbo 0   // Left 10 // Bit
 
 #define buttonDUp 4     // Left 3 // Bit
 #define buttonDDown 7   // Left 6 // Bit
@@ -121,6 +121,11 @@
 #define axisCyFull 17  // Left 13 // Both are part of the same byte
 
 #define buttonMode 24  // Left 11 // Bit
+
+#define motorInput A0  // Left 9
+#define turboLed A1    // Right 11
+#define macroLed A2    // Right 12
+
 /*
   serial_rx_buffer[0] = 0x01; //  Preamble
   serial_rx_buffer[1] = 0x00; //  Digital L Trigger, Digital R Trigger, Z, Start, Y, X, B, A
@@ -135,7 +140,25 @@
   serial_rx_buffer[10] = 0x00; // Delay Byte 1
   serial_rx_buffer[11] = 0x01; // Postamble
 */
-/////////////////////////////////
+
+uint16_t motorLevel = 0;
+
+bool motorLevelConvertedToBit = false;
+bool motorLevelConvertedToBitPrevious = false;
+
+uint16_t turboLedLevel = 0;
+
+bool turboLedLevelConvertedToBit = false;
+bool turboLedLevelConvertedToBitPrevious = false;
+
+bool macroLedLevel = LOW;
+bool macroLedLevelPrevious = LOW;
+
+bool macroLedLevel2 = LOW;
+bool macroLedLevelPrevious2 = LOW;
+
+bool readingsChanged = true;
+bool sendMotorsStatus = true;
 
 const uint16_t startingMacroIndex = 0x04;
 const uint16_t endingMacroIndex = 0x44;
@@ -153,10 +176,6 @@ uint16_t loopCounter = 0;
 uint16_t howManyInnerLoopsMacroHas = 0;  //This variable is used to tell if the macro has inner loops (eg: a+b,[wait b]255) and how many there are // 0 = There are NO inner loops !0 = There are n inner loops, where n is this variable
 uint16_t macroMetadataIndex = 0;
 uint16_t isInnerLoop = 0;
-
-#define motorInput A0  // Left 9
-#define turboLed A1    // Right 11
-#define macroLed A2    // Right 12
 
 // Left 9 = Motor Input = A0
 // Right 11 = Turbo LED = A1
@@ -275,6 +294,8 @@ void setup() {
   old_macro_input[10] = 0x00;
   old_macro_input[11] = 0x00;
   digitalWrite(bootLed, LOW);
+
+  getMotorsStatus();
 }
 
 void loop() {
@@ -535,7 +556,71 @@ void loop() {
   }
   runMacro();
   pressButtons();
+  getMotorsStatus();
 }  // Close Loop Function
+
+void getMotorsStatus() {
+  if (sendMotorsStatus == false) {
+    return;
+  }
+
+  motorLevel = analogRead(motorInput);
+  //turboLedLevel = !analogRead(turboLed);
+  //macroLedLevel = digitalRead(macroLed);
+  turboLedLevel = 0; // Forcing these to 0 because the readings are unreliable, and tbh these aren't really that important to have
+  macroLedLevel = 0;
+
+  if (motorLevel <= 7) {
+    // The motor is not spinning here
+    motorLevelConvertedToBit = false;
+  }
+  // Dont care about inbetween values
+  if (motorLevel >= 35) {
+    // The motor is spinning here
+    motorLevelConvertedToBit = true;
+  }
+  if (motorLevelConvertedToBit != motorLevelConvertedToBitPrevious) {
+    readingsChanged = true;
+  }
+
+  if (turboLedLevel <= 7) {
+    // The Turbo LED is OFF here
+    turboLedLevelConvertedToBit = false;
+  }
+  // Dont care about inbetween values
+  if (turboLedLevel >= 35) {
+    // The Turbo LED is ON here
+    turboLedLevelConvertedToBit = true;
+  }
+  if (turboLedLevelConvertedToBit != turboLedLevelConvertedToBitPrevious) {
+    readingsChanged = true;
+  }
+
+  if (macroLedLevel != macroLedLevelPrevious) {
+    readingsChanged = true;
+  }
+
+  motorLevelConvertedToBitPrevious = motorLevelConvertedToBit;
+  turboLedLevelConvertedToBitPrevious = turboLedLevelConvertedToBit;
+  macroLedLevelPrevious = macroLedLevel;
+
+  if (readingsChanged == true) {
+    // Store each value in its own byte even though they only take up one bit because adding stuff to the same byte is slower (Preamble/Postamble = 0x02)
+    Serial.write(0x02);
+    Serial.write(motorLevelConvertedToBit);     // Motor 1
+    Serial.write(0x00);                         // Motor 2
+    Serial.write(0x00);                         // Motor 3
+    Serial.write(0x00);                         // Motor 4
+    Serial.write(0x00);                         // LED 1
+    Serial.write(0x00);                         // LED 2
+    Serial.write(0x00);                         // LED 3
+    Serial.write(0x00);                         // LED 4
+    Serial.write(0x00);                         // Not Used
+    Serial.write(0x00);                         // Not Used
+    Serial.write(0x02);
+    readingsChanged = false;
+  }
+}
 
 void runMacro() {
   if (isInputting == false) {
