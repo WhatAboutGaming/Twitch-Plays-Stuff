@@ -118,6 +118,7 @@ var globalConfig = {
   introductory_message_to_new_users_with_help_messages: "",
   introductory_message_to_returning_users: "",
   introductory_message_to_returning_users_with_help_messages: "",
+  get_stream_viewer_count: false,
   webserver_port: 8080,
   chat_config: "",
   run_start_time: new Date().getTime(),
@@ -211,7 +212,7 @@ var controllerConfig = {
   max_times_to_repeat_macro: 255,
   controller_object: "",
   simultaneous_different_basic_buttons_allowed: 5,
-  controller_graphics: "gcn_controller_graphics.png",
+  controller_graphics: "placeholder.png",
   use_controller_graphics: false,
   help_message_basic: [
     "Hi Chat :)"
@@ -266,6 +267,10 @@ var currentValueToDisplay = 0;
 var font;
 var offlineImg;
 var controllerGraphics;
+var controllerMotorOnGraphics = [[0], [0], [0], [0]];
+var controllerMotorOffGraphics = [0, 0, 0, 0];
+var controllerLedOnGraphics = [0, 0, 0, 0];
+var controllerLedOffGraphics = [0, 0, 0, 0];
 
 var socket;
 var inputQueue = [];
@@ -356,16 +361,54 @@ var inputCountsObject = {
 
 var displayFramerate = false;
 
-let frameDataToDisplayObject = {
+var frameDataToDisplayObject = {
   frame_count_to_display: 0,
   frame_rate_to_display: 0
 };
+
+var vibrationAndLedDataToDisplayObject = {
+  motors_data: [
+    0, 0, 0, 0
+  ],
+  leds_data: [
+    0, 0, 0, 0
+  ]
+};
+
+var minimumVibrationPosition = Math.ceil(-5);
+var maximumVibrationPosition = Math.floor(5);
+var vibrationXAxisPosition = 0;
+var vibrationYAxisPosition = 0;
+var isAnyMotorVibrating = false;
+var vibrateCurrentInput = false;
+var changeCurrentInputColor = false;
+var colorToChangeCurrentInputTo = "#FFFFFFFF";
 
 function preload() {
   //soundFormats("mp3");
   //font = loadFont("Pokemon_DPPt_mod2.ttf");
   font = loadFont(fontName);
   offlineImg = loadImage("tttp_brb_screen_lq.png");
+
+  controllerMotorOnGraphics[0][0] = loadImage("placeholder.png"); // Motor 1 On // In this part of the code, these are all placeholders
+  controllerMotorOnGraphics[1][0] = loadImage("placeholder.png"); // Motor 2 On
+  controllerMotorOnGraphics[2][0] = loadImage("placeholder.png"); // Motor 3 On
+  controllerMotorOnGraphics[3][0] = loadImage("placeholder.png"); // Motor 4 On
+
+  controllerMotorOffGraphics[0] = loadImage("placeholder.png"); // Motor 1 Off
+  controllerMotorOffGraphics[1] = loadImage("placeholder.png"); // Motor 2 Off
+  controllerMotorOffGraphics[2] = loadImage("placeholder.png"); // Motor 3 Off
+  controllerMotorOffGraphics[3] = loadImage("placeholder.png"); // Motor 4 Off
+
+  controllerLedOnGraphics[0] = loadImage("placeholder.png"); // LED 1 On
+  controllerLedOnGraphics[1] = loadImage("placeholder.png"); // LED 2 On
+  controllerLedOnGraphics[2] = loadImage("placeholder.png"); // LED 3 On
+  controllerLedOnGraphics[3] = loadImage("placeholder.png"); // LED 4 On
+
+  controllerLedOffGraphics[0] = loadImage("placeholder.png"); // LED 1 Off
+  controllerLedOffGraphics[1] = loadImage("placeholder.png"); // LED 2 Off
+  controllerLedOffGraphics[2] = loadImage("placeholder.png"); // LED 3 Off
+  controllerLedOffGraphics[3] = loadImage("placeholder.png"); // LED 4 Off
   if (controllerConfig.use_controller_graphics == true) {
     controllerGraphics = loadImage(controllerConfig.controller_graphics);
   }
@@ -573,6 +616,23 @@ function setup() {
   socket = io.connect();
   socket.on("controller_config", function(data) {
     controllerConfig = data;
+
+    if (controllerConfig.use_vibration_and_led_data == true) {
+      for (let vibrationOptionsIndex = 0; vibrationOptionsIndex < controllerConfig.vibration_options.length; vibrationOptionsIndex++) {
+        if (controllerConfig.vibration_options[vibrationOptionsIndex].display_motor == true) {
+          for (let motorIconOnIndex = 0; motorIconOnIndex < controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_on.length; motorIconOnIndex++) {
+            controllerMotorOnGraphics[vibrationOptionsIndex][motorIconOnIndex] = loadImage(controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_on[motorIconOnIndex]);
+          }
+          controllerMotorOffGraphics[vibrationOptionsIndex] = loadImage(controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_off);
+        }
+      }
+      for (let ledOptionsIndex = 0; ledOptionsIndex < controllerConfig.led_options.length; ledOptionsIndex++) {
+        if (controllerConfig.led_options[ledOptionsIndex].display_led == true) {
+          controllerLedOnGraphics[ledOptionsIndex] = loadImage(controllerConfig.led_options[ledOptionsIndex].led_icon_on);
+          controllerLedOffGraphics[ledOptionsIndex] = loadImage(controllerConfig.led_options[ledOptionsIndex].led_icon_off);
+        }
+      }
+    }
     if (controllerConfig.use_controller_graphics == true) {
       controllerGraphics = loadImage(controllerConfig.controller_graphics);
     }
@@ -583,6 +643,9 @@ function setup() {
     globalConfig = data;
     //console.log("GLOBAL CONFIG");
     //console.log(globalConfig);
+  });
+  socket.on("vibration_and_led_data_to_display_object", function(data) {
+    vibrationAndLedDataToDisplayObject = data;
   });
   socket.on("frame_data_to_display_object", function(data) {
     frameDataToDisplayObject = data;
@@ -728,6 +791,12 @@ function setup() {
 
 function draw() {
   //tint(255, 255);
+  isAnyMotorVibrating = false;
+  vibrateCurrentInput = false;
+  changeCurrentInputColor = false;
+  colorToChangeCurrentInputTo = "#FFFFFFFF";
+  vibrationXAxisPosition = 0;
+  vibrationYAxisPosition = 0;
   currentTimeMillis = new Date().getTime();
   playTimeTotal = currentTimeMillis - globalConfig.run_start_time;
   //console.log(currentTimeMillis - globalConfig.run_start_time);
@@ -791,10 +860,166 @@ function draw() {
   //text(playTimeString + "\n" + new Date(currentTimeMillis).toISOString(), 768, 551);
   if (socket.connected == true) {
     if (playTimeTotal >= 0) {
+      if (controllerConfig.use_vibration_and_led_data == false) {
+        vibrationXAxisPosition = 0;
+        vibrationYAxisPosition = 0;
+      }
+      if (controllerConfig.use_vibration_and_led_data == true) {
+        for (let motorsDataIndex = 0; motorsDataIndex < vibrationAndLedDataToDisplayObject.motors_data.length; motorsDataIndex++) {
+          if (vibrationAndLedDataToDisplayObject.motors_data[motorsDataIndex] == 1) {
+            isAnyMotorVibrating = true; // If at least one motor is vibrating, use this variable to generate a random value and use the same random value for all motors, which means only 1 random value is generated per frame, there is no need to have multiple random values for different motors
+          }
+        }
+        if (isAnyMotorVibrating == false) {
+          vibrationXAxisPosition = 0;
+          vibrationYAxisPosition = 0;
+        }
+        if (isAnyMotorVibrating == true) {
+          minimumVibrationPosition = Math.ceil(controllerConfig.vibration_negative_range_pixels);
+          maximumVibrationPosition = Math.floor(controllerConfig.vibration_positive_range_pixels);
+          vibrationXAxisPosition = Math.floor(Math.random() * (maximumVibrationPosition - minimumVibrationPosition + 1) + minimumVibrationPosition);
+          vibrationYAxisPosition = Math.floor(Math.random() * (maximumVibrationPosition - minimumVibrationPosition + 1) + minimumVibrationPosition);
+        }
+        for (let vibrationOptionsIndex = 0; vibrationOptionsIndex < controllerConfig.vibration_options.length; vibrationOptionsIndex++) {
+          if (controllerConfig.vibration_options[vibrationOptionsIndex].display_motor == true) {
+            if (controllerConfig.vibration_options[vibrationOptionsIndex].motor_behavior == "vibrate_label") {
+              recalculateFont(controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_scale, controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_scale / 2);
+              textSize(textSizeToUse);
+              strokeWeight(fontStrokeWeight);
+              textLeading(textDefaultLeadingToUse);
+              textAlign(LEFT, TOP);
+              if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] <= 0) {
+                fill(controllerConfig.vibration_options[vibrationOptionsIndex].motor_color_state_off);
+                text(controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_state_off, controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[0], controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[1]);
+              }
+              if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] > 0) {
+                if (controllerConfig.vibration_options[vibrationOptionsIndex].enable_visual_vibration == false) {
+                  fill(controllerConfig.vibration_options[vibrationOptionsIndex].motor_color_state_on);
+                  text(controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_state_on, controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[0], controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[1]);
+                }
+                if (controllerConfig.vibration_options[vibrationOptionsIndex].enable_visual_vibration == true) {
+                  fill(controllerConfig.vibration_options[vibrationOptionsIndex].motor_color_state_on);
+                  text(controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_state_on, controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[0] + vibrationXAxisPosition, controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[1] + vibrationYAxisPosition);
+                }
+              }
+            }
+            if (controllerConfig.vibration_options[vibrationOptionsIndex].motor_behavior == "vibrate_icon") {
+              if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] <= 0) {
+                image(controllerMotorOffGraphics[vibrationOptionsIndex], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[0], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[1], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOffGraphics[vibrationOptionsIndex].width / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon), controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOffGraphics[vibrationOptionsIndex].height / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon));
+              }
+              if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] > 0) {
+                if (controllerConfig.vibration_options[vibrationOptionsIndex].enable_visual_vibration == false) {
+                  let randomControllerMotorOnGraphicsIndex = Math.floor(Math.random() * controllerMotorOnGraphics[vibrationOptionsIndex].length);
+                  image(controllerMotorOnGraphics[vibrationOptionsIndex][randomControllerMotorOnGraphicsIndex], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[0], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[1], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOnGraphics[vibrationOptionsIndex].width / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon), controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOnGraphics[vibrationOptionsIndex].height / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon));
+                }
+                if (controllerConfig.vibration_options[vibrationOptionsIndex].enable_visual_vibration == true) {
+                  let randomControllerMotorOnGraphicsIndex = Math.floor(Math.random() * controllerMotorOnGraphics[vibrationOptionsIndex].length);
+                  image(controllerMotorOnGraphics[vibrationOptionsIndex][randomControllerMotorOnGraphicsIndex], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[0] + vibrationXAxisPosition, controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[1] + vibrationYAxisPosition, controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOnGraphics[vibrationOptionsIndex].width / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon), controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOnGraphics[vibrationOptionsIndex].height / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon));
+                }
+              }
+            }
+            if (controllerConfig.vibration_options[vibrationOptionsIndex].motor_behavior == "vibrate_icon_and_label") {
+              recalculateFont(controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_scale, controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_scale / 2);
+              textSize(textSizeToUse);
+              strokeWeight(fontStrokeWeight);
+              textLeading(textDefaultLeadingToUse);
+              textAlign(LEFT, TOP);
+              if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] <= 0) {
+                fill(controllerConfig.vibration_options[vibrationOptionsIndex].motor_color_state_off);
+                text(controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_state_off, controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[0], controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[1]);
+                image(controllerMotorOffGraphics[vibrationOptionsIndex], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[0], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[1], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOffGraphics[vibrationOptionsIndex].width / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon), controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOffGraphics[vibrationOptionsIndex].height / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon));
+              }
+              if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] > 0) {
+                if (controllerConfig.vibration_options[vibrationOptionsIndex].enable_visual_vibration == false) {
+                  let randomControllerMotorOnGraphicsIndex = Math.floor(Math.random() * controllerMotorOnGraphics[vibrationOptionsIndex].length);
+                  fill(controllerConfig.vibration_options[vibrationOptionsIndex].motor_color_state_on);
+                  text(controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_state_on, controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[0], controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[1]);
+                  image(controllerMotorOnGraphics[vibrationOptionsIndex][randomControllerMotorOnGraphicsIndex], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[0], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[1], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOnGraphics[vibrationOptionsIndex].width / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon), controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOnGraphics[vibrationOptionsIndex].height / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon));
+                }
+                if (controllerConfig.vibration_options[vibrationOptionsIndex].enable_visual_vibration == true) {
+                  let randomControllerMotorOnGraphicsIndex = Math.floor(Math.random() * controllerMotorOnGraphics[vibrationOptionsIndex].length);
+                  fill(controllerConfig.vibration_options[vibrationOptionsIndex].motor_color_state_on);
+                  text(controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_state_on, controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[0] + vibrationXAxisPosition, controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_position[1] + vibrationYAxisPosition);
+                  image(controllerMotorOnGraphics[vibrationOptionsIndex][randomControllerMotorOnGraphicsIndex], controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[0] + vibrationXAxisPosition, controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_position[1] + vibrationYAxisPosition, controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOnGraphics[vibrationOptionsIndex].width / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon), controllerConfig.vibration_options[vibrationOptionsIndex].motor_icon_scale * (controllerMotorOnGraphics[vibrationOptionsIndex].height / controllerConfig.vibration_options[vibrationOptionsIndex].divisor_to_use_for_motor_icon));
+                }
+              }
+            }
+            if (controllerConfig.vibration_options[vibrationOptionsIndex].motor_behavior == "vibrate_current_input") {
+              if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] <= 0) {
+                vibrateCurrentInput = false;
+                changeCurrentInputColor = false;
+                colorToChangeCurrentInputTo = "#FFFFFFFF";
+              }
+              if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] > 0) {
+                vibrateCurrentInput = true;
+                changeCurrentInputColor = false;
+                colorToChangeCurrentInputTo = "#FFFFFFFF";
+              }
+            }
+            if (controllerConfig.vibration_options[vibrationOptionsIndex].motor_behavior == "vibrate_current_input_with_color_change") {
+              if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] <= 0) {
+                vibrateCurrentInput = false;
+                changeCurrentInputColor = false;
+                colorToChangeCurrentInputTo = controllerConfig.vibration_options[vibrationOptionsIndex].motor_color_state_off;
+              }
+              if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] > 0) {
+                vibrateCurrentInput = true;
+                changeCurrentInputColor = true;
+                colorToChangeCurrentInputTo = controllerConfig.vibration_options[vibrationOptionsIndex].motor_color_state_on;
+              }
+            }
+          }
+        }
+        for (let ledOptionsIndex = 0; ledOptionsIndex < controllerConfig.led_options.length; ledOptionsIndex++) {
+          if (controllerConfig.led_options[ledOptionsIndex].display_led == true) {
+            if (controllerConfig.led_options[ledOptionsIndex].led_behavior == "use_label") {
+              recalculateFont(controllerConfig.led_options[ledOptionsIndex].led_label_scale, controllerConfig.led_options[ledOptionsIndex].led_label_scale / 2);
+              textSize(textSizeToUse);
+              strokeWeight(fontStrokeWeight);
+              textLeading(textDefaultLeadingToUse);
+              textAlign(LEFT, TOP);
+              if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] <= 0) {
+                fill(controllerConfig.led_options[ledOptionsIndex].led_color_state_off);
+                text(controllerConfig.led_options[ledOptionsIndex].led_label_state_off, controllerConfig.led_options[ledOptionsIndex].led_label_position[0], controllerConfig.led_options[ledOptionsIndex].led_label_position[1]);
+              }
+              if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] > 0) {
+                fill(controllerConfig.led_options[ledOptionsIndex].led_color_state_on);
+                text(controllerConfig.led_options[ledOptionsIndex].led_label_state_on, controllerConfig.led_options[ledOptionsIndex].led_label_position[0], controllerConfig.led_options[ledOptionsIndex].led_label_position[1]);
+              }
+            }
+            if (controllerConfig.led_options[ledOptionsIndex].led_behavior == "use_icon") {
+              if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] <= 0) {
+                image(controllerLedOffGraphics[ledOptionsIndex], controllerConfig.led_options[ledOptionsIndex].led_icon_position[0], controllerConfig.led_options[ledOptionsIndex].led_icon_position[1], controllerConfig.led_options[ledOptionsIndex].led_icon_scale * (controllerLedOffGraphics[ledOptionsIndex].width / controllerConfig.led_options[ledOptionsIndex].divisor_to_use_for_led_icon), controllerConfig.led_options[ledOptionsIndex].led_icon_scale * (controllerLedOffGraphics[ledOptionsIndex].height / controllerConfig.led_options[ledOptionsIndex].divisor_to_use_for_led_icon));
+              }
+              if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] > 0) {
+                image(controllerLedOnGraphics[ledOptionsIndex], controllerConfig.led_options[ledOptionsIndex].led_icon_position[0], controllerConfig.led_options[ledOptionsIndex].led_icon_position[1], controllerConfig.led_options[ledOptionsIndex].led_icon_scale * (controllerLedOnGraphics[ledOptionsIndex].width / controllerConfig.led_options[ledOptionsIndex].divisor_to_use_for_led_icon), controllerConfig.led_options[ledOptionsIndex].led_icon_scale * (controllerLedOnGraphics[ledOptionsIndex].height / controllerConfig.led_options[ledOptionsIndex].divisor_to_use_for_led_icon));
+              }
+            }
+            if (controllerConfig.led_options[ledOptionsIndex].led_behavior == "use_icon_and_label") {
+              recalculateFont(controllerConfig.led_options[ledOptionsIndex].led_label_scale, controllerConfig.led_options[ledOptionsIndex].led_label_scale / 2);
+              textSize(textSizeToUse);
+              strokeWeight(fontStrokeWeight);
+              textLeading(textDefaultLeadingToUse);
+              textAlign(LEFT, TOP);
+              if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] <= 0) {
+                fill(controllerConfig.led_options[ledOptionsIndex].led_color_state_off);
+                text(controllerConfig.led_options[ledOptionsIndex].led_label_state_off, controllerConfig.led_options[ledOptionsIndex].led_label_position[0], controllerConfig.led_options[ledOptionsIndex].led_label_position[1]);
+                image(controllerLedOffGraphics[ledOptionsIndex], controllerConfig.led_options[ledOptionsIndex].led_icon_position[0], controllerConfig.led_options[ledOptionsIndex].led_icon_position[1], controllerConfig.led_options[ledOptionsIndex].led_icon_scale * (controllerLedOffGraphics[ledOptionsIndex].width / controllerConfig.led_options[ledOptionsIndex].divisor_to_use_for_led_icon), controllerConfig.led_options[ledOptionsIndex].led_icon_scale * (controllerLedOffGraphics[ledOptionsIndex].height / controllerConfig.led_options[ledOptionsIndex].divisor_to_use_for_led_icon));
+              }
+              if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] > 0) {
+                image(controllerLedOnGraphics[ledOptionsIndex], controllerConfig.led_options[ledOptionsIndex].led_icon_position[0], controllerConfig.led_options[ledOptionsIndex].led_icon_position[1], controllerConfig.led_options[ledOptionsIndex].led_icon_scale * (controllerLedOnGraphics[ledOptionsIndex].width / controllerConfig.led_options[ledOptionsIndex].divisor_to_use_for_led_icon), controllerConfig.led_options[ledOptionsIndex].led_icon_scale * (controllerLedOnGraphics[ledOptionsIndex].height / controllerConfig.led_options[ledOptionsIndex].divisor_to_use_for_led_icon));
+                fill(controllerConfig.led_options[ledOptionsIndex].led_color_state_on);
+                text(controllerConfig.led_options[ledOptionsIndex].led_label_state_on, controllerConfig.led_options[ledOptionsIndex].led_label_position[0], controllerConfig.led_options[ledOptionsIndex].led_label_position[1]);
+              }
+            }
+          }
+        }
+      }
       recalculateFont(2, 1);
       textSize(textSizeToUse);
       strokeWeight(fontStrokeWeight);
       textLeading(textDefaultLeadingToUse);
+      fill("#FFFFFFFF");
       text(playTimeString + "\n" + new Date(currentTimeMillis).toISOString(), 768, 551);
       /*
       recalculateFont(4, 2);
@@ -1189,13 +1414,29 @@ function draw() {
       textAlign(CENTER, TOP);
       scale(0.5, 1);
       textLeading(textDefaultLeadingToUse);
-      text(basicInputString, 896 * 2, 306);
+      if (vibrateCurrentInput == false) {
+        text(basicInputString, (896 * 2), 306);
+      }
+      if (vibrateCurrentInput == true) {
+        if (changeCurrentInputColor == true) {
+          fill(colorToChangeCurrentInputTo);
+        }
+        text(basicInputString, (896 * 2) + vibrationXAxisPosition, 306 + vibrationYAxisPosition);
+      }
       scale(2, 1);
     }
     if (basicInputString.length <= 12 && basicInputString.length > 0) {
       textAlign(CENTER, TOP);
       textLeading(textDefaultLeadingToUse);
-      text(basicInputString, 896, 306);
+      if (vibrateCurrentInput == false) {
+        text(basicInputString, 896, 306);
+      }
+      if (vibrateCurrentInput == true) {
+        if (changeCurrentInputColor == true) {
+          fill(colorToChangeCurrentInputTo);
+        }
+        text(basicInputString, 896 + vibrationXAxisPosition, 306 + vibrationYAxisPosition);
+      }
     }
   }
   if (voteDataObject.input_mode == 2) {
@@ -1255,7 +1496,7 @@ function draw() {
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{stream_end_time}})+/ig, streamEndTimeRemainingString + "\n(" + streamEndTimeISOString + ")");
         //console.log(globalConfig.overlay_advanced_mode_help_message_to_display);
         //console.log(advancedModeHelpMessageToDisplay2);
-        text(advancedModeHelpMessageToDisplay2, 896 * 2, 60);
+        text(advancedModeHelpMessageToDisplay2, (896 * 2), 60);
         scale(2, 1);
       }
     }
@@ -1264,24 +1505,56 @@ function draw() {
         if (advancedInputMetadata.loop_macro == 0) {
           textAlign(CENTER, TOP);
           textLeading(textDefaultLeadingToUse);
-          text("Input\n" + advancedInputMetadata.current_macro_index_running + "/" + advancedInputMetadata.macro_inputs_to_run, 896, 100);
+          if (vibrateCurrentInput == false) {
+            text("Input\n" + advancedInputMetadata.current_macro_index_running + "/" + advancedInputMetadata.macro_inputs_to_run, 896, 100);
+          }
+          if (vibrateCurrentInput == true) {
+            if (changeCurrentInputColor == true) {
+              fill(colorToChangeCurrentInputTo);
+            }
+            text("Input\n" + advancedInputMetadata.current_macro_index_running + "/" + advancedInputMetadata.macro_inputs_to_run, 896 + vibrationXAxisPosition, 100 + vibrationYAxisPosition);
+          }
         }
         if (advancedInputMetadata.loop_macro == 1) {
           textAlign(CENTER, TOP);
           textLeading(textDefaultLeadingToUse);
-          text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\n\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1), 896, 100);
+          if (vibrateCurrentInput == false) {
+            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\n\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1), 896, 100);
+          }
+          if (vibrateCurrentInput == true) {
+            if (changeCurrentInputColor == true) {
+              fill(colorToChangeCurrentInputTo);
+            }
+            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\n\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1), 896 + vibrationXAxisPosition, 100 + vibrationYAxisPosition);
+          }
         }
         if (advancedInputString.length > 12) {
           textAlign(CENTER, TOP);
           scale(0.5, 1);
           textLeading(textDefaultLeadingToUse);
-          text("\n" + advancedInputString, 896 * 2, 224);
+          if (vibrateCurrentInput == false) {
+            text("\n" + advancedInputString, (896 * 2), 224);
+          }
+          if (vibrateCurrentInput == true) {
+            if (changeCurrentInputColor == true) {
+              fill(colorToChangeCurrentInputTo);
+            }
+            text("\n" + advancedInputString, (896 * 2) + vibrationXAxisPosition, 224 + vibrationYAxisPosition);
+          }
           scale(2, 1);
         }
         if (advancedInputString.length <= 12 && advancedInputString.length > 0) {
           textAlign(CENTER, TOP);
           textLeading(textDefaultLeadingToUse);
-          text("\n" + advancedInputString, 896, 224);
+          if (vibrateCurrentInput == false) {
+            text("\n" + advancedInputString, 896, 224);
+          }
+          if (vibrateCurrentInput == true) {
+            if (changeCurrentInputColor == true) {
+              fill(colorToChangeCurrentInputTo);
+            }
+            text("\n" + advancedInputString, 896 + vibrationXAxisPosition, 224 + vibrationYAxisPosition);
+          }
         }
       }
       if (advancedInputMetadata.is_inner_loop == 1) {
@@ -1292,24 +1565,56 @@ function draw() {
         if (advancedInputMetadata.loop_macro == 0) {
           textAlign(CENTER, TOP);
           textLeading(textDefaultLeadingToUse);
-          text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896, 60);
+          if (vibrateCurrentInput == false) {
+            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896, 60);
+          }
+          if (vibrateCurrentInput == true) {
+            if (changeCurrentInputColor == true) {
+              fill(colorToChangeCurrentInputTo);
+            }
+            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896 + vibrationXAxisPosition, 60 + vibrationYAxisPosition);
+          }
         }
         if (advancedInputMetadata.loop_macro == 1) {
           textAlign(CENTER, TOP);
           textLeading(textDefaultLeadingToUse);
-          text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1) + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896, 40);
+          if (vibrateCurrentInput == false) {
+            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1) + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896, 40);            
+          }
+          if (vibrateCurrentInput == true) {
+            if (changeCurrentInputColor == true) {
+              fill(colorToChangeCurrentInputTo);
+            }
+            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1) + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896 + vibrationXAxisPosition, 40 + vibrationYAxisPosition);            
+          }
         }
         if (advancedInputString.length > 12) {
           textAlign(CENTER, TOP);
           scale(0.5, 1);
           textLeading(textDefaultLeadingToUse);
-          text("\n" + advancedInputString, 896 * 2, 266);
+          if (vibrateCurrentInput == false) {
+            text("\n" + advancedInputString, (896 * 2), 266);
+          }
+          if (vibrateCurrentInput == true) {
+            if (changeCurrentInputColor == true) {
+              fill(colorToChangeCurrentInputTo);
+            }
+            text("\n" + advancedInputString, (896 * 2) + vibrationXAxisPosition, 266 + vibrationYAxisPosition);
+          }
           scale(2, 1);
         }
         if (advancedInputString.length <= 12 && advancedInputString.length > 0) {
           textAlign(CENTER, TOP);
           textLeading(textDefaultLeadingToUse);
-          text("\n" + advancedInputString, 896, 266);
+          if (vibrateCurrentInput == false) {
+            text("\n" + advancedInputString, 896, 266);
+          }
+          if (vibrateCurrentInput == true) {
+            if (changeCurrentInputColor == true) {
+              fill(colorToChangeCurrentInputTo);
+            }
+            text("\n" + advancedInputString, 896 + vibrationXAxisPosition, 266 + vibrationYAxisPosition);
+          }
         }
       }
     }
@@ -1321,40 +1626,80 @@ function draw() {
   stroke("#000000FF");
   textAlign(LEFT, TOP); // 4x5 font isn't kind to CENTER, LEFT, text gets blurry, so I have to do LEFT, TOP and kinda hardcode the text position so it looks like it is centered, ugly hack but it works
   fill("#FFFFFFFF");
-  if (viewerCount < 0) {
-    textLeading(textDefaultLeadingToUse);
-    if (controllerConfig.display_framerate == true) {
-      text("OFFLINE    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+  if (globalConfig.get_stream_viewer_count == true) {
+    if (viewerCount < 0) {
+      textLeading(textDefaultLeadingToUse);
+      if (controllerConfig.display_framerate == true) {
+        text("OFFLINE    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+      }
+      if (controllerConfig.display_framerate == false) {
+        text("OFFLINE", 768, 346);
+      }
     }
-    if (controllerConfig.display_framerate == false) {
-      text("OFFLINE", 768, 346);
+    if (viewerCount == 0) {
+      textLeading(textDefaultLeadingToUse);
+      if (controllerConfig.display_framerate == true) {
+        text(viewerCount + " Viewers    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+      }
+      if (controllerConfig.display_framerate == false) {
+        text(viewerCount + " Viewers", 768, 346);
+      }
+    }
+    if (viewerCount == 1) {
+      textLeading(textDefaultLeadingToUse);
+      if (controllerConfig.display_framerate == true) {
+        text(viewerCount + " Viewer    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+      }
+      if (controllerConfig.display_framerate == false) {
+        text(viewerCount + " Viewer", 768, 346);
+      }
+    }
+    if (viewerCount > 1) {
+      textLeading(textDefaultLeadingToUse);
+      if (controllerConfig.display_framerate == true) {
+        text(viewerCount + " Viewers    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+      }
+      if (controllerConfig.display_framerate == false) {
+        text(viewerCount + " Viewers", 768, 346);
+      }
     }
   }
-  if (viewerCount == 0) {
-    textLeading(textDefaultLeadingToUse);
-    if (controllerConfig.display_framerate == true) {
-      text(viewerCount + " Viewers    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+  if (globalConfig.get_stream_viewer_count == false) {
+    if (viewerCount < 0) {
+      textLeading(textDefaultLeadingToUse);
+      if (controllerConfig.display_framerate == true) {
+        text(frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+      }
+      if (controllerConfig.display_framerate == false) {
+        //text("OFFLINE", 768, 346);
+      }
     }
-    if (controllerConfig.display_framerate == false) {
-      text(viewerCount + " Viewers", 768, 346);
+    if (viewerCount == 0) {
+      textLeading(textDefaultLeadingToUse);
+      if (controllerConfig.display_framerate == true) {
+        text(frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+      }
+      if (controllerConfig.display_framerate == false) {
+        //text(viewerCount + " Viewers", 768, 346);
+      }
     }
-  }
-  if (viewerCount == 1) {
-    textLeading(textDefaultLeadingToUse);
-    if (controllerConfig.display_framerate == true) {
-      text(viewerCount + " Viewer    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+    if (viewerCount == 1) {
+      textLeading(textDefaultLeadingToUse);
+      if (controllerConfig.display_framerate == true) {
+        text(frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+      }
+      if (controllerConfig.display_framerate == false) {
+        //text(viewerCount + " Viewer", 768, 346);
+      }
     }
-    if (controllerConfig.display_framerate == false) {
-      text(viewerCount + " Viewer", 768, 346);
-    }
-  }
-  if (viewerCount > 1) {
-    textLeading(textDefaultLeadingToUse);
-    if (controllerConfig.display_framerate == true) {
-      text(viewerCount + " Viewers    " + frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
-    }
-    if (controllerConfig.display_framerate == false) {
-      text(viewerCount + " Viewers", 768, 346);
+    if (viewerCount > 1) {
+      textLeading(textDefaultLeadingToUse);
+      if (controllerConfig.display_framerate == true) {
+        text(frameDataToDisplayObject.frame_rate_to_display + "fps", 768, 346);
+      }
+      if (controllerConfig.display_framerate == false) {
+        //text(viewerCount + " Viewers", 768, 346);
+      }
     }
   }
   //tint(255, 127);

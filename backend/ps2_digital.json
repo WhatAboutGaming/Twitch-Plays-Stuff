@@ -28,6 +28,169 @@
   "max_times_to_repeat_macro": 255,
   "controller_object": "ps2_controller_digital.json",
   "simultaneous_different_basic_buttons_allowed": 5,
+  "use_vibration_and_led_data": true,
+  "vibration_negative_range_pixels": -5,
+  "vibration_positive_range_pixels": 5,
+  "vibration_options": [
+    {
+      "display_motor": true,
+      "enable_visual_vibration": true,
+      "motor_label_name": "Left Rumble",
+      "motor_label_state_on": "Left Rumble On",
+      "motor_label_state_off": "Left Rumble Off",
+      "motor_label_scale": 2,
+      "motor_label_position": [2, 525],
+      "motor_icon_on": ["assets\\color\\l_inverted_normal_0.png", "assets\\color\\l_inverted_normal_1.png", "assets\\color\\l_inverted_normal_2.png", "assets\\color\\l_inverted_rotated_0.png", "assets\\color\\l_inverted_rotated_1.png", "assets\\color\\l_inverted_rotated_2.png", "assets\\color\\l_normal_0.png", "assets\\color\\l_normal_1.png", "assets\\color\\l_normal_2.png", "assets\\color\\l_rotated_0.png", "assets\\color\\l_rotated_1.png", "assets\\color\\l_rotated_2.png"],
+      "motor_icon_off": "assets\\bw\\l_inverted_normal_bw_0.png",
+      "motor_icon_scale": 1,
+      "motor_icon_position": [2, 485],
+      "divisor_to_use_for_motor_icon": 1,
+      "motor_color_state_on": "#00FF00FF",
+      "motor_color_state_off": "#FF0000FF",
+      "motor_behavior": "vibrate_icon",
+      "send_status_change_message": false,
+      "notes": "motor_behavior is used to tell how the vibration should be displayed, if it should use its own icon or if it should vibrate something else in the overlay, like the text that displays what input is currently being executed, as an example, it is only recommended to use integers for the scales motor_label_scale and motor_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "vibrate_label, vibrate_icon, vibrate_icon_and_label, vibrate_current_input, vibrate_current_input_with_color_change, all(?)"
+    },
+    {
+      "display_motor": true,
+      "enable_visual_vibration": true,
+      "motor_label_name": "Right Rumble",
+      "motor_label_state_on": "Right Rumble On",
+      "motor_label_state_off": "Right Rumble Off",
+      "motor_label_scale": 2,
+      "motor_label_position": [740, 525],
+      "motor_icon_on": ["assets\\color\\r_inverted_normal_0.png", "assets\\color\\r_inverted_normal_1.png", "assets\\color\\r_inverted_normal_2.png", "assets\\color\\r_inverted_rotated_0.png", "assets\\color\\r_inverted_rotated_1.png", "assets\\color\\r_inverted_rotated_2.png", "assets\\color\\r_normal_0.png", "assets\\color\\r_normal_1.png", "assets\\color\\r_normal_2.png", "assets\\color\\r_rotated_0.png", "assets\\color\\r_rotated_1.png", "assets\\color\\r_rotated_2.png"],
+      "motor_icon_off": "assets\\bw\\r_normal_bw_0.png",
+      "motor_icon_scale": 1,
+      "motor_icon_position": [740, 485],
+      "divisor_to_use_for_motor_icon": 1,
+      "motor_color_state_on": "#00FF00FF",
+      "motor_color_state_off": "#FF0000FF",
+      "motor_behavior": "vibrate_icon",
+      "send_status_change_message": false,
+      "notes": "motor_behavior is used to tell how the vibration should be displayed, if it should use its own icon or if it should vibrate something else in the overlay, like the text that displays what input is currently being executed, as an example, it is only recommended to use integers for the scales motor_label_scale and motor_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "vibrate_label, vibrate_icon, vibrate_icon_and_label, vibrate_current_input, vibrate_current_input_with_color_change, all(?)"
+    },
+    {
+      "display_motor": false,
+      "enable_visual_vibration": false,
+      "motor_label_name": "Motor 3",
+      "motor_label_state_on": "Motor 3 On",
+      "motor_label_state_off": "Motor 3 Off",
+      "motor_label_scale": 2,
+      "motor_label_position": [200, 230],
+      "motor_icon_on": ["placeholder.png"],
+      "motor_icon_off": "placeholder.png",
+      "motor_icon_scale": 2,
+      "motor_icon_position": [200, 230],
+      "divisor_to_use_for_motor_icon": 1,
+      "motor_color_state_on": "#00FF00FF",
+      "motor_color_state_off": "#FF0000FF",
+      "motor_behavior": "vibrate_icon",
+      "send_status_change_message": false,
+      "notes": "motor_behavior is used to tell how the vibration should be displayed, if it should use its own icon or if it should vibrate something else in the overlay, like the text that displays what input is currently being executed, as an example, it is only recommended to use integers for the scales motor_label_scale and motor_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "vibrate_label, vibrate_icon, vibrate_icon_and_label, vibrate_current_input, vibrate_current_input_with_color_change, all(?)"
+    },
+    {
+      "display_motor": false,
+      "enable_visual_vibration": false,
+      "motor_label_name": "Motor 4",
+      "motor_label_state_on": "Motor 4 On",
+      "motor_label_state_off": "Motor 4 Off",
+      "motor_label_scale": 2,
+      "motor_label_position": [200, 240],
+      "motor_icon_on": ["placeholder.png"],
+      "motor_icon_off": "placeholder.png",
+      "motor_icon_scale": 2,
+      "motor_icon_position": [200, 240],
+      "divisor_to_use_for_motor_icon": 1,
+      "motor_color_state_on": "#00FF00FF",
+      "motor_color_state_off": "#FF0000FF",
+      "motor_behavior": "vibrate_icon",
+      "send_status_change_message": false,
+      "notes": "motor_behavior is used to tell how the vibration should be displayed, if it should use its own icon or if it should vibrate something else in the overlay, like the text that displays what input is currently being executed, as an example, it is only recommended to use integers for the scales motor_label_scale and motor_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "vibrate_label, vibrate_icon, vibrate_icon_and_label, vibrate_current_input, vibrate_current_input_with_color_change, all(?)"
+    }
+  ],
+  "led_options": [
+    {
+      "display_led": true,
+      "led_label_name": "Analog",
+      "led_label_state_on": "Analog On",
+      "led_label_state_off": "Analog Off",
+      "led_label_scale": 2,
+      "led_label_position": [396, 525],
+      "led_icon_on": "assets\\leds\\analog_on_4.png",
+      "led_icon_off": "assets\\leds\\analog_off_2.png",
+      "led_icon_scale": 1,
+      "led_icon_position": [396, 485],
+      "divisor_to_use_for_led_icon": 1,
+      "led_color_state_on": "#00FF00FF",
+      "led_color_state_off": "#FF0000FF",
+      "led_behavior": "use_icon",
+      "send_status_change_message": true,
+      "notes": "led_behavior is used to tell how the LED should be displayed, if it should use its own icon or if it should light up something else in the overlay, like the text that displays what input is currently being executed(?), as an example, it is only recommended to use integers for the scales led_label_scale and led_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "use_label, use_icon, use_icon_and_label, use_current_input(?), use_current_input_with_color_change(?), all(?)"
+    },
+    {
+      "display_led": false,
+      "led_label_name": "LED 2",
+      "led_label_state_on": "LED 2 On",
+      "led_label_state_off": "LED 2 Off",
+      "led_label_scale": 2,
+      "led_label_position": [200, 260],
+      "led_icon_on": "placeholder.png",
+      "led_icon_off": "placeholder.png",
+      "led_icon_scale": 2,
+      "led_icon_position": [200, 260],
+      "divisor_to_use_for_led_icon": 1,
+      "led_color_state_on": "#00FF00FF",
+      "led_color_state_off": "#FF0000FF",
+      "led_behavior": "use_icon",
+      "send_status_change_message": false,
+      "notes": "led_behavior is used to tell how the LED should be displayed, if it should use its own icon or if it should light up something else in the overlay, like the text that displays what input is currently being executed(?), as an example, it is only recommended to use integers for the scales led_label_scale and led_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "use_label, use_icon, use_icon_and_label, use_current_input(?), use_current_input_with_color_change(?), all(?)"
+    },
+    {
+      "display_led": false,
+      "led_label_name": "LED 3",
+      "led_label_state_on": "LED 3 On",
+      "led_label_state_off": "LED 3 Off",
+      "led_label_scale": 2,
+      "led_label_position": [200, 270],
+      "led_icon_on": "placeholder.png",
+      "led_icon_off": "placeholder.png",
+      "led_icon_scale": 2,
+      "led_icon_position": [200, 270],
+      "divisor_to_use_for_led_icon": 1,
+      "led_color_state_on": "#00FF00FF",
+      "led_color_state_off": "#FF0000FF",
+      "led_behavior": "use_icon",
+      "send_status_change_message": false,
+      "notes": "led_behavior is used to tell how the LED should be displayed, if it should use its own icon or if it should light up something else in the overlay, like the text that displays what input is currently being executed(?), as an example, it is only recommended to use integers for the scales led_label_scale and led_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "use_label, use_icon, use_icon_and_label, use_current_input(?), use_current_input_with_color_change(?), all(?)"
+    },
+    {
+      "display_led": false,
+      "led_label_name": "LED 4",
+      "led_label_state_on": "LED 4 On",
+      "led_label_state_off": "LED 4 Off",
+      "led_label_scale": 2,
+      "led_label_position": [200, 280],
+      "led_icon_on": "placeholder.png",
+      "led_icon_off": "placeholder.png",
+      "led_icon_scale": 2,
+      "led_icon_position": [200, 280],
+      "divisor_to_use_for_led_icon": 1,
+      "led_color_state_on": "#00FF00FF",
+      "led_color_state_off": "#FF0000FF",
+      "led_behavior": "use_icon",
+      "send_status_change_message": false,
+      "notes": "led_behavior is used to tell how the LED should be displayed, if it should use its own icon or if it should light up something else in the overlay, like the text that displays what input is currently being executed(?), as an example, it is only recommended to use integers for the scales led_label_scale and led_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "use_label, use_icon, use_icon_and_label, use_current_input(?), use_current_input_with_color_change(?), all(?)"
+    }
+  ],
   "controller_graphics": "gcn_controller_graphics.png",
   "use_controller_graphics": false,
   "help_message_basic": [
@@ -53,6 +216,350 @@
     "You can learn how to save and execute saved macros (and more!) by using the command !macrohelp. You can also find this help message in the stream description. The framerate is currently {{frame_rate}}fps."
   ],
   "blacklisted_combos": [
+    {
+      "blacklisted_combo_input_string": "Select+Start",
+      "blacklisted_combo_input_size": 2,
+      "blacklisted_combo_input_value": "0x08007F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Open In-Game Reset Menu 1",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Start",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+L1+R1",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x01067F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Native In-Game Reset",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L1",
+          "component_input_value": "0x00047F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R1",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+L1+R2",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x01067F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Enable Smooth Texture Mapping",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L1",
+          "component_input_value": "0x00047F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+L2+R1",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x01097F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Disable Smooth Texture Mapping",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R1",
+          "component_input_value": "0x00087F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+R1+R2",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x010A7F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Enable Scanlines",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R1",
+          "component_input_value": "0x00087F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+L1+L2",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x01057F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Disable Scanlines",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L1",
+          "component_input_value": "0x00047F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+L2+R2+Tri",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x01137F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Open Disc Tray",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Tri",
+          "component_input_value": "0x00107F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+L2+R2+^",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x11037F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Insert Disc 1",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "^",
+          "component_input_value": "0x10007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+L2+R2+>",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x21037F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Insert Disc 2",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": ">",
+          "component_input_value": "0x20007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+L2+R2+v",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x41037F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Insert Disc 3",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "v",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+L2+R2+<",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x81037F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Insert Disc 4",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "<",
+          "component_input_value": "0x80007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+L2+R2+Sq",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x01837F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Close Disc Tray",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Sq",
+          "component_input_value": "0x00807F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+L2+R2+X",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x01437F7F7F7F0000L",
+      "blacklisted_combo_input_description": "PS1 Software Reset System",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "X",
+          "component_input_value": "0x00407F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Select+Start+L2+R2+L1",
+      "blacklisted_combo_input_size": 5,
+      "blacklisted_combo_input_value": "0x09077F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Open In-Game Reset Menu 2",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Select",
+          "component_input_value": "0x01007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Start",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L1",
+          "component_input_value": "0x00047F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "L2+R2+L1+R1+X+v",
+      "blacklisted_combo_input_size": 6,
+      "blacklisted_combo_input_value": "0x404F7F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Open In-Game Reset Menu 3",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "L2",
+          "component_input_value": "0x00017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R2",
+          "component_input_value": "0x00027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "L1",
+          "component_input_value": "0x00047F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "R1",
+          "component_input_value": "0x00087F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "X",
+          "component_input_value": "0x00407F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "v",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        }
+      ]
+    },
     {
       "blacklisted_combo_input_string": "Select+Start+L2+R2+L1+R1",
       "blacklisted_combo_input_size": 6,

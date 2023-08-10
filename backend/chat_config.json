@@ -36,5 +36,6 @@
   ],
   "trusted_users": [
     "trusted_user_userid"
-  ]
+  ],
+  "discord_bot_token": "discord_bot_token"
 }
