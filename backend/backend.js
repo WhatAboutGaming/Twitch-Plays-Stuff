@@ -20706,6 +20706,14 @@ function logInputToDatabase(inputMode, inputString, originalMessage, isSavedMacr
   if (globalConfig.log_input_to_database == false) {
     return;
   }
+  let playTimeTotal = millisTimestamp - runStartTime;
+  let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
+  let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+  let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
+  let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
+  let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
+  let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+  let playTimeStringNoMillis = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec";
   let dataToAddToDatabase = {
     input_mode: inputMode,
     input_mode_name: inputModesArray[inputMode].mode_name,
@@ -20714,13 +20722,15 @@ function logInputToDatabase(inputMode, inputString, originalMessage, isSavedMacr
     is_saved_macro: isSavedMacro,
     saved_macro_object: savedMacroObject,
     room_id: roomId,
-    run_name: runName,
+    run_name: runName.replace(/({{channel_id}})+/ig, roomId),
     run_id: runId,
     sender_username: senderUsername,
     sender_user_id: senderUserId,
     message_id: messageId,
     millis_timestamp: millisTimestamp,
-    iso_string_timestamp: new Date(millisTimestamp).toISOString()
+    iso_string_timestamp: new Date(millisTimestamp).toISOString(),
+    play_time_total_millis: playTimeTotal,
+    play_time_total_string: playTimeString
   };
 
   mongoClient.connect(mongoUrl, {
@@ -20731,7 +20741,7 @@ function logInputToDatabase(inputMode, inputString, originalMessage, isSavedMacr
     }
     let dbo = db.db(globalConfig.inputs_sent_database_name.replace(/({{channel_id}})+/ig, roomId));
     let myobj = dataToAddToDatabase;
-    dbo.collection(globalConfig.inputs_sent_collection_name.replace(/({{run_name}})+/ig, runName)).insertOne(myobj, function(err, res) {
+    dbo.collection(globalConfig.inputs_sent_collection_name.replace(/({{run_name}})+/ig, runName).replace(/({{channel_id}})+/ig, roomId)).insertOne(myobj, function(err, res) {
       if (err) {
         throw err;
       }
@@ -20786,6 +20796,14 @@ function logInputToTextFile(inputMode, inputString, originalMessage, isSavedMacr
   if (globalConfig.log_input_to_text_file == false) {
     return;
   }
+  let playTimeTotal = millisTimestamp - runStartTime;
+  let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
+  let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+  let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
+  let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
+  let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
+  let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+  let playTimeStringNoMillis = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec";
   let dataToAddToDatabase = {
     input_mode: inputMode,
     input_mode_name: inputModesArray[inputMode].mode_name,
@@ -20794,13 +20812,15 @@ function logInputToTextFile(inputMode, inputString, originalMessage, isSavedMacr
     is_saved_macro: isSavedMacro,
     saved_macro_object: savedMacroObject,
     room_id: roomId,
-    run_name: runName,
+    run_name: runName.replace(/({{channel_id}})+/ig, roomId),
     run_id: runId,
     sender_username: senderUsername,
     sender_user_id: senderUserId,
     message_id: messageId,
     millis_timestamp: millisTimestamp,
-    iso_string_timestamp: new Date(millisTimestamp).toISOString()
+    iso_string_timestamp: new Date(millisTimestamp).toISOString(),
+    play_time_total_millis: playTimeTotal,
+    play_time_total_string: playTimeString
   };
   writeToTextFile("inputs", "input_logs", JSON.stringify(dataToAddToDatabase), roomId, millisTimestamp);
 }
