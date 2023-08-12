@@ -32,7 +32,7 @@
   "get_stream_viewer_count": true,
   "webserver_port": 8080,
   "chat_config": "chat_config.json",
-  "run_start_time": 1692489600000,
+  "run_start_time": 1691884800000,
   "next_run_start_time": 1694304000000,
   "stream_end_time": 1692489600000,
   "initial_accept_inputs": false,
