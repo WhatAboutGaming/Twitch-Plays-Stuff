@@ -97,7 +97,7 @@ uint32_t ps2FrameMillisPrevious = 0UL;
 
 uint32_t ps2FramesThisSecond = 0UL;
 
-bool sendFrameData = true;
+bool sendFrameData = false;
 uint32_t timeToSendNextFrameDataMillis = 0UL;
 
 const uint16_t startingMacroIndex = 0x04;
