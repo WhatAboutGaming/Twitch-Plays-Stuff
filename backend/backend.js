@@ -1287,41 +1287,43 @@ parser.on("data", async function(data) {
               ]
             };
             io.sockets.emit("vibration_and_led_data_to_display_object", vibrationAndLedDataToDisplayObject);
-            if (client.readyState() === "OPEN") {
-              for (let vibrationOptionsIndex = 0; vibrationOptionsIndex < controllerConfig.vibration_options.length; vibrationOptionsIndex++) {
-                if (controllerConfig.vibration_options[vibrationOptionsIndex].display_motor == true) {
-                  if (controllerConfig.vibration_options[vibrationOptionsIndex].send_status_change_message == true) {
-                    if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] != vibrationAndLedDataToDisplayPreviousObject.motors_data[vibrationOptionsIndex]) {
-                      if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] <= 0) {
-                        updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                        client.action(chatConfig.main_channel, new Date().toISOString() + " " + controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_name + " is now disabled.");
-                        //console.log(new Date().toISOString() + " MOTOR AT INDEX " + vibrationOptionsIndex + " (" + controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_name + ") IS NOW OFF");
+            if (acceptInputs == true) {
+              if (client.readyState() === "OPEN") {
+                for (let vibrationOptionsIndex = 0; vibrationOptionsIndex < controllerConfig.vibration_options.length; vibrationOptionsIndex++) {
+                  if (controllerConfig.vibration_options[vibrationOptionsIndex].display_motor == true) {
+                    if (controllerConfig.vibration_options[vibrationOptionsIndex].send_status_change_message == true) {
+                      if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] != vibrationAndLedDataToDisplayPreviousObject.motors_data[vibrationOptionsIndex]) {
+                        if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] <= 0) {
+                          updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                          client.action(chatConfig.main_channel, new Date().toISOString() + " " + controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_name + " is now disabled.");
+                          //console.log(new Date().toISOString() + " MOTOR AT INDEX " + vibrationOptionsIndex + " (" + controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_name + ") IS NOW OFF");
+                        }
+                        if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] > 0) {
+                          updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                          client.action(chatConfig.main_channel, new Date().toISOString() + " " + controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_name + " is now enabled.");
+                          //console.log(new Date().toISOString() + " MOTOR AT INDEX " + vibrationOptionsIndex + " (" + controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_name + ") IS NOW ON");
+                        }
+                        //console.log(new Date().toISOString() + " MOTOR AT INDEX " + vibrationOptionsIndex + " (" + controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_name + ") CHANGED FROM " + vibrationAndLedDataToDisplayPreviousObject.motors_data[vibrationOptionsIndex] + " TO " + vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex]);
                       }
-                      if (vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex] > 0) {
-                        updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                        client.action(chatConfig.main_channel, new Date().toISOString() + " " + controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_name + " is now enabled.");
-                        //console.log(new Date().toISOString() + " MOTOR AT INDEX " + vibrationOptionsIndex + " (" + controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_name + ") IS NOW ON");
-                      }
-                      //console.log(new Date().toISOString() + " MOTOR AT INDEX " + vibrationOptionsIndex + " (" + controllerConfig.vibration_options[vibrationOptionsIndex].motor_label_name + ") CHANGED FROM " + vibrationAndLedDataToDisplayPreviousObject.motors_data[vibrationOptionsIndex] + " TO " + vibrationAndLedDataToDisplayObject.motors_data[vibrationOptionsIndex]);
                     }
                   }
                 }
-              }
-              for (let ledOptionsIndex = 0; ledOptionsIndex < controllerConfig.led_options.length; ledOptionsIndex++) {
-                if (controllerConfig.led_options[ledOptionsIndex].display_led == true) {
-                  if (controllerConfig.led_options[ledOptionsIndex].send_status_change_message == true) {
-                    if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] != vibrationAndLedDataToDisplayPreviousObject.leds_data[ledOptionsIndex]) {
-                      if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] <= 0) {
-                        updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                        client.action(chatConfig.main_channel, new Date().toISOString() + " " + controllerConfig.led_options[ledOptionsIndex].led_label_name + " is now disabled.");
-                        //console.log(new Date().toISOString() + " LED AT INDEX " + ledOptionsIndex + " (" + controllerConfig.led_options[ledOptionsIndex].led_label_name + ") IS NOW OFF");
+                for (let ledOptionsIndex = 0; ledOptionsIndex < controllerConfig.led_options.length; ledOptionsIndex++) {
+                  if (controllerConfig.led_options[ledOptionsIndex].display_led == true) {
+                    if (controllerConfig.led_options[ledOptionsIndex].send_status_change_message == true) {
+                      if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] != vibrationAndLedDataToDisplayPreviousObject.leds_data[ledOptionsIndex]) {
+                        if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] <= 0) {
+                          updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                          client.action(chatConfig.main_channel, new Date().toISOString() + " " + controllerConfig.led_options[ledOptionsIndex].led_label_name + " is now disabled.");
+                          //console.log(new Date().toISOString() + " LED AT INDEX " + ledOptionsIndex + " (" + controllerConfig.led_options[ledOptionsIndex].led_label_name + ") IS NOW OFF");
+                        }
+                        if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] > 0) {
+                          updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                          client.action(chatConfig.main_channel, new Date().toISOString() + " " + controllerConfig.led_options[ledOptionsIndex].led_label_name + " is now enabled.");
+                          //console.log(new Date().toISOString() + " LED AT INDEX " + ledOptionsIndex + " (" + controllerConfig.led_options[ledOptionsIndex].led_label_name + ") IS NOW ON");
+                        }
+                        //console.log(new Date().toISOString() + " LED AT INDEX " + ledOptionsIndex + " (" + controllerConfig.led_options[ledOptionsIndex].led_label_name + ") CHANGED FROM " + vibrationAndLedDataToDisplayPreviousObject.leds_data[ledOptionsIndex] + " TO " + vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex]);
                       }
-                      if (vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex] > 0) {
-                        updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                        client.action(chatConfig.main_channel, new Date().toISOString() + " " + controllerConfig.led_options[ledOptionsIndex].led_label_name + " is now enabled.");
-                        //console.log(new Date().toISOString() + " LED AT INDEX " + ledOptionsIndex + " (" + controllerConfig.led_options[ledOptionsIndex].led_label_name + ") IS NOW ON");
-                      }
-                      //console.log(new Date().toISOString() + " LED AT INDEX " + ledOptionsIndex + " (" + controllerConfig.led_options[ledOptionsIndex].led_label_name + ") CHANGED FROM " + vibrationAndLedDataToDisplayPreviousObject.leds_data[ledOptionsIndex] + " TO " + vibrationAndLedDataToDisplayObject.leds_data[ledOptionsIndex]);
                     }
                   }
                 }
