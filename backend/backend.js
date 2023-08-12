@@ -20896,7 +20896,7 @@ if (globalConfig.use_discord_bot == true) {
     originalDiscordMessage = originalDiscordMessage.trim();
     let originalDiscordMessageWords = originalDiscordMessage.split(/\s+/ig);
     let originalDiscordMessageLines = originalDiscordMessage.split(/\n+/ig);
-    let picOneOptionRegex = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((pick\s*one)+|(pick\s*options*)+|(tie\s*breaker)+)+/ig;
+    let picOneOptionRegex = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((pick\s*one)+|(pick\s*options*)+|(tie\s*breaker)+|(coin\s*flip)+)+/ig;
     let pickOneOptionPrefixCheck = picOneOptionRegex.test(originalDiscordMessage);
     if (pickOneOptionPrefixCheck == true) {
       let messageToReturn = "";

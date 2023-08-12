@@ -859,7 +859,7 @@ function draw() {
   //console.log(new Date(currentTimeMillis).toISOString() + " A " + textDefaultLeadingToUse);
   //text(playTimeString + "\n" + new Date(currentTimeMillis).toISOString(), 768, 551);
   if (socket.connected == true) {
-    if (playTimeTotal >= 0) {
+    if (acceptInputs == true) {
       if (controllerConfig.use_vibration_and_led_data == false) {
         vibrationXAxisPosition = 0;
         vibrationYAxisPosition = 0;
@@ -1341,42 +1341,44 @@ function draw() {
     text("|", votingBarSlider, 4);
   }
   if (voteDataObject.input_mode == 0) {
-    inputQueue.forEach(function(item, index, array) {
-      recalculateFont(2, 2);
-      initialPosition = (index * textDefaultLeadingToUse) + 57;
-      textFont(font);
-      textSize(textSizeToUse);
-      strokeWeight(fontStrokeWeight);
-      stroke(item.user_color_inverted); // Username stroke color
-      textAlign(LEFT, TOP);
-      fill(item.user_color);
-      if (item.username_to_display.length > 16) {
-        scale(0.5, 1);
-        textLeading(textDefaultLeadingToUse);
-        text(item.username_to_display, (771 * 2) - 2, 2 + initialPosition);
-        scale(2, 1);
-      }
-      if (item.username_to_display.length <= 16) {
-        // Don't rescale
-        textLeading(textDefaultLeadingToUse);
-        text(item.username_to_display, 771, 2 + initialPosition);
-      }
-      strokeWeight(fontStrokeWeight);
-      stroke("#FFFFFFFF");
-      textAlign(RIGHT, TOP);
-      fill("#000000FF");
-      //scale(0.5);
-      if (item.input_string.length > 12) {
-        scale(0.5, 1);
-        textLeading(textDefaultLeadingToUse);
-        text(item.input_string, (1022 * 2) + 2, 2 + initialPosition);
-        scale(2, 1);
-      }
-      if (item.input_string.length <= 12) {
-        textLeading(textDefaultLeadingToUse);
-        text(item.input_string, 1023, 2 + initialPosition);
-      }
-    });
+    if (acceptInputs == true) {
+      inputQueue.forEach(function(item, index, array) {
+        recalculateFont(2, 2);
+        initialPosition = (index * textDefaultLeadingToUse) + 57;
+        textFont(font);
+        textSize(textSizeToUse);
+        strokeWeight(fontStrokeWeight);
+        stroke(item.user_color_inverted); // Username stroke color
+        textAlign(LEFT, TOP);
+        fill(item.user_color);
+        if (item.username_to_display.length > 16) {
+          scale(0.5, 1);
+          textLeading(textDefaultLeadingToUse);
+          text(item.username_to_display, (771 * 2) - 2, 2 + initialPosition);
+          scale(2, 1);
+        }
+        if (item.username_to_display.length <= 16) {
+          // Don't rescale
+          textLeading(textDefaultLeadingToUse);
+          text(item.username_to_display, 771, 2 + initialPosition);
+        }
+        strokeWeight(fontStrokeWeight);
+        stroke("#FFFFFFFF");
+        textAlign(RIGHT, TOP);
+        fill("#000000FF");
+        //scale(0.5);
+        if (item.input_string.length > 12) {
+          scale(0.5, 1);
+          textLeading(textDefaultLeadingToUse);
+          text(item.input_string, (1022 * 2) + 2, 2 + initialPosition);
+          scale(2, 1);
+        }
+        if (item.input_string.length <= 12) {
+          textLeading(textDefaultLeadingToUse);
+          text(item.input_string, 1023, 2 + initialPosition);
+        }
+      });
+    }
   }
 
   // Draw the BASIC/ADVANCED text behind the vote bar (the bar is translucent)
@@ -1410,32 +1412,34 @@ function draw() {
     stroke("#000000FF");
     textAlign(LEFT, TOP); // 4x5 font isn't kind to CENTER, LEFT, text gets blurry, so I have to do LEFT, TOP and kinda hardcode the text position so it looks like it is centered, ugly hack but it works
     fill("#FFFFFFFF");
-    if (basicInputString.length > 12) {
-      textAlign(CENTER, TOP);
-      scale(0.5, 1);
-      textLeading(textDefaultLeadingToUse);
-      if (vibrateCurrentInput == false) {
-        text(basicInputString, (896 * 2), 306);
-      }
-      if (vibrateCurrentInput == true) {
-        if (changeCurrentInputColor == true) {
-          fill(colorToChangeCurrentInputTo);
+    if (acceptInputs == true) {
+      if (basicInputString.length > 12) {
+        textAlign(CENTER, TOP);
+        scale(0.5, 1);
+        textLeading(textDefaultLeadingToUse);
+        if (vibrateCurrentInput == false) {
+          text(basicInputString, (896 * 2), 306);
         }
-        text(basicInputString, (896 * 2) + vibrationXAxisPosition, 306 + vibrationYAxisPosition);
-      }
-      scale(2, 1);
-    }
-    if (basicInputString.length <= 12 && basicInputString.length > 0) {
-      textAlign(CENTER, TOP);
-      textLeading(textDefaultLeadingToUse);
-      if (vibrateCurrentInput == false) {
-        text(basicInputString, 896, 306);
-      }
-      if (vibrateCurrentInput == true) {
-        if (changeCurrentInputColor == true) {
-          fill(colorToChangeCurrentInputTo);
+        if (vibrateCurrentInput == true) {
+          if (changeCurrentInputColor == true) {
+            fill(colorToChangeCurrentInputTo);
+          }
+          text(basicInputString, (896 * 2) + vibrationXAxisPosition, 306 + vibrationYAxisPosition);
         }
-        text(basicInputString, 896 + vibrationXAxisPosition, 306 + vibrationYAxisPosition);
+        scale(2, 1);
+      }
+      if (basicInputString.length <= 12 && basicInputString.length > 0) {
+        textAlign(CENTER, TOP);
+        textLeading(textDefaultLeadingToUse);
+        if (vibrateCurrentInput == false) {
+          text(basicInputString, 896, 306);
+        }
+        if (vibrateCurrentInput == true) {
+          if (changeCurrentInputColor == true) {
+            fill(colorToChangeCurrentInputTo);
+          }
+          text(basicInputString, 896 + vibrationXAxisPosition, 306 + vibrationYAxisPosition);
+        }
       }
     }
   }
@@ -1501,119 +1505,121 @@ function draw() {
       }
     }
     if (advancedInputString != "") {
-      if (advancedInputMetadata.is_inner_loop == 0) {
-        if (advancedInputMetadata.loop_macro == 0) {
-          textAlign(CENTER, TOP);
-          textLeading(textDefaultLeadingToUse);
-          if (vibrateCurrentInput == false) {
-            text("Input\n" + advancedInputMetadata.current_macro_index_running + "/" + advancedInputMetadata.macro_inputs_to_run, 896, 100);
-          }
-          if (vibrateCurrentInput == true) {
-            if (changeCurrentInputColor == true) {
-              fill(colorToChangeCurrentInputTo);
+      if (acceptInputs == true) {
+        if (advancedInputMetadata.is_inner_loop == 0) {
+          if (advancedInputMetadata.loop_macro == 0) {
+            textAlign(CENTER, TOP);
+            textLeading(textDefaultLeadingToUse);
+            if (vibrateCurrentInput == false) {
+              text("Input\n" + advancedInputMetadata.current_macro_index_running + "/" + advancedInputMetadata.macro_inputs_to_run, 896, 100);
             }
-            text("Input\n" + advancedInputMetadata.current_macro_index_running + "/" + advancedInputMetadata.macro_inputs_to_run, 896 + vibrationXAxisPosition, 100 + vibrationYAxisPosition);
+            if (vibrateCurrentInput == true) {
+              if (changeCurrentInputColor == true) {
+                fill(colorToChangeCurrentInputTo);
+              }
+              text("Input\n" + advancedInputMetadata.current_macro_index_running + "/" + advancedInputMetadata.macro_inputs_to_run, 896 + vibrationXAxisPosition, 100 + vibrationYAxisPosition);
+            }
+          }
+          if (advancedInputMetadata.loop_macro == 1) {
+            textAlign(CENTER, TOP);
+            textLeading(textDefaultLeadingToUse);
+            if (vibrateCurrentInput == false) {
+              text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\n\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1), 896, 100);
+            }
+            if (vibrateCurrentInput == true) {
+              if (changeCurrentInputColor == true) {
+                fill(colorToChangeCurrentInputTo);
+              }
+              text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\n\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1), 896 + vibrationXAxisPosition, 100 + vibrationYAxisPosition);
+            }
+          }
+          if (advancedInputString.length > 12) {
+            textAlign(CENTER, TOP);
+            scale(0.5, 1);
+            textLeading(textDefaultLeadingToUse);
+            if (vibrateCurrentInput == false) {
+              text("\n" + advancedInputString, (896 * 2), 224);
+            }
+            if (vibrateCurrentInput == true) {
+              if (changeCurrentInputColor == true) {
+                fill(colorToChangeCurrentInputTo);
+              }
+              text("\n" + advancedInputString, (896 * 2) + vibrationXAxisPosition, 224 + vibrationYAxisPosition);
+            }
+            scale(2, 1);
+          }
+          if (advancedInputString.length <= 12 && advancedInputString.length > 0) {
+            textAlign(CENTER, TOP);
+            textLeading(textDefaultLeadingToUse);
+            if (vibrateCurrentInput == false) {
+              text("\n" + advancedInputString, 896, 224);
+            }
+            if (vibrateCurrentInput == true) {
+              if (changeCurrentInputColor == true) {
+                fill(colorToChangeCurrentInputTo);
+              }
+              text("\n" + advancedInputString, 896 + vibrationXAxisPosition, 224 + vibrationYAxisPosition);
+            }
           }
         }
-        if (advancedInputMetadata.loop_macro == 1) {
-          textAlign(CENTER, TOP);
-          textLeading(textDefaultLeadingToUse);
-          if (vibrateCurrentInput == false) {
-            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\n\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1), 896, 100);
+        if (advancedInputMetadata.is_inner_loop == 1) {
+          let innerLoopCurrentInputIndex = innerLoopMetadata.inner_loop_input_index - innerLoopMetadata.where_does_inner_loop_start_index;
+          if (innerLoopCurrentInputIndex <= 0) {
+            innerLoopCurrentInputIndex = 0;
           }
-          if (vibrateCurrentInput == true) {
-            if (changeCurrentInputColor == true) {
-              fill(colorToChangeCurrentInputTo);
+          if (advancedInputMetadata.loop_macro == 0) {
+            textAlign(CENTER, TOP);
+            textLeading(textDefaultLeadingToUse);
+            if (vibrateCurrentInput == false) {
+              text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896, 60);
             }
-            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\n\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1), 896 + vibrationXAxisPosition, 100 + vibrationYAxisPosition);
-          }
-        }
-        if (advancedInputString.length > 12) {
-          textAlign(CENTER, TOP);
-          scale(0.5, 1);
-          textLeading(textDefaultLeadingToUse);
-          if (vibrateCurrentInput == false) {
-            text("\n" + advancedInputString, (896 * 2), 224);
-          }
-          if (vibrateCurrentInput == true) {
-            if (changeCurrentInputColor == true) {
-              fill(colorToChangeCurrentInputTo);
+            if (vibrateCurrentInput == true) {
+              if (changeCurrentInputColor == true) {
+                fill(colorToChangeCurrentInputTo);
+              }
+              text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896 + vibrationXAxisPosition, 60 + vibrationYAxisPosition);
             }
-            text("\n" + advancedInputString, (896 * 2) + vibrationXAxisPosition, 224 + vibrationYAxisPosition);
           }
-          scale(2, 1);
-        }
-        if (advancedInputString.length <= 12 && advancedInputString.length > 0) {
-          textAlign(CENTER, TOP);
-          textLeading(textDefaultLeadingToUse);
-          if (vibrateCurrentInput == false) {
-            text("\n" + advancedInputString, 896, 224);
-          }
-          if (vibrateCurrentInput == true) {
-            if (changeCurrentInputColor == true) {
-              fill(colorToChangeCurrentInputTo);
+          if (advancedInputMetadata.loop_macro == 1) {
+            textAlign(CENTER, TOP);
+            textLeading(textDefaultLeadingToUse);
+            if (vibrateCurrentInput == false) {
+              text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1) + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896, 40);            
             }
-            text("\n" + advancedInputString, 896 + vibrationXAxisPosition, 224 + vibrationYAxisPosition);
-          }
-        }
-      }
-      if (advancedInputMetadata.is_inner_loop == 1) {
-        let innerLoopCurrentInputIndex = innerLoopMetadata.inner_loop_input_index - innerLoopMetadata.where_does_inner_loop_start_index;
-        if (innerLoopCurrentInputIndex <= 0) {
-          innerLoopCurrentInputIndex = 0;
-        }
-        if (advancedInputMetadata.loop_macro == 0) {
-          textAlign(CENTER, TOP);
-          textLeading(textDefaultLeadingToUse);
-          if (vibrateCurrentInput == false) {
-            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896, 60);
-          }
-          if (vibrateCurrentInput == true) {
-            if (changeCurrentInputColor == true) {
-              fill(colorToChangeCurrentInputTo);
+            if (vibrateCurrentInput == true) {
+              if (changeCurrentInputColor == true) {
+                fill(colorToChangeCurrentInputTo);
+              }
+              text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1) + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896 + vibrationXAxisPosition, 40 + vibrationYAxisPosition);            
             }
-            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896 + vibrationXAxisPosition, 60 + vibrationYAxisPosition);
           }
-        }
-        if (advancedInputMetadata.loop_macro == 1) {
-          textAlign(CENTER, TOP);
-          textLeading(textDefaultLeadingToUse);
-          if (vibrateCurrentInput == false) {
-            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1) + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896, 40);            
-          }
-          if (vibrateCurrentInput == true) {
-            if (changeCurrentInputColor == true) {
-              fill(colorToChangeCurrentInputTo);
+          if (advancedInputString.length > 12) {
+            textAlign(CENTER, TOP);
+            scale(0.5, 1);
+            textLeading(textDefaultLeadingToUse);
+            if (vibrateCurrentInput == false) {
+              text("\n" + advancedInputString, (896 * 2), 266);
             }
-            text("Input\n" + (advancedInputMetadata.current_macro_index_running + 1) + "/" + advancedInputMetadata.macro_inputs_to_run + "\nLoop\n" + advancedInputMetadata.loop_counter + "/" + (advancedInputMetadata.times_to_loop + 1) + "\nInner Input\n" + (innerLoopCurrentInputIndex + 1) + "/" + innerLoopMetadata.inner_loop_inputs_to_run + "\nI. Loop\n" + (advancedInputMetadata.macro_metadata_index + 1) + "/" + (advancedInputMetadata.how_many_inner_loops_macro_has) + "\nI. Loop Count\n" + (innerLoopMetadata.inner_loop_repeat_counter) + "/" + (innerLoopMetadata.inner_loop_times_to_repeat), 896 + vibrationXAxisPosition, 40 + vibrationYAxisPosition);            
-          }
-        }
-        if (advancedInputString.length > 12) {
-          textAlign(CENTER, TOP);
-          scale(0.5, 1);
-          textLeading(textDefaultLeadingToUse);
-          if (vibrateCurrentInput == false) {
-            text("\n" + advancedInputString, (896 * 2), 266);
-          }
-          if (vibrateCurrentInput == true) {
-            if (changeCurrentInputColor == true) {
-              fill(colorToChangeCurrentInputTo);
+            if (vibrateCurrentInput == true) {
+              if (changeCurrentInputColor == true) {
+                fill(colorToChangeCurrentInputTo);
+              }
+              text("\n" + advancedInputString, (896 * 2) + vibrationXAxisPosition, 266 + vibrationYAxisPosition);
             }
-            text("\n" + advancedInputString, (896 * 2) + vibrationXAxisPosition, 266 + vibrationYAxisPosition);
+            scale(2, 1);
           }
-          scale(2, 1);
-        }
-        if (advancedInputString.length <= 12 && advancedInputString.length > 0) {
-          textAlign(CENTER, TOP);
-          textLeading(textDefaultLeadingToUse);
-          if (vibrateCurrentInput == false) {
-            text("\n" + advancedInputString, 896, 266);
-          }
-          if (vibrateCurrentInput == true) {
-            if (changeCurrentInputColor == true) {
-              fill(colorToChangeCurrentInputTo);
+          if (advancedInputString.length <= 12 && advancedInputString.length > 0) {
+            textAlign(CENTER, TOP);
+            textLeading(textDefaultLeadingToUse);
+            if (vibrateCurrentInput == false) {
+              text("\n" + advancedInputString, 896, 266);
             }
-            text("\n" + advancedInputString, 896 + vibrationXAxisPosition, 266 + vibrationYAxisPosition);
+            if (vibrateCurrentInput == true) {
+              if (changeCurrentInputColor == true) {
+                fill(colorToChangeCurrentInputTo);
+              }
+              text("\n" + advancedInputString, 896 + vibrationXAxisPosition, 266 + vibrationYAxisPosition);
+            }
           }
         }
       }
