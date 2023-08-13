@@ -859,7 +859,7 @@ function draw() {
   //console.log(new Date(currentTimeMillis).toISOString() + " A " + textDefaultLeadingToUse);
   //text(playTimeString + "\n" + new Date(currentTimeMillis).toISOString(), 768, 551);
   if (socket.connected == true) {
-    if (acceptInputs == true) {
+    if (playTimeTotal >= 0 || acceptInputs == true) {
       if (controllerConfig.use_vibration_and_led_data == false) {
         vibrationXAxisPosition = 0;
         vibrationYAxisPosition = 0;
