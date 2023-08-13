@@ -8,7 +8,7 @@
   "time_unit_alternate": "frames",
   "time_unit_short": "f",
   "millis_to_seconds_conversion_threshold": -1,
-  "display_framerate": false,
+  "display_framerate": true,
   "normal_delay": 16,
   "max_delay": 65535,
   "held_delay": 0,
@@ -199,7 +199,7 @@
     "Normal duration of inputs is {{normal_delay}} {{time_unit}}, but you can end your input with - to execute the inputs indefinitely until the next input comes. Alternatively, you can type Wait or Stop to stop the execution of a held input. Maximum duration for an input is {{max_delay}} {{time_unit}}.",
     "Example: X+Square+Right- will hold the Buttons X and Square and will pull Right on the Left Analog Stick. Commands are NOT case sensitive: left and lEft will both pull Left on the Left Analog Stick.",
     "You can type Basic or Advanced to vote to change input modes. The majority of votes needs at least 75% of votes to have the input mode changed to their side, votes are removed from the pool after 5 minutes. After that, you'll have to vote again to have your vote readded to the pool.",
-    "Alternatively, you can spam votes to make sure your vote always stays in the pool. You can switch sides whenever you want. Basic mode executes inputs are they are received from chat, it is limited for some tasks, while advanced can be used to do a sequence of very precise inputs. Current mode is Basic mode. You can also find this help message in the stream description."
+    "Alternatively, you can spam votes to make sure your vote always stays in the pool. You can switch sides whenever you want. Basic mode executes inputs are they are received from chat, it is limited for some tasks, while advanced can be used to do a sequence of very precise inputs. Current mode is Basic mode. You can also find this help message in the stream description. The framerate is currently {{frame_rate}}fps"
   ],
   "simultaneous_different_advanced_buttons_allowed": 5,
   "help_message_advanced": [
@@ -213,7 +213,7 @@
     "You can use both Invert and Opposite at the same time. Example: Opposite Invert X+Up O+Down Square+Left Triangle+Right Select Up Down will execute commands as Up Down Select Triangle+Left Square+Right O+Up X+Down.",
     "Maximum duration for an input is {{max_duration_per_precision_input_millis}} {{time_unit}}. You can type Basic or Advanced to vote to change input modes. The majority of votes needs at least 75% of votes to have the input mode changed to their side, votes are removed from the pool after 5 minutes. After that, you'll have to vote again to have your vote readded to the pool.",
     "Alternatively, you can spam votes to make sure your vote always stays in the pool. You can switch sides whenever you want. Basic mode executes inputs are they are received from chat, it is limited for some tasks, while advanced can be used to do a sequence of very precise inputs. Current mode is Advanced mode.",
-    "You can learn how to save and execute saved macros (and more!) by using the command !macrohelp. You can also find this help message in the stream description."
+    "You can learn how to save and execute saved macros (and more!) by using the command !macrohelp. You can also find this help message in the stream description. The framerate is currently {{frame_rate}}fps"
   ],
   "blacklisted_combos": [
     {

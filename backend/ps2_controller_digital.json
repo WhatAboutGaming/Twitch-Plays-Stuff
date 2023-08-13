@@ -19402,7 +19402,8 @@
     "input_value": "0x00007F7F7F7F0100L",
     "input_name": "Analog",
     "input_alias": [
-      "Analog"
+      "Analog",
+      "Vibration"
     ],
     "color_value": "#FFFFFF",
     "is_blacklisted": true,
