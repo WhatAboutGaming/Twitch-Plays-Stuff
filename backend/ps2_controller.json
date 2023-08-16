@@ -4842,7 +4842,6 @@
       "1L",
       "LB",
       "BL",
-      "L",
       "LeftBumper",
       "BumperLeft",
       "LeftShoulder",
@@ -4901,7 +4900,6 @@
       "1R",
       "RB",
       "BR",
-      "R",
       "RightBumper",
       "BumperRight",
       "RightShoulder",
@@ -11463,6 +11461,7 @@
     "input_value": "0x00007F7F007F0000L",
     "input_name": "<",
     "input_alias": [
+      "L",
       "L≤=",
       "L≤",
       "L≤-",
@@ -11919,6 +11918,7 @@
     "input_value": "0x00007F7FFF7F0000L",
     "input_name": ">",
     "input_alias": [
+      "R",
       "L=≥",
       "L≥",
       "L-≥",

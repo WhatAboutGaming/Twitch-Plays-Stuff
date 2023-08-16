@@ -49,11 +49,11 @@
   "voting_allowed_period_millis": 300000,
   "vote_expiration_time_millis": 300000,
   "help_message_cooldown_millis": 5000,
-  "game_title": "Kingdom Hearts",
-  "game_title_short": "Kingdom Hearts",
-  "game_title_shorter": "Kingdom Hearts",
-  "game_title_shorter_2": "Kingdom Hearts",
-  "game_title_shorter_3": "Kingdom Hearts",
+  "game_title": "Kingdom Hearts 2",
+  "game_title_short": "Kingdom Hearts 2",
+  "game_title_shorter": "Kingdom Hearts 2",
+  "game_title_shorter_2": "Kingdom Hearts 2",
+  "game_title_shorter_3": "Kingdom Hearts 2",
   "stream_title": "Twitch Plays(Viewers play\/Chat plays){{game_title_shorter_3}} on an actual PS2 day {{play_time_days}} hour {{hour_low}} to hour {{hour_high}} type !help to learn how to play",
   "stream_going_offline_message": "{{game_title}} day {{play_time_days}} hour {{hour_low}} to hour {{hour_high}} stream is briefly going offline, don't go anywhere!",
   "send_stream_going_offline_message": true,
@@ -90,7 +90,7 @@
   "github_repo": "https://github.com/WhatAboutGaming/Twitch-Plays-Stuff",
   "run_id": 5,
   "notes": "To test server: Set game_title as TEST RUN 0, set stream_title as TEST RUN 1, set next_game_title as TEST RUN 2, set main_database_name as test_database_main, set chatters_collection_name as test_database_chatters, set run_name as test_database_run_name, set global_database_name as test_database_global, set inputter_database_name as test_database_inputters, set macro_database_name as test_database_macro, set run_id as -1",
-  "overlay_header_text": "Twitch Plays (Viewers play\/Chat plays) {{game_title_short}}\non PS2 !help !discord",
+  "overlay_header_text": "Twitch Plays (Viewers play\/Chat plays) {{game_title_short}}\non an actual PS2 console !help !discord",
   "overlay_advanced_mode_help_message_to_display": "!help to learn how to play\n\nStream goes offline in\n{{stream_end_time}}\n(The {{play_time:1692489600000}} mark)\n\nFinal Fantasy (NES)\nStarts in {{next_run_start_time}}",
   "overlay_text_rotation": [
     "Type !help or !commands to learn how to play",
@@ -107,7 +107,7 @@
     "Glitches are allowed as long as they don't break or crash\nthe game, or leave the game in an unplayable state."
   ],
   "current_run_endgame_goals": [
-    "Have fun! :)"
+    "The only endgame condition is to have fun! :)"
   ],
   "periodical_news_messages": [
     "Not sure how to play? You can type !help or !commands in chat at any time to have a help message sent straight to chat.",
