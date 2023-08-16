@@ -587,6 +587,7 @@ function writeToPort(inputArray, inputIndex, inputDelay) {
   //console.log("Writing index " + inputIndex);
 
   // Clear the incoming serial data from arduino before sending a basic input
+  /*
   port.flush(function(err, results) {
     //console.log(new Date().toISOString() + " 1 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     if (err) {
@@ -601,6 +602,8 @@ function writeToPort(inputArray, inputIndex, inputDelay) {
     }
     //console.log(new Date().toISOString() + " flush results " + results);
   });
+  */
+  /*
   port.drain(function(err, results) {
     //console.log(new Date().toISOString() + " 2 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     if (err) {
@@ -615,7 +618,7 @@ function writeToPort(inputArray, inputIndex, inputDelay) {
     }
     //console.log(new Date().toISOString() + " drain results " + results);
   });
-
+  */
   port.write(inputArray, function(err) {
     //console.log(new Date().toISOString() + " 3 [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     if (err) {
@@ -712,6 +715,7 @@ parser.on("data", async function(data) {
     // The block below should never happen, if it does, something horribly wrong happened
     if (data.length != incomingSerialDataSize) {
       //console.log(new Date().toISOString() + " Invalid data size");
+      /*
       port.flush(function(err, results) {
         //console.log(new Date().toISOString() + " 4 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
@@ -726,6 +730,8 @@ parser.on("data", async function(data) {
         }
         //console.log(new Date().toISOString() + " flush results " + results);
       });
+      */
+      /*
       port.drain(function(err, results) {
         //console.log(new Date().toISOString() + " 5 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
@@ -740,6 +746,7 @@ parser.on("data", async function(data) {
         }
         //console.log(new Date().toISOString() + " drain results " + results);
       });
+      */
     }
     //
     if (data.length == incomingSerialDataSize) {
@@ -916,6 +923,7 @@ parser.on("data", async function(data) {
         }
         if (data[0] == 1) {
           if (inputMode != 0) {
+            /*
             port.flush(function(err, results) {
               //console.log(new Date().toISOString() + " 6 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
@@ -930,6 +938,8 @@ parser.on("data", async function(data) {
               }
               //console.log(new Date().toISOString() + " flush results " + results);
             });
+            */
+            /*
             port.drain(function(err, results) {
               //console.log(new Date().toISOString() + " 7 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
@@ -944,6 +954,7 @@ parser.on("data", async function(data) {
               }
               //console.log(new Date().toISOString() + " drain results " + results);
             });
+            */
             data[0] = 0;
             data[1] = 0;
             data[2] = 0;
@@ -1362,6 +1373,7 @@ parser.on("data", async function(data) {
         }
         if (data[0] >= controllerConfig.initial_macro_preamble && data[0] <= (controllerConfig.final_macro_preamble - 1)) {
           if (inputMode != 2) {
+            /*
             port.flush(function(err, results) {
               //console.log(new Date().toISOString() + " 8 [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
@@ -1376,6 +1388,8 @@ parser.on("data", async function(data) {
               }
               //console.log(new Date().toISOString() + " flush results " + results);
             });
+            */
+            /*
             port.drain(function(err, results) {
               //console.log(new Date().toISOString() + " 9 [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
@@ -1390,6 +1404,7 @@ parser.on("data", async function(data) {
               }
               //console.log(new Date().toISOString() + " drain results " + results);
             });
+            */
             data[0] = 0;
             data[1] = 0;
             data[2] = 0;
@@ -1754,6 +1769,7 @@ parser.on("data", async function(data) {
         // If this block happens, then the data is invalid format (probably because the serial communication desynced), the serial port will be flushed to clear any desync issues and should hopefully be in sync when the next message is received from the Arduino
         //console.log(new Date().toISOString() + " Invalid data format, data[0] = " + data[0] + " data[11] = " + data[11]);
         //console.log(data);
+        /*
         port.flush(function(err, results) {
           //console.log(new Date().toISOString() + " A [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
           if (err) {
@@ -1768,6 +1784,8 @@ parser.on("data", async function(data) {
           }
           //console.log(new Date().toISOString() + " flush results " + results);
         });
+        */
+        /*
         port.drain(function(err, results) {
           //console.log(new Date().toISOString() + " B [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
           if (err) {
@@ -1782,6 +1800,7 @@ parser.on("data", async function(data) {
           }
           //console.log(new Date().toISOString() + " drain results " + results);
         });
+        */
       }
     }
   }
@@ -9702,6 +9721,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //
 
                 // Clear the incoming serial data from arduino before setting settable advanced input
+                /*
                 port.flush(function(err, results) {
                   //console.log(new Date().toISOString() + " C [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
@@ -9716,6 +9736,8 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(new Date().toISOString() + " flush results " + results);
                 });
+                */
+                /*
                 port.drain(function(err, results) {
                   //console.log(new Date().toISOString() + " D [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
@@ -9730,7 +9752,7 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(new Date().toISOString() + " drain results " + results);
                 });
-
+                */
                 port.write(settableMacroChain[settableInputsIndex].input_data, function(err) {
                   //console.log(new Date().toISOString() + " E [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
@@ -9769,6 +9791,7 @@ async function onMessageHandler(target, tags, message, self) {
               await sleep(1);
 
               // Clear the incoming serial data from arduino before setting an advanced input to be executed
+              /*
               port.flush(function(err, results) {
                 //console.log(new Date().toISOString() + " F [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -9783,6 +9806,8 @@ async function onMessageHandler(target, tags, message, self) {
                 }
                 //console.log(new Date().toISOString() + " flush results " + results);
               });
+              */
+              /*
               port.drain(function(err, results) {
                 //console.log(new Date().toISOString() + " G [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -9797,7 +9822,7 @@ async function onMessageHandler(target, tags, message, self) {
                 }
                 //console.log(new Date().toISOString() + " drain results " + results);
               });
-
+              */
               port.write(playSettableParametersToWrite, function(err) {
                 //console.log(new Date().toISOString() + " H [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -10118,6 +10143,7 @@ async function onMessageHandler(target, tags, message, self) {
                 await sleep(1);
 
                 // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
+                /*
                 port.flush(function(err, results) {
                   //console.log(new Date().toISOString() + " I [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
@@ -10132,7 +10158,8 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(new Date().toISOString() + " flush results " + results);
                 });
-
+                */
+                /*
                 port.drain(function(err, results) {
                   //console.log(new Date().toISOString() + " J [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
@@ -10147,7 +10174,7 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(new Date().toISOString() + " drain results " + results);
                 });
-
+                */
                 // Write data to Arduino here
                 port.write(innerLoopParametersToWrite, function(err) {
                   if (err) {
@@ -10973,6 +11000,7 @@ async function onMessageHandler(target, tags, message, self) {
               //client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2, messageId);
 
               // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
+              /*
               port.flush(function(err, results) {
                 //console.log(new Date().toISOString() + " I [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -10987,6 +11015,8 @@ async function onMessageHandler(target, tags, message, self) {
                 }
                 //console.log(new Date().toISOString() + " flush results " + results);
               });
+              */
+              /*
               port.drain(function(err, results) {
                 //console.log(new Date().toISOString() + " J [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -11001,7 +11031,7 @@ async function onMessageHandler(target, tags, message, self) {
                 }
                 //console.log(new Date().toISOString() + " drain results " + results);
               });
-
+              */
               port.write(macroParametersToWrite, function(err) {
                 //console.log(new Date().toISOString() + " K [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -13565,6 +13595,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //
 
                 // Clear the incoming serial data from arduino before setting settable advanced input
+                /*
                 port.flush(function(err, results) {
                   //console.log(new Date().toISOString() + " C [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
@@ -13579,6 +13610,8 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(new Date().toISOString() + " flush results " + results);
                 });
+                */
+                /*
                 port.drain(function(err, results) {
                   //console.log(new Date().toISOString() + " D [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
@@ -13593,7 +13626,7 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(new Date().toISOString() + " drain results " + results);
                 });
-
+                */
                 port.write(settableMacroChain[settableInputsIndex].input_data, function(err) {
                   //console.log(new Date().toISOString() + " E [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
@@ -13632,6 +13665,7 @@ async function onMessageHandler(target, tags, message, self) {
               await sleep(1);
 
               // Clear the incoming serial data from arduino before setting an advanced input to be executed
+              /*
               port.flush(function(err, results) {
                 //console.log(new Date().toISOString() + " F [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -13646,6 +13680,8 @@ async function onMessageHandler(target, tags, message, self) {
                 }
                 //console.log(new Date().toISOString() + " flush results " + results);
               });
+              */
+              /*
               port.drain(function(err, results) {
                 //console.log(new Date().toISOString() + " G [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -13660,7 +13696,7 @@ async function onMessageHandler(target, tags, message, self) {
                 }
                 //console.log(new Date().toISOString() + " drain results " + results);
               });
-
+              */
               port.write(playSettableParametersToWrite, function(err) {
                 //console.log(new Date().toISOString() + " H [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -13981,6 +14017,7 @@ async function onMessageHandler(target, tags, message, self) {
                 await sleep(1);
 
                 // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
+                /*
                 port.flush(function(err, results) {
                   //console.log(new Date().toISOString() + " I [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
@@ -13995,7 +14032,8 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(new Date().toISOString() + " flush results " + results);
                 });
-
+                */
+                /*
                 port.drain(function(err, results) {
                   //console.log(new Date().toISOString() + " J [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                   if (err) {
@@ -14010,7 +14048,7 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(new Date().toISOString() + " drain results " + results);
                 });
-
+                */
                 // Write data to Arduino here
                 port.write(innerLoopParametersToWrite, function(err) {
                   if (err) {
@@ -14836,6 +14874,7 @@ async function onMessageHandler(target, tags, message, self) {
               //client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2, messageId);
 
               // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
+              /*
               port.flush(function(err, results) {
                 //console.log(new Date().toISOString() + " I [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -14850,6 +14889,8 @@ async function onMessageHandler(target, tags, message, self) {
                 }
                 //console.log(new Date().toISOString() + " flush results " + results);
               });
+              */
+              /*
               port.drain(function(err, results) {
                 //console.log(new Date().toISOString() + " J [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -14864,7 +14905,7 @@ async function onMessageHandler(target, tags, message, self) {
                 }
                 //console.log(new Date().toISOString() + " drain results " + results);
               });
-
+              */
               port.write(macroParametersToWrite, function(err) {
                 //console.log(new Date().toISOString() + " K [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
                 if (err) {
@@ -17962,6 +18003,7 @@ function checkModeVotes() {
     // Clear the incoming serial data from arduino before setting an advanced input
     if (waitForArduinoToBeReady == false) {
       console.log(new Date().toISOString() + " [SERIAL PORT] It looks like we're trying to write to the port before it is ready com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+      /*
       port.flush(function(err, results) {
         //console.log(new Date().toISOString() + " L [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
@@ -17976,6 +18018,8 @@ function checkModeVotes() {
         }
         //console.log(new Date().toISOString() + " flush results " + results);
       });
+      */
+      /*
       port.drain(function(err, results) {
         //console.log(new Date().toISOString() + " M [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
@@ -17990,6 +18034,7 @@ function checkModeVotes() {
         }
         //console.log(new Date().toISOString() + " drain results " + results);
       });
+      */
       port.write(neutralDataToWrite, function(err) {
         //console.log(new Date().toISOString() + " N [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
         if (err) {
@@ -18803,6 +18848,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
           if (sendToArduino == true) {
 
             // Clear the incoming serial data from arduino before setting any input in the input chain
+            /*
             port.flush(function(err, results) {
               //console.log(new Date().toISOString() + " O [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
@@ -18817,6 +18863,8 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
               }
               //console.log(new Date().toISOString() + " flush results " + results);
             });
+            */
+            /*
             port.drain(function(err, results) {
               //console.log(new Date().toISOString() + " P [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
@@ -18831,7 +18879,7 @@ function processMacroChain(macroString, macroInputDelay, macroIndex, sendToArdui
               }
               //console.log(new Date().toISOString() + " drain results " + results);
             });
-
+            */
             port.write(dataToWrite, function(err) {
               //console.log(new Date().toISOString() + " Q [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
               if (err) {
@@ -19293,6 +19341,7 @@ async function stopAllInputs() {
   // Clear the incoming serial data from arduino before setting an advanced input
   if (waitForArduinoToBeReady == false) {
     //console.log(new Date().toISOString() + " [SERIAL PORT] It looks like we're trying to write to the port before it is ready com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+    /*
     port.flush(function(err, results) {
       //console.log(new Date().toISOString() + " L [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
       if (err) {
@@ -19307,6 +19356,8 @@ async function stopAllInputs() {
       }
       //console.log(new Date().toISOString() + " flush results " + results);
     });
+    */
+    /*
     port.drain(function(err, results) {
       //console.log(new Date().toISOString() + " M [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
       if (err) {
@@ -19321,6 +19372,7 @@ async function stopAllInputs() {
       }
       //console.log(new Date().toISOString() + " drain results " + results);
     });
+    */
     port.write(neutralDataToWrite, function(err) {
       //console.log(new Date().toISOString() + " N [SERIAL PORT] Attempting to write to port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
       if (err) {
@@ -19662,6 +19714,7 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
         sleep(1);
         
         // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
+        /*
         port.flush(function(err, results) {
           //console.log(new Date().toISOString() + " I [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
           if (err) {
@@ -19676,8 +19729,8 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
           }
           //console.log(new Date().toISOString() + " flush results " + results);
         });
-        
-        
+        */
+        /*
         port.drain(function(err, results) {
           //console.log(new Date().toISOString() + " J [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
           if (err) {
@@ -19692,7 +19745,7 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
           }
           //console.log(new Date().toISOString() + " drain results " + results);
         });
-        
+        */
         // Write data to Arduino here
         
         port.write(macroToTestInnerLoopParametersToWrite, function(err) {
@@ -20562,6 +20615,7 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
 
       // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
       if (sendToArduino == true) {
+        /*
         port.flush(function(err, results) {
           //console.log(new Date().toISOString() + " I [SERIAL PORT] Attempting to flush port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
           if (err) {
@@ -20576,7 +20630,8 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
           }
           //console.log(new Date().toISOString() + " flush results " + results);
         });
-
+        */
+        /*
         port.drain(function(err, results) {
           //console.log(new Date().toISOString() + " J [SERIAL PORT] Attempting to drain port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
           if (err) {
@@ -20591,7 +20646,7 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
           }
           //console.log(new Date().toISOString() + " drain results " + results);
         });
-
+        */
         //console.log(new Date().toISOString());
         //console.log("macroParametersToWrite");
         //console.log(macroParametersToWrite);
