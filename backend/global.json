@@ -49,12 +49,12 @@
   "voting_allowed_period_millis": 300000,
   "vote_expiration_time_millis": 300000,
   "help_message_cooldown_millis": 5000,
-  "game_title": "Kingdom Hearts 2",
-  "game_title_short": "Kingdom Hearts 2",
-  "game_title_shorter": "Kingdom Hearts 2",
-  "game_title_shorter_2": "Kingdom Hearts 2",
-  "game_title_shorter_3": "Kingdom Hearts 2",
-  "stream_title": "Twitch Plays(Viewers play\/Chat plays){{game_title_shorter_3}} on an actual PS2 day {{play_time_days}} hour {{hour_low}} to hour {{hour_high}} type !help to learn how to play",
+  "game_title": "Yakuza",
+  "game_title_short": "Yakuza",
+  "game_title_shorter": "Yakuza",
+  "game_title_shorter_2": "Yakuza",
+  "game_title_shorter_3": "Yakuza",
+  "stream_title": "Twitch Plays (Viewers play\/Chat plays) {{game_title_shorter_3}} on an actual PS2 day {{play_time_days}} hour {{hour_low}} to hour {{hour_high}} type !help to learn how to play",
   "stream_going_offline_message": "{{game_title}} day {{play_time_days}} hour {{hour_low}} to hour {{hour_high}} stream is briefly going offline, don't go anywhere!",
   "send_stream_going_offline_message": true,
   "next_game_title": "Final Fantasy",
@@ -100,6 +100,7 @@
     "Please, don't delete any files, and please save regularly",
     "Attempting to delete or deleting any file will earn you an\nunappealable permanent ban",
     "Current goal: Have fun! :)",
+    "Twilight Thorn: {{play_time:1692243199577}} ({{absolute_time:1692243199577}})!",
     "Currently testing PS2 games. Games will be switched\nperiodically.",
     "The time is {{current_time_no_millis}}.\n{{game_title_short}} has been going for {{play_time_total_string_no_millis}}.",
     "Stream goes offline in {{stream_end_time}} (The {{play_time:1692489600000}} mark).",
@@ -116,6 +117,7 @@
     "Currently testing PS2 games. The game will be switched periodically.",
     "The time is {{current_time}}. {{game_title}} has been going for {{play_time_total_string}}.",
     "Stream goes offline in {{stream_end_time}} (The {{play_time:1692489600000}} mark)",
+    "Video: Beating Twilight Thorn https://www.twitch.tv/videos/1901692522 {{play_time:1692243199577}} ({{absolute_time:1692243199577}})",
     "We're currently playing {{game_title}}. Save files for this run can be found here: https://github.com/WhatAboutGaming/Twitch-Plays-Stuff/tree/master/Save%20Files/PS2%20Test%20Stream and the videos for this run can be found on this playlist: https://www.twitch.tv/collections/A8MCoW6HehdDlA",
     "Current goal: Have fun! :)"
   ],
@@ -151,6 +153,8 @@
     "We're currently playing {{game_title}}. Save files for this run can be found here: https://github.com/WhatAboutGaming/Twitch-Plays-Stuff/tree/master/Save%20Files/Zelda%20ALTTP and the videos for this run can be found on this playlist: https://www.twitch.tv/collections/szSSO9O5URdFmg",
     "We have a Discord server and there is currently a poll up for which game to be played after this (Date TBD), the options are: FF4 (SNES), FF6 (SNES) and The Legend of Zelda (NES), you can vote for more than one option, Discord server link here: https://discord.gg/yHETNuZCUK",
     "Glitches are allowed as long as they don't break or crash\nthe game, or leave the game in an unplayable state.",
-    "There will be extra time for post game and sidequests, so\ntake your time!"
+    "There will be extra time for post game and sidequests, so\ntake your time!",
+    "Rescued Zelda: {{play_time:1680574786233}} ({{absolute_time:1680574786233}})!",
+    "Video: Rescuing Zelda https://www.twitch.tv/videos/1785962928 {{play_time:1680574786233}} ({{absolute_time:1680574786233}})"
   ]
 }

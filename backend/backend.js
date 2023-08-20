@@ -9711,7 +9711,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("playSettableInputCount = " + playSettableInputCount);
               //console.log("playSettableRepeatCount = " + playSettableRepeatCount);
               for (let settableInputsIndex = 0; settableInputsIndex < playSettableInputCount + 1; settableInputsIndex++) {
-                await sleep(1);
+                await sleep(2);
                 //console.log("");
                 //console.log("settableInputsIndex = " + settableInputsIndex);
                 //console.log("playSettableInputCount = " + playSettableInputCount);
@@ -9788,7 +9788,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(playSettableParametersToWrite);
               //let macroParametersToWrite = [controllerConfig.final_macro_preamble, currentMacroChainIndex + 1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
               //
-              await sleep(1);
+              await sleep(2);
 
               // Clear the incoming serial data from arduino before setting an advanced input to be executed
               /*
@@ -10140,7 +10140,7 @@ async function onMessageHandler(target, tags, message, self) {
                 whereDoesNextInnerLoopStart = innerLoopMetadataArray[innerLoopMetadataArrayIndex][6];
                 innerLoopMetadataArray[innerLoopMetadataArrayIndex][8] = (innerLoopMetadataArray.length - innerLoopMetadataArrayIndex) - 1;
                 let innerLoopParametersToWrite = innerLoopMetadataArray[innerLoopMetadataArrayIndex];
-                await sleep(1);
+                await sleep(2);
 
                 // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
                 /*
@@ -10500,7 +10500,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"));
                 //console.log("currentMacroChainIndex:" + currentMacroChainIndex)
                 if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
-                  await sleep(1); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
+                  await sleep(2); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
                   let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, true, false, false, userId);
                   //console.log(new Date().toISOString());
                   //console.log("macroChainInputObject");
@@ -13585,7 +13585,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("playSettableInputCount = " + playSettableInputCount);
               //console.log("playSettableRepeatCount = " + playSettableRepeatCount);
               for (let settableInputsIndex = 0; settableInputsIndex < playSettableInputCount + 1; settableInputsIndex++) {
-                await sleep(1);
+                await sleep(2);
                 //console.log("");
                 //console.log("settableInputsIndex = " + settableInputsIndex);
                 //console.log("playSettableInputCount = " + playSettableInputCount);
@@ -13662,7 +13662,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(playSettableParametersToWrite);
               //let macroParametersToWrite = [controllerConfig.final_macro_preamble, currentMacroChainIndex + 1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
               //
-              await sleep(1);
+              await sleep(2);
 
               // Clear the incoming serial data from arduino before setting an advanced input to be executed
               /*
@@ -14014,7 +14014,7 @@ async function onMessageHandler(target, tags, message, self) {
                 whereDoesNextInnerLoopStart = innerLoopMetadataArray[innerLoopMetadataArrayIndex][6];
                 innerLoopMetadataArray[innerLoopMetadataArrayIndex][8] = (innerLoopMetadataArray.length - innerLoopMetadataArrayIndex) - 1;
                 let innerLoopParametersToWrite = innerLoopMetadataArray[innerLoopMetadataArrayIndex];
-                await sleep(1);
+                await sleep(2);
 
                 // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
                 /*
@@ -14374,7 +14374,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"));
                 //console.log("currentMacroChainIndex:" + currentMacroChainIndex)
                 if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
-                  await sleep(1); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
+                  await sleep(2); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
                   let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, true, false, false, userId);
                   //console.log(new Date().toISOString());
                   //console.log("macroChainInputObject");
@@ -19711,7 +19711,7 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
         //console.log(macroToTestInnerLoopMetadataArrayIndex);
         //console.log("macroToTestInnerLoopParametersToWrite");
         //console.log(macroToTestInnerLoopParametersToWrite);
-        sleep(1);
+        sleep(2);
         
         // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
         /*
@@ -20099,7 +20099,7 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
         //console.log(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"));
         //console.log("currentMacroChainIndex:" + currentMacroChainIndex)
         if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
-          sleep(1); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
+          sleep(2); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
           let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, sendToArduino, macroToTestExecuteInputsBackwards, macroToTestExecuteInputsOppositeDirections, userId);
           //console.log(new Date().toISOString());
           //console.log("macroChainInputObject");
