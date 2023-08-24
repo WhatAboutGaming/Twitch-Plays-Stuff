@@ -81,7 +81,7 @@ var acceptTts = globalConfig.initial_accept_tts;
 var acceptInputsFromAnyone = globalConfig.initial_accept_inputs_from_anyone;
 
 var inputMode = globalConfig.initial_input_mode; // Modes are 0 = anarchy (Normal mode), 1 = democracy (people vote for the next input), 2 = TAS or Advanced Mode (Used for making macros, and doing very precise movements, very precise timings, etc) // Democracy is not implemented, I don't know if I'll ever implement it
-var inputModePrevious = 0;
+var inputModePrevious = inputMode;
 var inputModesArray = [{
   mode_name: "Basic",
   mode_id: 0
@@ -6724,7 +6724,13 @@ async function onMessageHandler(target, tags, message, self) {
             if (playerVoteIndex < 0) {
               //checkModeVotes();
               voteTime = new Date().getTime() + globalConfig.vote_expiration_time_millis;
-              modeVotes.push({
+              let modeVoteObjectToInsert = {
+                run_name: globalConfig.run_name,
+                run_id: globalConfig.run_id,
+                room_id: roomId,
+                original_message: originalMessage,
+                message_id: messageId,
+                time_vote_was_added_millis: new Date().getTime(),
                 username_to_display: usernameToPing,
                 username: username,
                 display_name: displayName,
@@ -6734,7 +6740,8 @@ async function onMessageHandler(target, tags, message, self) {
                 user_id: userId,
                 expiration_time: voteTime,
                 mode_vote: 0
-              });
+              };
+              modeVotes.push(modeVoteObjectToInsert);
               //console.log("BASIC 1");
               updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
               client.reply(target, "@" + usernameToPing + " Your mode vote was added as Basic and will expire at " + new Date(voteTime).toISOString() + ". The time is " + new Date().toISOString() + ".", messageId);
@@ -6752,13 +6759,21 @@ async function onMessageHandler(target, tags, message, self) {
                 input_modes_array: inputModesArray,
                 input_mode: inputMode
               };
+              logModeVotesToTextFile(voteDataObject, modeVotes, modeVoteObjectToInsert, "added", 0, "Basic", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+              logModeVotesToDatabase(voteDataObject, modeVotes, modeVoteObjectToInsert, "added", 0, "Basic", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               io.sockets.emit("vote_data", voteDataObject);
             }
             //checkModeVotes();
             if (playerVoteIndex >= 0) {
               //checkModeVotes();
               voteTime = new Date().getTime() + globalConfig.vote_expiration_time_millis;
-              modeVotes[playerVoteIndex] = {
+              let modeVoteObjectToInsert = {
+                run_name: globalConfig.run_name,
+                run_id: globalConfig.run_id,
+                room_id: roomId,
+                original_message: originalMessage,
+                message_id: messageId,
+                time_vote_was_added_millis: new Date().getTime(),
                 username_to_display: usernameToPing,
                 username: username,
                 display_name: displayName,
@@ -6769,6 +6784,7 @@ async function onMessageHandler(target, tags, message, self) {
                 expiration_time: voteTime,
                 mode_vote: 0
               };
+              modeVotes[playerVoteIndex] = modeVoteObjectToInsert;
               //modeVotes[playerVoteIndex].expiration_time = voteTime;
               //console.log("BASIC 2");
               updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
@@ -6787,6 +6803,8 @@ async function onMessageHandler(target, tags, message, self) {
                 input_modes_array: inputModesArray,
                 input_mode: inputMode
               };
+              logModeVotesToTextFile(voteDataObject, modeVotes, modeVoteObjectToInsert, "updated", 0, "Basic", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+              logModeVotesToDatabase(voteDataObject, modeVotes, modeVoteObjectToInsert, "updated", 0, "Basic", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               io.sockets.emit("vote_data", voteDataObject);
             }
             //checkModeVotes();
@@ -6797,7 +6815,13 @@ async function onMessageHandler(target, tags, message, self) {
             if (playerVoteIndex < 0) {
               //checkModeVotes();
               voteTime = new Date().getTime() + globalConfig.vote_expiration_time_millis;
-              modeVotes.push({
+              let modeVoteObjectToInsert = {
+                run_name: globalConfig.run_name,
+                run_id: globalConfig.run_id,
+                room_id: roomId,
+                original_message: originalMessage,
+                message_id: messageId,
+                time_vote_was_added_millis: new Date().getTime(),
                 username_to_display: usernameToPing,
                 username: username,
                 display_name: displayName,
@@ -6807,7 +6831,8 @@ async function onMessageHandler(target, tags, message, self) {
                 user_id: userId,
                 expiration_time: voteTime,
                 mode_vote: 2
-              });
+              };
+              modeVotes.push(modeVoteObjectToInsert);
               //checkModeVotes();
               //console.log("ADVANCED 1");
               updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
@@ -6826,12 +6851,20 @@ async function onMessageHandler(target, tags, message, self) {
                 input_modes_array: inputModesArray,
                 input_mode: inputMode
               };
+              logModeVotesToTextFile(voteDataObject, modeVotes, modeVoteObjectToInsert, "added", 2, "Advanced", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+              logModeVotesToDatabase(voteDataObject, modeVotes, modeVoteObjectToInsert, "added", 2, "Advanced", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               io.sockets.emit("vote_data", voteDataObject);
             }
             if (playerVoteIndex >= 0) {
               //checkModeVotes();
               voteTime = new Date().getTime() + globalConfig.vote_expiration_time_millis;
-              modeVotes[playerVoteIndex] = {
+              let modeVoteObjectToInsert = {
+                run_name: globalConfig.run_name,
+                run_id: globalConfig.run_id,
+                room_id: roomId,
+                original_message: originalMessage,
+                message_id: messageId,
+                time_vote_was_added_millis: new Date().getTime(),
                 username_to_display: usernameToPing,
                 username: username,
                 display_name: displayName,
@@ -6842,6 +6875,7 @@ async function onMessageHandler(target, tags, message, self) {
                 expiration_time: voteTime,
                 mode_vote: 2
               };
+              modeVotes[playerVoteIndex] = modeVoteObjectToInsert;
               //modeVotes[playerVoteIndex].expiration_time = voteTime;
               //checkModeVotes();
               //console.log("ADVANCED 2");
@@ -6861,6 +6895,8 @@ async function onMessageHandler(target, tags, message, self) {
                 input_modes_array: inputModesArray,
                 input_mode: inputMode
               };
+              logModeVotesToTextFile(voteDataObject, modeVotes, modeVoteObjectToInsert, "updated", 2, "Advanced", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+              logModeVotesToDatabase(voteDataObject, modeVotes, modeVoteObjectToInsert, "updated", 2, "Advanced", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               io.sockets.emit("vote_data", voteDataObject);
             }
             //checkModeVotes();
@@ -6890,7 +6926,13 @@ async function onMessageHandler(target, tags, message, self) {
             if (playerVoteIndex < 0) {
               //checkModeVotes();
               voteTime = new Date().getTime() + globalConfig.vote_expiration_time_millis;
-              modeVotes.push({
+              let modeVoteObjectToInsert = {
+                run_name: globalConfig.run_name,
+                run_id: globalConfig.run_id,
+                room_id: roomId,
+                original_message: originalMessage,
+                message_id: messageId,
+                time_vote_was_added_millis: new Date().getTime(),
                 username_to_display: usernameToPing,
                 username: username,
                 display_name: displayName,
@@ -6900,7 +6942,8 @@ async function onMessageHandler(target, tags, message, self) {
                 user_id: userId,
                 expiration_time: voteTime,
                 mode_vote: 0
-              });
+              };
+              modeVotes.push(modeVoteObjectToInsert);
               //console.log("BASIC 1");
               updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
               client.reply(target, "@" + usernameToPing + " Your mode vote was added as Basic and will expire at " + new Date(voteTime).toISOString() + ". The time is " + new Date().toISOString() + ".", messageId);
@@ -6918,13 +6961,21 @@ async function onMessageHandler(target, tags, message, self) {
                 input_modes_array: inputModesArray,
                 input_mode: inputMode
               };
+              logModeVotesToTextFile(voteDataObject, modeVotes, modeVoteObjectToInsert, "added", 0, "Basic", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+              logModeVotesToDatabase(voteDataObject, modeVotes, modeVoteObjectToInsert, "added", 0, "Basic", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               io.sockets.emit("vote_data", voteDataObject);
             }
             //checkModeVotes();
             if (playerVoteIndex >= 0) {
               //checkModeVotes();
               voteTime = new Date().getTime() + globalConfig.vote_expiration_time_millis;
-              modeVotes[playerVoteIndex] = {
+              let modeVoteObjectToInsert = {
+                run_name: globalConfig.run_name,
+                run_id: globalConfig.run_id,
+                room_id: roomId,
+                original_message: originalMessage,
+                message_id: messageId,
+                time_vote_was_added_millis: new Date().getTime(),
                 username_to_display: usernameToPing,
                 username: username,
                 display_name: displayName,
@@ -6935,6 +6986,7 @@ async function onMessageHandler(target, tags, message, self) {
                 expiration_time: voteTime,
                 mode_vote: 0
               };
+              modeVotes[playerVoteIndex] = modeVoteObjectToInsert;
               //modeVotes[playerVoteIndex].expiration_time = voteTime;
               //console.log("BASIC 2");
               updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
@@ -6953,6 +7005,8 @@ async function onMessageHandler(target, tags, message, self) {
                 input_modes_array: inputModesArray,
                 input_mode: inputMode
               };
+              logModeVotesToTextFile(voteDataObject, modeVotes, modeVoteObjectToInsert, "updated", 0, "Basic", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+              logModeVotesToDatabase(voteDataObject, modeVotes, modeVoteObjectToInsert, "updated", 0, "Basic", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               io.sockets.emit("vote_data", voteDataObject);
             }
             //checkModeVotes();
@@ -6963,7 +7017,13 @@ async function onMessageHandler(target, tags, message, self) {
             if (playerVoteIndex < 0) {
               //checkModeVotes();
               voteTime = new Date().getTime() + globalConfig.vote_expiration_time_millis;
-              modeVotes.push({
+              let modeVoteObjectToInsert = {
+                run_name: globalConfig.run_name,
+                run_id: globalConfig.run_id,
+                room_id: roomId,
+                original_message: originalMessage,
+                message_id: messageId,
+                time_vote_was_added_millis: new Date().getTime(),
                 username_to_display: usernameToPing,
                 username: username,
                 display_name: displayName,
@@ -6973,7 +7033,8 @@ async function onMessageHandler(target, tags, message, self) {
                 user_id: userId,
                 expiration_time: voteTime,
                 mode_vote: 2
-              });
+              };
+              modeVotes.push(modeVoteObjectToInsert);
               //checkModeVotes();
               //console.log("ADVANCED 1");
               updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
@@ -6992,12 +7053,20 @@ async function onMessageHandler(target, tags, message, self) {
                 input_modes_array: inputModesArray,
                 input_mode: inputMode
               };
+              logModeVotesToTextFile(voteDataObject, modeVotes, modeVoteObjectToInsert, "added", 2, "Advanced", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+              logModeVotesToDatabase(voteDataObject, modeVotes, modeVoteObjectToInsert, "added", 2, "Advanced", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               io.sockets.emit("vote_data", voteDataObject);
             }
             if (playerVoteIndex >= 0) {
               //checkModeVotes();
               voteTime = new Date().getTime() + globalConfig.vote_expiration_time_millis;
-              modeVotes[playerVoteIndex] = {
+              let modeVoteObjectToInsert = {
+                run_name: globalConfig.run_name,
+                run_id: globalConfig.run_id,
+                room_id: roomId,
+                original_message: originalMessage,
+                message_id: messageId,
+                time_vote_was_added_millis: new Date().getTime(),
                 username_to_display: usernameToPing,
                 username: username,
                 display_name: displayName,
@@ -7008,6 +7077,7 @@ async function onMessageHandler(target, tags, message, self) {
                 expiration_time: voteTime,
                 mode_vote: 2
               };
+              modeVotes[playerVoteIndex] = modeVoteObjectToInsert;
               //modeVotes[playerVoteIndex].expiration_time = voteTime;
               //checkModeVotes();
               //console.log("ADVANCED 2");
@@ -7027,6 +7097,8 @@ async function onMessageHandler(target, tags, message, self) {
                 input_modes_array: inputModesArray,
                 input_mode: inputMode
               };
+              logModeVotesToTextFile(voteDataObject, modeVotes, modeVoteObjectToInsert, "updated", 2, "Advanced", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+              logModeVotesToDatabase(voteDataObject, modeVotes, modeVoteObjectToInsert, "updated", 2, "Advanced", inputMode, inputModePrevious, originalMessage, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               io.sockets.emit("vote_data", voteDataObject);
             }
             //checkModeVotes();
@@ -17913,6 +17985,19 @@ function checkModeVotes() {
         client.reply(chatConfig.main_channel, "@" + item.username_to_display + " Your " + inputModesArray[item.mode_vote].mode_name + " mode vote has expired and was removed!", item.message_id);
       }
       //console.log("Removing vote at index " + index);
+      let voteDataObject = {
+        basic_vote_count: basicVoteCount,
+        advanced_vote_count: advancedVoteCount,
+        threshold_to_change_mode: thresholdToChangeMode,
+        total_votes: totalVotes,
+        advanced_vote_count_ratio: advancedVoteCountRatio,
+        basic_vote_count_ratio: basicVoteCountRatio,
+        input_modes_array: inputModesArray,
+        input_mode: inputMode
+      };
+      //io.sockets.emit("vote_data", voteDataObject);
+      logModeVotesToTextFile(voteDataObject, modeVotes, item, "removed", item.mode_vote, inputModesArray[item.mode_vote].mode_name, inputMode, inputModePrevious, item.original_message, item.room_id, item.run_name, item.run_id, item.username_to_display, item.user_id, item.message_id, new Date().getTime());
+      logModeVotesToDatabase(voteDataObject, modeVotes, item, "removed", item.mode_vote, inputModesArray[item.mode_vote].mode_name, inputMode, inputModePrevious, item.original_message, item.room_id, item.run_name, item.run_id, item.username_to_display, item.user_id, item.message_id, new Date().getTime());
       modeVotes.splice(index, 1);
       if (item.mode_vote == 0) {
         basicVoteCountLocal--;
@@ -18072,6 +18157,8 @@ function checkModeVotes() {
       input_modes_array: inputModesArray,
       input_mode: inputMode
     };
+    logModeChangesToTextFile(voteDataObject, modeVotes, "Switching from " + inputModesArray[inputModePrevious].mode_name + " to " + inputModesArray[inputMode].mode_name + ". Basic mode has " + parseInt(basicVoteCountRatio * 100) + "% of all votes (" + basicVoteCount + " vote(s)) and Advanced mode has " + parseInt(advancedVoteCountRatio * 100) + "% of all votes (" + advancedVoteCount + " vote(s))!", inputMode, inputModePrevious, roomIdToSendMessageTo, globalConfig.run_name, globalConfig.run_id, new Date().getTime());
+    logModeChangesToDatabase(voteDataObject, modeVotes, "Switching from " + inputModesArray[inputModePrevious].mode_name + " to " + inputModesArray[inputMode].mode_name + ". Basic mode has " + parseInt(basicVoteCountRatio * 100) + "% of all votes (" + basicVoteCount + " vote(s)) and Advanced mode has " + parseInt(advancedVoteCountRatio * 100) + "% of all votes (" + advancedVoteCount + " vote(s))!", inputMode, inputModePrevious, roomIdToSendMessageTo, globalConfig.run_name, globalConfig.run_id, new Date().getTime());
     io.sockets.emit("vote_data", voteDataObject);
   }
   if (removedVoteCountLocal > 0) {
@@ -18123,7 +18210,7 @@ function checkVotingCooldownTime() {
       //console.log("advancedAllowed time over, going back to basic");
       if (client.readyState() === "OPEN") {
         updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-        client.action(chatConfig.main_channel, "Switching from " + inputModesArray[inputModePrevious].mode_name + " to " + inputModesArray[inputMode].mode_name + " because time for Advanced mode has ended. All votes were removed.");
+        client.action(chatConfig.main_channel, "Switching from " + inputModesArray[inputModePrevious].mode_name + " to " + inputModesArray[inputMode].mode_name + " because time for Advanced mode has ran out. All votes were removed.");
       }
       inputModePrevious = 0; // We don't want to trigger the difference detection
       let voteDataObject = {
@@ -18136,6 +18223,8 @@ function checkVotingCooldownTime() {
         input_modes_array: inputModesArray,
         input_mode: inputMode
       };
+      logModeChangesToTextFile(voteDataObject, modeVotes, "Switching from " + inputModesArray[inputModePrevious].mode_name + " to " + inputModesArray[inputMode].mode_name + " because time for Advanced mode has ran out. All votes were removed.", inputMode, inputModePrevious, roomIdToSendMessageTo, globalConfig.run_name, globalConfig.run_id, new Date().getTime());
+      logModeChangesToDatabase(voteDataObject, modeVotes, "Switching from " + inputModesArray[inputModePrevious].mode_name + " to " + inputModesArray[inputMode].mode_name + " because time for Advanced mode has ran out. All votes were removed.", inputMode, inputModePrevious, roomIdToSendMessageTo, globalConfig.run_name, globalConfig.run_id, new Date().getTime());
       io.sockets.emit("vote_data", voteDataObject);
     }
   }
@@ -20808,6 +20897,103 @@ function logInputToDatabase(inputMode, inputString, originalMessage, isSavedMacr
   });
 }
 
+function logModeVotesToDatabase(modeVoteDataObject, modeVotesObjectArray, newModeVoteObject, modeVoteType, modeSenderVotedFor, modeNameSenderVotedFor, currentInputMode, previousInputMode, originalMessage, roomId, runName, runId, senderUsername, senderUserId, messageId, millisTimestamp) {
+  if (globalConfig.log_mode_votes_to_database == false) {
+    return;
+  }
+  let playTimeTotal = millisTimestamp - runStartTime;
+  let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
+  let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+  let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
+  let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
+  let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
+  let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+  let playTimeStringNoMillis = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec";
+  let dataToAddToDatabase = {
+    mode_vote_data_object: modeVoteDataObject,
+    mode_votes_object_array: modeVotesObjectArray,
+    new_mode_vote_object: newModeVoteObject,
+    mode_vote_type: modeVoteType,
+    mode_sender_voted_for: modeSenderVotedFor,
+    mode_name_sender_voted_for: modeNameSenderVotedFor,
+    current_input_mode: currentInputMode,
+    previous_input_mode: previousInputMode,
+    original_message: originalMessage,
+    room_id: roomId,
+    run_name: runName.replace(/({{channel_id}})+/ig, roomId),
+    run_id: runId,
+    sender_username: senderUsername,
+    sender_user_id: senderUserId,
+    message_id: messageId,
+    millis_timestamp: millisTimestamp,
+    iso_string_timestamp: new Date(millisTimestamp).toISOString(),
+    play_time_total_millis: playTimeTotal,
+    play_time_total_string: playTimeString
+  };
+
+  mongoClient.connect(mongoUrl, {
+    useUnifiedTopology: true
+  }, function(err, db) {
+    if (err) {
+      throw err;
+    }
+    let dbo = db.db(globalConfig.mode_votes_database_name.replace(/({{channel_id}})+/ig, roomId));
+    let myobj = dataToAddToDatabase;
+    dbo.collection(globalConfig.mode_votes_collection_name.replace(/({{run_name}})+/ig, runName).replace(/({{channel_id}})+/ig, roomId)).insertOne(myobj, function(err, res) {
+      if (err) {
+        throw err;
+      }
+      //console.log("1 document inserted");
+      db.close();
+    });
+  });
+}
+
+function logModeChangesToDatabase(modeVoteDataObject, modeVotesObjectArray, modeChangeReason, currentInputMode, previousInputMode, roomId, runName, runId, millisTimestamp) {
+  if (globalConfig.log_input_mode_changes_to_database == false) {
+    return;
+  }
+  let playTimeTotal = millisTimestamp - runStartTime;
+  let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
+  let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+  let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
+  let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
+  let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
+  let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+  let playTimeStringNoMillis = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec";
+  let dataToAddToDatabase = {
+    mode_vote_data_object: modeVoteDataObject,
+    mode_votes_object_array: modeVotesObjectArray,
+    mode_change_reason: modeChangeReason,
+    current_input_mode: currentInputMode,
+    previous_input_mode: previousInputMode,
+    room_id: roomId,
+    run_name: runName.replace(/({{channel_id}})+/ig, roomId),
+    run_id: runId,
+    millis_timestamp: millisTimestamp,
+    iso_string_timestamp: new Date(millisTimestamp).toISOString(),
+    play_time_total_millis: playTimeTotal,
+    play_time_total_string: playTimeString
+  };
+
+  mongoClient.connect(mongoUrl, {
+    useUnifiedTopology: true
+  }, function(err, db) {
+    if (err) {
+      throw err;
+    }
+    let dbo = db.db(globalConfig.input_mode_changes_database_name.replace(/({{channel_id}})+/ig, roomId));
+    let myobj = dataToAddToDatabase;
+    dbo.collection(globalConfig.input_mode_changes_collection_name.replace(/({{run_name}})+/ig, runName).replace(/({{channel_id}})+/ig, roomId)).insertOne(myobj, function(err, res) {
+      if (err) {
+        throw err;
+      }
+      //console.log("1 document inserted");
+      db.close();
+    });
+  });
+}
+
 function logModbotActionToTextFile(originalUserObjectAsReturnedByTheDatabase, roomId, originalMessage, modbotAction, timeoutDuration, modbotReason, modbotResponseToSender, modbotDebugLine, millisTimestamp) {
   if (globalConfig.log_modbot_action_to_text_file == false) {
     return;
@@ -20880,6 +21066,75 @@ function logInputToTextFile(inputMode, inputString, originalMessage, isSavedMacr
     play_time_total_string: playTimeString
   };
   writeToTextFile("inputs", "input_logs", JSON.stringify(dataToAddToDatabase), roomId, millisTimestamp);
+}
+
+function logModeVotesToTextFile(modeVoteDataObject, modeVotesObjectArray, newModeVoteObject, modeVoteType, modeSenderVotedFor, modeNameSenderVotedFor, currentInputMode, previousInputMode, originalMessage, roomId, runName, runId, senderUsername, senderUserId, messageId, millisTimestamp) {
+  if (globalConfig.log_mode_votes_to_text_file == false) {
+    return;
+  }
+  // modeVoteType can be one of the 3 options
+  // 1) added: A sender has never voted before and now added their fresh vote to the array
+  // 2) updated: A sender has updated or changed their vote to either switch modes or to keep that vote fresh
+  // 3) removed: A vote was removed after it was expired
+  let playTimeTotal = millisTimestamp - runStartTime;
+  let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
+  let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+  let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
+  let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
+  let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
+  let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+  let playTimeStringNoMillis = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec";
+  let dataToAddToDatabase = {
+    mode_vote_data_object: modeVoteDataObject,
+    mode_votes_object_array: modeVotesObjectArray,
+    new_mode_vote_object: newModeVoteObject,
+    mode_vote_type: modeVoteType,
+    mode_sender_voted_for: modeSenderVotedFor,
+    mode_name_sender_voted_for: modeNameSenderVotedFor,
+    current_input_mode: currentInputMode,
+    previous_input_mode: previousInputMode,
+    original_message: originalMessage,
+    room_id: roomId,
+    run_name: runName.replace(/({{channel_id}})+/ig, roomId),
+    run_id: runId,
+    sender_username: senderUsername,
+    sender_user_id: senderUserId,
+    message_id: messageId,
+    millis_timestamp: millisTimestamp,
+    iso_string_timestamp: new Date(millisTimestamp).toISOString(),
+    play_time_total_millis: playTimeTotal,
+    play_time_total_string: playTimeString
+  };
+  writeToTextFile("mode_votes", "mode_vote_logs", JSON.stringify(dataToAddToDatabase), roomId, millisTimestamp);
+}
+
+function logModeChangesToTextFile(modeVoteDataObject, modeVotesObjectArray, modeChangeReason, currentInputMode, previousInputMode, roomId, runName, runId, millisTimestamp) {
+  if (globalConfig.log_input_mode_changes_to_text_file == false) {
+    return;
+  }
+  let playTimeTotal = millisTimestamp - runStartTime;
+  let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
+  let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+  let playTimeMinutes = (parseInt(playTimeTotal / 60000) % 60).toString().padStart(2, "0");
+  let playTimeSeconds = (parseInt(playTimeTotal / 1000) % 60).toString().padStart(2, "0");
+  let playTimeMillis = (playTimeTotal % 1000).toString().padStart(3, "0");
+  let playTimeString = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec " + playTimeMillis + "msec";
+  let playTimeStringNoMillis = playTimeDays + "day " + playTimeHours + "hour " + playTimeMinutes + "min " + playTimeSeconds + "sec";
+  let dataToAddToDatabase = {
+    mode_vote_data_object: modeVoteDataObject,
+    mode_votes_object_array: modeVotesObjectArray,
+    mode_change_reason: modeChangeReason,
+    current_input_mode: currentInputMode,
+    previous_input_mode: previousInputMode,
+    room_id: roomId,
+    run_name: runName.replace(/({{channel_id}})+/ig, roomId),
+    run_id: runId,
+    millis_timestamp: millisTimestamp,
+    iso_string_timestamp: new Date(millisTimestamp).toISOString(),
+    play_time_total_millis: playTimeTotal,
+    play_time_total_string: playTimeString
+  };
+  writeToTextFile("input_mode_changes", "input_mode_change_logs", JSON.stringify(dataToAddToDatabase), roomId, millisTimestamp);
 }
 
 function writeToTextFile(filenameToWriteTo, folderNameToWriteTo, inputStringToWrite, roomId, millisTimestamp) {
