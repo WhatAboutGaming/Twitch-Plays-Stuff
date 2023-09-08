@@ -4341,7 +4341,7 @@ async function onMessageHandler(target, tags, message, self) {
       /(a+f+i+l+i+a+t+e+)+\s+(f+o+\w*)+\s+(f+r+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(s+u+\w+e+r+\w*)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+\s+(s+u+b+\w*)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(h+e+l+o+[^\s]*)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(r+e+a+l+)\s+(f+r+e+)+\s+(a+n+d+)+\s+(h+i+g+h+)+\s+(q+u+a+l+i+t+y+)+\s+(s+e+r+v+i+c+e+s*)+\s+(t+\w*)+\s+(i+n+c+r+e+a+s+e+)+\s+(y+o+u+\w*)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /((c+u+t+)+|(b+i+t+)+)+\s*(\.+|d+o+t+)*\s*(l+y+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /((c+u+t+)+|(b+i+t+)+)+\s*(\.+|d+o+t+)*\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(b+i+g+)+\s*(\.+|d+o+t+)*\s*((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(c+h+i+l+p+|b+i+g+\s*((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+)+\s*(\.+|d+o+t+)*\s*(c+o+m*|i+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(h+e+l+o+[^\s]*)+\s+(i+)+\s+(d+o+)+\s+(g+r+a+p+h+i+c+)+\s+(d+e+s+i+g+n+)+\s+(\w+o+)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(w+o+r+k+)+\s+(d+o+n+e+)+\s+(l+i+k+e+)+\s+(\w+)+\s+(l+o+g+o+[^\s]*)+\s+(b+a+n+e+r+[^\s]*)+\s+(p+a+n+e+l+[^\s]*)+\s+(o+v+e+r+l+a+y+[^\s]*)+\s+(e+t+c+[^\s]*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -4350,12 +4350,17 @@ async function onMessageHandler(target, tags, message, self) {
       /((g+[\s\-\_]*e+[\s\-\_]*t+)+[\s\-\_]*(v+[\s\-\_]*i+[\s\-\_]*e+[\s\-\_]*w+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((g+[\s\-\_]*\-+[\s\-\_]*t+)+[\s\-\_]*(v+[\s\-\_]*\-+[\s\-\_]*e+[\s\-\_]*w+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((t+w+[l1\!\|]+t+c+h+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /((t+w+[li1\!\|]+t+c+h+)+)+\s*(\.+|d+o+t+)+\s*((l+y+)+|(t+v+)+|(c+o+m*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Check if first message is twitch.tv. tbh, if an user posts a twitch.tv link as first message, then uh that's a bruh moment tbh, I think it's safe to say they're just here to spam(?)
+      /((t+w+[li1\!\|]+t+c+h+s*)+)+\s*(\.+|d+o+t+)+\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Check if first message is twitch.tv. tbh, if an user posts a twitch.tv link as first message, then uh that's a bruh moment tbh, I think it's safe to say they're just here to spam(?)
+      /((t+w+[li1\!\|]+t+c+h+s*)+)+\s*((l+a+u+n+c+h+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // TwitchLaunch
+      /((t+w+[li1\!\|]+t+c+h+s*)+)+\s*(((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Twitch Streams
+      /((t+i+c*k+\s*t+o+c*k+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // TikTok
+      /((((c+o+n+t+e+n+t+)+)+\s+((p+o+s+t+(i*n*g*)*)+)+)+|(((r+o+c+k+e+t+)+)+\s+((a+u+d+i+e+n+c+e+)+)+)+|(((\d+)+)+\s+((d+o+l+l+a+r+)*\s*)*((p+e+r+)+|(f+o+r+)+|(\/)+)(\s*\d+)*\s+((d+a+y+)+|(d+a+i+l+y+)+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), //Content Posting, Rocket Audience, number per day, number/day, number for number daily, drive engagement
       /((t+w+[li1\!\|]+t+c+h+s*\s*\-+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((d+o+g+e+)+\s*(h+y+p+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((d+o*g+e*)+[\s\-\_]*(h+y+p+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((o+n+l+y+)+\s*(f+a+n+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /((t+i+n+y+)+\s*(u+r+l+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(((o+f+e+r+)+|(c+a+t+c+h+)+)+\s*\w*\s*p+r+o+m+o+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(((f+r+e+)+\s+(v+i+e+w+\w*)+)+|((v+i+e+w+\w*)+\s*\w*\s*(f+r+e+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((r+u+s+t+)+[\s\-\_]*(e+v+e+n+t+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -4364,9 +4369,9 @@ async function onMessageHandler(target, tags, message, self) {
       /((m+a+j+o+r+)+[\s\-\_]*(t+w+[li1\!\|]+t+c+h+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((r+u+s+t)+[\s\-\_]*(t+w+[li1\!\|]+t+c+h+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(f+a+c+e+p+u+n+c+h+[\s\-\_]*l+i+v+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(((l+i+v+e)*|(c+u+t+)*|(b+i+t+)*)*\s*(\.+|d+o+t+)+\s*((c+o+m*)+|(l+y+)+|(t+v+)+)+\/+(t+w+[li1\!\|]+t+c+h+s*\s*\-*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(c+s+\W*g+o+[\s\-\_]*d+a+l+a+s)+\s*(\.+|d+o+t+)+\s*((c+o+m*)+|(l+y+)+|(t+v+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(e+s+l+[\s\-\_]*d+r+o+p+s+)+\s*(\.+|d+o+t+)+\s*((c+o+m*)+|(l+y+)+|(t+v+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(((l+i+v+e)*|(c+u+t+)*|(b+i+t+)*)*\s*(\.+|d+o+t+)+\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+)+\/+(t+w+[li1\!\|]+t+c+h+s*\s*\-*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(c+s+\W*g+o+[\s\-\_]*d+a+l+a+s)+\s*(\.+|d+o+t+)+\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(e+s+l+[\s\-\_]*d+r+o+p+s+)+\s*(\.+|d+o+t+)+\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((r+u+s+t+)+|(g+i+f+t+)+|(c+o+d+e+)+|(e+v+e+n+t+)+|(a+w+a+r+d+)+|(c+o+n+e+c+t+)+|(c+s+\W*g+o+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Comment this line if bot bans accidentally
       /(p+r+i+c+e+\s+i+s+\s+l+o+w+e+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(l+o+w+e+r+\s+p+r+i+c+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -19483,10 +19488,28 @@ async function stopAllInputs() {
 
 async function stopAllInputsAndQuit() {
   console.log(new Date().toISOString() + " STARTING TO EXIT PROCESS");
+  if (client.readyState() === "OPEN") {
+    if (chatConfig.send_debug_channel_messages == true) {
+      updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+      client.action(chatConfig.debug_channel, new Date().toISOString() + " STARTING TO EXIT PROCESS");
+    }
+  }
   await stopAllInputs();
   console.log(new Date().toISOString() + " SLEEPING");
+  if (client.readyState() === "OPEN") {
+    if (chatConfig.send_debug_channel_messages == true) {
+      updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+      client.action(chatConfig.debug_channel, new Date().toISOString() + " SLEEPING");
+    }
+  }
   await sleep(500); // Sleeping to make sure all async processes actually have enough time to end
   console.log(new Date().toISOString() + " DONE SLEEPING, EXITING PROCESS");
+  if (client.readyState() === "OPEN") {
+    if (chatConfig.send_debug_channel_messages == true) {
+      updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+      client.action(chatConfig.debug_channel, new Date().toISOString() + " DONE SLEEPING, EXITING PROCESS");
+    }
+  }
   process.exit(0); // 0 will let Node.js know to terminate the process when no async operations are performing. Without mentioning, it will take the default value of 0.
 }
 

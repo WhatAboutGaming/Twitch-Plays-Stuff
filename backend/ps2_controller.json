@@ -4918,6 +4918,7 @@
     "input_value": "0x00107F7F7F7F0000L",
     "input_name": "Tri",
     "input_alias": [
+      "T",
       "Tri",
       "△",
       "Triaglne",
@@ -5000,6 +5001,7 @@
     "input_value": "0x00807F7F7F7F0000L",
     "input_name": "Sq",
     "input_alias": [
+      "Q",
       "Sq",
       "[]",
       "□",
