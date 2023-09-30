@@ -262,7 +262,7 @@ io.sockets.on("connection",
       chat_logger_reconnect_attempts: chatLoggerReconnectAttempts,
       server_start_time: serverStartTime
     };
-    io.to(socket.id).emit("chat_connection_status", chatConnectionStatus);
+    io.sockets.emit("chat_connection_status", chatConnectionStatus);
     socket.on("restart_command", function(data) {
       console.log(new Date().toISOString() + " We received the restart_command " + data + ", which means someone pressed Q on the keyboard (or pressed the RESTART BACKEND button) to restart the backend, or pressed P on the keyboard (or pressed the RESTART MACHINE button) to restart the machine, or pressed R on the keyboard (or pressed the RESTART CONNECTION button) to restart the chat connection, on the status_page!");
       if (data == "restart_backend") {
@@ -320,14 +320,14 @@ io.sockets.on("connection",
       input_mode: inputMode
     };
     if (inputMode == 0) {
-      io.to(socket.id).emit("basic_input_string", basicInputString);
-      //io.to(socket.id).emit("advanced_input_string", advancedInputString);
-      io.to(socket.id).emit("end_input_string", endInputString);
+      io.sockets.emit("basic_input_string", basicInputString);
+      //io.sockets.emit("advanced_input_string", advancedInputString);
+      io.sockets.emit("end_input_string", endInputString);
     }
     if (inputMode == 2) {
-      //io.to(socket.id).emit("basic_input_string", basicInputString);
-      io.to(socket.id).emit("advanced_input_string", advancedInputString);
-      io.to(socket.id).emit("end_input_string", endInputString);
+      //io.sockets.emit("basic_input_string", basicInputString);
+      io.sockets.emit("advanced_input_string", advancedInputString);
+      io.sockets.emit("end_input_string", endInputString);
     }
     vibrationAndLedDataToDisplayObject = {
       motors_data: [
@@ -337,34 +337,34 @@ io.sockets.on("connection",
         led1ToDisplay, led2ToDisplay, led3ToDisplay, led4ToDisplay
       ]
     };
-    io.to(socket.id).emit("vibration_and_led_data_to_display_object", vibrationAndLedDataToDisplayObject);
+    io.sockets.emit("vibration_and_led_data_to_display_object", vibrationAndLedDataToDisplayObject);
     if (controllerConfig.display_framerate == true) {
       let frameDataToDisplayObject = {
         frame_count_to_display: frameCountToDisplay,
         frame_rate_to_display: frameRateToDisplay
       };
-      io.to(socket.id).emit("frame_data_to_display_object", frameDataToDisplayObject);
+      io.sockets.emit("frame_data_to_display_object", frameDataToDisplayObject);
     }
-    io.to(socket.id).emit("input_counts_object", inputCountsObject);
-    io.to(socket.id).emit("advanced_input_metadata", advancedInputMetadata);
-    io.to(socket.id).emit("inner_loop_metadata", innerLoopMetadata);
-    io.to(socket.id).emit("controller_graphics", controllerConfig.controller_graphics);
-    io.to(socket.id).emit("display_framerate", controllerConfig.display_framerate);
-    io.to(socket.id).emit("game_title", globalConfig.game_title);
-    io.to(socket.id).emit("game_title_short", globalConfig.game_title_short);
-    io.to(socket.id).emit("next_game_title", globalConfig.next_game_title);
-    io.to(socket.id).emit("next_game_title_short", globalConfig.next_game_title_short);
-    io.to(socket.id).emit("vote_data", voteDataObject);
-    io.to(socket.id).emit("viewer_count", currentViewerCount);
-    io.to(socket.id).emit("run_start_time", runStartTime);
-    io.to(socket.id).emit("next_run_start_time", nextRunStartTime);
-    io.to(socket.id).emit("stream_end_time", streamEndTime);
-    io.to(socket.id).emit("help_messages", globalConfig.overlay_text_rotation);
-    io.to(socket.id).emit("header_text", globalConfig.overlay_header_text);
-    io.to(socket.id).emit("advanced_mode_help_message_to_display", globalConfig.overlay_advanced_mode_help_message_to_display);
-    io.to(socket.id).emit("accept_inputs", acceptInputs);
-    io.to(socket.id).emit("controller_config", controllerConfig);
-    io.to(socket.id).emit("global_config", globalConfig);
+    io.sockets.emit("input_counts_object", inputCountsObject);
+    io.sockets.emit("advanced_input_metadata", advancedInputMetadata);
+    io.sockets.emit("inner_loop_metadata", innerLoopMetadata);
+    io.sockets.emit("controller_graphics", controllerConfig.controller_graphics);
+    io.sockets.emit("display_framerate", controllerConfig.display_framerate);
+    io.sockets.emit("game_title", globalConfig.game_title);
+    io.sockets.emit("game_title_short", globalConfig.game_title_short);
+    io.sockets.emit("next_game_title", globalConfig.next_game_title);
+    io.sockets.emit("next_game_title_short", globalConfig.next_game_title_short);
+    io.sockets.emit("vote_data", voteDataObject);
+    io.sockets.emit("viewer_count", currentViewerCount);
+    io.sockets.emit("run_start_time", runStartTime);
+    io.sockets.emit("next_run_start_time", nextRunStartTime);
+    io.sockets.emit("stream_end_time", streamEndTime);
+    io.sockets.emit("help_messages", globalConfig.overlay_text_rotation);
+    io.sockets.emit("header_text", globalConfig.overlay_header_text);
+    io.sockets.emit("advanced_mode_help_message_to_display", globalConfig.overlay_advanced_mode_help_message_to_display);
+    io.sockets.emit("accept_inputs", acceptInputs);
+    io.sockets.emit("controller_config", controllerConfig);
+    io.sockets.emit("global_config", globalConfig);
 
     socket.on("disconnect", function() {
       console.log("Client has disconnected: " + socket.id);
@@ -4375,6 +4375,9 @@ async function onMessageHandler(target, tags, message, self) {
       /((r+u+s+t+)+|(g+i+f+t+)+|(c+o+d+e+)+|(e+v+e+n+t+)+|(a+w+a+r+d+)+|(c+o+n+e+c+t+)+|(c+s+\W*g+o+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Comment this line if bot bans accidentally
       /(p+r+i+c+e+\s+i+s+\s+l+o+w+e+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(l+o+w+e+r+\s+p+r+i+c+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(r+e+a+l+y+)+\s+(e+n+j+o+y+)+\s+(y+o+\w*)+\s+((c+o+n+t+e+n+t+)+|(s+t+r+e*a*m+i*n*g*)+)+\s+(a+n+d+)+\s+(f+i+n+d+)+(\s+i+t+)*\s+(e+n+j+o+y+a+b+l+e+)\s+(t+o+)+\s+(w+a+t+c+h+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // greetings. I really enjoy your content and find it enjoyable to watch. I recommend that you continue your outstanding work. SeemsGood SeemsGood
+      /(r+e+c+o+m+e+n+d+)+\s+(t+h+a+t+)+\s+(y+o+\w*)+\s+(c+o+n+t+i+n+u+e+)+\s+(y+o+\w*)+\s+((o+u+t+s+t+a+n+d+i+n+g+)+|(a+m+a+z+i+n+g+)+)+\s+(w+o+r+k+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // greetings. I really enjoy your content and find it enjoyable to watch. I recommend that you continue your outstanding work. SeemsGood SeemsGood
+      /(h+e+l+o+)+\s+(n+i+c+e+)+\s+(m+e+t+i+n+g+)+\s+(y+o+\w*)+\s*\,*(\s*a+n+d+)*\s*(h+o+w+)+\s+(i+s+)+\s+(y+o+\w*)\s+(s+t+r+e*a*m+i*n*g*)+\s+(g+o+i+n+g*)+(\s*\w+)*\s+(s+o+)+\s+(f+a+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // hello nice meeting you and how is your streaming going on so far
       /((m+y+\s*s+t+r+m+)+|(m+y+\s*s+t+r+e+a+m+)+|(m+y+\s*s+t+r+a+e+m+)+|(m+y+\s*s+t+r+e+m+)+|(m+y+\s*s+t+r+a+m+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((\.+|d+o+t+)+\s*(s+t+o+r+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+((a+n+d+)*|(\,+)*)*\s*((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+\s*((a+n+d+)*|(\,+)*)*\s*((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -4506,8 +4509,8 @@ async function onMessageHandler(target, tags, message, self) {
     let upperCaseLettersToLowerCaseLettersRatio = upperCaseLettersCount / lowerCaseLettersCount;
     */
 
-    //console.log("singleMessageSpamBots");
-    //console.log(singleMessageSpamBots);
+    console.log("singleMessageSpamBots");
+    console.log(singleMessageSpamBots);
     //console.log("slurDetection");
     //console.log(slurDetection);
     //console.log("multiMessageSpamBotTypeA");
@@ -6438,7 +6441,7 @@ async function onMessageHandler(target, tags, message, self) {
     // There's no need to run this block for advanced mode, only basic mode since names are not displayed in advanced mode
     // It turns out this sleep is important because the database is used again below, no matter which input mode, so we have to sleep long enough to make sure the database completed any operations above before doing anything to the database below 
     //console.log(new Date().toISOString() + " BEFORE user_color=" + userColor);
-    await sleep(400); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
+    //await sleep(400); // LOL this is so ugly, I've made the database checks async then learned how to do database checks that block until they're completed, but I learned after a good chunk of this async database check was done, I don't want to redo everything so it's blocking everything after, it's going to take forever :( with that being said, the database checks being sync look much cleaner on code than async, at least cleaner than how I implemented the async checks, this means every message will have an artificial delay, which will also make moderation delayed
     //console.log(new Date().toISOString() + " AFTER  user_color=" + userColor);
     userColorInverted = userColor;
     userColorInverted = userColorInverted.replace(/(0x)+/ig, "");
@@ -10672,60 +10675,62 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(result);
                   //
-                  mongoClient.connect(mongoUrl, {
-                    useUnifiedTopology: true
-                  }, function(databaseToUpdateError, databaseToUpdate) {
-                    if (databaseToUpdateError) {
-                      throw databaseToUpdateError;
-                    }
-                    let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-                    let dataToQuery = {
-                      user_id: userId
-                    };
-                    let dataToUpdate = {
-                      $set: {
-                        user_id: result.user_id,
-
-                        first_message_sent_id: result.first_message_sent_id,
-                        last_message_sent_id: result.last_message_sent_id,
-
-                        basic_inputs_sent: result.basic_inputs_sent,
-                        advanced_inputs_sent: result.advanced_inputs_sent + 1,
-                        total_inputs_sent: result.total_inputs_sent + 1,
-
-                        is_first_message_basic_input: result.is_first_message_basic_input,
-                        is_last_message_basic_input: false,
-
-                        is_first_message_advanced_input: result.is_first_message_advanced_input,
-                        is_last_message_advanced_input: true,
-
-                        first_basic_input: result.first_basic_input,
-                        first_advanced_input: result.first_advanced_input,
-
-                        last_basic_input: result.last_basic_input,
-                        last_advanced_input: originalMessage
+                  if (result !== null) {
+                    mongoClient.connect(mongoUrl, {
+                      useUnifiedTopology: true
+                    }, function(databaseToUpdateError, databaseToUpdate) {
+                      if (databaseToUpdateError) {
+                        throw databaseToUpdateError;
                       }
-                    };
-                    //logInputToDatabase(inputMode, dataToUpdate.$set.last_advanced_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                    //logInputToTextFile(inputMode, dataToUpdate.$set.last_advanced_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                    if (dataToUpdate.$set.first_advanced_input == "") {
-                      // User's first advanced input
-                      dataToUpdate.$set.first_advanced_input = originalMessage;
-                    }
-                    if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
-                      // User's first message is also an input
-                      //console.log("NEW USER PogChamp");
-                      dataToUpdate.$set.is_first_message_basic_input = false;
-                      dataToUpdate.$set.is_first_message_advanced_input = true;
-                    }
-                    userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
-                      if (resError) {
-                        throw resError;
+                      let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+                      let dataToQuery = {
+                        user_id: userId
+                      };
+                      let dataToUpdate = {
+                        $set: {
+                          user_id: result.user_id,
+                          
+                          first_message_sent_id: result.first_message_sent_id,
+                          last_message_sent_id: result.last_message_sent_id,
+                          
+                          basic_inputs_sent: result.basic_inputs_sent,
+                          advanced_inputs_sent: result.advanced_inputs_sent + 1,
+                          total_inputs_sent: result.total_inputs_sent + 1,
+                          
+                          is_first_message_basic_input: result.is_first_message_basic_input,
+                          is_last_message_basic_input: false,
+                          
+                          is_first_message_advanced_input: result.is_first_message_advanced_input,
+                          is_last_message_advanced_input: true,
+                          
+                          first_basic_input: result.first_basic_input,
+                          first_advanced_input: result.first_advanced_input,
+                          
+                          last_basic_input: result.last_basic_input,
+                          last_advanced_input: originalMessage
+                        }
+                      };
+                      //logInputToDatabase(inputMode, dataToUpdate.$set.last_advanced_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                      //logInputToTextFile(inputMode, dataToUpdate.$set.last_advanced_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                      if (dataToUpdate.$set.first_advanced_input == "") {
+                        // User's first advanced input
+                        dataToUpdate.$set.first_advanced_input = originalMessage;
                       }
-                      //console.log("1 document updated");
-                      databaseToUpdate.close();
+                      if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
+                        // User's first message is also an input
+                        //console.log("NEW USER PogChamp");
+                        dataToUpdate.$set.is_first_message_basic_input = false;
+                        dataToUpdate.$set.is_first_message_advanced_input = true;
+                      }
+                      userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                        if (resError) {
+                          throw resError;
+                        }
+                        //console.log("1 document updated");
+                        databaseToUpdate.close();
+                      });
                     });
-                  });
+                  }
                   //
                   userDb.close();
                 });
@@ -14546,60 +14551,62 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(result);
                   //
-                  mongoClient.connect(mongoUrl, {
-                    useUnifiedTopology: true
-                  }, function(databaseToUpdateError, databaseToUpdate) {
-                    if (databaseToUpdateError) {
-                      throw databaseToUpdateError;
-                    }
-                    let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-                    let dataToQuery = {
-                      user_id: userId
-                    };
-                    let dataToUpdate = {
-                      $set: {
-                        user_id: result.user_id,
-
-                        first_message_sent_id: result.first_message_sent_id,
-                        last_message_sent_id: result.last_message_sent_id,
-
-                        basic_inputs_sent: result.basic_inputs_sent,
-                        advanced_inputs_sent: result.advanced_inputs_sent + 1,
-                        total_inputs_sent: result.total_inputs_sent + 1,
-
-                        is_first_message_basic_input: result.is_first_message_basic_input,
-                        is_last_message_basic_input: false,
-
-                        is_first_message_advanced_input: result.is_first_message_advanced_input,
-                        is_last_message_advanced_input: true,
-
-                        first_basic_input: result.first_basic_input,
-                        first_advanced_input: result.first_advanced_input,
-
-                        last_basic_input: result.last_basic_input,
-                        last_advanced_input: originalMessage
+                  if (result !== null) {
+                    mongoClient.connect(mongoUrl, {
+                      useUnifiedTopology: true
+                    }, function(databaseToUpdateError, databaseToUpdate) {
+                      if (databaseToUpdateError) {
+                        throw databaseToUpdateError;
                       }
-                    };
-                    //logInputToDatabase(inputMode, dataToUpdate.$set.last_advanced_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                    //logInputToTextFile(inputMode, dataToUpdate.$set.last_advanced_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                    if (dataToUpdate.$set.first_advanced_input == "") {
-                      // User's first advanced input
-                      dataToUpdate.$set.first_advanced_input = originalMessage;
-                    }
-                    if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
-                      // User's first message is also an input
-                      //console.log("NEW USER PogChamp");
-                      dataToUpdate.$set.is_first_message_basic_input = false;
-                      dataToUpdate.$set.is_first_message_advanced_input = true;
-                    }
-                    userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
-                      if (resError) {
-                        throw resError;
+                      let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+                      let dataToQuery = {
+                        user_id: userId
+                      };
+                      let dataToUpdate = {
+                        $set: {
+                          user_id: result.user_id,
+
+                          first_message_sent_id: result.first_message_sent_id,
+                          last_message_sent_id: result.last_message_sent_id,
+
+                          basic_inputs_sent: result.basic_inputs_sent,
+                          advanced_inputs_sent: result.advanced_inputs_sent + 1,
+                          total_inputs_sent: result.total_inputs_sent + 1,
+
+                          is_first_message_basic_input: result.is_first_message_basic_input,
+                          is_last_message_basic_input: false,
+
+                          is_first_message_advanced_input: result.is_first_message_advanced_input,
+                          is_last_message_advanced_input: true,
+
+                          first_basic_input: result.first_basic_input,
+                          first_advanced_input: result.first_advanced_input,
+
+                          last_basic_input: result.last_basic_input,
+                          last_advanced_input: originalMessage
+                        }
+                      };
+                      //logInputToDatabase(inputMode, dataToUpdate.$set.last_advanced_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                      //logInputToTextFile(inputMode, dataToUpdate.$set.last_advanced_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                      if (dataToUpdate.$set.first_advanced_input == "") {
+                        // User's first advanced input
+                        dataToUpdate.$set.first_advanced_input = originalMessage;
                       }
-                      //console.log("1 document updated");
-                      databaseToUpdate.close();
+                      if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
+                        // User's first message is also an input
+                        //console.log("NEW USER PogChamp");
+                        dataToUpdate.$set.is_first_message_basic_input = false;
+                        dataToUpdate.$set.is_first_message_advanced_input = true;
+                      }
+                      userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                        if (resError) {
+                          throw resError;
+                        }
+                        //console.log("1 document updated");
+                        databaseToUpdate.close();
+                      });
                     });
-                  });
+                  }
                   //
                   userDb.close();
                 });
@@ -15163,60 +15170,62 @@ async function onMessageHandler(target, tags, message, self) {
                         }
                         //console.log(result);
                         //
-                        mongoClient.connect(mongoUrl, {
-                          useUnifiedTopology: true
-                        }, function(databaseToUpdateError, databaseToUpdate) {
-                          if (databaseToUpdateError) {
-                            throw databaseToUpdateError;
-                          }
-                          let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-                          let dataToQuery = {
-                            user_id: userId
-                          };
-                          let dataToUpdate = {
-                            $set: {
-                              user_id: result.user_id,
-
-                              first_message_sent_id: result.first_message_sent_id,
-                              last_message_sent_id: result.last_message_sent_id,
-
-                              basic_inputs_sent: result.basic_inputs_sent + 1,
-                              advanced_inputs_sent: result.advanced_inputs_sent,
-                              total_inputs_sent: result.total_inputs_sent + 1,
-
-                              is_first_message_basic_input: result.is_first_message_basic_input,
-                              is_last_message_basic_input: true,
-
-                              is_first_message_advanced_input: result.is_first_message_advanced_input,
-                              is_last_message_advanced_input: false,
-
-                              first_basic_input: result.first_basic_input,
-                              first_advanced_input: result.first_advanced_input,
-
-                              last_basic_input: originalMessage,
-                              last_advanced_input: result.last_advanced_input
+                        if (result !== null) {
+                          mongoClient.connect(mongoUrl, {
+                            useUnifiedTopology: true
+                          }, function(databaseToUpdateError, databaseToUpdate) {
+                            if (databaseToUpdateError) {
+                              throw databaseToUpdateError;
                             }
-                          };
-                          //logInputToDatabase(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                          //logInputToTextFile(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                          if (dataToUpdate.$set.first_basic_input == "") {
-                            // User's first basic input
-                            dataToUpdate.$set.first_basic_input = originalMessage;
-                          }
-                          if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
-                            // User's first message is also an input
-                            //console.log("NEW USER PogChamp");
-                            dataToUpdate.$set.is_first_message_basic_input = true;
-                            dataToUpdate.$set.is_first_message_advanced_input = false;
-                          }
-                          userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
-                            if (resError) {
-                              throw resError;
+                            let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+                            let dataToQuery = {
+                              user_id: userId
+                            };
+                            let dataToUpdate = {
+                              $set: {
+                                user_id: result.user_id,
+
+                                first_message_sent_id: result.first_message_sent_id,
+                                last_message_sent_id: result.last_message_sent_id,
+
+                                basic_inputs_sent: result.basic_inputs_sent + 1,
+                                advanced_inputs_sent: result.advanced_inputs_sent,
+                                total_inputs_sent: result.total_inputs_sent + 1,
+
+                                is_first_message_basic_input: result.is_first_message_basic_input,
+                                is_last_message_basic_input: true,
+
+                                is_first_message_advanced_input: result.is_first_message_advanced_input,
+                                is_last_message_advanced_input: false,
+
+                                first_basic_input: result.first_basic_input,
+                                first_advanced_input: result.first_advanced_input,
+
+                                last_basic_input: originalMessage,
+                                last_advanced_input: result.last_advanced_input
+                              }
+                            };
+                            //logInputToDatabase(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                            //logInputToTextFile(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                            if (dataToUpdate.$set.first_basic_input == "") {
+                              // User's first basic input
+                              dataToUpdate.$set.first_basic_input = originalMessage;
                             }
-                            //console.log("1 document updated");
-                            databaseToUpdate.close();
+                            if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
+                              // User's first message is also an input
+                              //console.log("NEW USER PogChamp");
+                              dataToUpdate.$set.is_first_message_basic_input = true;
+                              dataToUpdate.$set.is_first_message_advanced_input = false;
+                            }
+                            userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                              if (resError) {
+                                throw resError;
+                              }
+                              //console.log("1 document updated");
+                              databaseToUpdate.close();
+                            });
                           });
-                        });
+                        }
                         //
                         userDb.close();
                       });
@@ -16172,60 +16181,62 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(result);
                   //
-                  mongoClient.connect(mongoUrl, {
-                    useUnifiedTopology: true
-                  }, function(databaseToUpdateError, databaseToUpdate) {
-                    if (databaseToUpdateError) {
-                      throw databaseToUpdateError;
-                    }
-                    let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-                    let dataToQuery = {
-                      user_id: userId
-                    };
-                    let dataToUpdate = {
-                      $set: {
-                        user_id: result.user_id,
-
-                        first_message_sent_id: result.first_message_sent_id,
-                        last_message_sent_id: result.last_message_sent_id,
-
-                        basic_inputs_sent: result.basic_inputs_sent + 1,
-                        advanced_inputs_sent: result.advanced_inputs_sent,
-                        total_inputs_sent: result.total_inputs_sent + 1,
-
-                        is_first_message_basic_input: result.is_first_message_basic_input,
-                        is_last_message_basic_input: true,
-
-                        is_first_message_advanced_input: result.is_first_message_advanced_input,
-                        is_last_message_advanced_input: false,
-
-                        first_basic_input: result.first_basic_input,
-                        first_advanced_input: result.first_advanced_input,
-
-                        last_basic_input: originalMessage,
-                        last_advanced_input: result.last_advanced_input
+                  if (result !== null) {
+                    mongoClient.connect(mongoUrl, {
+                      useUnifiedTopology: true
+                    }, function(databaseToUpdateError, databaseToUpdate) {
+                      if (databaseToUpdateError) {
+                        throw databaseToUpdateError;
                       }
-                    };
-                    //logInputToDatabase(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                    //logInputToTextFile(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                    if (dataToUpdate.$set.first_basic_input == "") {
-                      // User's first basic input
-                      dataToUpdate.$set.first_basic_input = originalMessage;
-                    }
-                    if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
-                      // User's first message is also an input
-                      //console.log("NEW USER PogChamp");
-                      dataToUpdate.$set.is_first_message_basic_input = true;
-                      dataToUpdate.$set.is_first_message_advanced_input = false;
-                    }
-                    userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
-                      if (resError) {
-                        throw resError;
+                      let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+                      let dataToQuery = {
+                        user_id: userId
+                      };
+                      let dataToUpdate = {
+                        $set: {
+                          user_id: result.user_id,
+
+                          first_message_sent_id: result.first_message_sent_id,
+                          last_message_sent_id: result.last_message_sent_id,
+
+                          basic_inputs_sent: result.basic_inputs_sent + 1,
+                          advanced_inputs_sent: result.advanced_inputs_sent,
+                          total_inputs_sent: result.total_inputs_sent + 1,
+
+                          is_first_message_basic_input: result.is_first_message_basic_input,
+                          is_last_message_basic_input: true,
+
+                          is_first_message_advanced_input: result.is_first_message_advanced_input,
+                          is_last_message_advanced_input: false,
+
+                          first_basic_input: result.first_basic_input,
+                          first_advanced_input: result.first_advanced_input,
+
+                          last_basic_input: originalMessage,
+                          last_advanced_input: result.last_advanced_input
+                        }
+                      };
+                      //logInputToDatabase(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                      //logInputToTextFile(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                      if (dataToUpdate.$set.first_basic_input == "") {
+                        // User's first basic input
+                        dataToUpdate.$set.first_basic_input = originalMessage;
                       }
-                      //console.log("1 document updated");
-                      databaseToUpdate.close();
+                      if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
+                        // User's first message is also an input
+                        //console.log("NEW USER PogChamp");
+                        dataToUpdate.$set.is_first_message_basic_input = true;
+                        dataToUpdate.$set.is_first_message_advanced_input = false;
+                      }
+                      userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                        if (resError) {
+                          throw resError;
+                        }
+                        //console.log("1 document updated");
+                        databaseToUpdate.close();
+                      });
                     });
-                  });
+                  }
                   //
                   userDb.close();
                 });
@@ -16618,60 +16629,62 @@ async function onMessageHandler(target, tags, message, self) {
                         }
                         //console.log(result);
                         //
-                        mongoClient.connect(mongoUrl, {
-                          useUnifiedTopology: true
-                        }, function(databaseToUpdateError, databaseToUpdate) {
-                          if (databaseToUpdateError) {
-                            throw databaseToUpdateError;
-                          }
-                          let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-                          let dataToQuery = {
-                            user_id: userId
-                          };
-                          let dataToUpdate = {
-                            $set: {
-                              user_id: result.user_id,
-
-                              first_message_sent_id: result.first_message_sent_id,
-                              last_message_sent_id: result.last_message_sent_id,
-
-                              basic_inputs_sent: result.basic_inputs_sent + 1,
-                              advanced_inputs_sent: result.advanced_inputs_sent,
-                              total_inputs_sent: result.total_inputs_sent + 1,
-
-                              is_first_message_basic_input: result.is_first_message_basic_input,
-                              is_last_message_basic_input: true,
-
-                              is_first_message_advanced_input: result.is_first_message_advanced_input,
-                              is_last_message_advanced_input: false,
-
-                              first_basic_input: result.first_basic_input,
-                              first_advanced_input: result.first_advanced_input,
-
-                              last_basic_input: originalMessage,
-                              last_advanced_input: result.last_advanced_input
+                        if (result !== null) {
+                          mongoClient.connect(mongoUrl, {
+                            useUnifiedTopology: true
+                          }, function(databaseToUpdateError, databaseToUpdate) {
+                            if (databaseToUpdateError) {
+                              throw databaseToUpdateError;
                             }
-                          };
-                          //logInputToDatabase(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                          //logInputToTextFile(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                          if (dataToUpdate.$set.first_basic_input == "") {
-                            // User's first basic input
-                            dataToUpdate.$set.first_basic_input = originalMessage;
-                          }
-                          if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
-                            // User's first message is also an input
-                            //console.log("NEW USER PogChamp");
-                            dataToUpdate.$set.is_first_message_basic_input = true;
-                            dataToUpdate.$set.is_first_message_advanced_input = false;
-                          }
-                          userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
-                            if (resError) {
-                              throw resError;
+                            let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+                            let dataToQuery = {
+                              user_id: userId
+                            };
+                            let dataToUpdate = {
+                              $set: {
+                                user_id: result.user_id,
+
+                                first_message_sent_id: result.first_message_sent_id,
+                                last_message_sent_id: result.last_message_sent_id,
+
+                                basic_inputs_sent: result.basic_inputs_sent + 1,
+                                advanced_inputs_sent: result.advanced_inputs_sent,
+                                total_inputs_sent: result.total_inputs_sent + 1,
+
+                                is_first_message_basic_input: result.is_first_message_basic_input,
+                                is_last_message_basic_input: true,
+
+                                is_first_message_advanced_input: result.is_first_message_advanced_input,
+                                is_last_message_advanced_input: false,
+
+                                first_basic_input: result.first_basic_input,
+                                first_advanced_input: result.first_advanced_input,
+
+                                last_basic_input: originalMessage,
+                                last_advanced_input: result.last_advanced_input
+                              }
+                            };
+                            //logInputToDatabase(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                            //logInputToTextFile(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                            if (dataToUpdate.$set.first_basic_input == "") {
+                              // User's first basic input
+                              dataToUpdate.$set.first_basic_input = originalMessage;
                             }
-                            //console.log("1 document updated");
-                            databaseToUpdate.close();
+                            if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
+                              // User's first message is also an input
+                              //console.log("NEW USER PogChamp");
+                              dataToUpdate.$set.is_first_message_basic_input = true;
+                              dataToUpdate.$set.is_first_message_advanced_input = false;
+                            }
+                            userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                              if (resError) {
+                                throw resError;
+                              }
+                              //console.log("1 document updated");
+                              databaseToUpdate.close();
+                            });
                           });
-                        });
+                        }
                         //
                         userDb.close();
                       });
@@ -17627,60 +17640,62 @@ async function onMessageHandler(target, tags, message, self) {
                   }
                   //console.log(result);
                   //
-                  mongoClient.connect(mongoUrl, {
-                    useUnifiedTopology: true
-                  }, function(databaseToUpdateError, databaseToUpdate) {
-                    if (databaseToUpdateError) {
-                      throw databaseToUpdateError;
-                    }
-                    let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-                    let dataToQuery = {
-                      user_id: userId
-                    };
-                    let dataToUpdate = {
-                      $set: {
-                        user_id: result.user_id,
-
-                        first_message_sent_id: result.first_message_sent_id,
-                        last_message_sent_id: result.last_message_sent_id,
-
-                        basic_inputs_sent: result.basic_inputs_sent + 1,
-                        advanced_inputs_sent: result.advanced_inputs_sent,
-                        total_inputs_sent: result.total_inputs_sent + 1,
-
-                        is_first_message_basic_input: result.is_first_message_basic_input,
-                        is_last_message_basic_input: true,
-
-                        is_first_message_advanced_input: result.is_first_message_advanced_input,
-                        is_last_message_advanced_input: false,
-
-                        first_basic_input: result.first_basic_input,
-                        first_advanced_input: result.first_advanced_input,
-
-                        last_basic_input: originalMessage,
-                        last_advanced_input: result.last_advanced_input
+                  if (result !== null) {
+                    mongoClient.connect(mongoUrl, {
+                      useUnifiedTopology: true
+                    }, function(databaseToUpdateError, databaseToUpdate) {
+                      if (databaseToUpdateError) {
+                        throw databaseToUpdateError;
                       }
-                    };
-                    //logInputToDatabase(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                    //logInputToTextFile(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
-                    if (dataToUpdate.$set.first_basic_input == "") {
-                      // User's first basic input
-                      dataToUpdate.$set.first_basic_input = originalMessage;
-                    }
-                    if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
-                      // User's first message is also an input
-                      //console.log("NEW USER PogChamp");
-                      dataToUpdate.$set.is_first_message_basic_input = true;
-                      dataToUpdate.$set.is_first_message_advanced_input = false;
-                    }
-                    userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
-                      if (resError) {
-                        throw resError;
+                      let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+                      let dataToQuery = {
+                        user_id: userId
+                      };
+                      let dataToUpdate = {
+                        $set: {
+                          user_id: result.user_id,
+
+                          first_message_sent_id: result.first_message_sent_id,
+                          last_message_sent_id: result.last_message_sent_id,
+
+                          basic_inputs_sent: result.basic_inputs_sent + 1,
+                          advanced_inputs_sent: result.advanced_inputs_sent,
+                          total_inputs_sent: result.total_inputs_sent + 1,
+
+                          is_first_message_basic_input: result.is_first_message_basic_input,
+                          is_last_message_basic_input: true,
+
+                          is_first_message_advanced_input: result.is_first_message_advanced_input,
+                          is_last_message_advanced_input: false,
+
+                          first_basic_input: result.first_basic_input,
+                          first_advanced_input: result.first_advanced_input,
+
+                          last_basic_input: originalMessage,
+                          last_advanced_input: result.last_advanced_input
+                        }
+                      };
+                      //logInputToDatabase(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                      //logInputToTextFile(inputMode, dataToUpdate.$set.last_basic_input, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
+                      if (dataToUpdate.$set.first_basic_input == "") {
+                        // User's first basic input
+                        dataToUpdate.$set.first_basic_input = originalMessage;
                       }
-                      //console.log("1 document updated");
-                      databaseToUpdate.close();
+                      if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
+                        // User's first message is also an input
+                        //console.log("NEW USER PogChamp");
+                        dataToUpdate.$set.is_first_message_basic_input = true;
+                        dataToUpdate.$set.is_first_message_advanced_input = false;
+                      }
+                      userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                        if (resError) {
+                          throw resError;
+                        }
+                        //console.log("1 document updated");
+                        databaseToUpdate.close();
+                      });
                     });
-                  });
+                  }
                   //
                   userDb.close();
                 });
@@ -20307,67 +20322,69 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
           }
           //console.log(result);
           //
-          mongoClient.connect(mongoUrl, {
-            useUnifiedTopology: true
-          }, function(databaseToUpdateError, databaseToUpdate) {
-            if (databaseToUpdateError) {
-              throw databaseToUpdateError;
-            }
-            let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-            let dataToQuery = {
-              user_id: userId
-            };
-            let dataToUpdate = {
-              $set: {
-                user_id: result.user_id,
-
-                first_message_sent_id: result.first_message_sent_id,
-                last_message_sent_id: result.last_message_sent_id,
-
-                basic_inputs_sent: result.basic_inputs_sent,
-                advanced_inputs_sent: result.advanced_inputs_sent + 1,
-                total_inputs_sent: result.total_inputs_sent + 1,
-
-                is_first_message_basic_input: result.is_first_message_basic_input,
-                is_last_message_basic_input: false,
-
-                is_first_message_advanced_input: result.is_first_message_advanced_input,
-                is_last_message_advanced_input: true,
-
-                first_basic_input: result.first_basic_input,
-                first_advanced_input: result.first_advanced_input,
-
-                last_basic_input: result.last_basic_input,
-                last_advanced_input: macroToTestInnerLoopFinalString
+          if (result !== null) {
+            mongoClient.connect(mongoUrl, {
+              useUnifiedTopology: true
+            }, function(databaseToUpdateError, databaseToUpdate) {
+              if (databaseToUpdateError) {
+                throw databaseToUpdateError;
               }
-            };
-            if (sendToArduino == true) {
-              if (isSavedMacro == false) {
-                if (timesMacroWasExecuted <= 0) {
-                  // This is not a saved macro because a saved macro will have a value larger than 0 when it gets here
-                  //logInputToDatabase(inputMode, dataToUpdate.$set.last_advanced_input, macroStringToPreTest, false, null, roomId, globalConfig.run_name, globalConfig.run_id, username, userId, messageId, new Date().getTime());
-                  //logInputToTextFile(inputMode, dataToUpdate.$set.last_advanced_input, macroStringToPreTest, false, null, roomId, globalConfig.run_name, globalConfig.run_id, username, userId, messageId, new Date().getTime());
+              let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+              let dataToQuery = {
+                user_id: userId
+              };
+              let dataToUpdate = {
+                $set: {
+                  user_id: result.user_id,
+
+                  first_message_sent_id: result.first_message_sent_id,
+                  last_message_sent_id: result.last_message_sent_id,
+
+                  basic_inputs_sent: result.basic_inputs_sent,
+                  advanced_inputs_sent: result.advanced_inputs_sent + 1,
+                  total_inputs_sent: result.total_inputs_sent + 1,
+
+                  is_first_message_basic_input: result.is_first_message_basic_input,
+                  is_last_message_basic_input: false,
+
+                  is_first_message_advanced_input: result.is_first_message_advanced_input,
+                  is_last_message_advanced_input: true,
+
+                  first_basic_input: result.first_basic_input,
+                  first_advanced_input: result.first_advanced_input,
+
+                  last_basic_input: result.last_basic_input,
+                  last_advanced_input: macroToTestInnerLoopFinalString
+                }
+              };
+              if (sendToArduino == true) {
+                if (isSavedMacro == false) {
+                  if (timesMacroWasExecuted <= 0) {
+                    // This is not a saved macro because a saved macro will have a value larger than 0 when it gets here
+                    //logInputToDatabase(inputMode, dataToUpdate.$set.last_advanced_input, macroStringToPreTest, false, null, roomId, globalConfig.run_name, globalConfig.run_id, username, userId, messageId, new Date().getTime());
+                    //logInputToTextFile(inputMode, dataToUpdate.$set.last_advanced_input, macroStringToPreTest, false, null, roomId, globalConfig.run_name, globalConfig.run_id, username, userId, messageId, new Date().getTime());
+                  }
                 }
               }
-            }
-            if (dataToUpdate.$set.first_advanced_input == "") {
-              // User's first advanced input
-              dataToUpdate.$set.first_advanced_input = macroToTestInnerLoopFinalString;
-            }
-            if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
-              // User's first message is also an input
-              //console.log("NEW USER PogChamp");
-              dataToUpdate.$set.is_first_message_basic_input = false;
-              dataToUpdate.$set.is_first_message_advanced_input = true;
-            }
-            userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
-              if (resError) {
-                throw resError;
+              if (dataToUpdate.$set.first_advanced_input == "") {
+                // User's first advanced input
+                dataToUpdate.$set.first_advanced_input = macroToTestInnerLoopFinalString;
               }
-              //console.log("1 document updated");
-              databaseToUpdate.close();
+              if (dataToUpdate.$set.first_message_sent_id == dataToUpdate.$set.last_message_sent_id) {
+                // User's first message is also an input
+                //console.log("NEW USER PogChamp");
+                dataToUpdate.$set.is_first_message_basic_input = false;
+                dataToUpdate.$set.is_first_message_advanced_input = true;
+              }
+              userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                if (resError) {
+                  throw resError;
+                }
+                //console.log("1 document updated");
+                databaseToUpdate.close();
+              });
             });
-          });
+          }
           //
           userDb.close();
         });
