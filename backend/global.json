@@ -22,7 +22,7 @@
   "enable_check_moderators": true,
   "enable_check_followage": true,
   "send_introductory_messages_to_new_users_using_twitch_tags": false,
-  "send_welcome_back_messages_to_returning_users_using_twitch_tags": true,
+  "send_welcome_back_messages_to_returning_users_using_twitch_tags": false,
   "send_introductory_messages_to_new_users": true,
   "send_help_messages_to_new_users": false,
   "introductory_message_to_new_users": "Hello, I see you're new here! If you want to learn how to play, type !help or !commands, you can also read the stream description, but be warned because there is a LOT to read, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!",

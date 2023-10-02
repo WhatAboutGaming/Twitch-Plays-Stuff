@@ -4275,6 +4275,8 @@ async function onMessageHandler(target, tags, message, self) {
   console.log(username);
   console.log(message);
   */
+  //console.log("messageId");
+  //console.log(messageId);
   if (messageType == "whisper") {
     // Resend whisper to channel owner here
     updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
@@ -4509,8 +4511,8 @@ async function onMessageHandler(target, tags, message, self) {
     let upperCaseLettersToLowerCaseLettersRatio = upperCaseLettersCount / lowerCaseLettersCount;
     */
 
-    console.log("singleMessageSpamBots");
-    console.log(singleMessageSpamBots);
+    //console.log("singleMessageSpamBots");
+    //console.log(singleMessageSpamBots);
     //console.log("slurDetection");
     //console.log(slurDetection);
     //console.log("multiMessageSpamBotTypeA");
@@ -4583,7 +4585,7 @@ async function onMessageHandler(target, tags, message, self) {
         //console.log(result);
         //isNullDatabase = result;
         if (result === null) {
-          console.log("User doesn't exist");
+          console.log("User doesn't exist AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
           //
           mongoClient.connect(mongoUrl, {
             useUnifiedTopology: true
@@ -5018,7 +5020,7 @@ async function onMessageHandler(target, tags, message, self) {
                     }
                     if (chatConfig.send_debug_channel_messages == true) {
                       //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target);
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER A] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target);
                     }
                   }
                   if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
@@ -5474,7 +5476,7 @@ async function onMessageHandler(target, tags, message, self) {
           //test();
         }
         if (result !== null) {
-          //console.log("User exists");
+          //console.log("User exists BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
           //console.log("result");
           //console.log(result);
           mongoClient.connect(mongoUrl, {
@@ -5538,6 +5540,7 @@ async function onMessageHandler(target, tags, message, self) {
                 is_spam_bot: result.is_spam_bot
               }
             };
+            //console.log(dataToUpdate);
             if (dataToUpdate.$set.is_returning_chatter === "" || dataToUpdate.$set.is_returning_chatter === null || dataToUpdate.$set.is_returning_chatter === undefined || dataToUpdate.$set.is_returning_chatter === "null" || dataToUpdate.$set.is_returning_chatter === "undefined") {
               // Change this value in case user already exists but the user didn't have the value in their database entry
               console.log("Changing dataToUpdate.$set.is_returning_chatter for user_id " + dataToUpdate.$set.user_id + " from " + dataToUpdate.$set.is_returning_chatter);
@@ -5915,7 +5918,7 @@ async function onMessageHandler(target, tags, message, self) {
                     if (chatConfig.send_debug_channel_messages == true) {
                       //console.log("chatConfig.debug_channel = " + chatConfig.debug_channel);
                       //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target);
+                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER B] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target);
                     }
                   }
                   if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
@@ -7225,7 +7228,7 @@ async function onMessageHandler(target, tags, message, self) {
       }
     }
     if (inputMode == 2) {
-      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
+      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(syntax)+|(infor*m*a*t*i*o*n*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
           //console.log("Don't send the help message yet");
@@ -9791,7 +9794,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("playSettableInputCount = " + playSettableInputCount);
               //console.log("playSettableRepeatCount = " + playSettableRepeatCount);
               for (let settableInputsIndex = 0; settableInputsIndex < playSettableInputCount + 1; settableInputsIndex++) {
-                await sleep(2);
+                await sleep(1);
                 //console.log("");
                 //console.log("settableInputsIndex = " + settableInputsIndex);
                 //console.log("playSettableInputCount = " + playSettableInputCount);
@@ -9868,7 +9871,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(playSettableParametersToWrite);
               //let macroParametersToWrite = [controllerConfig.final_macro_preamble, currentMacroChainIndex + 1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
               //
-              await sleep(2);
+              await sleep(1);
 
               // Clear the incoming serial data from arduino before setting an advanced input to be executed
               /*
@@ -10220,7 +10223,7 @@ async function onMessageHandler(target, tags, message, self) {
                 whereDoesNextInnerLoopStart = innerLoopMetadataArray[innerLoopMetadataArrayIndex][6];
                 innerLoopMetadataArray[innerLoopMetadataArrayIndex][8] = (innerLoopMetadataArray.length - innerLoopMetadataArrayIndex) - 1;
                 let innerLoopParametersToWrite = innerLoopMetadataArray[innerLoopMetadataArrayIndex];
-                await sleep(2);
+                await sleep(1);
 
                 // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
                 /*
@@ -10580,7 +10583,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"));
                 //console.log("currentMacroChainIndex:" + currentMacroChainIndex)
                 if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
-                  await sleep(2); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
+                  await sleep(1); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
                   let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, true, false, false, userId);
                   //console.log(new Date().toISOString());
                   //console.log("macroChainInputObject");
@@ -10686,12 +10689,14 @@ async function onMessageHandler(target, tags, message, self) {
                       let dataToQuery = {
                         user_id: userId
                       };
+                      //console.log("WE ARE HERE AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA (Advanced Input)");
+                      //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                       let dataToUpdate = {
                         $set: {
                           user_id: result.user_id,
                           
                           first_message_sent_id: result.first_message_sent_id,
-                          last_message_sent_id: result.last_message_sent_id,
+                          last_message_sent_id: messageId,
                           
                           basic_inputs_sent: result.basic_inputs_sent,
                           advanced_inputs_sent: result.advanced_inputs_sent + 1,
@@ -13667,7 +13672,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log("playSettableInputCount = " + playSettableInputCount);
               //console.log("playSettableRepeatCount = " + playSettableRepeatCount);
               for (let settableInputsIndex = 0; settableInputsIndex < playSettableInputCount + 1; settableInputsIndex++) {
-                await sleep(2);
+                await sleep(1);
                 //console.log("");
                 //console.log("settableInputsIndex = " + settableInputsIndex);
                 //console.log("playSettableInputCount = " + playSettableInputCount);
@@ -13744,7 +13749,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(playSettableParametersToWrite);
               //let macroParametersToWrite = [controllerConfig.final_macro_preamble, currentMacroChainIndex + 1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
               //
-              await sleep(2);
+              await sleep(1);
 
               // Clear the incoming serial data from arduino before setting an advanced input to be executed
               /*
@@ -14096,7 +14101,7 @@ async function onMessageHandler(target, tags, message, self) {
                 whereDoesNextInnerLoopStart = innerLoopMetadataArray[innerLoopMetadataArrayIndex][6];
                 innerLoopMetadataArray[innerLoopMetadataArrayIndex][8] = (innerLoopMetadataArray.length - innerLoopMetadataArrayIndex) - 1;
                 let innerLoopParametersToWrite = innerLoopMetadataArray[innerLoopMetadataArrayIndex];
-                await sleep(2);
+                await sleep(1);
 
                 // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
                 /*
@@ -14456,7 +14461,7 @@ async function onMessageHandler(target, tags, message, self) {
                 //console.log(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"));
                 //console.log("currentMacroChainIndex:" + currentMacroChainIndex)
                 if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
-                  await sleep(2); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
+                  await sleep(1); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
                   let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, true, false, false, userId);
                   //console.log(new Date().toISOString());
                   //console.log("macroChainInputObject");
@@ -14562,12 +14567,14 @@ async function onMessageHandler(target, tags, message, self) {
                       let dataToQuery = {
                         user_id: userId
                       };
+                      //console.log("WE ARE HERE BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB (Advanced Input)");
+                      //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                       let dataToUpdate = {
                         $set: {
                           user_id: result.user_id,
 
                           first_message_sent_id: result.first_message_sent_id,
-                          last_message_sent_id: result.last_message_sent_id,
+                          last_message_sent_id: messageId,
 
                           basic_inputs_sent: result.basic_inputs_sent,
                           advanced_inputs_sent: result.advanced_inputs_sent + 1,
@@ -15033,7 +15040,7 @@ async function onMessageHandler(target, tags, message, self) {
         //messageInputs = messageInputs.split(/[\+\_\|\#\[\]\,\.\s]+/ig);
         //console.log(messageInputs);
       }
-      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
+      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(syntax)+|(infor*m*a*t*i*o*n*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
           //console.log("Don't send the help message yet");
@@ -15181,12 +15188,14 @@ async function onMessageHandler(target, tags, message, self) {
                             let dataToQuery = {
                               user_id: userId
                             };
+                            //console.log("WE ARE HERE CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC (Basic Input)");
+                            //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                             let dataToUpdate = {
                               $set: {
                                 user_id: result.user_id,
 
                                 first_message_sent_id: result.first_message_sent_id,
-                                last_message_sent_id: result.last_message_sent_id,
+                                last_message_sent_id: messageId,
 
                                 basic_inputs_sent: result.basic_inputs_sent + 1,
                                 advanced_inputs_sent: result.advanced_inputs_sent,
@@ -16192,12 +16201,14 @@ async function onMessageHandler(target, tags, message, self) {
                       let dataToQuery = {
                         user_id: userId
                       };
+                      //console.log("WE ARE HERE DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD (Basic Input)");
+                      //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                       let dataToUpdate = {
                         $set: {
                           user_id: result.user_id,
 
                           first_message_sent_id: result.first_message_sent_id,
-                          last_message_sent_id: result.last_message_sent_id,
+                          last_message_sent_id: messageId,
 
                           basic_inputs_sent: result.basic_inputs_sent + 1,
                           advanced_inputs_sent: result.advanced_inputs_sent,
@@ -16640,12 +16651,14 @@ async function onMessageHandler(target, tags, message, self) {
                             let dataToQuery = {
                               user_id: userId
                             };
+                            //console.log("WE ARE HERE EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE (Basic Input)");
+                            //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                             let dataToUpdate = {
                               $set: {
                                 user_id: result.user_id,
 
                                 first_message_sent_id: result.first_message_sent_id,
-                                last_message_sent_id: result.last_message_sent_id,
+                                last_message_sent_id: messageId,
 
                                 basic_inputs_sent: result.basic_inputs_sent + 1,
                                 advanced_inputs_sent: result.advanced_inputs_sent,
@@ -17651,12 +17664,14 @@ async function onMessageHandler(target, tags, message, self) {
                       let dataToQuery = {
                         user_id: userId
                       };
+                      //console.log("WE ARE HERE FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF (Basic Input)");
+                      //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                       let dataToUpdate = {
                         $set: {
                           user_id: result.user_id,
 
                           first_message_sent_id: result.first_message_sent_id,
-                          last_message_sent_id: result.last_message_sent_id,
+                          last_message_sent_id: messageId,
 
                           basic_inputs_sent: result.basic_inputs_sent + 1,
                           advanced_inputs_sent: result.advanced_inputs_sent,
@@ -19838,7 +19853,7 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
         //console.log(macroToTestInnerLoopMetadataArrayIndex);
         //console.log("macroToTestInnerLoopParametersToWrite");
         //console.log(macroToTestInnerLoopParametersToWrite);
-        sleep(2);
+        sleep(1);
         
         // Clear the incoming serial data from arduino before setting an advanced input (Will this break things?)
         /*
@@ -20226,7 +20241,7 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
         //console.log(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"));
         //console.log("currentMacroChainIndex:" + currentMacroChainIndex)
         if (currentMacroChainIndex < controllerConfig.advanced_input_macros_allowed) {
-          sleep(2); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
+          sleep(1); // Have to sleep here because if we send messages too fast to the arduino, it fails to process the whole thing, yes I have to fix this code on arduino side, not using a hack in this code, yes 0ms, weirdly is just slow enough for it to work, I hate this "solution"
           let macroChainInputObject = processMacroChain(precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_string_array.join("+"), precisionInputsPreProcessed.input_array[preprocessedArrayIndex].input_hold_delay, currentMacroChainIndex, sendToArduino, macroToTestExecuteInputsBackwards, macroToTestExecuteInputsOppositeDirections, userId);
           //console.log(new Date().toISOString());
           //console.log("macroChainInputObject");
@@ -20333,12 +20348,14 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
               let dataToQuery = {
                 user_id: userId
               };
+              //console.log("WE ARE HERE GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG (Advanced Input)");
+              //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
               let dataToUpdate = {
                 $set: {
                   user_id: result.user_id,
 
                   first_message_sent_id: result.first_message_sent_id,
-                  last_message_sent_id: result.last_message_sent_id,
+                  last_message_sent_id: messageId,
 
                   basic_inputs_sent: result.basic_inputs_sent,
                   advanced_inputs_sent: result.advanced_inputs_sent + 1,
