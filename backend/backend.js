@@ -254,7 +254,7 @@ var io = require("socket.io").listen(server);
 io.sockets.on("connection",
   // We are given a websocket object in our function
   function(socket) {
-    console.log("We have a new client: " + socket.id);
+    console.log(new Date().toISOString() + " We have a new client: " + socket.id);
     chatConnectionStatus = {
       chat_logger_ready_state: chatLogger.readyState(),
       client_ready_state: client.readyState(),
@@ -367,7 +367,7 @@ io.sockets.on("connection",
     io.sockets.emit("global_config", globalConfig);
 
     socket.on("disconnect", function() {
-      console.log("Client has disconnected: " + socket.id);
+      console.log(new Date().toISOString() + " Client has disconnected: " + socket.id);
     });
   }
 );
@@ -2549,6 +2549,91 @@ var hourToCheckPm = 23;
 
 var runStartLeniency = -60000; // This variable is used to start checking for time at least 60000 milliseconds before the run actually starts, so the title can be changed just before it actually starts
 
+function getRelativeTimeFromHelpMessageString(helpMessageInputString, timeToCountFromAsMilliseconds, displayMilliseconds, displayAlternateUnitAbbreviation) {
+  let numberToExtractFromRelativeTime = helpMessageInputString.match(/({{relative_time:\d+}})+/ig);
+  if (numberToExtractFromRelativeTime !== "" && numberToExtractFromRelativeTime !== undefined && numberToExtractFromRelativeTime !== null && numberToExtractFromRelativeTime !== [] && numberToExtractFromRelativeTime !== "[]" && numberToExtractFromRelativeTime !== {} && numberToExtractFromRelativeTime !== "{}" && numberToExtractFromRelativeTime !== "null" && numberToExtractFromRelativeTime !== "undefined") {
+    if (numberToExtractFromRelativeTime.length > 0) {
+      if (numberToExtractFromRelativeTime[0] !== "" && numberToExtractFromRelativeTime[0] !== undefined && numberToExtractFromRelativeTime[0] !== null && numberToExtractFromRelativeTime[0] !== [] && numberToExtractFromRelativeTime[0] !== "[]" && numberToExtractFromRelativeTime[0] !== {} && numberToExtractFromRelativeTime[0] !== "{}" && numberToExtractFromRelativeTime[0] !== "null" && numberToExtractFromRelativeTime[0] !== "undefined") {
+        numberToExtractFromRelativeTime = numberToExtractFromRelativeTime[0].split(/\:+/ig);
+        if (numberToExtractFromRelativeTime[1] !== "" && numberToExtractFromRelativeTime[1] !== undefined && numberToExtractFromRelativeTime[1] !== null && numberToExtractFromRelativeTime[1] !== [] && numberToExtractFromRelativeTime[1] !== "[]" && numberToExtractFromRelativeTime[1] !== {} && numberToExtractFromRelativeTime[1] !== "{}" && numberToExtractFromRelativeTime[1] !== "null" && numberToExtractFromRelativeTime[1] !== "undefined") {
+          numberToExtractFromRelativeTime = numberToExtractFromRelativeTime[1];
+          numberToExtractFromRelativeTime = numberToExtractFromRelativeTime.replace(/([\{\}])+/ig, "");
+          if (numberToExtractFromRelativeTime.length > 0) {
+            if (numberToExtractFromRelativeTime !== "" && numberToExtractFromRelativeTime !== undefined && numberToExtractFromRelativeTime !== null && numberToExtractFromRelativeTime !== [] && numberToExtractFromRelativeTime !== "[]" && numberToExtractFromRelativeTime !== {} && numberToExtractFromRelativeTime !== "{}" && numberToExtractFromRelativeTime !== "null" && numberToExtractFromRelativeTime !== "undefined") {
+              numberToExtractFromRelativeTime = parseInt(numberToExtractFromRelativeTime);
+              let checkIfnumberToExtractFromRelativeTimeIsNotANumber = isNaN(numberToExtractFromRelativeTime);
+              if (checkIfnumberToExtractFromRelativeTimeIsNotANumber == false) {
+                // Now we parse this number into usable timestamp
+                let helpMessageRelativeTimeTotal = numberToExtractFromRelativeTime - timeToCountFromAsMilliseconds;
+                helpMessageRelativeTimeTotal = Math.abs(helpMessageRelativeTimeTotal);
+                let helpMessageRelativeTimeDays = (parseInt(helpMessageRelativeTimeTotal / 86400000)).toString().padStart(2, "0");
+                let helpMessageRelativeTimeHours = (parseInt(helpMessageRelativeTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+                let helpMessageRelativeTimeMinutes = (parseInt(helpMessageRelativeTimeTotal / 60000) % 60).toString().padStart(2, "0");
+                let helpMessageRelativeTimeSeconds = (parseInt(helpMessageRelativeTimeTotal / 1000) % 60).toString().padStart(2, "0");
+                let helpMessageRelativeTimeMillis = (helpMessageRelativeTimeTotal % 1000).toString().padStart(3, "0");
+                if (displayMilliseconds == true) {
+                  if (displayAlternateUnitAbbreviation == true) {
+                    let helpMessageRelativeTimeString = helpMessageRelativeTimeDays + "day " + helpMessageRelativeTimeHours + "hour " + helpMessageRelativeTimeMinutes + "min " + helpMessageRelativeTimeSeconds + "sec " + helpMessageRelativeTimeMillis + "msec";
+                    helpMessageInputString = helpMessageInputString.replace(/({{relative_time:\d+}})+/ig, helpMessageRelativeTimeString);
+                    return helpMessageInputString;
+                  }
+                  if (displayAlternateUnitAbbreviation == false) {
+                    let helpMessageRelativeTimeString = helpMessageRelativeTimeDays + "d " + helpMessageRelativeTimeHours + "h " + helpMessageRelativeTimeMinutes + "m " + helpMessageRelativeTimeSeconds + "s " + helpMessageRelativeTimeMillis + "ms";
+                    helpMessageInputString = helpMessageInputString.replace(/({{relative_time:\d+}})+/ig, helpMessageRelativeTimeString);
+                    return helpMessageInputString;
+                  }
+                }
+                if (displayMilliseconds == false) {
+                  if (displayAlternateUnitAbbreviation == true) {
+                    let helpMessageRelativeTimeString = helpMessageRelativeTimeDays + "day " + helpMessageRelativeTimeHours + "hour " + helpMessageRelativeTimeMinutes + "min " + helpMessageRelativeTimeSeconds + "sec";
+                    helpMessageInputString = helpMessageInputString.replace(/({{relative_time:\d+}})+/ig, helpMessageRelativeTimeString);
+                    return helpMessageInputString;
+                  }
+                  if (displayAlternateUnitAbbreviation == false) {
+                    let helpMessageRelativeTimeString = helpMessageRelativeTimeDays + "d " + helpMessageRelativeTimeHours + "h " + helpMessageRelativeTimeMinutes + "m " + helpMessageRelativeTimeSeconds + "s";
+                    helpMessageInputString = helpMessageInputString.replace(/({{relative_time:\d+}})+/ig, helpMessageRelativeTimeString);
+                    return helpMessageInputString;
+                  }
+                }
+              }
+              if (checkIfnumberToExtractFromRelativeTimeIsNotANumber == true) {
+                numberToExtractFromRelativeTime = 0;
+                return helpMessageInputString;
+              }
+            }
+            if (numberToExtractFromRelativeTime === "" || numberToExtractFromRelativeTime === undefined || numberToExtractFromRelativeTime === null || numberToExtractFromRelativeTime === [] || numberToExtractFromRelativeTime === "[]" || numberToExtractFromRelativeTime === {} || numberToExtractFromRelativeTime === "{}" || numberToExtractFromRelativeTime === "null" || numberToExtractFromRelativeTime === "undefined") {
+              numberToExtractFromRelativeTime = 0;
+              return helpMessageInputString;
+            }
+          }
+          if (numberToExtractFromRelativeTime.length <= 0) {
+            numberToExtractFromRelativeTime = 0;
+            return helpMessageInputString;
+          }
+        }
+        if (numberToExtractFromRelativeTime[1] === "" || numberToExtractFromRelativeTime[1] === undefined || numberToExtractFromRelativeTime[1] === null || numberToExtractFromRelativeTime[1] === [] || numberToExtractFromRelativeTime[1] === "[]" || numberToExtractFromRelativeTime[1] === {} || numberToExtractFromRelativeTime[1] === "{}" || numberToExtractFromRelativeTime[1] === "null" || numberToExtractFromRelativeTime[1] === "undefined") {
+          numberToExtractFromRelativeTime = 0;
+          return helpMessageInputString;
+        }
+      }
+      if (numberToExtractFromRelativeTime[0] === "" || numberToExtractFromRelativeTime[0] === undefined || numberToExtractFromRelativeTime[0] === null || numberToExtractFromRelativeTime[0] === [] || numberToExtractFromRelativeTime[0] === "[]" || numberToExtractFromRelativeTime[0] === {} || numberToExtractFromRelativeTime[0] === "{}" || numberToExtractFromRelativeTime[0] === "null" || numberToExtractFromRelativeTime[0] === "undefined") {
+        numberToExtractFromRelativeTime = 0;
+        return helpMessageInputString;
+      }
+    }
+    if (numberToExtractFromRelativeTime.length <= 0) {
+      numberToExtractFromRelativeTime = 0
+      return helpMessageInputString;
+    }
+  }
+  if (numberToExtractFromRelativeTime === "" || numberToExtractFromRelativeTime === undefined || numberToExtractFromRelativeTime === null || numberToExtractFromRelativeTime === [] || numberToExtractFromRelativeTime === "[]" || numberToExtractFromRelativeTime === {} || numberToExtractFromRelativeTime === "{}" || numberToExtractFromRelativeTime === "null" || numberToExtractFromRelativeTime === "undefined") {
+    numberToExtractFromRelativeTime = 0;
+    return helpMessageInputString;
+  }
+  numberToExtractFromRelativeTime = 0;
+  return helpMessageInputString;
+}
+
 function getPlayTimeFromHelpMessageString(helpMessageInputString, runStartTimeAsMilliseconds, displayMilliseconds, displayAlternateUnitAbbreviation) {
   let numberToExtractFromPlayTime = helpMessageInputString.match(/({{play_time:\d+}})+/ig);
   if (numberToExtractFromPlayTime !== "" && numberToExtractFromPlayTime !== undefined && numberToExtractFromPlayTime !== null && numberToExtractFromPlayTime !== [] && numberToExtractFromPlayTime !== "[]" && numberToExtractFromPlayTime !== {} && numberToExtractFromPlayTime !== "{}" && numberToExtractFromPlayTime !== "null" && numberToExtractFromPlayTime !== "undefined") {
@@ -2788,6 +2873,7 @@ function updateStreamTime() {
 
               randomPeriodicalNewsMessageToSend = getAbsoluteTimeAsISOStringFromHelpMessageString(randomPeriodicalNewsMessageToSend, true);
               randomPeriodicalNewsMessageToSend = getPlayTimeFromHelpMessageString(randomPeriodicalNewsMessageToSend, runStartTime, true, true);
+              randomPeriodicalNewsMessageToSend = getRelativeTimeFromHelpMessageString(randomPeriodicalNewsMessageToSend, currentTimeMillis, true, true);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title}})+/ig, globalConfig.game_title);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
@@ -2962,6 +3048,7 @@ function updateStreamTime() {
 
               randomPeriodicalNewsMessageToSend = getAbsoluteTimeAsISOStringFromHelpMessageString(randomPeriodicalNewsMessageToSend, true);
               randomPeriodicalNewsMessageToSend = getPlayTimeFromHelpMessageString(randomPeriodicalNewsMessageToSend, runStartTime, true, true);
+              randomPeriodicalNewsMessageToSend = getRelativeTimeFromHelpMessageString(randomPeriodicalNewsMessageToSend, currentTimeMillis, true, true);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title}})+/ig, globalConfig.game_title);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
               randomPeriodicalNewsMessageToSend = randomPeriodicalNewsMessageToSend.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
@@ -4166,9 +4253,107 @@ function checkRunStartTime() {
     stopCheckingRunStartTime = true;
     acceptInputs = true;
     console.log(new Date().getTime() + " is greater or equals than " + runStartTime);
+
+    chatConnectionStatus = {
+      chat_logger_ready_state: chatLogger.readyState(),
+      client_ready_state: client.readyState(),
+      client_reconnect_attempts: clientReconnectAttempts,
+      chat_logger_reconnect_attempts: chatLoggerReconnectAttempts,
+      server_start_time: serverStartTime
+    };
+    io.sockets.emit("chat_connection_status", chatConnectionStatus);
+    globalConfig = JSON.parse(fs.readFileSync("global.json", "utf8")); // Contains Web server settings, which controller to use, which chat settings to use
+    controllerConfig = JSON.parse(fs.readFileSync(globalConfig.controller_config, "utf8")); // Contains COM port settings, which controller object file to load, help message for that controller, simultaneous basic different button presses allowed
+    controllerObject = JSON.parse(fs.readFileSync(controllerConfig.controller_object, "utf8")); // Contains the controller object itself
+    chatConfig = JSON.parse(fs.readFileSync(globalConfig.chat_config, "utf8")); // Contains chat settings, what account to use, what oauth, what channels to join
+    twitchCredentials = JSON.parse(fs.readFileSync("twitch_credentials.json", "utf8")); // Contains Twitch Credentials used to generate OAuth 2.0 Tokens as well as the Channel ID, which is used to update channel information such as stream title
+    updateNeutralControllerData();
+
+    runStartTime = globalConfig.run_start_time;
+    nextRunStartTime = globalConfig.next_run_start_time;
+    streamEndTime = globalConfig.stream_end_time;
+
+    helpMessageBasic = controllerConfig.help_message_basic;
+    helpMessageAdvanced = controllerConfig.help_message_advanced;
+    helpMessageSavingMacros = globalConfig.help_message_saving_macros; // This help message can only be used in advanced mode
+    currentRunEndgameGoals = globalConfig.current_run_endgame_goals;
+    periodicalNewsMessages = globalConfig.periodical_news_messages;
+
+    //acceptInputs = globalConfig.initial_accept_inputs;
+    //acceptTts = globalConfig.initial_accept_tts;
+    acceptInputsFromAnyone = globalConfig.initial_accept_inputs_from_anyone;
+    //inputMode = globalConfig.initial_input_mode;
+    //thresholdToChangeMode = globalConfig.threshold_to_change_mode;
+
+    checkModeVotes();
+
+    if (isNaN(advancedVoteCountRatio) == true) {
+      advancedVoteCountRatio = 0;
+    }
+    if (isNaN(basicVoteCountRatio) == true) {
+      basicVoteCountRatio = 0;
+    }
+
+    let voteDataObject = {
+      basic_vote_count: basicVoteCount,
+      advanced_vote_count: advancedVoteCount,
+      threshold_to_change_mode: thresholdToChangeMode,
+      total_votes: totalVotes,
+      advanced_vote_count_ratio: advancedVoteCountRatio,
+      basic_vote_count_ratio: basicVoteCountRatio,
+      input_modes_array: inputModesArray,
+      input_mode: inputMode
+    };
+    if (inputMode == 0) {
+      io.sockets.emit("basic_input_string", basicInputString);
+      //io.sockets.emit("advanced_input_string", advancedInputString);
+      io.sockets.emit("end_input_string", endInputString);
+    }
+    if (inputMode == 2) {
+      //io.sockets.emit("basic_input_string", basicInputString);
+      io.sockets.emit("advanced_input_string", advancedInputString);
+      io.sockets.emit("end_input_string", endInputString);
+    }
+    vibrationAndLedDataToDisplayObject = {
+      motors_data: [
+        motor1ToDisplay, motor2ToDisplay, motor3ToDisplay, motor4ToDisplay
+      ],
+      leds_data: [
+        led1ToDisplay, led2ToDisplay, led3ToDisplay, led4ToDisplay
+      ]
+    };
+    io.sockets.emit("vibration_and_led_data_to_display_object", vibrationAndLedDataToDisplayObject);
+    if (controllerConfig.display_framerate == true) {
+      let frameDataToDisplayObject = {
+        frame_count_to_display: frameCountToDisplay,
+        frame_rate_to_display: frameRateToDisplay
+      };
+      io.sockets.emit("frame_data_to_display_object", frameDataToDisplayObject);
+    }
+    io.sockets.emit("input_counts_object", inputCountsObject);
+    io.sockets.emit("advanced_input_metadata", advancedInputMetadata);
+    io.sockets.emit("inner_loop_metadata", innerLoopMetadata);
+    io.sockets.emit("controller_graphics", controllerConfig.controller_graphics);
+    io.sockets.emit("display_framerate", controllerConfig.display_framerate);
+    io.sockets.emit("game_title", globalConfig.game_title);
+    io.sockets.emit("game_title_short", globalConfig.game_title_short);
+    io.sockets.emit("next_game_title", globalConfig.next_game_title);
+    io.sockets.emit("next_game_title_short", globalConfig.next_game_title_short);
+    io.sockets.emit("vote_data", voteDataObject);
+    io.sockets.emit("viewer_count", currentViewerCount);
+    io.sockets.emit("run_start_time", runStartTime);
+    io.sockets.emit("next_run_start_time", nextRunStartTime);
+    io.sockets.emit("stream_end_time", streamEndTime);
+    io.sockets.emit("help_messages", globalConfig.overlay_text_rotation);
+    io.sockets.emit("header_text", globalConfig.overlay_header_text);
+    io.sockets.emit("advanced_mode_help_message_to_display", globalConfig.overlay_advanced_mode_help_message_to_display);
+    io.sockets.emit("accept_inputs", acceptInputs);
+    io.sockets.emit("controller_config", controllerConfig);
+    io.sockets.emit("global_config", globalConfig);
+
     if (client.readyState() === "OPEN") {
       updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-      client.action(chatConfig.main_channel, "Run has started!");
+      client.action(chatConfig.main_channel, globalConfig.game_title + " has started!");
     }
   }
   //oldTime = currentTime;
@@ -10689,8 +10874,6 @@ async function onMessageHandler(target, tags, message, self) {
                       let dataToQuery = {
                         user_id: userId
                       };
-                      //console.log("WE ARE HERE AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA (Advanced Input)");
-                      //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                       let dataToUpdate = {
                         $set: {
                           user_id: result.user_id,
@@ -14567,8 +14750,6 @@ async function onMessageHandler(target, tags, message, self) {
                       let dataToQuery = {
                         user_id: userId
                       };
-                      //console.log("WE ARE HERE BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB (Advanced Input)");
-                      //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                       let dataToUpdate = {
                         $set: {
                           user_id: result.user_id,
@@ -15188,8 +15369,6 @@ async function onMessageHandler(target, tags, message, self) {
                             let dataToQuery = {
                               user_id: userId
                             };
-                            //console.log("WE ARE HERE CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC (Basic Input)");
-                            //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                             let dataToUpdate = {
                               $set: {
                                 user_id: result.user_id,
@@ -16201,8 +16380,6 @@ async function onMessageHandler(target, tags, message, self) {
                       let dataToQuery = {
                         user_id: userId
                       };
-                      //console.log("WE ARE HERE DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD (Basic Input)");
-                      //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                       let dataToUpdate = {
                         $set: {
                           user_id: result.user_id,
@@ -16651,8 +16828,6 @@ async function onMessageHandler(target, tags, message, self) {
                             let dataToQuery = {
                               user_id: userId
                             };
-                            //console.log("WE ARE HERE EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE (Basic Input)");
-                            //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                             let dataToUpdate = {
                               $set: {
                                 user_id: result.user_id,
@@ -17664,8 +17839,6 @@ async function onMessageHandler(target, tags, message, self) {
                       let dataToQuery = {
                         user_id: userId
                       };
-                      //console.log("WE ARE HERE FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF (Basic Input)");
-                      //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
                       let dataToUpdate = {
                         $set: {
                           user_id: result.user_id,
@@ -19532,7 +19705,7 @@ async function stopAllInputsAndQuit() {
       client.action(chatConfig.debug_channel, new Date().toISOString() + " SLEEPING");
     }
   }
-  await sleep(500); // Sleeping to make sure all async processes actually have enough time to end
+  await sleep(500); // Sleeping to make sure all async processes actually have enough time to end (serial port related stuff as well as twitch chat are async)
   console.log(new Date().toISOString() + " DONE SLEEPING, EXITING PROCESS");
   if (client.readyState() === "OPEN") {
     if (chatConfig.send_debug_channel_messages == true) {
@@ -20348,8 +20521,6 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
               let dataToQuery = {
                 user_id: userId
               };
-              //console.log("WE ARE HERE GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG (Advanced Input)");
-              //console.log("LAST MESSAGE ID IS " + result.last_message_sent_id + " BUT IT SHOULD BE " + messageId);
               let dataToUpdate = {
                 $set: {
                   user_id: result.user_id,

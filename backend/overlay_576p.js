@@ -459,6 +459,91 @@ function recalculateFont(newFontSizeMultiplier, newFontStrokeWeightMultiplier) {
   textStrokeLeadingToUse = ((fontStrokeLeading * fontSizeMultiplier) - fontStrokeLeading1px) + fontStrokeWeight;
 }
 
+function getRelativeTimeFromHelpMessageString(helpMessageInputString, timeToCountFromAsMilliseconds, displayMilliseconds, displayAlternateUnitAbbreviation) {
+  let numberToExtractFromRelativeTime = helpMessageInputString.match(/({{relative_time:\d+}})+/ig);
+  if (numberToExtractFromRelativeTime !== "" && numberToExtractFromRelativeTime !== undefined && numberToExtractFromRelativeTime !== null && numberToExtractFromRelativeTime !== [] && numberToExtractFromRelativeTime !== "[]" && numberToExtractFromRelativeTime !== {} && numberToExtractFromRelativeTime !== "{}" && numberToExtractFromRelativeTime !== "null" && numberToExtractFromRelativeTime !== "undefined") {
+    if (numberToExtractFromRelativeTime.length > 0) {
+      if (numberToExtractFromRelativeTime[0] !== "" && numberToExtractFromRelativeTime[0] !== undefined && numberToExtractFromRelativeTime[0] !== null && numberToExtractFromRelativeTime[0] !== [] && numberToExtractFromRelativeTime[0] !== "[]" && numberToExtractFromRelativeTime[0] !== {} && numberToExtractFromRelativeTime[0] !== "{}" && numberToExtractFromRelativeTime[0] !== "null" && numberToExtractFromRelativeTime[0] !== "undefined") {
+        numberToExtractFromRelativeTime = numberToExtractFromRelativeTime[0].split(/\:+/ig);
+        if (numberToExtractFromRelativeTime[1] !== "" && numberToExtractFromRelativeTime[1] !== undefined && numberToExtractFromRelativeTime[1] !== null && numberToExtractFromRelativeTime[1] !== [] && numberToExtractFromRelativeTime[1] !== "[]" && numberToExtractFromRelativeTime[1] !== {} && numberToExtractFromRelativeTime[1] !== "{}" && numberToExtractFromRelativeTime[1] !== "null" && numberToExtractFromRelativeTime[1] !== "undefined") {
+          numberToExtractFromRelativeTime = numberToExtractFromRelativeTime[1];
+          numberToExtractFromRelativeTime = numberToExtractFromRelativeTime.replace(/([\{\}])+/ig, "");
+          if (numberToExtractFromRelativeTime.length > 0) {
+            if (numberToExtractFromRelativeTime !== "" && numberToExtractFromRelativeTime !== undefined && numberToExtractFromRelativeTime !== null && numberToExtractFromRelativeTime !== [] && numberToExtractFromRelativeTime !== "[]" && numberToExtractFromRelativeTime !== {} && numberToExtractFromRelativeTime !== "{}" && numberToExtractFromRelativeTime !== "null" && numberToExtractFromRelativeTime !== "undefined") {
+              numberToExtractFromRelativeTime = parseInt(numberToExtractFromRelativeTime);
+              let checkIfnumberToExtractFromRelativeTimeIsNotANumber = isNaN(numberToExtractFromRelativeTime);
+              if (checkIfnumberToExtractFromRelativeTimeIsNotANumber == false) {
+                // Now we parse this number into usable timestamp
+                let helpMessageRelativeTimeTotal = numberToExtractFromRelativeTime - timeToCountFromAsMilliseconds;
+                helpMessageRelativeTimeTotal = Math.abs(helpMessageRelativeTimeTotal);
+                let helpMessageRelativeTimeDays = (parseInt(helpMessageRelativeTimeTotal / 86400000)).toString().padStart(2, "0");
+                let helpMessageRelativeTimeHours = (parseInt(helpMessageRelativeTimeTotal / 3600000) % 24).toString().padStart(2, "0");
+                let helpMessageRelativeTimeMinutes = (parseInt(helpMessageRelativeTimeTotal / 60000) % 60).toString().padStart(2, "0");
+                let helpMessageRelativeTimeSeconds = (parseInt(helpMessageRelativeTimeTotal / 1000) % 60).toString().padStart(2, "0");
+                let helpMessageRelativeTimeMillis = (helpMessageRelativeTimeTotal % 1000).toString().padStart(3, "0");
+                if (displayMilliseconds == true) {
+                  if (displayAlternateUnitAbbreviation == true) {
+                    let helpMessageRelativeTimeString = helpMessageRelativeTimeDays + "day " + helpMessageRelativeTimeHours + "hour " + helpMessageRelativeTimeMinutes + "min " + helpMessageRelativeTimeSeconds + "sec " + helpMessageRelativeTimeMillis + "msec";
+                    helpMessageInputString = helpMessageInputString.replace(/({{relative_time:\d+}})+/ig, helpMessageRelativeTimeString);
+                    return helpMessageInputString;
+                  }
+                  if (displayAlternateUnitAbbreviation == false) {
+                    let helpMessageRelativeTimeString = helpMessageRelativeTimeDays + "d " + helpMessageRelativeTimeHours + "h " + helpMessageRelativeTimeMinutes + "m " + helpMessageRelativeTimeSeconds + "s " + helpMessageRelativeTimeMillis + "ms";
+                    helpMessageInputString = helpMessageInputString.replace(/({{relative_time:\d+}})+/ig, helpMessageRelativeTimeString);
+                    return helpMessageInputString;
+                  }
+                }
+                if (displayMilliseconds == false) {
+                  if (displayAlternateUnitAbbreviation == true) {
+                    let helpMessageRelativeTimeString = helpMessageRelativeTimeDays + "day " + helpMessageRelativeTimeHours + "hour " + helpMessageRelativeTimeMinutes + "min " + helpMessageRelativeTimeSeconds + "sec";
+                    helpMessageInputString = helpMessageInputString.replace(/({{relative_time:\d+}})+/ig, helpMessageRelativeTimeString);
+                    return helpMessageInputString;
+                  }
+                  if (displayAlternateUnitAbbreviation == false) {
+                    let helpMessageRelativeTimeString = helpMessageRelativeTimeDays + "d " + helpMessageRelativeTimeHours + "h " + helpMessageRelativeTimeMinutes + "m " + helpMessageRelativeTimeSeconds + "s";
+                    helpMessageInputString = helpMessageInputString.replace(/({{relative_time:\d+}})+/ig, helpMessageRelativeTimeString);
+                    return helpMessageInputString;
+                  }
+                }
+              }
+              if (checkIfnumberToExtractFromRelativeTimeIsNotANumber == true) {
+                numberToExtractFromRelativeTime = 0;
+                return helpMessageInputString;
+              }
+            }
+            if (numberToExtractFromRelativeTime === "" || numberToExtractFromRelativeTime === undefined || numberToExtractFromRelativeTime === null || numberToExtractFromRelativeTime === [] || numberToExtractFromRelativeTime === "[]" || numberToExtractFromRelativeTime === {} || numberToExtractFromRelativeTime === "{}" || numberToExtractFromRelativeTime === "null" || numberToExtractFromRelativeTime === "undefined") {
+              numberToExtractFromRelativeTime = 0;
+              return helpMessageInputString;
+            }
+          }
+          if (numberToExtractFromRelativeTime.length <= 0) {
+            numberToExtractFromRelativeTime = 0;
+            return helpMessageInputString;
+          }
+        }
+        if (numberToExtractFromRelativeTime[1] === "" || numberToExtractFromRelativeTime[1] === undefined || numberToExtractFromRelativeTime[1] === null || numberToExtractFromRelativeTime[1] === [] || numberToExtractFromRelativeTime[1] === "[]" || numberToExtractFromRelativeTime[1] === {} || numberToExtractFromRelativeTime[1] === "{}" || numberToExtractFromRelativeTime[1] === "null" || numberToExtractFromRelativeTime[1] === "undefined") {
+          numberToExtractFromRelativeTime = 0;
+          return helpMessageInputString;
+        }
+      }
+      if (numberToExtractFromRelativeTime[0] === "" || numberToExtractFromRelativeTime[0] === undefined || numberToExtractFromRelativeTime[0] === null || numberToExtractFromRelativeTime[0] === [] || numberToExtractFromRelativeTime[0] === "[]" || numberToExtractFromRelativeTime[0] === {} || numberToExtractFromRelativeTime[0] === "{}" || numberToExtractFromRelativeTime[0] === "null" || numberToExtractFromRelativeTime[0] === "undefined") {
+        numberToExtractFromRelativeTime = 0;
+        return helpMessageInputString;
+      }
+    }
+    if (numberToExtractFromRelativeTime.length <= 0) {
+      numberToExtractFromRelativeTime = 0
+      return helpMessageInputString;
+    }
+  }
+  if (numberToExtractFromRelativeTime === "" || numberToExtractFromRelativeTime === undefined || numberToExtractFromRelativeTime === null || numberToExtractFromRelativeTime === [] || numberToExtractFromRelativeTime === "[]" || numberToExtractFromRelativeTime === {} || numberToExtractFromRelativeTime === "{}" || numberToExtractFromRelativeTime === "null" || numberToExtractFromRelativeTime === "undefined") {
+    numberToExtractFromRelativeTime = 0;
+    return helpMessageInputString;
+  }
+  numberToExtractFromRelativeTime = 0;
+  return helpMessageInputString;
+}
+
 function getPlayTimeFromHelpMessageString(helpMessageInputString, runStartTimeAsMilliseconds, displayMilliseconds, displayAlternateUnitAbbreviation) {
   let numberToExtractFromPlayTime = helpMessageInputString.match(/({{play_time:\d+}})+/ig);
   if (numberToExtractFromPlayTime !== "" && numberToExtractFromPlayTime !== undefined && numberToExtractFromPlayTime !== null && numberToExtractFromPlayTime !== [] && numberToExtractFromPlayTime !== "[]" && numberToExtractFromPlayTime !== {} && numberToExtractFromPlayTime !== "{}" && numberToExtractFromPlayTime !== "null" && numberToExtractFromPlayTime !== "undefined") {
@@ -468,7 +553,7 @@ function getPlayTimeFromHelpMessageString(helpMessageInputString, runStartTimeAs
         if (numberToExtractFromPlayTime[1] !== "" && numberToExtractFromPlayTime[1] !== undefined && numberToExtractFromPlayTime[1] !== null && numberToExtractFromPlayTime[1] !== [] && numberToExtractFromPlayTime[1] !== "[]" && numberToExtractFromPlayTime[1] !== {} && numberToExtractFromPlayTime[1] !== "{}" && numberToExtractFromPlayTime[1] !== "null" && numberToExtractFromPlayTime[1] !== "undefined") {
           numberToExtractFromPlayTime = numberToExtractFromPlayTime[1];
           numberToExtractFromPlayTime = numberToExtractFromPlayTime.replace(/([\{\}])+/ig, "");
-          if (numberToExtractFromPlayTime.length > 0 ) {
+          if (numberToExtractFromPlayTime.length > 0) {
             if (numberToExtractFromPlayTime !== "" && numberToExtractFromPlayTime !== undefined && numberToExtractFromPlayTime !== null && numberToExtractFromPlayTime !== [] && numberToExtractFromPlayTime !== "[]" && numberToExtractFromPlayTime !== {} && numberToExtractFromPlayTime !== "{}" && numberToExtractFromPlayTime !== "null" && numberToExtractFromPlayTime !== "undefined") {
               numberToExtractFromPlayTime = parseInt(numberToExtractFromPlayTime);
               let checkIfnumberToExtractFromPlayTimeIsNotANumber = isNaN(numberToExtractFromPlayTime);
@@ -516,7 +601,7 @@ function getPlayTimeFromHelpMessageString(helpMessageInputString, runStartTimeAs
               return helpMessageInputString;
             }
           }
-          if (numberToExtractFromPlayTime.length <= 0 ) {
+          if (numberToExtractFromPlayTime.length <= 0) {
             numberToExtractFromPlayTime = 0;
             return helpMessageInputString;
           }
@@ -553,7 +638,7 @@ function getAbsoluteTimeAsISOStringFromHelpMessageString(helpMessageInputString,
         if (numberToExtractFromAbsoluteTime[1] !== "" && numberToExtractFromAbsoluteTime[1] !== undefined && numberToExtractFromAbsoluteTime[1] !== null && numberToExtractFromAbsoluteTime[1] !== [] && numberToExtractFromAbsoluteTime[1] !== "[]" && numberToExtractFromAbsoluteTime[1] !== {} && numberToExtractFromAbsoluteTime[1] !== "{}" && numberToExtractFromAbsoluteTime[1] !== "null" && numberToExtractFromAbsoluteTime[1] !== "undefined") {
           numberToExtractFromAbsoluteTime = numberToExtractFromAbsoluteTime[1];
           numberToExtractFromAbsoluteTime = numberToExtractFromAbsoluteTime.replace(/([\{\}])+/ig, "");
-          if (numberToExtractFromAbsoluteTime.length > 0 ) {
+          if (numberToExtractFromAbsoluteTime.length > 0) {
             if (numberToExtractFromAbsoluteTime !== "" && numberToExtractFromAbsoluteTime !== undefined && numberToExtractFromAbsoluteTime !== null && numberToExtractFromAbsoluteTime !== [] && numberToExtractFromAbsoluteTime !== "[]" && numberToExtractFromAbsoluteTime !== {} && numberToExtractFromAbsoluteTime !== "{}" && numberToExtractFromAbsoluteTime !== "null" && numberToExtractFromAbsoluteTime !== "undefined") {
               numberToExtractFromAbsoluteTime = parseInt(numberToExtractFromAbsoluteTime);
               let checkIfNumberToExtractFromAbsoluteTimeIsNotANumber = isNaN(numberToExtractFromAbsoluteTime);
@@ -580,7 +665,7 @@ function getAbsoluteTimeAsISOStringFromHelpMessageString(helpMessageInputString,
               return helpMessageInputString;
             }
           }
-          if (numberToExtractFromAbsoluteTime.length <= 0 ) {
+          if (numberToExtractFromAbsoluteTime.length <= 0) {
             numberToExtractFromAbsoluteTime = 0;
             return helpMessageInputString;
           }
@@ -1239,6 +1324,7 @@ function draw() {
       let helpMessageToDisplay = globalConfig.overlay_text_rotation[currentValueToDisplay];
       helpMessageToDisplay = getAbsoluteTimeAsISOStringFromHelpMessageString(helpMessageToDisplay, false);
       helpMessageToDisplay = getPlayTimeFromHelpMessageString(helpMessageToDisplay, globalConfig.run_start_time, false, false);
+      helpMessageToDisplay = getRelativeTimeFromHelpMessageString(helpMessageToDisplay, currentTimeMillis, false, false);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{game_title}})+/ig, globalConfig.game_title);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
       helpMessageToDisplay = helpMessageToDisplay.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
@@ -1480,8 +1566,9 @@ function draw() {
         textLeading(textDefaultLeadingToUse);
         //text("Stream goes offline in\n" + streamEndTimeRemainingString + "\n(" + streamEndTimeISOString  + ")\n(The 31 day mark)\n\n Super Mario RPG:\nLegend of the Seven Stars\nStarts in\n" + nextStartTimeRemainingString + "\n(" + nextStartTimeISOString + ")", 896 * 2, 60);
         let advancedModeHelpMessageToDisplay2 = globalConfig.overlay_advanced_mode_help_message_to_display;
-        advancedModeHelpMessageToDisplay2 = getAbsoluteTimeAsISOStringFromHelpMessageString(advancedModeHelpMessageToDisplay2, false);
+        advancedModeHelpMessageToDisplay2 = getAbsoluteTimeAsISOStringFromHelpMessageString(advancedModeHelpMessageToDisplay2, true);
         advancedModeHelpMessageToDisplay2 = getPlayTimeFromHelpMessageString(advancedModeHelpMessageToDisplay2, globalConfig.run_start_time, false, false);
+        advancedModeHelpMessageToDisplay2 = getRelativeTimeFromHelpMessageString(advancedModeHelpMessageToDisplay2, currentTimeMillis, false, false);
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{game_title}})+/ig, globalConfig.game_title);
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{game_title_short}})+/ig, globalConfig.game_title_short);
         advancedModeHelpMessageToDisplay2 = advancedModeHelpMessageToDisplay2.replace(/({{game_title_shorter}})+/ig, globalConfig.game_title_shorter);
