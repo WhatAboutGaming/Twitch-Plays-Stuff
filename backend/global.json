@@ -113,7 +113,7 @@
     "Stream goes offline in {{stream_end_time}} (The {{play_time:1705449600000}} mark).",
     "{{next_game_title}} starts in\n{{next_run_start_time}}",
     "If anything breaks, please ping @WhatAboutGamingLive",
-    "The Endgame Conditions are: See how far you can get! There\nis no date/time set for the run to end yet!",
+    "The Endgame Conditions are: See how far you can get!",
     "Glitches are allowed as long as they don't break or crash\nthe game, or leave the game in an unplayable state."
   ],
   "current_run_endgame_goals": [
