@@ -30,11 +30,12 @@
   "introductory_message_to_returning_users": "Hello, welcome back! It's possible things have changed a lot since you were last here. If you need a refresher, type !help or !commands, you can also read the stream description, but be warned because there is a LOT to read, and feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!",
   "introductory_message_to_returning_users_with_help_messages": "Hello, welcome back! It's possible things have changed a lot since you were last here. If you need a refresher, here's how you can play. Feel free to ask any questions if you still have questions. The stream can get quite confusing, so feel free to ask, there are people ready to help you out!",
   "get_stream_viewer_count": true,
+  "use_databases": true,
   "webserver_port": 8080,
   "chat_config": "chat_config.json",
   "run_start_time": 1702771200000,
   "next_run_start_time": 1707004800000,
-  "stream_end_time": 1702771200000,
+  "stream_end_time": 1705449600000,
   "initial_accept_inputs": false,
   "initial_accept_tts": false,
   "initial_accept_inputs_from_anyone": true,
@@ -99,7 +100,7 @@
   "run_id": 7,
   "notes": "To test server: Set game_title as TEST RUN 0, set stream_title as TEST RUN 1, set next_game_title as TEST RUN 2, set main_database_name as test_database_main, set chatters_collection_name as test_database_chatters, set run_name as test_database_run_name, set global_database_name as test_database_global, set inputter_database_name as test_database_inputters, set macro_database_name as test_database_macro, set run_id as -1",
   "overlay_header_text": "Twitch Plays (Viewers play\/Chat plays) {{game_title_short}}\non an actual PS2 console !help !discord",
-  "overlay_advanced_mode_help_message_to_display": "\n\n!help to learn how to play\n\n{{next_game_title}}\nstarts in {{next_run_start_time}}",
+  "overlay_advanced_mode_help_message_to_display": "!help to learn how to play\n\nStream goes offline in\n{{stream_end_time}}\n(The {{play_time:1705449600000}} mark)\n\n{{next_game_title}}\nstarts in {{next_run_start_time}}",
   "overlay_text_rotation": [
     "Type !help or !commands to learn how to play",
     "Type !macrohelp to learn how to save macros and\nexecute saved macros",
@@ -107,15 +108,16 @@
     "Type !discord to get a link to the stream Discord server",
     "Please, don't delete any files, and please save regularly",
     "Attempting to delete or deleting any file will earn you an\nunappealable permanent ban",
-    "Current goal: See how far you can get! There is no date/time\nset for the run to end yet!",
+    "Current goal: See how far you can get!",
     "The time is {{current_time_no_millis}}.\n{{game_title_short}} has been going for {{play_time_total_string_no_millis}}.",
+    "Stream goes offline in {{stream_end_time}} (The {{play_time:1705449600000}} mark).",
     "{{next_game_title}} starts in\n{{next_run_start_time}}",
     "If anything breaks, please ping @WhatAboutGamingLive",
     "The Endgame Conditions are: See how far you can get! There\nis no date/time set for the run to end yet!",
     "Glitches are allowed as long as they don't break or crash\nthe game, or leave the game in an unplayable state."
   ],
   "current_run_endgame_goals": [
-    "The Endgame Conditions are: See how far you can get! There is no date/time set for the run to end yet! Glitches are allowed as long as they don't break or crash the game, or leave the game in an unplayable state."
+    "The Endgame Conditions are: See how far you can get! Glitches are allowed as long as they don't break or crash the game, or leave the game in an unplayable state."
   ],
   "periodical_news_messages": [
     "Not sure how to play? You can type !help or !commands in chat at any time to have a help message sent straight to chat.",
@@ -124,8 +126,9 @@
     "We have a Discord server: https://discord.gg/yHETNuZCUK",
     "{{next_game_title}} starts in {{next_run_start_time}}. Countdown here: https://www.timeanddate.com/countdown/generic?iso=20240204T00&p0=1440&msg=Final+Fantasy+4&font=sanserif&csz=1",
     "The time is {{current_time}}. {{game_title}} has been going for {{play_time_total_string}}.",
+    "Stream goes offline in {{stream_end_time}} (The {{play_time:1705449600000}} mark). Countdown here: https://www.timeanddate.com/countdown/generic?iso=20240117T00&p0=1440&msg=Stream+Going+Offline&font=sanserif&csz=1",
     "We're currently playing {{game_title}}. Save files for this run can be found here: https://github.com/WhatAboutGaming/Twitch-Plays-Stuff/tree/master/Save%20Files/Kingdom%20Hearts%202%20Revisit and the videos for this run can be found on this playlist: https://www.twitch.tv/collections/3gszUs1nixdAPg",
-    "Current goal: See how far you can get! There is no date/time set for the run to end yet!"
+    "Current goal: See how far you can get!"
   ],
   "help_message_saving_macros": [
     "You can save or edit a macro by using the command !savemacro <macro name> <macro inputs>. Example: !savemacro WalkInCircles Up Right Down Left will save or edit the macro WalkInCircles with the inputs Up Right Down Left, which can then be used later.",
@@ -134,7 +137,7 @@
     "You can see the list of inputs of a macro by using the command !listmacro <macro name>. Example: !listmacro WalkingCircles will list the inputs of the macro WalkingCircles, which is Up Right Down Left. You can see the list of all macros saved by using the command !listallmacros.",
     "You can change if a macro can be edited only by the owner of the macro or by anyone by using the command !togglemacroeditability <macro name>. Example: !togglemacroeditability WalkingCircles will make it so the macro WalkingCircles can be edited by anyone, and sending !togglemacroeditability WalkingCircles again will make it so the macro WalkingCircles can be edited only by the owner of the macro.",
     "!togglemacroeditability <macro name> can be executed only by the owner of the macro. By default, when a new macro is created, it can only be edited by the owner of the macro.",
-    "You can set a single input per message by using the command !setsettablemacro <input> <position to edit>. Example: up+left;500 0 will set Up+Left for 500 milliseconds at position 0. Starting position is 0, final position is 63.",
+    "You can set a single input per message by using the command !setsettablemacro <input> <position to edit>. Example: up+left;30 0 will set Up+Left for 30 frames (half second) at position 0. Starting position is 0, final position is 63.",
     "You can list all inputs currently set by using the command !listsettablemacro <up to which position to list(optional)>. Example: !listsettablemacro 5 will list the first 5 inputs currently set. Starting position is 0, final position is 63. If there's no number provided, all of the inputs currently set will be listed.",
     "You can execute all inputs currently set by using the command !execsettablemacro <up to which position to execute> <times to repeat(optional)>. Example: !execsettablemacro 5 2 will execute the first 5 inputs currently set 1 time then repeat 2 more times. Starting position is 0, final position is 63. If there's no second number provided, the macro will be executed only 1 time. Currently, you can't save macros that were set using the !setsettablemacro command."
   ],

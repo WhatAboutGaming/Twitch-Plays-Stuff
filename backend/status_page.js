@@ -77,6 +77,7 @@ var fontTable = [{
     "font_stroke_leading": 19
   }
 ];
+
 var fontToUse = "CG_pixel_4x5.ttf";
 var fontNameIndex = fontTable.findIndex(element => element.font_name == fontToUse);
 var fontName = fontTable[fontNameIndex].font_name;
@@ -92,40 +93,6 @@ var fontStrokeLeading1px = (fontSizeMultiplier) * (differenceBetweenDefaultAndSt
 var textSizeToUse = fontDefaultSize * fontSizeMultiplier;
 var textDefaultLeadingToUse = ((fontDefaultLeading * fontSizeMultiplier) - fontDefaultLeading1px) + fontStrokeWeight;
 var textStrokeLeadingToUse = ((fontStrokeLeading * fontSizeMultiplier) - fontStrokeLeading1px) + fontStrokeWeight;
-//textDefaultLeadingToUse = textDefaultLeadingToUse + fontStrokeWeight;
-/*
-console.log("fontStrokeLeading1px = " + fontStrokeLeading1px);
-//fontStrokeLeading1px = fontStrokeLeading1px - 6; // -18 for 10x, -8 for 5x, -6 for 4x, -2 for 2x, -0 for 1x
-console.log("differenceBetweenDefaultAndStrokeLeadingDistances = " + differenceBetweenDefaultAndStrokeLeadingDistances);
-console.log("fontStrokeLeading1px = " + fontStrokeLeading1px);
-console.log("fontStrokeWeight = " + fontStrokeWeight);
-console.log("textSizeToUse = " + textSizeToUse);
-//chatConfig.trusted_users.findIndex(element => element == userId);
-//array1.findIndex((element) => element == 12)
-console.log("fontName = " + fontName);
-*/
-
-// Oh my god I hate this overlay, it is full of ugly hacks how does it EVEN WORK
-var socket;
-
-//var ttsAudio;
-//var ttsAudioStatus = true;
-//var ttsAudioStatusPrevious = true;
-//var startTimeMillis = 1611211608000;
-var startTimeMillis = new Date().getTime();
-var nextStartTimeMillis = new Date().getTime();
-var streamEndTimeMillis = new Date().getTime();
-var playTimeTotal = 0;
-
-var acceptInputs = false;
-
-//var helpMessages = ["Type “!speak 《message》” to talk to Pikachu!", "Type “!help” or “!commands” to learn how to play!"];
-//var helpMessages = ["Type “!help” or “!commands” to learn how to play!", "Please, don’t delete any files!", "Please save regularly!"];
-//var helpMessages = ["Type \"!help\" or \"!commands\" to learn how to play!", "Please, don\'t delete any files, and please save regularly!", "Attempting to delete or deleting any file will earn you\na permaban", "If you\'re caught AFK botting, you\'ll be timed out for\none day.", "If anything breaks, please ping @WhatAboutGamingLive", "Paper Mario Main quest took 8d10h01m47s!\nEnded at 2021-01-29T16:48:35Z!", "Congrats to everyone who participated!", "Current goal: Play SM64 until I decide what the next game\nis!"];
-//var helpMessages = ["Type “!help” or “!commands” to learn how to play!", "Please, don’t delete any files, and please save regularly!", "Deliberately deleting any file will result in a ban", "If anything breaks, please ping @WhatAboutGamingLive", "The Twitch Plays file is File 4 named “Ponjos”", "Main quest took 8d10h01m47s! Ended at 2021-01-29T16:48:35Z!", "Congrats to everyone who participated!", "Current goal: Do sidequests until I decide what the next game is!"];
-var helpMessages = ["Hi Chat :)"];
-var headerText = "Restarting overlay";
-var advancedModeHelpMessageToDisplay = "\n\n\n\n\n!help to learn how to play";
 
 var chatConnectionStatus = {
   chat_logger_ready_state: "CLOSED",
@@ -137,33 +104,16 @@ var chatConnectionStatus = {
 
 var restartBackendButton;
 var restartMachineButton;
-
-var secondCurrent = 0;
-var secondOld = 0;
-var currentValueToDisplay = 0;
+var restartConnectionButton;
 
 var font;
-//var offlineImg;
-
-var viewerCount = -1;
+var socket;
 
 function preload() {
-  //soundFormats("mp3");
-  //font = loadFont("Pokemon_DPPt_mod2.ttf");
   font = loadFont(fontName);
-  //offlineImg = loadImage("tttp_brb_screen_lq.png");
-  //ttsAudio = loadSound("output.mp3");
 }
 
 function recalculateFont(newFontSizeMultiplier, newFontStrokeWeightMultiplier) {
-  /*
-  fontToUse = "CG_pixel_3x5.ttf";
-  fontNameIndex = fontTable.findIndex(element => element.font_name == fontToUse);
-  fontName = fontTable[fontNameIndex].font_name;
-  fontDefaultSize = fontTable[fontNameIndex].font_default_size;
-  fontDefaultLeading = fontTable[fontNameIndex].font_default_leading;
-  fontStrokeLeading = fontTable[fontNameIndex].font_stroke_leading;
-  */
   differenceBetweenDefaultAndStrokeLeadingDistances = fontStrokeLeading - fontDefaultLeading; // Should always be 2 for pixel perfect fonts, but this is here in case it isn't
   fontSizeMultiplier = newFontSizeMultiplier;
   fontStrokeWeightMultiplier = newFontStrokeWeightMultiplier;
@@ -177,48 +127,33 @@ function recalculateFont(newFontSizeMultiplier, newFontStrokeWeightMultiplier) {
 
 function setup() {
   noSmooth();
-  frameRate(30);
+  frameRate(60);
   createCanvas(1920, 1080);
   background("#00000000");
-  
-  restartBackendButton = createButton("RESTART BACKEND");
-  restartBackendButton.position(5, 440);
-  restartBackendButton.mousePressed(restartBackend);
 
-  restartMachineButton = createButton("RESTART MACHINE");
-  restartMachineButton.position(5, 600);
-  restartMachineButton.mousePressed(restartMachine);
-
-  restartMachineButton = createButton("RESTART CONNECTION");
-  restartMachineButton.position(5, 760);
-  restartMachineButton.mousePressed(restartConnection);
-  
   socket = io.connect();
   socket.on("chat_connection_status", function(data) {
     chatConnectionStatus = data;
   });
+  
+  restartBackendButton = createButton("RESTART BACKEND");
+  restartBackendButton.position(5, 408);
+  restartBackendButton.mousePressed(restartBackend);
+
+  restartMachineButton = createButton("RESTART MACHINE");
+  restartMachineButton.position(5, 555);
+  restartMachineButton.mousePressed(restartMachine);
+
+  restartConnectionButton = createButton("RESTART CONNECTION");
+  restartConnectionButton.position(5, 702);
+  restartConnectionButton.mousePressed(restartConnection);
 }
 
 function draw() {
   clear();
   background("#00000000");
-  secondCurrent = new Date().getUTCSeconds();
-  if (socket.connected == false) {
-    // DO nothing I guess
-  }
-  // Nothing
   textFont(font);
-  /*
-  textSize(60);
-  strokeWeight(4);
-  stroke("#000000FF");
-  textAlign(LEFT, TOP);
-  // Main text
-  fill("#FFFFFFFF");
-  textLeading(56);
-  text(new Date().toISOString(), 5, 1024);
-  */
-  recalculateFont(4, 2);
+  recalculateFont(8, 4);
   textSize(textSizeToUse);
   strokeWeight(fontStrokeWeight);
   stroke("#000000FF");
@@ -226,7 +161,6 @@ function draw() {
   fill("#FFFFFFFF");
   textLeading(textDefaultLeadingToUse);
   let uptimeTotal = new Date().getTime() - chatConnectionStatus.server_start_time;
-  //
   let uptimeDays = (parseInt(uptimeTotal / 86400000)).toString().padStart(2, "0");
   let uptimeHours = (parseInt(uptimeTotal / 3600000) % 24).toString().padStart(2, "0");
   let uptimeMinutes = (parseInt(uptimeTotal / 60000) % 60).toString().padStart(2, "0");
@@ -235,7 +169,6 @@ function draw() {
   let uptimeString = uptimeDays + "d " + uptimeHours + "h " + uptimeMinutes + "m " + uptimeSeconds + "s " + uptimeMillis + "ms";
   text("chatLogger.readyState() = " + chatConnectionStatus.chat_logger_ready_state + "\nclient.readyState() = " + chatConnectionStatus.client_ready_state + "\nclientReconnectAttempts = " + chatConnectionStatus.client_reconnect_attempts + "\nchatLoggerReconnectAttempts = " + chatConnectionStatus.chat_logger_reconnect_attempts + "\nsocket.connected = " + socket.connected + "\n\nPress Q on the keyboard to restart\nthe backend\n\nPress P on the keyboard to restart\nthe machine\n\nPress R on the keyboard to restart\nthe chat connection\n\nUptime: " + uptimeString, 5, 5);
   text(new Date().toISOString(), 5, 1024);
-  secondOld = secondCurrent;
 }
 
 function restartMachine() {

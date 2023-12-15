@@ -4,6 +4,7 @@ var tmi = require("tmi.js");
 var SerialPort = require("serialport");
 var fs = require("fs");
 var cmd = require("node-cmd");
+var os = require("os");
 var sound = require("sound-play");
 var getMP3Duration = require("get-mp3-duration");
 var http = require("http");
@@ -21,7 +22,7 @@ var twitchCredentials = JSON.parse(fs.readFileSync("twitch_credentials.json", "u
 var twitchJsonEncodedAppAccessToken = {}; // Object returned from the Twitch API which contains the OAuth 2.0 Token that was generated using the Twitch Credentials, as mentioned above, this OAuth 2.0 token is used to make API calls to twitch. This Object isn't changes every time the server starts.
 var twitchJsonEncodedBotAppAccessToken = {}; // Object returned from the Twitch API which contains the OAuth 2.0 Token that was generated using the Twitch Credentials, as mentioned above, this OAuth 2.0 token is used to make API calls to twitch. This Object isn't changes every time the server starts.
 //console.log(JSON.stringify(controllerConfig, null, 2));
-var helpMessageCooldown = 0;
+var helpMessageCooldown = 5000;
 var runStartTime = globalConfig.run_start_time;
 var nextRunStartTime = globalConfig.next_run_start_time;
 var streamEndTime = globalConfig.stream_end_time;
@@ -498,7 +499,7 @@ port.open(function(err) {
       client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Successfully opened port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     }
   }
-  console.log(new Date().toISOString() + " [SERIAL PORT] port.open Successfully opened port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+  console.log(new Date().toISOString() + " [SERIAL PORT] port.open A Successfully opened port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
   console.log("we ready to go");
 });
 var shiftCharCode = Δ => c => String.fromCharCode(c.charCodeAt(0) + Δ);
@@ -1133,7 +1134,8 @@ parser.on("data", async function(data) {
               //await sleep(500);
               // The database operations below check the total input count
               /*
-              mongoClient.connect(mongoUrl, {
+              if (globalConfig.use_databases == true) {
+                mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
               }, function(err, globalDb) {
                 //isDatabaseBusy = true;
@@ -1273,6 +1275,7 @@ parser.on("data", async function(data) {
                   //isDatabaseBusy = false;
                 });
               });
+              }
               */
             }
           }
@@ -1582,7 +1585,8 @@ parser.on("data", async function(data) {
               //await sleep(500);
               // The database operations below check the total input count
               /*
-              mongoClient.connect(mongoUrl, {
+              if (globalConfig.use_databases == true) {
+                mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
               }, function(err, globalDb) {
                 //isDatabaseBusy = true;
@@ -1722,6 +1726,7 @@ parser.on("data", async function(data) {
                   //isDatabaseBusy = false;
                 });
               });
+              }
               */
             }
           }
@@ -1840,7 +1845,7 @@ port.on("open", function() {
       client.action(chatConfig.debug_channel, new Date().toISOString() + " [SERIAL PORT] Successfully opened port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
     }
   }
-  console.log(new Date().toISOString() + " [SERIAL PORT] port.onOpen Successfully opened port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
+  console.log(new Date().toISOString() + " [SERIAL PORT] port.onOpen B Successfully opened port com_port=" + controllerConfig.com_port + ", com_port_parameters=" + JSON.stringify(controllerConfig.com_port_parameters));
   console.log("was the port opened?");
   // open logic
 });
@@ -4521,18 +4526,18 @@ async function onMessageHandler(target, tags, message, self) {
     //console.log("replaceCyrillicsWithLatin");
     //console.log(replaceCyrillicsWithLatin);
     replaceCyrillicsWithLatin = replaceCyrillicsWithLatin.replace(/[！-～]/g, shiftCharCode(-0xFEE0)); // Convert fullwidth to halfwidth
-    let singleMessageSpamBots = [/(((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)*|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)*|(v+i+e+w+\w*)*)*\W*\s*(a*n*d*)*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+    let singleMessageSpamBots = [/(((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)*|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)*|(v+i+e+w+\w*)*)*\W*\s*(a*n*d*)*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // the combination of the words "view(ers)", "follow(ers)" and "view(ers)" in any order
       /(t+w+\w*t+c+h+)+\s+(((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))\s*b+[o0]+t+\w*)+\s+(s+o+f+t+w+a+r+e+\w*\W*)+\s*(d+o+)+\s+(a+n+y+)+\s*(o+n+l+i+n+e+)*\s+(\w*)\s+(a+n+y+)+\s+(s+t+r+e+a+m+[^\s]*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(h+e+y+[^\s]*)+\s+(n+i+c+e+)+\s+(s+t+r+e+a+m+[^\s]*)+\s+(y+\w*)+\s+(s+h+\w*)+\s+(f+o+r+)+\s+(s+u+r+e+)+\s+(j+o+i+n+)+\s+(\w*)\s+(s+t+r+e+a+m+[^\s]*)+\s+(c+o+m+u+n+i+t+y+)+\s+(\w*)\s+(j+u+s+t+)+\s+(f+o+u+n+d+)+\s+(\w*)\s+(d+i+s+c+o+r+d+)+\s+(y+e+s+t+e+r+d+a+y+)+\s+([^\s]*)\s+(c+h+e+c+k+)+\s+(i+t+)+\s+(o+u+t+)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(h+e+y+[^\s]*)+\s+(n+i+c+e+)+\s+(s+t+r+e+a+m+[^\s]*)+\s+(y+\w*)+\s+(s+h+\w*)+\s+(f+o+\w*)+\s+(s+u+r+e+)+\s+(j+o+i+n+)+\s+(\w*)\s+(s+t+r+e+a+m+[^\s]*)+\s+(c+o+m+u+n+i+t+y+)+\s+(\w*)\s+(j+u+s+t+)+\s+(f+o+u+n+d+)+\s+(\w*)\s+(d+i+s+c+o+r+d+)+\s+(y+e+s+t+e+r+d+a+y+)+\s+([^\s]*)\s+(c+h+e+c+k+)+\s+(i+t+)+\s+(o+u+t+)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(d+o+)+\s+(y+o+\w*)+\s+(w+a+n+\w+)+\s*(t*o*)*\s*(b*e*c*o*m*e*)*\s+(p+o+p+u+l+a+r+\w*[^\s]*|f+a+m+o+u+s+\W*[^\s]*)+\s+((b+u+y+)+|(b+e+s+t+)+|(g+e+t+)+)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+\s+(a+n+d+)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+\s+(\w+)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(a+f+i+l+i+a+t+e+)+\s+(f+o+\w*)+\s+(f+r+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(s+u+\w+e+r+\w*)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+\s+(s+u+b+\w*)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(h+e+l+o+[^\s]*)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(r+e+a+l+)\s+(f+r+e+)+\s+(a+n+d+)+\s+(h+i+g+h+)+\s+(q+u+a+l+i+t+y+)+\s+(s+e+r+v+i+c+e+s*)+\s+(t+\w*)+\s+(i+n+c+r+e+a+s+e+)+\s+(y+o+u+\w*)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(h+e+l+o+[^\s]*)+\s+(i+f+)+\s+(y+o+\w*)+\s+(n+e+d+)+\s+(r+e+a+l+)\s+(f+r+e+)+\s+(a+n+d+)+\s+(h+i+g+h+)+\s+(q+u+a+l+i+t+y+)+\s+(s+e+r+v+i+c+e+s*)+\s+(t+\w*)+\s+(i+n+c+r+e+a+s+e+)+\s+(y+o+\w*)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((c+u+t+)+|(b+i+t+)+)+\s*(\.+|d+o+t+)*\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(b+i+g+)+\s*(\.+|d+o+t+)*\s*((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(c+h+i+l+p+|b+i+g+\s*((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+)+\s*(\.+|d+o+t+)*\s*(c+o+m*|i+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(h+e+l+o+[^\s]*)+\s+(i+)+\s+(d+o+)+\s+(g+r+a+p+h+i+c+)+\s+(d+e+s+i+g+n+)+\s+(\w+o+)+\s+(i+f+)+\s+(y+o+u+\w*)+\s+(n+e+d+)+\s+(w+o+r+k+)+\s+(d+o+n+e+)+\s+(l+i+k+e+)+\s+(\w+)+\s+(l+o+g+o+[^\s]*)+\s+(b+a+n+e+r+[^\s]*)+\s+(p+a+n+e+l+[^\s]*)+\s+(o+v+e+r+l+a+y+[^\s]*)+\s+(e+t+c+[^\s]*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /((c+o+d+e+)+\s*(f+o+r+)*\s*(\w+)+\s+((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(h+e+l+o+[^\s]*)+\s+(i+)+\s+(d+o+)+\s+(g+r+a+p+h+i+c+)+\s+(d+e+s+i+g+n+)+\s+(\w+o+)+\s+(i+f+)+\s+(y+o+\w*)+\s+(n+e+d+)+\s+(w+o+r+k+)+\s+(d+o+n+e+)+\s+(l+i+k+e+)+\s+(\w+)+\s+(l+o+g+o+[^\s]*)+\s+(b+a+n+e+r+[^\s]*)+\s+(p+a+n+e+l+[^\s]*)+\s+(o+v+e+r+l+a+y+[^\s]*)+\s+(e+t+c+[^\s]*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /((c+o+d+e+)+\s*(f+o+\w*)*\s*(\w+)+\s+((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((p+r+o+m+o+t*i*o*n*a*l*)+\s*(c+o+d+e+)+\s*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((g+[\s\-\_]*e+[\s\-\_]*t+)+[\s\-\_]*(v+[\s\-\_]*i+[\s\-\_]*e+[\s\-\_]*w+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((g+[\s\-\_]*\-+[\s\-\_]*t+)+[\s\-\_]*(v+[\s\-\_]*\-+[\s\-\_]*e+[\s\-\_]*w+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -4541,14 +4546,31 @@ async function onMessageHandler(target, tags, message, self) {
       /((t+w+[li1\!\|]+t+c+h+s*)+)+\s*((l+a+u+n+c+h+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // TwitchLaunch
       /((t+w+[li1\!\|]+t+c+h+s*)+)+\s*(((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Twitch Streams
       /((t+i+c*k+\s*t+o+c*k+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // TikTok
-      /((((c+o+n+t+e+n+t+)+)+\s+((p+o+s+t+(i*n*g*)*)+)+)+|(((r+o+c+k+e+t+)+)+\s+((a+u+d+i+e+n+c+e+)+)+)+|(((\d+)+)+\s+((d+o+l+l+a+r+)*\s*)*((p+e+r+)+|(f+o+r+)+|(\/)+)(\s*\d+)*\s+((d+a+y+)+|(d+a+i+l+y+)+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), //Content Posting, Rocket Audience, number per day, number/day, number for number daily, drive engagement
+      /((((c+o+n+t+e+n+t+)+)+\s+((p+o+s+t+(i*n*g*)*)+)+)+|(((r+o+c+k+e+t+)+)+\s+((a+u+d+i+e+n+c+e+)+)+)+|(((\d+)+)+\s+((d+o+l+l+a+r+)*\s*)*((p+e+r+)+|(f+o+\w*)+|(\/)+)(\s*\d+)*\s+((d+a+y+)+|(d+a+i+l+y+)+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), //Content Posting, Rocket Audience, number per day, number/day, number for number daily, drive engagement
       /((t+w+[li1\!\|]+t+c+h+s*\s*\-+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /((d+o+g+e+)+\s*(h+y+p+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /((d+o*g+e*)+[\s\-\_]*(h+y+p+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+\W*\s*((f+[o0]+l+[o0]+w+\w*)+|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)+|(v+i+e+w+\w*)+|(c+h+a+t+\s*b+[o0]+t+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // the combination of the words "view(ers)", "follow(ers)", "view(ers)" and "chat bot(s)" in any order
+      /((d+o+g+e+)+\s*(h+y+p+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // dogehype (site to buy followers, viewers, etc)
+      /((s+t+r+e*a*m+i*n*g*)+\s*(r+i+s+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // streamrise dot ru (another site to buy followers, viewers, etc)
+      /((d+o*g+e*)+[\s\-\_]*(h+y+p+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // dogehype (site to buy followers, viewers, etc)
+      /((s+t+r+e*a*m+i*n*g*)+[\s\-\_]*(r+i+s+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // streamrise dot ru (another site to buy followers, viewers, etc)
+      /((s+t+r+e*a*m+i*n*g*)+\s*(p+r+o+m+o+t*i*o*n*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // stream-promotion dot ru (another site to buy followers, viewers, etc)
+      /((s+t+r+e*a*m+i*n*g*)+[\s\-\_]*(p+r+o+m+o+t*i*o*n*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // stream-promotion dot ru (another site to buy followers, viewers, etc)
+      /((p+r+o+m+o+t*e*)+\s+(y+o+\w*)+\s+((c+h+a+n+e+l+s*)+|(s+t+r+e*a*m+i*n*g*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Come stream-promotion ru. Promote your channel, viewers, followers, views, chat bots. Many offers for different platforms. Autostart. Responsive support 24\7
+      /((o+f+e+r+s*)+\s*(\s*\w+)\s*(d+i+f+e+r+e+n+t*)+\s+(p+l+a+t+a*f+o+r+m+a*s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Come stream-promotion ru. Promote your channel, viewers, followers, views, chat bots. Many offers for different platforms. Autostart. Responsive support 24\7
+      /(q+u+a+l+i*t*y*)+\s+(i+s+)+\s+([wg]+u*a+r+a+n*t+[ey]+[dt]*)+\s+(t+o+)+\s+(b+e+)+\s+(t+h+e+)+\s+(b+e+[sr]+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Quality is guaranteed to be the best
+      /(q+u+a+l+i*t*y*)+\s*(i+s+)*\s+([wg]+u*a+r+a+n*t+[ey]+[dt]*)+\s*(t+o+)*\s*(b+e+)*\s*(t+h+e+)*\s+(b+e+[sr]+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Quality (is) guaranteed ((to) (be) (the)) best
+      /(q+u+a+l+i*t*y*)+\s+([wg]+u*a+r+a+n*t+[ey]+[dt]*)+\s+(b+e+[sr]+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Quality guaranteed best
+      /(e+v+e+r+y+\s*t+h+i+n+g+)+\s+(i+s+)+\s+([aeiou]+n+)+\s+(y+o+\w*)+\s+(h+a+n+d+s*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Everything is in your hands
+      /(t+u+r+n+)+\s*(i+t+)*\s+(o+n+|o+f+|c+u+[sz]+t+o+m+i*[sz]*e*)+\s*\/*\s*(o+n+|o+f+|c+u+[sz]+t+o+m+i*[sz]*e*)+\s*\/*\s*(o+n+|o+f+|c+u+[sz]+t+o+m+i*[sz]*e*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // turn it on/off/customize
+      /(f+l+e+x+i*b*l*e*)+\s*(a+n+d+)*\s+(c+o+n*v+e+n*i+e+n*t*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Flexible and convenient
+      /(o+r+d+e+r+)+\s+(m+a+n+a+g+e*m*e*n*t*)+\s+(p+a+n+e+l+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Order management panel
+      /(a+n+y+)+\s+(c+o+m+p+e*t+i+t+o+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Any competitor
+      /((h+e+l+o+)+|(h+i+)+)+\s*\,*\s+(s+o+r+y+)+\s+(f+o+\w*)+\s+(b+o+t+h+e+r*i*n*g*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Hello, sorry for bothering
+      /(s+o+r+y+)+\s+(f+o+\w*)+\s+(b+o+t+h+e+r*i*n*g*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // sorry for bothering
       /((o+n+l+y+)+\s*(f+a+n+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((t+i+n+y+)+\s*(u+r+l+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(((o+f+e+r+)+|(c+a+t+c+h+)+)+\s*\w*\s*p+r+o+m+o+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /((t+i+n+y+)+[\s\-\_]*(u+r+l+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(((o+f+e+r+)+|(c+a+t+c+h+)+)+\s*\w*\s*p+r+o+m+o+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Offer promo(tion), catch promo(tion)
       /(((f+r+e+)+\s+(v+i+e+w+\w*)+)+|((v+i+e+w+\w*)+\s*\w*\s*(f+r+e+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((r+u+s+t+)+[\s\-\_]*(e+v+e+n+t+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((r+u+s+t+)+[\s\-\_]*(d+r+o+p+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -4560,33 +4582,56 @@ async function onMessageHandler(target, tags, message, self) {
       /(c+s+\W*g+o+[\s\-\_]*d+a+l+a+s)+\s*(\.+|d+o+t+)+\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(e+s+l+[\s\-\_]*d+r+o+p+s+)+\s*(\.+|d+o+t+)+\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((r+u+s+t+)+|(g+i+f+t+)+|(c+o+d+e+)+|(e+v+e+n+t+)+|(a+w+a+r+d+)+|(c+o+n+e+c+t+)+|(c+s+\W*g+o+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Comment this line if bot bans accidentally
-      /(p+r+i+c+e+\s+i+s+\s+l+o+w+e+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(p+r+i+c+e+\s+i+s+\s+l+o+w+e+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Price is lower
       /(l+o+w+e+r+\s+p+r+i+c+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(r+e+a+l+y+)+\s+(e+n+j+o+y+)+\s+(y+o+\w*)+\s+((c+o+n+t+e+n+t+)+|(s+t+r+e*a*m+i*n*g*)+)+\s+(a+n+d+)+\s+(f+i+n+d+)+(\s+i+t+)*\s+(e+n+j+o+y+a+b+l+e+)\s+(t+o+)+\s+(w+a+t+c+h+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // greetings. I really enjoy your content and find it enjoyable to watch. I recommend that you continue your outstanding work. SeemsGood SeemsGood
-      /(r+e+c+o+m+e+n+d+)+\s+(t+h+a+t+)+\s+(y+o+\w*)+\s+(c+o+n+t+i+n+u+e+)+\s+(y+o+\w*)+\s+((o+u+t+s+t+a+n+d+i+n+g+)+|(a+m+a+z+i+n+g+)+)+\s+(w+o+r+k+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // greetings. I really enjoy your content and find it enjoyable to watch. I recommend that you continue your outstanding work. SeemsGood SeemsGood
-      /(h+e+l+o+)+\s+(n+i+c+e+)+\s+(m+e+t+i+n+g+)+\s+(y+o+\w*)+\s*\,*(\s*a+n+d+)*\s*(h+o+w+)+\s+(i+s+)+\s+(y+o+\w*)\s+(s+t+r+e*a*m+i*n*g*)+\s+(g+o+i+n+g*)+(\s*\w+)*\s+(s+o+)+\s+(f+a+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // hello nice meeting you and how is your streaming going on so far
+      /(r+e+a+l+y+)+\s+(e+n+j+o+y+)+\s+(y+o+\w*)+\s+((c+o+n+t+e+n+t+)+|(s+t+r+e*a*m+i*n*g*)+)+\s+(a+n+d+)+\s+(f+i+n+d+)+(\s+i+t+)*\s+(e+n+j+o+y+a+b+l+e+)\s+(t+o+)+\s+(w+a+t+c+h+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // greetings. I really enjoy your content and find it enjoyable to watch. I recommend that you continue your outstanding work. SeemsGood SeemsGood (PART 1)
+      /(r+e+c+o+m+e+n+d+)+\s+(t+h+a+t+)+\s+(y+o+\w*)+\s+(c+o+n+t+i+n+u+e+)+\s+(y+o+\w*)+\s+((o+u+t+s+t+a+n+d+i+n+g+)+|(a+m+a+z+i+n+g+)+)+\s+(w+o+r+k+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // greetings. I really enjoy your content and find it enjoyable to watch. I recommend that you continue your outstanding work. SeemsGood SeemsGood (PART 2)
+      /((h+e+l+o+)+|(h+i+)+)+\s+((n+i+c+e+)+|(m+a+t+e+)+|(b+u+d+y*)+|(f+r+i*e+n+d*)+)+\s+((m+e+t+i+n+g+)+|(s+t+r+e*a*m+i*n*g*)+)+\s+(y+o+\w*)+\s*\,*(\s*a+n+d+)*\s*(h+o+w+)+\s+(i+s+)+\s+(y+o+\w*)\s+(s+t+r+e*a*m+i*n*g*)+\s+(g+o+i+n+g*)+(\s*\w+)*\s+(s+o+)+\s+(f+a+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // hello nice meeting you and how is your streaming going on so far
+      /((h+e+l+o+)+|(h+i+)+)+\s+((n+i+c+e+)+|(m+a+t+e+)+|(b+u+d+y*)+|(f+r+i*e+n+d*)+)+\s*(n+i+c+e+)*\s+((m+e+t+i+n+g+)+|(s+t+r+e*a*m+i*n*g*)+)+\s*(\w*)\s*(n+o+t+i+c+e+d*)+\s+(((s+o+m+e+)+|(s+m+o+e+)+)\s*(t+h+i+n+[kg]*)+)+\s*(\s*\w+)\s*(y+o+\w*)+\s+((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+|(c+h+a+n+e+l+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Hi mate nice streaming I noticed something on your channel that I think needs to be amended. I’d love to chat with you more about it on Discord. It would be a great opportunity to discuss the issue in more detail and to come up with a solution together. Would you be willing to chat with me on Discord? My username is Diablous#8216 (PART 1)
+      /((\w+[\'\’]+d+)+\s+)*(l+[ou]+v+e*)+(\s+t+o+)*\s+(c+h+a+t)\s+(w+i+t+h*)+\s+(y+o+\w*)+(\s*m+o+r+e+)*\s+(a*b+o+u+t*)+(\s+i+t+)*(\s*\w+)\s+(d+i+s+c+o+r+d+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Hi mate nice streaming I noticed something on your channel that I think needs to be amended. I’d love to chat with you more about it on Discord. It would be a great opportunity to discuss the issue in more detail and to come up with a solution together. Would you be willing to chat with me on Discord? My username is Diablous#8216 (PART 2)
+      /(i+t+)*(\s*((w+o+u+l+d+)+|([\'\’]d)+)+)\s+(b+e+)+\s*([aeiou]+)*\s*(g+r+e+a+t+)\s+(o+p+o+r+t+u+n+i+t+y*)+(\s+t+o+)*\s+(d+i+s+c+u+s+)+\s+(t+h+e)+\s+(i+s+u+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Hi mate nice streaming I noticed something on your channel that I think needs to be amended. I’d love to chat with you more about it on Discord. It would be a great opportunity to discuss the issue in more detail and to come up with a solution together. Would you be willing to chat with me on Discord? My username is Diablous#8216 (PART 3)
+      /(c+[ou]+m+e*)+\s+(u+p+)+\s+(w+i+t+h*)\s*(\w*)\s*(s+o+l+u+t+i+o+n+s*)+\s*(t+o+g+e+t+h+e+r+)*/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Hi mate nice streaming I noticed something on your channel that I think needs to be amended. I’d love to chat with you more about it on Discord. It would be a great opportunity to discuss the issue in more detail and to come up with a solution together. Would you be willing to chat with me on Discord? My username is Diablous#8216 (PART 4)
+      /(((w+o+u+l+d+)+|([\'\’]d)+)+)+\s+(y+o+\w*)+(\s+(b+e+)+)*\s+(w+i+l+i*n*g*)+(\s+t+o+)*\s+((c+h+a+t+)+|(t+a+l+k+)+)+\s+(w+i+t+h*)+\s+(m+e+)+(\s*(\s*\w+)\s*(d+i+s+c+o+r+d+)+)*/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Hi mate nice streaming I noticed something on your channel that I think needs to be amended. I’d love to chat with you more about it on Discord. It would be a great opportunity to discuss the issue in more detail and to come up with a solution together. Would you be willing to chat with me on Discord? My username is Diablous#8216 (PART 5)
       /((m+y+\s*s+t+r+m+)+|(m+y+\s*s+t+r+e+a+m+)+|(m+y+\s*s+t+r+a+e+m+)+|(m+y+\s*s+t+r+e+m+)+|(m+y+\s*s+t+r+a+m+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((\.+|d+o+t+)+\s*(s+t+o+r+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /((((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+((a+n+d+)*|(\,+)*)*\s*((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+\s*((a+n+d+)*|(\,+)*)*\s*((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /((((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+((a+n+d+)*|(\,+)*)*\s*((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+\s*((a+n+d+)*|(\,+)*)*\s*((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),  // the combination of the words "view(ers)", "follow(ers)" and "view(ers)" in any order (but slightly different)
       /((t+)+\s*(\.+|d+o+t+)+\s*(c+o+m*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // t.co links? bruh if you post that of course you are getting banned, you can never tell what a t.co link is
-      /((a+l+)+\s*(f+o+r+)+\s*(y+\w*)\s*((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(((u+p+(\s*g*r*a*d*e*)*)+|(u+p+(\s*d*a*t*e*)*)+)+\s*(y+\w*)\s*((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+|(c+h+a+n+e+l+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
+      /((a+l+)+\s*(f+o+\w*)+\s*(y+\w*)\s*((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(((u+p+(\s*g*r*a*d*e*)*)+|(u+p+(\s*d*a*t*e*)*)+)+\s*(y+\w*)\s*((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+|(c+h+a+n+e+l+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(p+r+o+m+o+((t*i*n*g*)*|(t*e*)*)*)\s+(t+w+[li1\!\|]+t+c+h+s*)+\s+(c+h+a+n+e+l+s*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // <3 The   best service in promoting Twitch channels -  STREAMSKILL. pro\en ! Get a Free test of 20 viewers for 1 hour only with us! <3 (PART 1)
+      /(b+e+s+t)+\s+(s+e+r+v+i+c+e+s*)*\s*(\w+)\s+(p+r+o+m+o+((t*i*n*g*)*|(t*e*)*)*)\s+(t+w+[li1\!\|]+t+c+h+s*)+\s+(c+h+a+n+e+l+s*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // <3 The   best service in promoting Twitch channels -  STREAMSKILL. pro\en ! Get a Free test of 20 viewers for 1 hour only with us! <3 (PART 1 alternate)
+      /((g+e+t+)+\s*(\w+)*\s+(f+r+e+)+\s+)*(t+e+s+t+)+\s*(\w+)*\s+(\d+)+\s+(v+i+e+w+\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // <3 The   best service in promoting Twitch channels -  STREAMSKILL. pro\en ! Get a Free test of 20 viewers for 1 hour only with us! <3 (PART 2)
+      /(f+r+e+)*\s*(t+e+s+t+)+\s*(\w+)*\s+(\d+)+\s+(v+i+e+w+\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // <3 The   best service in promoting Twitch channels -  STREAMSKILL. pro\en ! Get a Free test of 20 viewers for 1 hour only with us! <3 (PART 2 alternate)
+      /(s+t+r+e*a*m+i*n*g*)+\s*(s+k+i+l+)+\s*([\.\,\\\/]|d+o+t+)*\s*(p+r+o+)+\s*([\.\,\\\/])*\s*(e+n+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // <3 The   best service in promoting Twitch channels -  STREAMSKILL. pro\en ! Get a Free test of 20 viewers for 1 hour only with us! <3 (PART 3)
+      /(s+t+r+e*a*m+i*n*g*)+\s*(s+k+i+l+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // <3 The   best service in promoting Twitch channels -  STREAMSKILL. pro\en ! Get a Free test of 20 viewers for 1 hour only with us! <3 (PART 4)
+      /(\d*)*\s*(h+o+u+r)+((\s+(o+n+l+y+)+)*\s+(w+i+t+h*)+\s+(u+s+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")) // <3 The   best service in promoting Twitch channels -  STREAMSKILL. pro\en ! Get a Free test of 20 viewers for 1 hour only with us! <3 (PART 5)
     ];
     let multiMessageSpamBotTypeA = [/((i+t+)+\s*(i+s+)|(i+t+\W*s+))+\s+(n+i+c+e+)+\s+(t+o+)+\s+(m+e+t+)+\s+(y+\w*)+\s+(\w+\W*v+e+)+\s+(w+a+t+c+h+e+d+)+\s+(y+\w*)+\s+([^\s]*)+\s+(t+w+\w*t+c+h+)\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(y+\w*)+\s+(s+i+r+\W*)+\s+(h+a+v+e+)+\s+(f+l+o+w+\W*)+\s+(i+t+\W*s+)+\s+(a+w+e+s+\w+m+e\W*)+\s+(\w+)+\s+(l+i+k+e+)+\s+(y+\w*)+\s+(s+t+r+e+a+m+\w*\W*\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(g+o+d+\W*)+\s+((\w+\W*\s*a+m+)|(\w+\W*\s*m+))+\s+(\w*b+o+u+t+)+\s+(t+o+)+\s+(d+o+)+\s+(g+r+a+p+h+i+c+)+\s+(d+e+s+i+g+n+)+\s+(f+o+r+)+\s+(y+\w*)+\s+(s+t+r+e+a+m+\w*\W*\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(g+o+d+\W*)+\s+((\w+\W*\s*a+m+)|(\w+\W*\s*m+))+\s+(\w*b+o+u+t+)+\s+(t+o+)+\s+(d+o+)+\s+(g+r+a+p+h+i+c+)+\s+(d+e+s+i+g+n+)+\s+(f+o+\w*)+\s+(y+\w*)+\s+(s+t+r+e+a+m+\w*\W*\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(h+a+v+e+)+\s+(\w+)+\s+(l+o+k+)+\s+((a*t*|i*n*|o*n*)*\s*(t+h+e+)+)+\s+(r+e+f+e+r+e+n+c+e)+\s+(\w*)+\s+(m+y+)+\s+(p+r+o+f+i+l+e\W*\w*)+\s+(b+a+n+e+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
     let multiMessageSpamBotTypeB = [/(h+e+y+)+\s+(t+h+e+r+e+\W*)+\s+(((w+h+a+t+)+|(h+w+a+t+)+)+\W*i*s+\s*n+e+w+)+\s+(\w+)+\s+(c+h+e+c+k+e+d+)+\s+(o+u+t+)+\s+(y+\w*)+\s+([^\s]*)+\s+(c+h+a+n+e+l+\w*)+\s+(h+e+r+e+)+\s+(\w+)+\s+(t+w+\w*t+c+h+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /^(a*b+o+u+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(k+e+e+p+)+\s+(u+p+)+\s+(t+h+e+)+\s+(g+o+d+)+\s+(s+t+r+e+a+m\w*\W*\w*)+\s+(m+a+n+)+\s+((\w+\W*\s*a+m+)|(\w+\W*\s*m+))+\s+(g+o+i+n+g*)+\s+(t+o+)+\s+(d+o+)+\s+(a+n+i+m+a+t+e+d+)+\s+(b+r+b+\W*)+\s+(i+n+t+r+o\W*)+\s+(a+n+d+)+\s+(o+f+l+i+n+e+)+\s+(s+c+r+e+n+)+\s+(f+o+r+)+\s+(y+\w*)+\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(k+e+p+)+(\s*(i+t+)*\s*)*(u+p+)+\s+(t+h+e+)+\s+(g+o+d+)+\s+(s+t+r+e+a+m\w*\W*\w*)+\s+(m+a+n+)+\s+((\w+\W*\s*a+m+)|(\w+\W*\s*m+))+\s+(g+o+i+n+g*)+\s+(t+o+)+\s+(d+o+)+\s+(a+n+i+m+a+t+e+d+)+\s+(b+r+b+\W*)+\s+(i+n+t+r+o\W*)+\s+(a+n+d+)+\s+(o+f+l+i+n+e+)+\s+(s+c+r+e+n+)+\s+(f+o+\w*)+\s+(y+\w*)+\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(t+a+k+e+)+\s+(\w+)+\s+(l+o+k+)+\s+((a*t*|i*n*|o*n*)*\s*(t+h+e+)+)+\s+(u+r+l+)+\s+(\w*)+\s+(m+y+)+\s+(a+c+o+u+n+t+\W*\w*)+\s+(i+m+a+g+e+)+\s+(p+r+o+b+a+b+l+y+)+\s+(t+h+e+)+\s+(((b+u+y+)|(b+e+s+t+)|(g+e+t+))+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
     let multiMessageSpamBotTypeC = [/((h+e+y+)+\s+((w+h+a+t+)+|(h+w+a+t+)+)+\W*i*s+\s*((u+p+)+|(n+e+w+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(((h[oi]w)+|(hw[oi])+)+\W*i*s+\s*(y+o+\w*)+\s*(d+a+y+)+\s*(g+o+i+n+g*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((i+t+)+\W*((i*s+)|(h+a+s+))+\s*(b+e+n+)+\s*(p+r+e+t+y+)+\s*(g+o+d+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(((a+r+t+)+\s*(w+o+r+k+)+)+\s*(f+o+r+)+\s*(s+t+r+e+a+m+\w*\W*\w*)+\s*(\w*)*\s*(g+o+d+)+\s*(p+r+i+c+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(((a+r+t+)+\s*(w+o+r+k+)+)+\s*(f+o+\w*)+\s*(s+t+r+e+a+m+\w*\W*\w*)+\s*(\w*)*\s*(g+o+d+)+\s*(p+r+i+c+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((g+i+v+e*)+\s*(m+e+)*\s*(\w*)*\s+(d+i+s+c+o+r+d+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
+    ];
+    let multiMessageSpamBotTypeD = [/(h+e+l+[aeiou]+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // helloi
+      /((h+o+w+)+|(h+w+o+)+)+\s*([aeiou]*r+[aeiou]*)*\s+(y+o+\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // How are you ?
+      /(c+a+n+)+\s*(\w*)\s*(m+a+k+e+)+\s+(a+r+t+s*)+\s+(f+o+\w*)+\s+(y+o+\w*)+\s+(c+h+a+n+e+l+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // can I make arts for your channel
+      /(s+e+n+[dt]+)+\s+(m+e+)+\s+(y+o+\w*)+\s+(d+i+s+c+o+r+d+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Send me your discord
+      /(d+i+s+c+o+r+d+)+\s+(s+e+n+[dt]+)+\s+(m+e+)+\s+(y+o+\w*)+\s+(r+e+q+u+e+s+t+)+\s+(s+o+)+\s*(\w*)\s*(c+a+n+)+\s+(s+h+a+r+e+)+\s+(m+y+)+\s+(w+o+r+k+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // alisadaniel its ,my discord sent me your request so i can share my work <3
+      /(t+y+p+e*)+\s+(y+o+\w*)+\s+(d+i+s+c+o+r+d+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")) // type your discord ?
+    ];
+    let multiMessageSpamBotTypeE = [/(h+e+l+[aeiou]+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // hello 👋👋👋👋👋👋👋👋👋👋👋
+      /(h+a+v+e+)+\s*(\w*)*\s*(n+i+c+e+)+\s+(c+h+a+n+e+l+)+(\s*\,*\s*)*(k+e+p+)+(\s*(i+t+)*\s*)*(u+p+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // you have a nice channel keep it up 👍👍👍👍👍👍👍👍👍👍
+      /(h+a+v+e+)+\s*(\w*)*\s*(i+m+p+o+r+t+a+n+t+)+\s+(t+a+l+k+)+\s+(\w*b+o+u+t+)+\s+(y+o+\w*)+\s+(c+h+a+n+e+l+)+\s*(\w*)\s*(c+o+n+t+a+c+t+)+\s+(m+e+)(\s*(\s*\w+)\s*(d+i+s+c+o+r+d+)+)*/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")) // I have an important talk about your channel kindly contact me on discord. Pearl0307
     ];
     let slurDetection = false; // User will be instantly permabanned, no matter how known the user is, more words will be added as they happen
     if (globalConfig.enable_slur_detection == true) {
@@ -4706,12 +4751,17 @@ async function onMessageHandler(target, tags, message, self) {
     //console.log(multiMessageSpamBotTypeB);
     //console.log("multiMessageSpamBotTypeC");
     //console.log(multiMessageSpamBotTypeC);
+    //console.log("multiMessageSpamBotTypeD");
+    //console.log(multiMessageSpamBotTypeD);
+    //console.log("multiMessageSpamBotTypeE");
+    //console.log(multiMessageSpamBotTypeE);
     let isSingleMessageSpamBot = false;
     let isFirstMessageSpam = false;
     let isPossibleMultiMessageSpamBot = false;
     for (let singleMessageSpamBotsIndex = 0; singleMessageSpamBotsIndex < singleMessageSpamBots.length; singleMessageSpamBotsIndex++) {
       if (singleMessageSpamBots[singleMessageSpamBotsIndex] == true) {
         isSingleMessageSpamBot = globalConfig.ban_spambots;
+        //console.log("The regex at index " + singleMessageSpamBotsIndex + " is " + singleMessageSpamBots[singleMessageSpamBotsIndex] + " out of " + (singleMessageSpamBots.length - 1));
         //isFirstMessageSpam = true;
         //console.log("We have a single message spam bot maybe, idk still have to check the database");
       }
@@ -4734,16 +4784,464 @@ async function onMessageHandler(target, tags, message, self) {
         //console.log("We have a multimessage spambot type C, we have to check all the messages it sends tho for confirmation");
       }
     }
+    for (let multiMessageSpamBotTypeDIndex = 0; multiMessageSpamBotTypeDIndex < multiMessageSpamBotTypeD.length; multiMessageSpamBotTypeDIndex++) {
+      if (multiMessageSpamBotTypeD[multiMessageSpamBotTypeDIndex] == true) {
+        isFirstMessageSpam = globalConfig.ban_spambots;
+        //console.log("We have a multimessage spambot type D, we have to check all the messages it sends tho for confirmation");
+      }
+    }
+    for (let multiMessageSpamBotTypeEIndex = 0; multiMessageSpamBotTypeEIndex < multiMessageSpamBotTypeE.length; multiMessageSpamBotTypeEIndex++) {
+      if (multiMessageSpamBotTypeE[multiMessageSpamBotTypeEIndex] == true) {
+        isFirstMessageSpam = globalConfig.ban_spambots;
+        //console.log("We have a multimessage spambot type E, we have to check all the messages it sends tho for confirmation");
+      }
+    }
 
-    if (isSingleMessageSpamBot == false && slurDetection == false && doesMessageHaveTooManyUpperCaseLetters == false) {
+    if (isSingleMessageSpamBot == false && slurDetection == false && doesMessageHaveTooManyUpperCaseLetters == false && originalMessage.length < globalConfig.long_message_length) {
       if (globalConfig.send_introductory_messages_to_new_users_using_twitch_tags == true) {
         if (isFirstTwitchMessage == true) {
-          client.reply(target, "@" + usernameToPing + " " + globalConfig.introductory_message_to_new_users, messageId); // Add spambot and slur moderation here
+          client.reply(target, "@" + usernameToPing + " " + globalConfig.introductory_message_to_new_users, messageId); // Add spambot and slur moderation here (DONE, see below)
         }
       }
       if (globalConfig.send_welcome_back_messages_to_returning_users_using_twitch_tags == true) {
         if (isReturningChatter == true) {
-          client.reply(target, "@" + usernameToPing + " " + globalConfig.introductory_message_to_returning_users, messageId); // Add spambot and slur moderation here
+          client.reply(target, "@" + usernameToPing + " " + globalConfig.introductory_message_to_returning_users, messageId); // Add spambot and slur moderation here (DONE, see below)
+        }
+      }
+    }
+    if (isSingleMessageSpamBot == true || slurDetection == true || doesMessageHaveTooManyUpperCaseLetters == true || originalMessage.length >= globalConfig.long_message_length) {
+      if (globalConfig.send_introductory_messages_to_new_users_using_twitch_tags == true) {
+        if (isFirstTwitchMessage == true) {
+          if (isSingleMessageSpamBot == true) {
+            console.log("BAN THAT MOTHERFUCKER");
+            //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            banTwitchUser(roomId, userId, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            if (globalConfig.send_messages_to_moderated_user == true) {
+              client.reply(target, "@" + usernameToPing + " You were banned because you got detected as spam bot.", messageId);
+            }
+            if (globalConfig.send_whispers_to_moderated_user == true) {
+              sendTwitchWhisper(userId, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            }
+            if (chatConfig.send_debug_channel_messages == true) {
+              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
+            }
+          }
+          if (slurDetection == true) {
+            if (globalConfig.permaban_when_slur_is_detected == true) {
+              // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              banTwitchUser(roomId, userId, null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                client.reply(target, "@" + usernameToPing + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", messageId);
+              }
+              if (globalConfig.send_whispers_to_moderated_user == true) {
+                sendTwitchWhisper(userId, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              }
+              if (chatConfig.send_debug_channel_messages == true) {
+                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.");
+              }
+            }
+            if (globalConfig.permaban_when_slur_is_detected == false) {
+              // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              banTwitchUser(roomId, userId, globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", messageId);
+              }
+              if (globalConfig.send_whispers_to_moderated_user == true) {
+                sendTwitchWhisper(userId, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              }
+              if (chatConfig.send_debug_channel_messages == true) {
+                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.");
+              }
+            }
+          }
+          if (doesMessageHaveTooManyUpperCaseLetters == true || originalMessage.length >= globalConfig.long_message_length) {
+            if (globalConfig.warn_if_message_is_long == true) {
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                if (originalMessage.length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                  client.reply(target, "@" + usernameToPing + " Your message contains too many caps, please calm down!", messageId);
+                }
+                if (originalMessage.length >= globalConfig.long_message_length) {
+                  client.reply(target, "@" + usernameToPing + " Your message is too long, please calm down!", messageId);
+                }
+              }
+            }
+            if (globalConfig.warn_if_message_is_long == false) {
+              if (originalMessage.length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                banTwitchUser(roomId, userId, globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                if (globalConfig.send_messages_to_moderated_user == true) {
+                  client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", messageId);
+                }
+                if (globalConfig.send_whispers_to_moderated_user == true) {
+                  sendTwitchWhisper(userId, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                }
+                if (chatConfig.send_debug_channel_messages == true) {
+                  client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.");
+                }
+              }
+              if (originalMessage.length >= globalConfig.long_message_length) {
+                //console.log("First message is too long, do something about it A");
+                if (globalConfig.permaban_if_first_message_is_long == true) {
+                  //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  banTwitchUser(roomId, userId, null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  if (globalConfig.send_messages_to_moderated_user == true) {
+                    client.reply(target, "@" + usernameToPing + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", messageId);
+                  }
+                  if (globalConfig.send_whispers_to_moderated_user == true) {
+                    sendTwitchWhisper(userId, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                    sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  }
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.");
+                  }
+                }
+                if (globalConfig.permaban_if_first_message_is_long == false) {
+                  //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  banTwitchUser(roomId, userId, globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  if (globalConfig.send_messages_to_moderated_user == true) {
+                    client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", messageId);
+                  }
+                  if (globalConfig.send_whispers_to_moderated_user == true) {
+                    sendTwitchWhisper(userId, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                    sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  }
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.");
+                  }
+                }
+              }
+            }
+          }
+        }
+        if (isFirstTwitchMessage == false) {
+          if (isSingleMessageSpamBot == true) {
+            /*
+            console.log("BAN THAT MOTHERFUCKER");
+            //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            banTwitchUser(roomId, userId, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            if (globalConfig.send_messages_to_moderated_user == true) {
+              client.reply(target, "@" + usernameToPing + " You were banned because you got detected as spam bot.", messageId);
+            }
+            if (globalConfig.send_whispers_to_moderated_user == true) {
+              sendTwitchWhisper(userId, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            }
+            if (chatConfig.send_debug_channel_messages == true) {
+              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
+            }
+            */
+          }
+          if (slurDetection == true) {
+            if (globalConfig.permaban_when_slur_is_detected == true) {
+              // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              banTwitchUser(roomId, userId, null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                client.reply(target, "@" + usernameToPing + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", messageId);
+              }
+              if (globalConfig.send_whispers_to_moderated_user == true) {
+                sendTwitchWhisper(userId, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              }
+              if (chatConfig.send_debug_channel_messages == true) {
+                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.");
+              }
+            }
+            if (globalConfig.permaban_when_slur_is_detected == false) {
+              // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              banTwitchUser(roomId, userId, globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", messageId);
+              }
+              if (globalConfig.send_whispers_to_moderated_user == true) {
+                sendTwitchWhisper(userId, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              }
+              if (chatConfig.send_debug_channel_messages == true) {
+                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.");
+              }
+            }
+          }
+          if (doesMessageHaveTooManyUpperCaseLetters == true || originalMessage.length >= globalConfig.long_message_length) {
+            if (globalConfig.warn_if_message_is_long == true) {
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                if (originalMessage.length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                  client.reply(target, "@" + usernameToPing + " Your message contains too many caps, please calm down!", messageId);
+                }
+                if (originalMessage.length >= globalConfig.long_message_length) {
+                  client.reply(target, "@" + usernameToPing + " Your message is too long, please calm down!", messageId);
+                }
+              }
+            }
+            if (globalConfig.warn_if_message_is_long == false) {
+              if (originalMessage.length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                banTwitchUser(roomId, userId, globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your message contains too many caps, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                if (globalConfig.send_messages_to_moderated_user == true) {
+                  client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your message contains too many caps, please calm down!", messageId);
+                }
+                if (globalConfig.send_whispers_to_moderated_user == true) {
+                  sendTwitchWhisper(userId, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your message contains too many caps, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                }
+                if (chatConfig.send_debug_channel_messages == true) {
+                  client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, message contains too many caps.");
+                }
+              }
+              if (originalMessage.length >= globalConfig.long_message_length) {
+                //console.log("message is too long, do something about it A");
+                if (globalConfig.permaban_if_first_message_is_long == true) {
+                  //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  banTwitchUser(roomId, userId, null, "You were banned because your message is too long, you're either a spam bot, or just came here to spam.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  if (globalConfig.send_messages_to_moderated_user == true) {
+                    client.reply(target, "@" + usernameToPing + " You were banned because your message is too long, you're either a spam bot, or just came here to spam.", messageId);
+                  }
+                  if (globalConfig.send_whispers_to_moderated_user == true) {
+                    sendTwitchWhisper(userId, "You were banned because your message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                    sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  }
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, message too long.");
+                  }
+                }
+                if (globalConfig.permaban_if_first_message_is_long == false) {
+                  //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  banTwitchUser(roomId, userId, globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  if (globalConfig.send_messages_to_moderated_user == true) {
+                    client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down!", messageId);
+                  }
+                  if (globalConfig.send_whispers_to_moderated_user == true) {
+                    sendTwitchWhisper(userId, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                    sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  }
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, message too long.");
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      if (globalConfig.send_welcome_back_messages_to_returning_users_using_twitch_tags == true) {
+        if (isReturningChatter == true) {
+          if (isSingleMessageSpamBot == true) {
+            /*
+            console.log("BAN THAT MOTHERFUCKER");
+            //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            banTwitchUser(roomId, userId, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            if (globalConfig.send_messages_to_moderated_user == true) {
+              client.reply(target, "@" + usernameToPing + " You were banned because you got detected as spam bot.", messageId);
+            }
+            if (globalConfig.send_whispers_to_moderated_user == true) {
+              sendTwitchWhisper(userId, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            }
+            if (chatConfig.send_debug_channel_messages == true) {
+              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
+            }
+            */
+          }
+          if (slurDetection == true) {
+            if (globalConfig.permaban_when_slur_is_detected == true) {
+              // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              banTwitchUser(roomId, userId, null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                client.reply(target, "@" + usernameToPing + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", messageId);
+              }
+              if (globalConfig.send_whispers_to_moderated_user == true) {
+                sendTwitchWhisper(userId, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              }
+              if (chatConfig.send_debug_channel_messages == true) {
+                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.");
+              }
+            }
+            if (globalConfig.permaban_when_slur_is_detected == false) {
+              // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              banTwitchUser(roomId, userId, globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", messageId);
+              }
+              if (globalConfig.send_whispers_to_moderated_user == true) {
+                sendTwitchWhisper(userId, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              }
+              if (chatConfig.send_debug_channel_messages == true) {
+                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.");
+              }
+            }
+          }
+          if (doesMessageHaveTooManyUpperCaseLetters == true || originalMessage.length >= globalConfig.long_message_length) {
+            if (globalConfig.warn_if_message_is_long == true) {
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                if (originalMessage.length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                  client.reply(target, "@" + usernameToPing + " Your message contains too many caps, please calm down!", messageId);
+                }
+                if (originalMessage.length >= globalConfig.long_message_length) {
+                  client.reply(target, "@" + usernameToPing + " Your message is too long, please calm down!", messageId);
+                }
+              }
+            }
+            if (globalConfig.warn_if_message_is_long == false) {
+              if (originalMessage.length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                banTwitchUser(roomId, userId, globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your message contains too many caps, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                if (globalConfig.send_messages_to_moderated_user == true) {
+                  client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your message contains too many caps, please calm down!", messageId);
+                }
+                if (globalConfig.send_whispers_to_moderated_user == true) {
+                  sendTwitchWhisper(userId, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your message contains too many caps, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                }
+                if (chatConfig.send_debug_channel_messages == true) {
+                  client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, message contains too many caps.");
+                }
+              }
+              if (originalMessage.length >= globalConfig.long_message_length) {
+                //console.log("message is too long, do something about it A");
+                if (globalConfig.permaban_if_first_message_is_long == true) {
+                  //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  banTwitchUser(roomId, userId, null, "You were banned because your message is too long, you're either a spam bot, or just came here to spam.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  if (globalConfig.send_messages_to_moderated_user == true) {
+                    client.reply(target, "@" + usernameToPing + " You were banned because your message is too long, you're either a spam bot, or just came here to spam.", messageId);
+                  }
+                  if (globalConfig.send_whispers_to_moderated_user == true) {
+                    sendTwitchWhisper(userId, "You were banned because your message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                    sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  }
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, message too long.");
+                  }
+                }
+                if (globalConfig.permaban_if_first_message_is_long == false) {
+                  //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  banTwitchUser(roomId, userId, globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  if (globalConfig.send_messages_to_moderated_user == true) {
+                    client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down!", messageId);
+                  }
+                  if (globalConfig.send_whispers_to_moderated_user == true) {
+                    sendTwitchWhisper(userId, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                    sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  }
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, message too long.");
+                  }
+                }
+              }
+            }
+          }
+        }
+        if (isReturningChatter == false) {
+          if (isSingleMessageSpamBot == true) {
+            /*
+            console.log("BAN THAT MOTHERFUCKER");
+            //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            banTwitchUser(roomId, userId, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            if (globalConfig.send_messages_to_moderated_user == true) {
+              client.reply(target, "@" + usernameToPing + " You were banned because you got detected as spam bot.", messageId);
+            }
+            if (globalConfig.send_whispers_to_moderated_user == true) {
+              sendTwitchWhisper(userId, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+            }
+            if (chatConfig.send_debug_channel_messages == true) {
+              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
+            }
+            */
+          }
+          if (slurDetection == true) {
+            if (globalConfig.permaban_when_slur_is_detected == true) {
+              // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              banTwitchUser(roomId, userId, null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                client.reply(target, "@" + usernameToPing + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", messageId);
+              }
+              if (globalConfig.send_whispers_to_moderated_user == true) {
+                sendTwitchWhisper(userId, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              }
+              if (chatConfig.send_debug_channel_messages == true) {
+                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.");
+              }
+            }
+            if (globalConfig.permaban_when_slur_is_detected == false) {
+              // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              banTwitchUser(roomId, userId, globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", messageId);
+              }
+              if (globalConfig.send_whispers_to_moderated_user == true) {
+                sendTwitchWhisper(userId, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+              }
+              if (chatConfig.send_debug_channel_messages == true) {
+                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.");
+              }
+            }
+          }
+          if (doesMessageHaveTooManyUpperCaseLetters == true || originalMessage.length >= globalConfig.long_message_length) {
+            if (globalConfig.warn_if_message_is_long == true) {
+              if (globalConfig.send_messages_to_moderated_user == true) {
+                if (originalMessage.length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                  client.reply(target, "@" + usernameToPing + " Your message contains too many caps, please calm down!", messageId);
+                }
+                if (originalMessage.length >= globalConfig.long_message_length) {
+                  client.reply(target, "@" + usernameToPing + " Your message is too long, please calm down!", messageId);
+                }
+              }
+            }
+            if (globalConfig.warn_if_message_is_long == false) {
+              if (originalMessage.length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                banTwitchUser(roomId, userId, globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your message contains too many caps, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                if (globalConfig.send_messages_to_moderated_user == true) {
+                  client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your message contains too many caps, please calm down!", messageId);
+                }
+                if (globalConfig.send_whispers_to_moderated_user == true) {
+                  sendTwitchWhisper(userId, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your message contains too many caps, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                }
+                if (chatConfig.send_debug_channel_messages == true) {
+                  client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, message contains too many caps.");
+                }
+              }
+              if (originalMessage.length >= globalConfig.long_message_length) {
+                //console.log("message is too long, do something about it A");
+                if (globalConfig.permaban_if_first_message_is_long == true) {
+                  //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  banTwitchUser(roomId, userId, null, "You were banned because your message is too long, you're either a spam bot, or just came here to spam.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  if (globalConfig.send_messages_to_moderated_user == true) {
+                    client.reply(target, "@" + usernameToPing + " You were banned because your message is too long, you're either a spam bot, or just came here to spam.", messageId);
+                  }
+                  if (globalConfig.send_whispers_to_moderated_user == true) {
+                    sendTwitchWhisper(userId, "You were banned because your message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                    sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  }
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + true + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Banned, message too long.");
+                  }
+                }
+                if (globalConfig.permaban_if_first_message_is_long == false) {
+                  //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  banTwitchUser(roomId, userId, globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  if (globalConfig.send_messages_to_moderated_user == true) {
+                    client.reply(target, "@" + usernameToPing + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down!", messageId);
+                  }
+                  if (globalConfig.send_whispers_to_moderated_user == true) {
+                    sendTwitchWhisper(userId, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                    sendTwitchWhisper(userId, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  }
+                  if (chatConfig.send_debug_channel_messages == true) {
+                    client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + userId + ", last_username_to_ping=" + usernameToPing + ", last_message_sent_id=" + messageId + ", last_message_sent=" + originalMessage + ", last_message_sent_at=" + internalMessageTimestampIsoString + ", last_message_length=" + originalMessage.length + ", is_first_twitch_message=" + isFirstTwitchMessage + ", is_returning_chatter=" + isReturningChatter + ", is_account_blacklisted=" + false + ", is_banned=" + false + ", is_first_message_spam_bot=" + isFirstMessageSpam + ", is_spam_bot=" + isSingleMessageSpamBot + ", roomId=" + roomId + ", target=" + target + " Timeout, message too long.");
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -4753,942 +5251,64 @@ async function onMessageHandler(target, tags, message, self) {
     // The database checks below checks if an user exists
     // MOVE THIS UP TO WHERE THE MESSAGE ISNT MODIFIED
     // LIKE HERE
-    mongoClient.connect(mongoUrl, {
+    if (globalConfig.use_databases == true) {
+      mongoClient.connect(mongoUrl, {
       useUnifiedTopology: true
-    }, function(userDbError, userDb) {
-      //isDatabaseBusy = true;
-      if (userDbError) {
-        throw userDbError;
-      }
-      let userDatabase = userDb.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-      userDatabase.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).findOne({
-        user_id: userId
-      }, function(resultError, result) {
-        if (resultError) {
-          throw resultError;
+      }, function(userDbError, userDb) {
+        //isDatabaseBusy = true;
+        if (userDbError) {
+          throw userDbError;
         }
-        //console.log(result);
-        //isNullDatabase = result;
-        if (result === null) {
-          console.log("User doesn't exist AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-          //
-          mongoClient.connect(mongoUrl, {
-            useUnifiedTopology: true
-          }, function(databaseToCreateError, databaseToCreate) {
-            if (databaseToCreateError) {
-              throw databaseToCreateError;
-            }
-            let userDatabaseToCreate = databaseToCreate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-            let dataToInsert = {
-              user_id: userId,
-
-              first_known_username: username,
-              first_known_display_name: displayName,
-              first_user_color: twitchUserColor,
-              first_username_to_ping: usernameToPing,
-
-              last_known_username: username,
-              last_known_display_name: displayName,
-              last_user_color: twitchUserColor,
-              last_username_to_ping: usernameToPing,
-
-              randomly_generated_color: randomColor,
-
-              messages_sent: 1,
-
-              is_first_twitch_message: isFirstTwitchMessage,
-              is_returning_chatter: isReturningChatter,
-
-              first_message_sent_id: messageId,
-              first_message_sent: originalMessage,
-              first_message_sent_at_timestamp: internalMessageTimestamp,
-              first_message_sent_at_iso_timestamp: internalMessageTimestampIsoString,
-              first_message_sent_at_twitch_timestamp: twitchMessageTimestamp,
-              first_message_sent_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
-              first_message_length: originalMessage.length,
-              is_first_message_basic_input: false,
-              is_first_message_advanced_input: false,
-              first_basic_input: "",
-              first_advanced_input: "",
-
-              last_message_sent_id: messageId,
-              last_message_sent: originalMessage,
-              last_message_sent_at_timestamp: internalMessageTimestamp,
-              last_message_sent_at_iso_timestamp: internalMessageTimestampIsoString,
-              last_message_sent_at_twitch_timestamp: twitchMessageTimestamp,
-              last_message_sent_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
-              last_message_length: originalMessage.length,
-              is_last_message_basic_input: false,
-              is_last_message_advanced_input: false,
-              last_basic_input: "",
-              last_advanced_input: "",
-
-              shortest_message_sent_id: messageId,
-              shortest_message_sent: originalMessage,
-              shortest_message_sent_at_timestamp: internalMessageTimestamp,
-              shortest_message_sent_at_iso_timestamp: internalMessageTimestampIsoString,
-              shortest_message_sent_at_twitch_timestamp: twitchMessageTimestamp,
-              shortest_message_sent_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
-              shortest_message_length: originalMessage.length,
-
-              longest_message_sent_id: messageId,
-              longest_message_sent: originalMessage,
-              longest_message_sent_at_timestamp: internalMessageTimestamp,
-              longest_message_sent_at_iso_timestamp: internalMessageTimestampIsoString,
-              longest_message_sent_at_twitch_timestamp: twitchMessageTimestamp,
-              longest_message_sent_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
-              longest_message_length: originalMessage.length,
-
-              basic_inputs_sent: 0,
-              advanced_inputs_sent: 0,
-              total_inputs_sent: 0,
-              ban_count: 0,
-              strike_count: 0,
-              timeout_count: 0,
-              message_deletion_count: 0,
-              is_account_blacklisted: false,
-              is_banned: false,
-              is_first_message_spam_bot: isFirstMessageSpam,
-              is_spam_bot: isSingleMessageSpamBot
-            };
-            if (isFirstMessageSpam == false) {
-              if (dataToInsert.first_message_sent_id == dataToInsert.last_message_sent_id) {
-                if (doesMessageHaveTooManyUpperCaseLetters == true) {
-                  dataToInsert.timeout_count = dataToInsert.timeout_count + 1;
-                }
-                if (dataToInsert.first_message_length >= globalConfig.long_message_length) {
-                  if (globalConfig.permaban_if_first_message_is_long == true) {
-                    dataToInsert.ban_count = dataToInsert.ban_count + 1;
-                    //dataToInsert.is_account_blacklisted = true;
-                    dataToInsert.is_banned = true;
-                  }
-                  if (globalConfig.permaban_if_first_message_is_long == false) {
-                    dataToInsert.timeout_count = dataToInsert.timeout_count + 1;
-                  }
-                }
-              }
-            }
-            if (slurDetection == true) {
-              if (globalConfig.permaban_when_slur_is_detected == true) {
-                dataToInsert.strike_count = dataToInsert.strike_count + 1;
-                dataToInsert.ban_count = dataToInsert.ban_count + 1;
-                dataToInsert.is_account_blacklisted = true;
-                dataToInsert.is_banned = true;
-              }
-              if (globalConfig.permaban_when_slur_is_detected == false) {
-                dataToInsert.strike_count = dataToInsert.strike_count + 1;
-                dataToInsert.timeout_count = dataToInsert.timeout_count + 1;
-              }
-            }
-            if (isFirstMessageSpam == true) {
-              dataToInsert.strike_count = dataToInsert.strike_count + 1;
-            }
-            if (isSingleMessageSpamBot == true) {
-              dataToInsert.ban_count = dataToInsert.ban_count + 1;
-              dataToInsert.is_account_blacklisted = true;
-              dataToInsert.is_banned = true;
-            }
-            if (dataToInsert.is_account_blacklisted == true) {
-              dataToInsert.message_deletion_count = dataToInsert.message_deletion_count + 1;
-            }
-            /*
-            if (checkBigFollowsSpamBot == true) {
-              dataToInsert = {
-                user_id: userId,
-                messages_sent: 1,
-                input_count: 0,
-                ban_count: 1,
-                is_spam_bot: true
-              };
-            }
-            if (checkBigFollowsSpamBot == false) {
-              dataToInsert = {
-                user_id: userId,
-                messages_sent: 1,
-                input_count: 0,
-                ban_count: 0,
-                is_spam_bot: false
-              };
-            }
-            */
-            userDatabaseToCreate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).insertOne(dataToInsert, function(resError, res) {
-              if (resError) {
-                throw resError;
-              }
-              //console.log("1 document inserted");
-              mongoClient.connect(mongoUrl, {
-                useUnifiedTopology: true
-              }, function(databaseToReadFromError, databaseToReadFrom) {
-                if (databaseToReadFromError) {
-                  throw databaseToReadFromError;
-                }
-                let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-                userDatabaseToReadFrom.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).findOne({
-                  user_id: userId
-                }, function(databaseToReadFromResultError, databaseToReadFromResult) {
-                  if (databaseToReadFromResultError) {
-                    throw databaseToReadFromResultError;
-                  }
-                  databaseToReadFrom.close();
-                  //console.log("databaseToReadFromResult");
-                  //console.log(databaseToReadFromResult);
-                  if (databaseToReadFromResult.last_user_color == null || databaseToReadFromResult.last_user_color == undefined) {
-                    // This block picks the randomly generated color that was saved in the database when the user was first added to the database, and hopefully applies this color instead of using the hardcoded default color
-                    userColor = databaseToReadFromResult.randomly_generated_color;
-                  }
-                  if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
-                    console.log("New user successfully added to database A");
-                    if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == false) {
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                    }
-                    if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == true) {
-                      helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
-                      let sendHelpMessageToNewUsers = false;
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      if (sendHelpMessageToNewUsers == true) {
-                        if (inputMode == 0) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, basicHelpMessageToSend);
-                            }
-                          }
-                        }
-                        if (inputMode == 2) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, advancedHelpMessageToSend);
-                            }
-                          }
-                        }
-                      }
-                    }
-                    if (globalConfig.send_introductory_messages_to_new_users == false && globalConfig.send_help_messages_to_new_users == true) {
-                      helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
-                      let sendHelpMessageToNewUsers = false;
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      if (sendHelpMessageToNewUsers == true) {
-                        if (inputMode == 0) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, basicHelpMessageToSend);
-                            }
-                          }
-                        }
-                        if (inputMode == 2) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, advancedHelpMessageToSend);
-                            }
-                          }
-                        }
-                      }
-                    }
-                    if (chatConfig.send_debug_channel_messages == true) {
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER A] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target);
-                    }
-                  }
-                  if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
-                    console.log("First message ID is different from last message ID A");
-                    if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == false) {
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        console.log("Do not send message here A");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        console.log("Do not send message here B");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        console.log("Do not send message here C");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        console.log("Do not send message here D");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        console.log("Do not send message here E");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        console.log("Do not send message here F");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                    }
-                    if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == true) {
-                      helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
-                      let sendHelpMessageToNewUsers = false;
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        console.log("Do not send message here A");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        console.log("Do not send message here B");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        console.log("Do not send message here C");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        console.log("Do not send message here D");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        console.log("Do not send message here E");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        console.log("Do not send message here F");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (sendHelpMessageToNewUsers == true) {
-                        if (inputMode == 0) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, basicHelpMessageToSend);
-                            }
-                          }
-                        }
-                        if (inputMode == 2) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, advancedHelpMessageToSend);
-                            }
-                          }
-                        }
-                      }
-                    }
-                    if (globalConfig.send_introductory_messages_to_new_users == false && globalConfig.send_help_messages_to_new_users == true) {
-                      helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
-                      let sendHelpMessageToNewUsers = false;
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        console.log("Do not send message here A");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        console.log("Do not send message here B");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        console.log("Do not send message here C");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        console.log("Do not send message here D");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        console.log("Do not send message here E");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        console.log("Do not send message here F");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (sendHelpMessageToNewUsers == true) {
-                        if (inputMode == 0) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, basicHelpMessageToSend);
-                            }
-                          }
-                        }
-                        if (inputMode == 2) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, advancedHelpMessageToSend);
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                  if (databaseToReadFromResult.is_account_blacklisted == true) {
-                    if (databaseToReadFromResult.is_banned == false) {
-                      if (globalConfig.enable_silent_timeout == true) {
-                        //console.log("Silently timeout or delete message");
-                        deleteTwitchMessage(roomId, databaseToReadFromResult.last_message_sent_id, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                        logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
-                        logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
-                        banTwitchUser(roomId, databaseToReadFromResult.user_id, 1, null, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                        logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", 1, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Silent Timeout.", new Date().getTime());
-                        logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", 1, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Silent Timeout.", new Date().getTime());
-                      }
-                    }
-                  }
-                  if (databaseToReadFromResult.is_account_blacklisted == false) {
-                    if (databaseToReadFromResult.is_spam_bot == false) {
-                      if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
-                        if (databaseToReadFromResult.first_message_length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
-                          //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.", new Date().getTime());
-                          logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.", new Date().getTime());
-                          if (globalConfig.send_messages_to_moderated_user == true) {
-                            client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", databaseToReadFromResult.last_message_sent_id);
-                          }
-                          if (globalConfig.send_whispers_to_moderated_user == true) {
-                            sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          }
-                          if (chatConfig.send_debug_channel_messages == true) {
-                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.");
-                          }
-                        }
-                        if (databaseToReadFromResult.first_message_length >= globalConfig.long_message_length) {
-                          console.log("First message is too long, do something about it A");
-                          if (globalConfig.permaban_if_first_message_is_long == true) {
-                            //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.", new Date().getTime());
-                            logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.", new Date().getTime());
-                            if (globalConfig.send_messages_to_moderated_user == true) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (globalConfig.send_whispers_to_moderated_user == true) {
-                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            }
-                            if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.");
-                            }
-                          }
-                          if (globalConfig.permaban_if_first_message_is_long == false) {
-                            //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.", new Date().getTime());
-                            logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.", new Date().getTime());
-                            if (globalConfig.send_messages_to_moderated_user == true) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (globalConfig.send_whispers_to_moderated_user == true) {
-                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            }
-                            if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.");
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                  if (databaseToReadFromResult.is_spam_bot == true) {
-                    console.log("BAN THAT MOTHERFUCKER");
-                    //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                    banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                    logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
-                    logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
-                    if (globalConfig.send_messages_to_moderated_user == true) {
-                      client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot.", databaseToReadFromResult.last_message_sent_id);
-                    }
-                    if (globalConfig.send_whispers_to_moderated_user == true) {
-                      sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                    }
-                    if (chatConfig.send_debug_channel_messages == true) {
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
-                    }
-                  }
-                  if (databaseToReadFromResult.is_first_message_spam_bot == true) {
-                    console.log("Keep an eye on this user");
-                  }
-                  if (slurDetection == true) {
-                    if (globalConfig.permaban_when_slur_is_detected == true) {
-                      // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "ou were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.", new Date().getTime());
-                      logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "ou were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.", new Date().getTime());
-                      if (globalConfig.send_messages_to_moderated_user == true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (globalConfig.send_whispers_to_moderated_user == true) {
-                        sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      }
-                      if (chatConfig.send_debug_channel_messages == true) {
-                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.");
-                      }
-                    }
-                    if (globalConfig.permaban_when_slur_is_detected == false) {
-                      // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.", new Date().getTime());
-                      logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.", new Date().getTime());
-                      if (globalConfig.send_messages_to_moderated_user == true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (globalConfig.send_whispers_to_moderated_user == true) {
-                        sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      }
-                      if (chatConfig.send_debug_channel_messages == true) {
-                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.");
-                      }
-                    }
-                  }
-                });
-              });
-              databaseToCreate.close();
-            });
-          });
-          //
-          //test();
-        }
-        if (result !== null) {
-          //console.log("User exists BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
-          //console.log("result");
+        let userDatabase = userDb.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+        userDatabase.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).findOne({
+          user_id: userId
+        }, function(resultError, result) {
+          if (resultError) {
+            throw resultError;
+          }
           //console.log(result);
-          mongoClient.connect(mongoUrl, {
-            useUnifiedTopology: true
-          }, function(databaseToUpdateError, databaseToUpdate) {
-            if (databaseToUpdateError) {
-              throw databaseToUpdateError;
-            }
-            let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-            let dataToQuery = {
-              user_id: userId
-            };
-            let dataToUpdate = {
-              $set: {
+          //isNullDatabase = result;
+          if (result === null) {
+            //console.log("User doesn't exist AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            //
+            mongoClient.connect(mongoUrl, {
+              useUnifiedTopology: true
+            }, function(databaseToCreateError, databaseToCreate) {
+              if (databaseToCreateError) {
+                throw databaseToCreateError;
+              }
+              let userDatabaseToCreate = databaseToCreate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+              let dataToInsert = {
                 user_id: userId,
+
+                first_known_username: username,
+                first_known_display_name: displayName,
+                first_user_color: twitchUserColor,
+                first_username_to_ping: usernameToPing,
 
                 last_known_username: username,
                 last_known_display_name: displayName,
                 last_user_color: twitchUserColor,
                 last_username_to_ping: usernameToPing,
 
-                messages_sent: result.messages_sent + 1,
+                randomly_generated_color: randomColor,
 
-                //is_first_twitch_message: result.is_first_twitch_message,
-                //is_returning_chatter: result.is_returning_chatter,
+                messages_sent: 1,
+
                 is_first_twitch_message: isFirstTwitchMessage,
                 is_returning_chatter: isReturningChatter,
+
+                first_message_sent_id: messageId,
+                first_message_sent: originalMessage,
+                first_message_sent_at_timestamp: internalMessageTimestamp,
+                first_message_sent_at_iso_timestamp: internalMessageTimestampIsoString,
+                first_message_sent_at_twitch_timestamp: twitchMessageTimestamp,
+                first_message_sent_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+                first_message_length: originalMessage.length,
+                is_first_message_basic_input: false,
+                is_first_message_advanced_input: false,
+                first_basic_input: "",
+                first_advanced_input: "",
 
                 last_message_sent_id: messageId,
                 last_message_sent: originalMessage,
@@ -5699,814 +5319,1636 @@ async function onMessageHandler(target, tags, message, self) {
                 last_message_length: originalMessage.length,
                 is_last_message_basic_input: false,
                 is_last_message_advanced_input: false,
+                last_basic_input: "",
+                last_advanced_input: "",
 
-                shortest_message_sent_id: result.shortest_message_sent_id,
-                shortest_message_sent: result.shortest_message_sent,
-                shortest_message_sent_at_timestamp: result.shortest_message_sent_at_timestamp,
-                shortest_message_sent_at_iso_timestamp: result.shortest_message_sent_at_iso_timestamp,
-                shortest_message_sent_at_twitch_timestamp: result.shortest_message_sent_at_twitch_timestamp,
-                shortest_message_sent_at_twitch_iso_timestamp: result.shortest_message_sent_at_twitch_iso_timestamp,
-                shortest_message_length: result.shortest_message_length,
+                shortest_message_sent_id: messageId,
+                shortest_message_sent: originalMessage,
+                shortest_message_sent_at_timestamp: internalMessageTimestamp,
+                shortest_message_sent_at_iso_timestamp: internalMessageTimestampIsoString,
+                shortest_message_sent_at_twitch_timestamp: twitchMessageTimestamp,
+                shortest_message_sent_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+                shortest_message_length: originalMessage.length,
 
-                longest_message_sent_id: result.longest_message_sent_id,
-                longest_message_sent: result.longest_message_sent,
-                longest_message_sent_at_timestamp: result.longest_message_sent_at_timestamp,
-                longest_message_sent_at_iso_timestamp: result.longest_message_sent_at_iso_timestamp,
-                longest_message_sent_at_twitch_timestamp: result.longest_message_sent_at_twitch_timestamp,
-                longest_message_sent_at_twitch_iso_timestamp: result.longest_message_sent_at_twitch_iso_timestamp,
-                longest_message_length: result.longest_message_length,
+                longest_message_sent_id: messageId,
+                longest_message_sent: originalMessage,
+                longest_message_sent_at_timestamp: internalMessageTimestamp,
+                longest_message_sent_at_iso_timestamp: internalMessageTimestampIsoString,
+                longest_message_sent_at_twitch_timestamp: twitchMessageTimestamp,
+                longest_message_sent_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+                longest_message_length: originalMessage.length,
 
-                ban_count: result.ban_count,
-                strike_count: result.strike_count,
-                timeout_count: result.timeout_count,
-                message_deletion_count: result.message_deletion_count,
-                is_account_blacklisted: result.is_account_blacklisted,
-                is_first_message_spam_bot: result.is_first_message_spam_bot,
-                is_spam_bot: result.is_spam_bot
-              }
-            };
-            //console.log(dataToUpdate);
-            if (dataToUpdate.$set.is_returning_chatter === "" || dataToUpdate.$set.is_returning_chatter === null || dataToUpdate.$set.is_returning_chatter === undefined || dataToUpdate.$set.is_returning_chatter === "null" || dataToUpdate.$set.is_returning_chatter === "undefined") {
-              // Change this value in case user already exists but the user didn't have the value in their database entry
-              console.log("Changing dataToUpdate.$set.is_returning_chatter for user_id " + dataToUpdate.$set.user_id + " from " + dataToUpdate.$set.is_returning_chatter);
-              dataToUpdate.$set.is_returning_chatter = false;
-              console.log("To " + dataToUpdate.$set.is_returning_chatter);
-            }
-            if (dataToUpdate.$set.shortest_message_length > originalMessage.length) {
-              console.log("Shorter message");
-              dataToUpdate.$set.shortest_message_sent_id = messageId;
-              dataToUpdate.$set.shortest_message_sent = originalMessage;
-              dataToUpdate.$set.shortest_message_sent_at_timestamp = internalMessageTimestamp;
-              dataToUpdate.$set.shortest_message_sent_at_iso_timestamp = internalMessageTimestampIsoString;
-              dataToUpdate.$set.shortest_message_sent_at_twitch_timestamp = twitchMessageTimestamp;
-              dataToUpdate.$set.shortest_message_sent_at_twitch_iso_timestamp = twitchMessageTimestampIsoString;
-              dataToUpdate.$set.shortest_message_length = originalMessage.length;
-            }
-            if (dataToUpdate.$set.longest_message_length < originalMessage.length) {
-              console.log("Longer message");
-              dataToUpdate.$set.longest_message_sent_id = messageId;
-              dataToUpdate.$set.longest_message_sent = originalMessage;
-              dataToUpdate.$set.longest_message_sent_at_timestamp = internalMessageTimestamp;
-              dataToUpdate.$set.longest_message_sent_at_iso_timestamp = internalMessageTimestampIsoString;
-              dataToUpdate.$set.longest_message_sent_at_twitch_timestamp = twitchMessageTimestamp;
-              dataToUpdate.$set.longest_message_sent_at_twitch_iso_timestamp = twitchMessageTimestampIsoString;
-              dataToUpdate.$set.longest_message_length = originalMessage.length;
-            }
-            if (dataToUpdate.$set.is_first_message_spam_bot == true) {
-              console.log("IS THIS THING WORKING 1");
-              if (dataToUpdate.$set.strike_count >= 0) {
-                console.log("IS THIS THING WORKING 2");
-                if (isFirstMessageSpam == true) {
-                  console.log("IS THIS THING WORKING 3");
-                  dataToUpdate.$set.strike_count = dataToUpdate.$set.strike_count + 1;
-                }
-              }
-            }
-            if (dataToUpdate.$set.is_first_message_spam_bot == true) {
-              console.log("IS THIS THING WORKING 4");
-              if (dataToUpdate.$set.messages_sent < 3) {
-                console.log("IS THIS THING WORKING 5");
-                if (dataToUpdate.$set.strike_count < 3) {
-                  console.log("IS THIS THING WORKING 6");
-                  if (dataToUpdate.$set.strike_count != dataToUpdate.$set.messages_sent) {
-                    console.log("IS THIS THING WORKING 7");
-                    dataToUpdate.$set.is_first_message_spam_bot = false;
+                basic_inputs_sent: 0,
+                advanced_inputs_sent: 0,
+                total_inputs_sent: 0,
+                ban_count: 0,
+                strike_count: 0,
+                timeout_count: 0,
+                message_deletion_count: 0,
+                is_account_blacklisted: false,
+                is_banned: false,
+                is_first_message_spam_bot: isFirstMessageSpam,
+                is_spam_bot: isSingleMessageSpamBot
+              };
+              if (isFirstMessageSpam == false) {
+                if (dataToInsert.first_message_sent_id == dataToInsert.last_message_sent_id) {
+                  if (doesMessageHaveTooManyUpperCaseLetters == true) {
+                    dataToInsert.timeout_count = dataToInsert.timeout_count + 1;
+                  }
+                  if (dataToInsert.first_message_length >= globalConfig.long_message_length) {
+                    if (globalConfig.permaban_if_first_message_is_long == true) {
+                      dataToInsert.ban_count = dataToInsert.ban_count + 1;
+                      //dataToInsert.is_account_blacklisted = true;
+                      dataToInsert.is_banned = true;
+                    }
+                    if (globalConfig.permaban_if_first_message_is_long == false) {
+                      dataToInsert.timeout_count = dataToInsert.timeout_count + 1;
+                    }
                   }
                 }
               }
-            }
-            if (dataToUpdate.$set.is_first_message_spam_bot == true) {
-              console.log("IS THIS THING WORKING 8");
-              if (dataToUpdate.$set.messages_sent >= 3) {
-                console.log("IS THIS THING WORKING 9");
-                if (dataToUpdate.$set.strike_count >= 3) {
-                  console.log("IS THIS THING WORKING 10");
-                  if (dataToUpdate.$set.strike_count == dataToUpdate.$set.messages_sent) {
-                    console.log("IS THIS THING WORKING 11");
-                    dataToUpdate.$set.ban_count = dataToUpdate.$set.ban_count + 1;
-                    dataToUpdate.$set.is_spam_bot = true;
-                    dataToUpdate.$set.is_account_blacklisted = true;
-                    dataToUpdate.$set.is_banned = true;
-                  }
+              if (slurDetection == true) {
+                if (globalConfig.permaban_when_slur_is_detected == true) {
+                  dataToInsert.strike_count = dataToInsert.strike_count + 1;
+                  dataToInsert.ban_count = dataToInsert.ban_count + 1;
+                  dataToInsert.is_account_blacklisted = true;
+                  dataToInsert.is_banned = true;
+                }
+                if (globalConfig.permaban_when_slur_is_detected == false) {
+                  dataToInsert.strike_count = dataToInsert.strike_count + 1;
+                  dataToInsert.timeout_count = dataToInsert.timeout_count + 1;
                 }
               }
-            }
-            if (slurDetection == true) {
-              if (globalConfig.permaban_when_slur_is_detected == true) {
-                dataToUpdate.$set.strike_count = dataToUpdate.$set.strike_count + 1;
-                dataToUpdate.$set.ban_count = dataToUpdate.$set.ban_count + 1;
-                dataToUpdate.$set.is_account_blacklisted = true;
-                dataToUpdate.$set.is_banned = true;
+              if (isFirstMessageSpam == true) {
+                dataToInsert.strike_count = dataToInsert.strike_count + 1;
               }
-              if (globalConfig.permaban_when_slur_is_detected == false) {
-                dataToUpdate.$set.strike_count = dataToUpdate.$set.strike_count + 1;
-                dataToUpdate.$set.timeout_count = dataToUpdate.$set.timeout_count + 1;
+              if (isSingleMessageSpamBot == true) {
+                dataToInsert.ban_count = dataToInsert.ban_count + 1;
+                dataToInsert.is_account_blacklisted = true;
+                dataToInsert.is_banned = true;
               }
-            }
-            if (dataToUpdate.$set.is_account_blacklisted == true) {
-              dataToUpdate.$set.message_deletion_count = dataToUpdate.$set.message_deletion_count + 1;
-            }
-            //console.log("dataToUpdate");
-            //console.log(dataToUpdate);
-            //console.log(newvalues);
-            userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
-              if (resError) {
-                throw resError;
+              if (dataToInsert.is_account_blacklisted == true) {
+                dataToInsert.message_deletion_count = dataToInsert.message_deletion_count + 1;
               }
-              //console.log(res.result);
-              //console.log("1 document updated");
-              mongoClient.connect(mongoUrl, {
-                useUnifiedTopology: true
-              }, function(databaseToReadFromError, databaseToReadFrom) {
-                if (databaseToReadFromError) {
-                  throw databaseToReadFromError;
+              /*
+              if (checkBigFollowsSpamBot == true) {
+                dataToInsert = {
+                  user_id: userId,
+                  messages_sent: 1,
+                  input_count: 0,
+                  ban_count: 1,
+                  is_spam_bot: true
+                };
+              }
+              if (checkBigFollowsSpamBot == false) {
+                dataToInsert = {
+                  user_id: userId,
+                  messages_sent: 1,
+                  input_count: 0,
+                  ban_count: 0,
+                  is_spam_bot: false
+                };
+              }
+              */
+              userDatabaseToCreate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).insertOne(dataToInsert, function(resError, res) {
+                if (resError) {
+                  throw resError;
                 }
-                let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
-                userDatabaseToReadFrom.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).findOne({
-                  user_id: userId
-                }, function(databaseToReadFromResultError, databaseToReadFromResult) {
-                  if (databaseToReadFromResultError) {
-                    throw databaseToReadFromResultError;
+                //console.log("1 document inserted");
+                mongoClient.connect(mongoUrl, {
+                  useUnifiedTopology: true
+                }, function(databaseToReadFromError, databaseToReadFrom) {
+                  if (databaseToReadFromError) {
+                    throw databaseToReadFromError;
                   }
-                  databaseToReadFrom.close();
-                  //console.log("databaseToReadFromResult");
-                  //console.log(databaseToReadFromResult);
-                  if (databaseToReadFromResult.last_user_color == null || databaseToReadFromResult.last_user_color == undefined) {
-                    // This block picks the randomly generated color that was saved in the database when the user was first added to the database, and hopefully applies this color instead of using the hardcoded default color
-                    userColor = databaseToReadFromResult.randomly_generated_color;
-                  }
-                  if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
-                    console.log("New user successfully added to database B");
-                    if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == false) {
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                  let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+                  userDatabaseToReadFrom.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).findOne({
+                    user_id: userId
+                  }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                    if (databaseToReadFromResultError) {
+                      throw databaseToReadFromResultError;
+                    }
+                    databaseToReadFrom.close();
+                    //console.log("databaseToReadFromResult");
+                    //console.log(databaseToReadFromResult);
+                    if (databaseToReadFromResult.last_user_color == null || databaseToReadFromResult.last_user_color == undefined) {
+                      // This block picks the randomly generated color that was saved in the database when the user was first added to the database, and hopefully applies this color instead of using the hardcoded default color
+                      userColor = databaseToReadFromResult.randomly_generated_color;
+                    }
+                    if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
+                      console.log("New user successfully added to database A");
+                      if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == false) {
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
                       }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users, databaseToReadFromResult.last_message_sent_id);
+                      if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == true) {
+                        helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
+                        let sendHelpMessageToNewUsers = false;
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        if (sendHelpMessageToNewUsers == true) {
+                          if (inputMode == 0) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, basicHelpMessageToSend);
+                              }
+                            }
+                          }
+                          if (inputMode == 2) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, advancedHelpMessageToSend);
+                              }
+                            }
+                          }
+                        }
                       }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                      if (globalConfig.send_introductory_messages_to_new_users == false && globalConfig.send_help_messages_to_new_users == true) {
+                        helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
+                        let sendHelpMessageToNewUsers = false;
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        if (sendHelpMessageToNewUsers == true) {
+                          if (inputMode == 0) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, basicHelpMessageToSend);
+                              }
+                            }
+                          }
+                          if (inputMode == 2) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, advancedHelpMessageToSend);
+                              }
+                            }
+                          }
+                        }
                       }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                      if (chatConfig.send_debug_channel_messages == true) {
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER A] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target);
                       }
                     }
-                    if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == true) {
-                      helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
-                      let sendHelpMessageToNewUsers = false;
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (sendHelpMessageToNewUsers == true) {
-                        if (inputMode == 0) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, basicHelpMessageToSend);
-                            }
-                          }
+                    if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
+                      //console.log("First message ID is different from last message ID A");
+                      if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == false) {
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          console.log("Do not send message here A");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
                         }
-                        if (inputMode == 2) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, advancedHelpMessageToSend);
-                            }
-                          }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          console.log("Do not send message here B");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          console.log("Do not send message here C");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          console.log("Do not send message here D");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          console.log("Do not send message here E");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          console.log("Do not send message here F");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
                         }
                       }
-                    }
-                    if (globalConfig.send_introductory_messages_to_new_users == false && globalConfig.send_help_messages_to_new_users == true) {
-                      helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
-                      let sendHelpMessageToNewUsers = false;
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (sendHelpMessageToNewUsers == true) {
-                        if (inputMode == 0) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, basicHelpMessageToSend);
+                      if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == true) {
+                        helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
+                        let sendHelpMessageToNewUsers = false;
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          console.log("Do not send message here A");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          console.log("Do not send message here B");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          console.log("Do not send message here C");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          console.log("Do not send message here D");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          console.log("Do not send message here E");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          console.log("Do not send message here F");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (sendHelpMessageToNewUsers == true) {
+                          if (inputMode == 0) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, basicHelpMessageToSend);
+                              }
                             }
                           }
-                        }
-                        if (inputMode == 2) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, advancedHelpMessageToSend);
+                          if (inputMode == 2) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, advancedHelpMessageToSend);
+                              }
                             }
                           }
                         }
                       }
-                    }
-                    if (chatConfig.send_debug_channel_messages == true) {
-                      //console.log("chatConfig.debug_channel = " + chatConfig.debug_channel);
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER B] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target);
-                    }
-                  }
-                  if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
-                    console.log("First message ID is different from last message ID B");
-                    if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == false) {
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        console.log("Do not send message here G");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        console.log("Do not send message here H");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        console.log("Do not send message here I");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        console.log("Do not send message here J");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        console.log("Do not send message here K");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        console.log("Do not send message here L");
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
-                      }
-                    }
-                    if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == true) {
-                      helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
-                      let sendHelpMessageToNewUsers = false;
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        console.log("Do not send message here G");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        console.log("Do not send message here H");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        console.log("Do not send message here I");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        console.log("Do not send message here J");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        console.log("Do not send message here K");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        console.log("Do not send message here L");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (sendHelpMessageToNewUsers == true) {
-                        if (inputMode == 0) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, basicHelpMessageToSend);
+                      if (globalConfig.send_introductory_messages_to_new_users == false && globalConfig.send_help_messages_to_new_users == true) {
+                        helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
+                        let sendHelpMessageToNewUsers = false;
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          console.log("Do not send message here A");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          console.log("Do not send message here B");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          console.log("Do not send message here C");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          console.log("Do not send message here D");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          console.log("Do not send message here E");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          console.log("Do not send message here F");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (sendHelpMessageToNewUsers == true) {
+                          if (inputMode == 0) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, basicHelpMessageToSend);
+                              }
                             }
                           }
-                        }
-                        if (inputMode == 2) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, advancedHelpMessageToSend);
+                          if (inputMode == 2) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, advancedHelpMessageToSend);
+                              }
                             }
                           }
                         }
                       }
                     }
-                    if (globalConfig.send_introductory_messages_to_new_users == false && globalConfig.send_help_messages_to_new_users == true) {
-                      helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
-                      let sendHelpMessageToNewUsers = false;
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
-                        console.log("Do not send message here G");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
-                        console.log("Do not send message here H");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        console.log("Do not send message here I");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
-                        console.log("Do not send message here J");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
-                        console.log("Do not send message here K");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      /*
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        console.log("Do not send message here L");
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      */
-                      if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
-                        sendHelpMessageToNewUsers = true;
-                        //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (sendHelpMessageToNewUsers == true) {
-                        if (inputMode == 0) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, basicHelpMessageToSend);
-                            }
-                          }
-                        }
-                        if (inputMode == 2) {
-                          for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
-                            let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
-                            advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
-                            if (helpMessageIndex == 0) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
-                            }
-                            if (helpMessageIndex != 0) {
-                              client.action(target, advancedHelpMessageToSend);
-                            }
-                          }
+                    if (databaseToReadFromResult.is_account_blacklisted == true) {
+                      if (databaseToReadFromResult.is_banned == false) {
+                        if (globalConfig.enable_silent_timeout == true) {
+                          //console.log("Silently timeout or delete message");
+                          deleteTwitchMessage(roomId, databaseToReadFromResult.last_message_sent_id, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                          logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
+                          logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
+                          banTwitchUser(roomId, databaseToReadFromResult.user_id, 1, null, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                          logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", 1, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Silent Timeout.", new Date().getTime());
+                          logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", 1, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Silent Timeout.", new Date().getTime());
                         }
                       }
                     }
-                  }
-                  if (databaseToReadFromResult.is_account_blacklisted == true) {
-                    if (databaseToReadFromResult.is_banned == false) {
-                      if (globalConfig.enable_silent_timeout == true) {
-                        //console.log("Silently timeout or delete message");
-                        deleteTwitchMessage(roomId, databaseToReadFromResult.last_message_sent_id, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                        logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
-                        logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
-                        banTwitchUser(roomId, databaseToReadFromResult.user_id, 1, null, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                        logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", 1, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Silent Timeout.", new Date().getTime());
-                        logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", 1, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Silent Timeout.", new Date().getTime());
-                      }
-                    }
-                  }
-                  if (databaseToReadFromResult.is_account_blacklisted == false) {
-                    if (databaseToReadFromResult.is_spam_bot == false) {
-                      if (databaseToReadFromResult.last_message_length >= globalConfig.long_message_length) {
-                        // This should never happen
-                        console.log("First message is too long, do something about it B");
-                        if (globalConfig.timeout_if_message_is_long == true) {
-                          /*
-                          //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, message too long.", new Date().getTime());
-                          logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, message too long.", new Date().getTime());
-                          if (globalConfig.send_messages_to_moderated_user == true) {
-                            client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", databaseToReadFromResult.last_message_sent_id);
-                          }
-                          if (globalConfig.send_whispers_to_moderated_user == true) {
-                            sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          }
-                          if (chatConfig.send_debug_channel_messages == true) {
-                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, message too long.");
-                          }
-                          */
-                        }
-                        if (globalConfig.timeout_if_message_is_long == false) {
-                          // For now idk if timeout/delete or not when a message is too long, so I settled for just an in chat warning. It'll obviously happen again and again if the user keeps sending long messages. Not a good way to moderate but it's there just in case.
-                          //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          //banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          //logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, message too long.", new Date().getTime());
-                          //logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, message too long.", new Date().getTime());
-                          if (globalConfig.send_messages_to_moderated_user == true) {
-                            //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", databaseToReadFromResult.last_message_sent_id);
-                          }
-                          if (globalConfig.warn_if_message_is_long == true) {
+                    if (databaseToReadFromResult.is_account_blacklisted == false) {
+                      if (databaseToReadFromResult.is_spam_bot == false) {
+                        if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
+                          if (databaseToReadFromResult.first_message_length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                            //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                            banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                            logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.", new Date().getTime());
+                            logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.", new Date().getTime());
                             if (globalConfig.send_messages_to_moderated_user == true) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " Your message is too long, please calm down!", databaseToReadFromResult.last_message_sent_id);
+                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", databaseToReadFromResult.last_message_sent_id);
+                            }
+                            if (globalConfig.send_whispers_to_moderated_user == true) {
+                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                            }
+                            if (chatConfig.send_debug_channel_messages == true) {
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.");
+                            }
+                          }
+                          if (databaseToReadFromResult.first_message_length >= globalConfig.long_message_length) {
+                            //console.log("First message is too long, do something about it A");
+                            if (globalConfig.permaban_if_first_message_is_long == true) {
+                              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.", new Date().getTime());
+                              logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.", new Date().getTime());
+                              if (globalConfig.send_messages_to_moderated_user == true) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (globalConfig.send_whispers_to_moderated_user == true) {
+                                sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                                sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              }
+                              if (chatConfig.send_debug_channel_messages == true) {
+                                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.");
+                              }
+                            }
+                            if (globalConfig.permaban_if_first_message_is_long == false) {
+                              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.", new Date().getTime());
+                              logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.", new Date().getTime());
+                              if (globalConfig.send_messages_to_moderated_user == true) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (globalConfig.send_whispers_to_moderated_user == true) {
+                                sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                                sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              }
+                              if (chatConfig.send_debug_channel_messages == true) {
+                                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.");
+                              }
                             }
                           }
                         }
                       }
                     }
+                    if (databaseToReadFromResult.is_spam_bot == true) {
+                      console.log("BAN THAT MOTHERFUCKER");
+                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                      banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                      logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
+                      logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
+                      if (globalConfig.send_messages_to_moderated_user == true) {
+                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot.", databaseToReadFromResult.last_message_sent_id);
+                      }
+                      if (globalConfig.send_whispers_to_moderated_user == true) {
+                        sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                      }
+                      if (chatConfig.send_debug_channel_messages == true) {
+                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
+                      }
+                    }
+                    if (databaseToReadFromResult.is_first_message_spam_bot == true) {
+                      console.log("Keep an eye on this user");
+                    }
+                    if (slurDetection == true) {
+                      if (globalConfig.permaban_when_slur_is_detected == true) {
+                        // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "ou were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.", new Date().getTime());
+                        logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "ou were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.", new Date().getTime());
+                        if (globalConfig.send_messages_to_moderated_user == true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (globalConfig.send_whispers_to_moderated_user == true) {
+                          sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        }
+                        if (chatConfig.send_debug_channel_messages == true) {
+                          client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.");
+                        }
+                      }
+                      if (globalConfig.permaban_when_slur_is_detected == false) {
+                        // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.", new Date().getTime());
+                        logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.", new Date().getTime());
+                        if (globalConfig.send_messages_to_moderated_user == true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (globalConfig.send_whispers_to_moderated_user == true) {
+                          sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        }
+                        if (chatConfig.send_debug_channel_messages == true) {
+                          client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.");
+                        }
+                      }
+                    }
+                  });
+                });
+                databaseToCreate.close();
+              });
+            });
+            //
+            //test();
+          }
+          if (result !== null) {
+            //console.log("User exists BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+            //console.log("result");
+            //console.log(result);
+            mongoClient.connect(mongoUrl, {
+              useUnifiedTopology: true
+            }, function(databaseToUpdateError, databaseToUpdate) {
+              if (databaseToUpdateError) {
+                throw databaseToUpdateError;
+              }
+              let userDatabaseToUpdate = databaseToUpdate.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+              let dataToQuery = {
+                user_id: userId
+              };
+              let dataToUpdate = {
+                $set: {
+                  user_id: userId,
+
+                  last_known_username: username,
+                  last_known_display_name: displayName,
+                  last_user_color: twitchUserColor,
+                  last_username_to_ping: usernameToPing,
+
+                  messages_sent: result.messages_sent + 1,
+
+                  //is_first_twitch_message: result.is_first_twitch_message,
+                  //is_returning_chatter: result.is_returning_chatter,
+                  is_first_twitch_message: isFirstTwitchMessage,
+                  is_returning_chatter: isReturningChatter,
+
+                  last_message_sent_id: messageId,
+                  last_message_sent: originalMessage,
+                  last_message_sent_at_timestamp: internalMessageTimestamp,
+                  last_message_sent_at_iso_timestamp: internalMessageTimestampIsoString,
+                  last_message_sent_at_twitch_timestamp: twitchMessageTimestamp,
+                  last_message_sent_at_twitch_iso_timestamp: twitchMessageTimestampIsoString,
+                  last_message_length: originalMessage.length,
+                  is_last_message_basic_input: false,
+                  is_last_message_advanced_input: false,
+
+                  shortest_message_sent_id: result.shortest_message_sent_id,
+                  shortest_message_sent: result.shortest_message_sent,
+                  shortest_message_sent_at_timestamp: result.shortest_message_sent_at_timestamp,
+                  shortest_message_sent_at_iso_timestamp: result.shortest_message_sent_at_iso_timestamp,
+                  shortest_message_sent_at_twitch_timestamp: result.shortest_message_sent_at_twitch_timestamp,
+                  shortest_message_sent_at_twitch_iso_timestamp: result.shortest_message_sent_at_twitch_iso_timestamp,
+                  shortest_message_length: result.shortest_message_length,
+
+                  longest_message_sent_id: result.longest_message_sent_id,
+                  longest_message_sent: result.longest_message_sent,
+                  longest_message_sent_at_timestamp: result.longest_message_sent_at_timestamp,
+                  longest_message_sent_at_iso_timestamp: result.longest_message_sent_at_iso_timestamp,
+                  longest_message_sent_at_twitch_timestamp: result.longest_message_sent_at_twitch_timestamp,
+                  longest_message_sent_at_twitch_iso_timestamp: result.longest_message_sent_at_twitch_iso_timestamp,
+                  longest_message_length: result.longest_message_length,
+
+                  ban_count: result.ban_count,
+                  strike_count: result.strike_count,
+                  timeout_count: result.timeout_count,
+                  message_deletion_count: result.message_deletion_count,
+                  is_account_blacklisted: result.is_account_blacklisted,
+                  is_first_message_spam_bot: result.is_first_message_spam_bot,
+                  is_spam_bot: result.is_spam_bot
+                }
+              };
+              //console.log(dataToUpdate);
+              if (dataToUpdate.$set.is_returning_chatter === "" || dataToUpdate.$set.is_returning_chatter === null || dataToUpdate.$set.is_returning_chatter === undefined || dataToUpdate.$set.is_returning_chatter === "null" || dataToUpdate.$set.is_returning_chatter === "undefined") {
+                // Change this value in case user already exists but the user didn't have the value in their database entry
+                console.log("Changing dataToUpdate.$set.is_returning_chatter for user_id " + dataToUpdate.$set.user_id + " from " + dataToUpdate.$set.is_returning_chatter);
+                dataToUpdate.$set.is_returning_chatter = false;
+                console.log("To " + dataToUpdate.$set.is_returning_chatter);
+              }
+              if (dataToUpdate.$set.shortest_message_length > originalMessage.length) {
+                console.log("Shorter message");
+                dataToUpdate.$set.shortest_message_sent_id = messageId;
+                dataToUpdate.$set.shortest_message_sent = originalMessage;
+                dataToUpdate.$set.shortest_message_sent_at_timestamp = internalMessageTimestamp;
+                dataToUpdate.$set.shortest_message_sent_at_iso_timestamp = internalMessageTimestampIsoString;
+                dataToUpdate.$set.shortest_message_sent_at_twitch_timestamp = twitchMessageTimestamp;
+                dataToUpdate.$set.shortest_message_sent_at_twitch_iso_timestamp = twitchMessageTimestampIsoString;
+                dataToUpdate.$set.shortest_message_length = originalMessage.length;
+              }
+              if (dataToUpdate.$set.longest_message_length < originalMessage.length) {
+                console.log("Longer message");
+                dataToUpdate.$set.longest_message_sent_id = messageId;
+                dataToUpdate.$set.longest_message_sent = originalMessage;
+                dataToUpdate.$set.longest_message_sent_at_timestamp = internalMessageTimestamp;
+                dataToUpdate.$set.longest_message_sent_at_iso_timestamp = internalMessageTimestampIsoString;
+                dataToUpdate.$set.longest_message_sent_at_twitch_timestamp = twitchMessageTimestamp;
+                dataToUpdate.$set.longest_message_sent_at_twitch_iso_timestamp = twitchMessageTimestampIsoString;
+                dataToUpdate.$set.longest_message_length = originalMessage.length;
+              }
+              if (dataToUpdate.$set.is_first_message_spam_bot == true) {
+                console.log("IS THIS THING WORKING 1");
+                if (dataToUpdate.$set.strike_count >= 0) {
+                  console.log("IS THIS THING WORKING 2");
+                  if (isFirstMessageSpam == true) {
+                    console.log("IS THIS THING WORKING 3");
+                    dataToUpdate.$set.strike_count = dataToUpdate.$set.strike_count + 1;
                   }
-                  if (databaseToReadFromResult.is_account_blacklisted == false) {
-                    if (databaseToReadFromResult.is_spam_bot == false) {
-                      if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
-                        if (databaseToReadFromResult.first_message_length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
-                          //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.", new Date().getTime());
-                          logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.", new Date().getTime());
-                          if (globalConfig.send_messages_to_moderated_user == true) {
-                            client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", databaseToReadFromResult.last_message_sent_id);
+                }
+              }
+              if (dataToUpdate.$set.is_first_message_spam_bot == true) {
+                console.log("IS THIS THING WORKING 4");
+                if (dataToUpdate.$set.messages_sent < 3) {
+                  console.log("IS THIS THING WORKING 5");
+                  if (dataToUpdate.$set.strike_count < 3) {
+                    console.log("IS THIS THING WORKING 6");
+                    if (dataToUpdate.$set.strike_count != dataToUpdate.$set.messages_sent) {
+                      console.log("IS THIS THING WORKING 7");
+                      dataToUpdate.$set.is_first_message_spam_bot = false;
+                    }
+                  }
+                }
+              }
+              if (dataToUpdate.$set.is_first_message_spam_bot == true) {
+                console.log("IS THIS THING WORKING 8");
+                if (dataToUpdate.$set.messages_sent >= 3) {
+                  console.log("IS THIS THING WORKING 9");
+                  if (dataToUpdate.$set.strike_count >= 3) {
+                    console.log("IS THIS THING WORKING 10");
+                    if (dataToUpdate.$set.strike_count == dataToUpdate.$set.messages_sent) {
+                      console.log("IS THIS THING WORKING 11");
+                      dataToUpdate.$set.ban_count = dataToUpdate.$set.ban_count + 1;
+                      dataToUpdate.$set.is_spam_bot = true;
+                      dataToUpdate.$set.is_account_blacklisted = true;
+                      dataToUpdate.$set.is_banned = true;
+                    }
+                  }
+                }
+              }
+              if (slurDetection == true) {
+                if (globalConfig.permaban_when_slur_is_detected == true) {
+                  dataToUpdate.$set.strike_count = dataToUpdate.$set.strike_count + 1;
+                  dataToUpdate.$set.ban_count = dataToUpdate.$set.ban_count + 1;
+                  dataToUpdate.$set.is_account_blacklisted = true;
+                  dataToUpdate.$set.is_banned = true;
+                }
+                if (globalConfig.permaban_when_slur_is_detected == false) {
+                  dataToUpdate.$set.strike_count = dataToUpdate.$set.strike_count + 1;
+                  dataToUpdate.$set.timeout_count = dataToUpdate.$set.timeout_count + 1;
+                }
+              }
+              if (dataToUpdate.$set.is_account_blacklisted == true) {
+                dataToUpdate.$set.message_deletion_count = dataToUpdate.$set.message_deletion_count + 1;
+              }
+              //console.log("dataToUpdate");
+              //console.log(dataToUpdate);
+              //console.log(newvalues);
+              userDatabaseToUpdate.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).updateOne(dataToQuery, dataToUpdate, function(resError, res) {
+                if (resError) {
+                  throw resError;
+                }
+                //console.log(res.result);
+                //console.log("1 document updated");
+                mongoClient.connect(mongoUrl, {
+                  useUnifiedTopology: true
+                }, function(databaseToReadFromError, databaseToReadFrom) {
+                  if (databaseToReadFromError) {
+                    throw databaseToReadFromError;
+                  }
+                  let userDatabaseToReadFrom = databaseToReadFrom.db(globalConfig.main_database_name.replace(/({{channel_id}})+/ig, roomId));
+                  userDatabaseToReadFrom.collection(globalConfig.chatters_collection_name.replace(/({{channel_id}})+/ig, roomId)).findOne({
+                    user_id: userId
+                  }, function(databaseToReadFromResultError, databaseToReadFromResult) {
+                    if (databaseToReadFromResultError) {
+                      throw databaseToReadFromResultError;
+                    }
+                    databaseToReadFrom.close();
+                    //console.log("databaseToReadFromResult");
+                    //console.log(databaseToReadFromResult);
+                    if (databaseToReadFromResult.last_user_color == null || databaseToReadFromResult.last_user_color == undefined) {
+                      // This block picks the randomly generated color that was saved in the database when the user was first added to the database, and hopefully applies this color instead of using the hardcoded default color
+                      userColor = databaseToReadFromResult.randomly_generated_color;
+                    }
+                    if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
+                      console.log("New user successfully added to database B");
+                      if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == false) {
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                      }
+                      if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == true) {
+                        helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
+                        let sendHelpMessageToNewUsers = false;
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (sendHelpMessageToNewUsers == true) {
+                          if (inputMode == 0) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, basicHelpMessageToSend);
+                              }
+                            }
                           }
-                          if (globalConfig.send_whispers_to_moderated_user == true) {
-                            sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          }
-                          if (chatConfig.send_debug_channel_messages == true) {
-                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.");
+                          if (inputMode == 2) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, advancedHelpMessageToSend);
+                              }
+                            }
                           }
                         }
-                        if (databaseToReadFromResult.first_message_length >= globalConfig.long_message_length) {
+                      }
+                      if (globalConfig.send_introductory_messages_to_new_users == false && globalConfig.send_help_messages_to_new_users == true) {
+                        helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
+                        let sendHelpMessageToNewUsers = false;
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (sendHelpMessageToNewUsers == true) {
+                          if (inputMode == 0) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, basicHelpMessageToSend);
+                              }
+                            }
+                          }
+                          if (inputMode == 2) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, advancedHelpMessageToSend);
+                              }
+                            }
+                          }
+                        }
+                      }
+                      if (chatConfig.send_debug_channel_messages == true) {
+                        //console.log("chatConfig.debug_channel = " + chatConfig.debug_channel);
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [NEW USER B] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target);
+                      }
+                    }
+                    if (databaseToReadFromResult.first_message_sent_id != databaseToReadFromResult.last_message_sent_id) {
+                      //console.log("First message ID is different from last message ID B");
+                      if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == false) {
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          console.log("Do not send message here G");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          console.log("Do not send message here H");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          console.log("Do not send message here I");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          console.log("Do not send message here J");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          console.log("Do not send message here K");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          console.log("Do not send message here L");
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users, databaseToReadFromResult.last_message_sent_id);
+                        }
+                      }
+                      if (globalConfig.send_introductory_messages_to_new_users == true && globalConfig.send_help_messages_to_new_users == true) {
+                        helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
+                        let sendHelpMessageToNewUsers = false;
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          console.log("Do not send message here G");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          console.log("Do not send message here H");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          console.log("Do not send message here I");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          console.log("Do not send message here J");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          console.log("Do not send message here K");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          console.log("Do not send message here L");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (sendHelpMessageToNewUsers == true) {
+                          if (inputMode == 0) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, basicHelpMessageToSend);
+                              }
+                            }
+                          }
+                          if (inputMode == 2) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, advancedHelpMessageToSend);
+                              }
+                            }
+                          }
+                        }
+                      }
+                      if (globalConfig.send_introductory_messages_to_new_users == false && globalConfig.send_help_messages_to_new_users == true) {
+                        helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
+                        let sendHelpMessageToNewUsers = false;
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === false) {
+                          console.log("Do not send message here G");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_returning_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === false) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === true) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === null) {
+                          console.log("Do not send message here H");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === null) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          console.log("Do not send message here I");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === undefined) {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "") {
+                          console.log("Do not send message here J");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "null") {
+                          console.log("Do not send message here K");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "null") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        /*
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === false && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          console.log("Do not send message here L");
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        */
+                        if (databaseToReadFromResult.is_spam_bot === false && databaseToReadFromResult.is_account_blacklisted === false && databaseToReadFromResult.is_banned === false && databaseToReadFromResult.is_first_twitch_message === true && databaseToReadFromResult.is_returning_chatter === "undefined") {
+                          sendHelpMessageToNewUsers = true;
+                          //client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + globalConfig.introductory_message_to_new_users_with_help_messages, databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (sendHelpMessageToNewUsers == true) {
+                          if (inputMode == 0) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let basicHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              basicHelpMessageToSend = basicHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + basicHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, basicHelpMessageToSend);
+                              }
+                            }
+                          }
+                          if (inputMode == 2) {
+                            for (let helpMessageIndex = 0; helpMessageIndex < helpMessageAdvanced.length; helpMessageIndex++) {
+                              let advancedHelpMessageToSend = helpMessageAdvanced[helpMessageIndex];
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit}})+/ig, controllerConfig.time_unit);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_alternate}})+/ig, controllerConfig.time_unit_alternate);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{time_unit_short}})+/ig, controllerConfig.time_unit_short);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{normal_delay}})+/ig, controllerConfig.normal_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{default_duration_per_precision_input_millis}})+/ig, controllerConfig.default_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_delay}})+/ig, controllerConfig.max_delay);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_times_to_repeat_macro}})+/ig, controllerConfig.max_times_to_repeat_macro);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{advanced_input_macros_allowed}})+/ig, controllerConfig.advanced_input_macros_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{max_duration_per_precision_input_millis}})+/ig, controllerConfig.max_duration_per_precision_input_millis);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_basic_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_basic_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{simultaneous_different_advanced_buttons_allowed}})+/ig, controllerConfig.simultaneous_different_advanced_buttons_allowed);
+                              advancedHelpMessageToSend = advancedHelpMessageToSend.replace(/({{frame_rate}})+/ig, frameRateToDisplay);
+                              if (helpMessageIndex == 0) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " " + advancedHelpMessageToSend, databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (helpMessageIndex != 0) {
+                                client.action(target, advancedHelpMessageToSend);
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    if (databaseToReadFromResult.is_account_blacklisted == true) {
+                      if (databaseToReadFromResult.is_banned == false) {
+                        if (globalConfig.enable_silent_timeout == true) {
+                          //console.log("Silently timeout or delete message");
+                          deleteTwitchMessage(roomId, databaseToReadFromResult.last_message_sent_id, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                          logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
+                          logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
+                          banTwitchUser(roomId, databaseToReadFromResult.user_id, 1, null, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                          logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", 1, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Silent Timeout.", new Date().getTime());
+                          logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", 1, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Silent Timeout.", new Date().getTime());
+                        }
+                      }
+                    }
+                    if (databaseToReadFromResult.is_account_blacklisted == false) {
+                      if (databaseToReadFromResult.is_spam_bot == false) {
+                        if (databaseToReadFromResult.last_message_length >= globalConfig.long_message_length) {
                           // This should never happen
-                          console.log("First message is too long, do something about it C");
-                          if (globalConfig.permaban_if_first_message_is_long == true) {
+                          console.log("Message is too long, do something about it B");
+                          if (globalConfig.timeout_if_message_is_long == false) {
+                            /*
                             //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
                             banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.", new Date().getTime());
-                            logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.", new Date().getTime());
+                            logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, message too long.", new Date().getTime());
+                            logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, message too long.", new Date().getTime());
                             if (globalConfig.send_messages_to_moderated_user == true) {
                               client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", databaseToReadFromResult.last_message_sent_id);
                             }
@@ -6515,116 +6957,181 @@ async function onMessageHandler(target, tags, message, self) {
                               sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
                             }
                             if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.");
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, message too long.");
+                            }
+                            */
+                            if (globalConfig.warn_if_message_is_long == true) {
+                              if (globalConfig.send_messages_to_moderated_user == true) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " Your message is too long, please calm down!", databaseToReadFromResult.last_message_sent_id);
+                              }
                             }
                           }
-                          if (globalConfig.permaban_if_first_message_is_long == false) {
+                          if (globalConfig.timeout_if_message_is_long == true) {
+                            // For now idk if timeout/delete or not when a message is too long, so I settled for just an in chat warning. It'll obviously happen again and again if the user keeps sending long messages. Not a good way to moderate but it's there just in case.
                             //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.", new Date().getTime());
-                            logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.", new Date().getTime());
+                            banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                            logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, message too long.", new Date().getTime());
+                            logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, message too long.", new Date().getTime());
                             if (globalConfig.send_messages_to_moderated_user == true) {
-                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", databaseToReadFromResult.last_message_sent_id);
+                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down!", databaseToReadFromResult.last_message_sent_id);
                             }
                             if (globalConfig.send_whispers_to_moderated_user == true) {
-                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your message is too long, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
                               sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
                             }
                             if (chatConfig.send_debug_channel_messages == true) {
-                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.");
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, message too long.");
                             }
                           }
                         }
                       }
                     }
-                  }
-                  if (databaseToReadFromResult.is_spam_bot == true) {
-                    // this should never happen tho lol
-                    console.log("BAN THAT MOTHERFUCKER AGAIN");
-                    //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                    banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                    logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
-                    logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
-                    if (globalConfig.send_messages_to_moderated_user == true) {
-                      client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot.", databaseToReadFromResult.last_message_sent_id);
-                    }
-                    if (globalConfig.send_whispers_to_moderated_user == true) {
-                      sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                    }
-                    if (chatConfig.send_debug_channel_messages == true) {
-                      client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
-                    }
-                  }
-                  if (databaseToReadFromResult.is_first_message_spam_bot == true) {
-                    if (databaseToReadFromResult.messages_sent >= 3) {
-                      if (databaseToReadFromResult.strike_count >= 3) {
-                        if (databaseToReadFromResult.ban_count >= 1) {
-                          console.log("Yep, that's a multimessage spam bot");
-                          //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
-                          logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
-                          if (globalConfig.send_messages_to_moderated_user == true) {
-                            client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot.", databaseToReadFromResult.last_message_sent_id);
+                    if (databaseToReadFromResult.is_account_blacklisted == false) {
+                      if (databaseToReadFromResult.is_spam_bot == false) {
+                        if (databaseToReadFromResult.first_message_sent_id == databaseToReadFromResult.last_message_sent_id) {
+                          if (databaseToReadFromResult.first_message_length < globalConfig.long_message_length && doesMessageHaveTooManyUpperCaseLetters == true) {
+                            //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                            banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                            logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.", new Date().getTime());
+                            logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.all_caps_message_timeout, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.", new Date().getTime());
+                            if (globalConfig.send_messages_to_moderated_user == true) {
+                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down!", databaseToReadFromResult.last_message_sent_id);
+                            }
+                            if (globalConfig.send_whispers_to_moderated_user == true) {
+                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.all_caps_message_timeout + " seconds because your first message contains too many caps, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                            }
+                            if (chatConfig.send_debug_channel_messages == true) {
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message contains too many caps.");
+                            }
                           }
-                          if (globalConfig.send_whispers_to_moderated_user == true) {
-                            sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                            sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                          }
-                          if (chatConfig.send_debug_channel_messages == true) {
-                            client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
+                          if (databaseToReadFromResult.first_message_length >= globalConfig.long_message_length) {
+                            // This should never happen
+                            //console.log("First message is too long, do something about it C");
+                            if (globalConfig.permaban_if_first_message_is_long == true) {
+                              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.", new Date().getTime());
+                              logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.", new Date().getTime());
+                              if (globalConfig.send_messages_to_moderated_user == true) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because your first message is too long, you're either a spam bot, or just came here to spam.", databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (globalConfig.send_whispers_to_moderated_user == true) {
+                                sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because your first message is too long, you're either a spam bot, or just came here to spam. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                                sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              }
+                              if (chatConfig.send_debug_channel_messages == true) {
+                                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, first message too long.");
+                              }
+                            }
+                            if (globalConfig.permaban_if_first_message_is_long == false) {
+                              //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.", new Date().getTime());
+                              logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.long_message_timeout, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.", new Date().getTime());
+                              if (globalConfig.send_messages_to_moderated_user == true) {
+                                client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down!", databaseToReadFromResult.last_message_sent_id);
+                              }
+                              if (globalConfig.send_whispers_to_moderated_user == true) {
+                                sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.long_message_timeout + " seconds because your first message is too long, please calm down! This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                                sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              }
+                              if (chatConfig.send_debug_channel_messages == true) {
+                                client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, first message too long.");
+                              }
+                            }
                           }
                         }
                       }
                     }
-                    console.log("Keep an eye on this user");
-                  }
-                  if (slurDetection == true) {
-                    if (globalConfig.permaban_when_slur_is_detected == true) {
-                      // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+                    if (databaseToReadFromResult.is_spam_bot == true) {
+                      // this should never happen tho lol
+                      console.log("BAN THAT MOTHERFUCKER AGAIN");
                       //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.", new Date().getTime());
-                      logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.", new Date().getTime());
+                      banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                      logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
+                      logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
                       if (globalConfig.send_messages_to_moderated_user == true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", databaseToReadFromResult.last_message_sent_id);
+                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot.", databaseToReadFromResult.last_message_sent_id);
                       }
                       if (globalConfig.send_whispers_to_moderated_user == true) {
-                        sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
                       }
                       if (chatConfig.send_debug_channel_messages == true) {
-                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.");
+                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
                       }
                     }
-                    if (globalConfig.permaban_when_slur_is_detected == false) {
-                      // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.", new Date().getTime());
-                      logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.", new Date().getTime());
-                      if (globalConfig.send_messages_to_moderated_user == true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", databaseToReadFromResult.last_message_sent_id);
+                    if (databaseToReadFromResult.is_first_message_spam_bot == true) {
+                      if (databaseToReadFromResult.messages_sent >= 3) {
+                        if (databaseToReadFromResult.strike_count >= 3) {
+                          if (databaseToReadFromResult.ban_count >= 1) {
+                            console.log("Yep, that's a multimessage spam bot");
+                            //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                            banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                            logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
+                            logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
+                            if (globalConfig.send_messages_to_moderated_user == true) {
+                              client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot.", databaseToReadFromResult.last_message_sent_id);
+                            }
+                            if (globalConfig.send_whispers_to_moderated_user == true) {
+                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                              sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                            }
+                            if (chatConfig.send_debug_channel_messages == true) {
+                              client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
+                            }
+                          }
+                        }
                       }
-                      if (globalConfig.send_whispers_to_moderated_user == true) {
-                        sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                      console.log("Keep an eye on this user");
+                    }
+                    if (slurDetection == true) {
+                      if (globalConfig.permaban_when_slur_is_detected == true) {
+                        // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.", new Date().getTime());
+                        logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.", new Date().getTime());
+                        if (globalConfig.send_messages_to_moderated_user == true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban.", databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (globalConfig.send_whispers_to_moderated_user == true) {
+                          sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable permanent ban. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        }
+                        if (chatConfig.send_debug_channel_messages == true) {
+                          client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, sent a slur.");
+                        }
                       }
-                      if (chatConfig.send_debug_channel_messages == true) {
-                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.");
+                      if (globalConfig.permaban_when_slur_is_detected == false) {
+                        // Tell the user they got banned for sending a slur, and that sending slurs, no matter the context, severity, or how known the user is, will still be an unappealable permanent ban
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        banTwitchUser(roomId, databaseToReadFromResult.user_id, globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.", new Date().getTime());
+                        logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "timeout", globalConfig.slur_detection_timeout, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.", new Date().getTime());
+                        if (globalConfig.send_messages_to_moderated_user == true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout.", databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (globalConfig.send_whispers_to_moderated_user == true) {
+                          sendTwitchWhisper(databaseToReadFromResult.user_id, "You were timed out for " + globalConfig.slur_detection_timeout + " seconds because you sent a slur. Sending slurs, regardless of context, will always result in an unappealable timeout. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ".", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        }
+                        if (chatConfig.send_debug_channel_messages == true) {
+                          client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Timeout, sent a slur.");
+                        }
                       }
                     }
-                  }
+                  });
                 });
+                databaseToUpdate.close();
               });
-              databaseToUpdate.close();
             });
-          });
-          //
-        }
-        userDb.close();
-        //isDatabaseBusy = false;
+            //
+          }
+          userDb.close();
+          //isDatabaseBusy = false;
+        });
       });
-    });
+    }
     //if (inputMode == 0) {
     // There's no need to run this block for advanced mode, only basic mode since names are not displayed in advanced mode
     // It turns out this sleep is important because the database is used again below, no matter which input mode, so we have to sleep long enough to make sure the database completed any operations above before doing anything to the database below 
@@ -7402,7 +7909,7 @@ async function onMessageHandler(target, tags, message, self) {
     let checkModerators = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((m+o+d+s+)+|(m+o+d+e+r+a+t+o+r+s+))+/ig.test(originalMessage);
     if (checkModerators == true) {
       if (globalConfig.enable_check_moderators == true) {
-        console.log("Because Twitch killed the endpoint that I was using to get mods list, this command no longer works. Find another solution that doesn't require you to be the streamer to get the mods list because this makes abasolutely no sense.");
+        console.log("Because Twitch killed the endpoint that I was using to get mods list, this command no longer works. Find another solution that doesn't require you to be the streamer to get the mods list because this makes absolutely no sense.");
       }
     }
     */
@@ -10847,8 +11354,9 @@ async function onMessageHandler(target, tags, message, self) {
             //console.log("precisionInputsPreProcessed.input_repeat_count: " + precisionInputsPreProcessed.input_repeat_count);
             if (currentMacroChainIndex > 0) {
               //console.log("IS THIS VALID INPUT?");
-              // Get user from userdatabase by using their userid then increment the user's advanced input count
-              mongoClient.connect(mongoUrl, {
+              if (globalConfig.use_databases == true) {
+                // Get user from userdatabase by using their userid then increment the user's advanced input count
+                mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
               }, function(userDbError, userDb) {
                 if (userDbError) {
@@ -11179,6 +11687,7 @@ async function onMessageHandler(target, tags, message, self) {
                   //isDatabaseBusy = false;
                 });
               });
+              }
               if (precisionInputsPreProcessed.input_repeat_count > 0) {
                 macroParametersToWrite[2] = 0x01; // Tell the arduino to loop, it'll loop when it gets to the end of a macro, otherwise it'll only execute once, even if the "times to loop" parameter is higher than 1
               }
@@ -14723,8 +15232,9 @@ async function onMessageHandler(target, tags, message, self) {
             //console.log("precisionInputsPreProcessed.input_repeat_count: " + precisionInputsPreProcessed.input_repeat_count);
             if (currentMacroChainIndex > 0) {
               //console.log("IS THIS VALID INPUT?");
-              // Get user from userdatabase by using their userid then increment the user's advanced input count
-              mongoClient.connect(mongoUrl, {
+              if (globalConfig.use_databases == true) {
+                // Get user from userdatabase by using their userid then increment the user's advanced input count
+                mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
               }, function(userDbError, userDb) {
                 if (userDbError) {
@@ -15055,6 +15565,7 @@ async function onMessageHandler(target, tags, message, self) {
                   //isDatabaseBusy = false;
                 });
               });
+              }
               if (precisionInputsPreProcessed.input_repeat_count > 0) {
                 macroParametersToWrite[2] = 0x01; // Tell the arduino to loop, it'll loop when it gets to the end of a macro, otherwise it'll only execute once, even if the "times to loop" parameter is higher than 1
               }
@@ -15341,8 +15852,8 @@ async function onMessageHandler(target, tags, message, self) {
                   io.sockets.emit("input_data", inputQueue[currentInputInQueue]);
                   setTimeout(async function() {
                     io.sockets.emit("play_audio", true);
-
-                    // Get user from userdatabase by using their userid then increment the user's basic input count
+                    if (globalConfig.use_databases == true) {
+                      // Get user from userdatabase by using their userid then increment the user's basic input count
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
                     }, function(userDbError, userDb) {
@@ -15680,7 +16191,7 @@ async function onMessageHandler(target, tags, message, self) {
                         //isDatabaseBusy = false;
                       });
                     });
-
+                    }
                     //sound.play(__dirname + "\\output.mp3").then(function() {
                     //console.log("done");
                     //isTtsBusy = false;
@@ -16353,8 +16864,9 @@ async function onMessageHandler(target, tags, message, self) {
               logInputToDatabase(inputMode, inputString, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               logInputToTextFile(inputMode, inputString, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               io.sockets.emit("input_data", inputQueue[currentInputInQueue]);
-              // Get user from userdatabase by using their userid then increment the user's basic input count
-              mongoClient.connect(mongoUrl, {
+              if (globalConfig.use_databases == true) {
+                // Get user from userdatabase by using their userid then increment the user's basic input count
+                mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
               }, function(userDbError, userDb) {
                 if (userDbError) {
@@ -16690,6 +17202,7 @@ async function onMessageHandler(target, tags, message, self) {
                   //isDatabaseBusy = false;
                 });
               });
+              }
             }
             //writeToPort(dataToWrite, currentInputInQueue);
           }
@@ -16800,8 +17313,8 @@ async function onMessageHandler(target, tags, message, self) {
                   io.sockets.emit("input_data", inputQueue[currentInputInQueue]);
                   setTimeout(async function() {
                     io.sockets.emit("play_audio", true);
-
-                    // Get user from userdatabase by using their userid then increment the user's basic input count
+                    if (globalConfig.use_databases == true) {
+                      // Get user from userdatabase by using their userid then increment the user's basic input count
                     mongoClient.connect(mongoUrl, {
                       useUnifiedTopology: true
                     }, function(userDbError, userDb) {
@@ -17139,7 +17652,7 @@ async function onMessageHandler(target, tags, message, self) {
                         //isDatabaseBusy = false;
                       });
                     });
-
+                    }
                     //sound.play(__dirname + "\\output.mp3").then(function() {
                     //console.log("done");
                     //isTtsBusy = false;
@@ -17812,7 +18325,8 @@ async function onMessageHandler(target, tags, message, self) {
               logInputToDatabase(inputMode, inputString, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               logInputToTextFile(inputMode, inputString, originalMessage, false, null, roomId, globalConfig.run_name, globalConfig.run_id, usernameToPing, userId, messageId, new Date().getTime());
               io.sockets.emit("input_data", inputQueue[currentInputInQueue]);
-              // Get user from userdatabase by using their userid then increment the user's basic input count
+              if (globalConfig.use_databases == true) {
+                // Get user from userdatabase by using their userid then increment the user's basic input count
               mongoClient.connect(mongoUrl, {
                 useUnifiedTopology: true
               }, function(userDbError, userDb) {
@@ -18149,6 +18663,7 @@ async function onMessageHandler(target, tags, message, self) {
                   //isDatabaseBusy = false;
                 });
               });
+              }
             }
             //writeToPort(dataToWrite, currentInputInQueue);
           }
@@ -20494,7 +21009,8 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
     //console.log("precisionInputsPreProcessed.input_repeat_count: " + precisionInputsPreProcessed.input_repeat_count);
     if (currentMacroChainIndex > 0) {
       //console.log("IS THIS VALID INPUT?");
-      // Get user from userdatabase by using their userid then increment the user's advanced input count
+      if (globalConfig.use_databases == true) {
+        // Get user from userdatabase by using their userid then increment the user's advanced input count
       mongoClient.connect(mongoUrl, {
         useUnifiedTopology: true
       }, function(userDbError, userDb) {
@@ -20833,6 +21349,7 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
           //isDatabaseBusy = false;
         });
       });
+      }
       if (precisionInputsPreProcessed.input_repeat_count > 0) {
         macroParametersToWrite[2] = 0x01; // Tell the arduino to loop, it'll loop when it gets to the end of a macro, otherwise it'll only execute once, even if the "times to loop" parameter is higher than 1
       }
