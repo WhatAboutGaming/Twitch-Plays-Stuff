@@ -1,0 +1,44 @@
+# FCEULTRA.CNF == Configuration file for the emulator FCEUltra
+# CNF Handling Code (c)2006 Ronald Andersson aka dlanor       
+# ------------------------------------------------------------
+OffsetX     = -58
+OffsetY     = 13
+Display     = 0
+Emulation   = 0
+Interlace   = 1
+Filter      = 0
+LowPass     = 0
+Turbo       = 0
+Elfpath     = mc0:/BOOT/BOOT.ELF
+Savepath    = mass:/NES/Save/
+Skinpath    = mc0:/FCEUMM/skin.cnf
+;Player 1 Controls
+JOY1_Menu          = 0x0002
+JOY1_SaveState     = 0x0200
+JOY1_LoadState     = 0x0100
+JOY1_FDS_DiskSwap  = 0x0400
+JOY1_FDS_SideSwap  = 0x0800
+JOY1_A             = 0x2000
+JOY1_B             = 0x4000
+JOY1_Select        = 0x0001
+JOY1_Start         = 0x0008
+JOY1_Up            = 0x0010
+JOY1_Down          = 0x0040
+JOY1_Left          = 0x0080
+JOY1_Right         = 0x0020
+;Player 2 Controls
+JOY2_Menu          = 0x0002
+JOY2_SaveState     = 0x0200
+JOY2_LoadState     = 0x0100
+JOY2_FDS_DiskSwap  = 0x0400
+JOY2_FDS_SideSwap  = 0x0800
+JOY2_A             = 0x2000
+JOY2_B             = 0x4000
+JOY2_Select        = 0x0001
+JOY2_Start         = 0x0008
+JOY2_Up            = 0x0010
+JOY2_Down          = 0x0040
+JOY2_Left          = 0x0080
+JOY2_Right         = 0x0020
+# ------------------------------------------------------------
+# End-Of-File for FCEUltra.CNF
