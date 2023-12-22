@@ -1,0 +1,12 @@
+# PSMS.CNF == Configuration file for the emulator PSMS        
+# CNF Handling Code (c)2006 Ronald Andersson aka dlanor       
+# ------------------------------------------------------------
+OffsetX     = -44
+OffsetY     = 8
+Display     = 0
+Interlace   = 1
+Filter      = 0
+Elfpath     = mc0:/BOOT/BOOT.ELF
+Savepath    = mass:/SEGA/SMS_GG SAVE/
+# ------------------------------------------------------------
+# End-Of-File for PSMS.CNF
