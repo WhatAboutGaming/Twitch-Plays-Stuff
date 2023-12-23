@@ -1,0 +1,14 @@
+# SKIN.CNF == Skin configuration file for the emulator FCEUltra
+# CNF Handling Code (c)2006 Ronald Andersson aka dlanor        
+# -------------------------------------------------------------
+FrameColor  = 0x80FFFFFF
+TextColor   = 0x80FFFFFF
+Highlight   = 0x80408080
+BGColor1    = 0x80000080
+BGColor2    = 0x80000000
+BGColor3    = 0x80000000
+BGColor4    = 0x80000080
+BGTexture   = mass:/FCEUMM/back.png
+BGMenu      = mass:/FCEUMM/menu.png
+# -------------------------------------------------------------
+# End-Of-File for SKIN.CNF
