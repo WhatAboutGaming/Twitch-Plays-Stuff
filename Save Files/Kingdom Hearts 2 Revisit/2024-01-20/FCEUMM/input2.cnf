@@ -1,0 +1,13 @@
+JOY2_Menu          = 0x0002
+JOY2_SaveState     = 0x0200
+JOY2_LoadState     = 0x0100
+JOY2_FDS_DiskSwap  = 0x0400
+JOY2_FDS_SideSwap  = 0x0800
+JOY2_A             = 0x2000
+JOY2_B             = 0x4000
+JOY2_Select        = 0x0001
+JOY2_Start         = 0x0008
+JOY2_Up            = 0x0010
+JOY2_Down          = 0x0040
+JOY2_Left          = 0x0080
+JOY2_Right         = 0x0020

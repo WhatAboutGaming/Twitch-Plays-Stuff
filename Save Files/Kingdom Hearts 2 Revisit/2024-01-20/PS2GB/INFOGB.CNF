@@ -1,0 +1,13 @@
+# INFOGB.CNF == Configuration file for the emulator InfoGB
+# --------------------------------------------------------
+dispx    = 79
+dispy    = 7
+stretch  = 2
+filter   = 0
+showfps  = 1
+sound    = 1
+save_device = 2
+boot_ELF = mc0:/BOOT/BOOT.ELF
+auto_ROM = 
+# --------------------------------------------------------
+# End-Of-File for InfoGB.CNF

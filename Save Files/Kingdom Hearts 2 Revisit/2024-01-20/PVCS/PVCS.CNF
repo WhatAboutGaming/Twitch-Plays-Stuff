@@ -1,0 +1,11 @@
+# PVCS.CNF == Configuration file for the emulator PVCS        
+# CNF Handling Code (c)2006 Ronald Andersson aka dlanor       
+# ------------------------------------------------------------
+OffsetX     = -57
+OffsetY     = 7
+Display     = 0
+Interlace   = 1
+Filter      = 0
+Elfpath     = mc0:/BOOT/BOOT.ELF
+# ------------------------------------------------------------
+# End-Of-File for PVCS.CNF
