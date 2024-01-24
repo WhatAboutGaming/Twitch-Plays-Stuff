@@ -1863,7 +1863,7 @@ var chatConnectionStatus = {
 };
 
 // Register our event handlers (defined below)
-client.on("ping", onPing);
+//client.on("ping", onPing);
 client.on("raided", onRaid);
 client.on("timeout", onTimeOut);
 client.on("ban", onBan);
@@ -1871,7 +1871,7 @@ client.on("messagedeleted", onClearMsg);
 client.on("message", onMessageHandler);
 client.on("connected", onConnectedHandler);
 client.on("raw_message", onRawMessageHandler);
-chatLogger.on("ping", onChatLoggerPing);
+//chatLogger.on("ping", onChatLoggerPing);
 chatLogger.on("connected", onConnectedChatLoggerHandler);
 chatLogger.on("raw_message", rawMessageLogger);
 //chatLogger.on("timeout", onChatLoggerTimeOut);
@@ -4581,7 +4581,7 @@ async function onMessageHandler(target, tags, message, self) {
       /(((l+i+v+e)*|(c+u+t+)*|(b+i+t+)*)*\s*(\.+|d+o+t+)+\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+)+\/+(t+w+[li1\!\|]+t+c+h+s*\s*\-*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(c+s+\W*g+o+[\s\-\_]*d+a+l+a+s)+\s*(\.+|d+o+t+)+\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(e+s+l+[\s\-\_]*d+r+o+p+s+)+\s*(\.+|d+o+t+)+\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /((r+u+s+t+)+|(g+i+f+t+)+|(c+o+d+e+)+|(e+v+e+n+t+)+|(a+w+a+r+d+)+|(c+o+n+e+c+t+)+|(c+s+\W*g+o+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Comment this line if bot bans accidentally
+      ///((r+u+s+t+)+|(g+i+f+t+)+|(c+o+d+e+)+|(e+v+e+n+t+)+|(a+w+a+r+d+)+|(c+o+n+e+c+t+)+|(c+s+\W*g+o+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Comment this line if bot bans accidentally
       /(p+r+i+c+e+\s+i+s+\s+l+o+w+e+r+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Price is lower
       /(l+o+w+e+r+\s+p+r+i+c+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(r+e+a+l+y+)+\s+(e+n+j+o+y+)+\s+(y+o+\w*)+\s+((c+o+n+t+e+n+t+)+|(s+t+r+e*a*m+i*n*g*)+)+\s+(a+n+d+)+\s+(f+i+n+d+)+(\s+i+t+)*\s+(e+n+j+o+y+a+b+l+e+)\s+(t+o+)+\s+(w+a+t+c+h+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // greetings. I really enjoy your content and find it enjoyable to watch. I recommend that you continue your outstanding work. SeemsGood SeemsGood (PART 1)
@@ -7810,7 +7810,7 @@ async function onMessageHandler(target, tags, message, self) {
       }
       }
     }
-    let currentRunEndgameGoalsPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((run\s*end\s*(game)*\s*conditions*)+|(end\s*(game)*\s*conditions*)+)+/ig.test(originalMessage);
+    let currentRunEndgameGoalsPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((run\s*end\s*(game)*\s*conditions*)+|(end\s*(game)*\s*conditions*)+)+/ig.test(originalMessage);
     if (currentRunEndgameGoalsPrefixCheck == true) {
       updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
       for (let helpMessageIndex = 0; helpMessageIndex < currentRunEndgameGoals.length; helpMessageIndex++) {
@@ -7822,7 +7822,7 @@ async function onMessageHandler(target, tags, message, self) {
         }
       }
     }
-    let checkUptime = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(uptim[er]|upti[er]m|up\s*tim[er]|up\s*ti[er]m|tim[er]|ti[er]m)+/ig.test(originalMessage);
+    let checkUptime = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*(uptim[er]|upti[er]m|up\s*tim[er]|up\s*ti[er]m|tim[er]|ti[er]m)+/ig.test(originalMessage);
     if (checkUptime == true) {
       if (globalConfig.enable_check_uptime == true) {
         getTwitchStreamStatus(roomId, userId, usernameToPing, target, messageId, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
@@ -7890,37 +7890,37 @@ async function onMessageHandler(target, tags, message, self) {
       */
     }
     if (controllerConfig.display_framerate == true) {
-      let frameRatePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(frame\s*rate)+/ig.test(originalMessage);
+      let frameRatePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*(frame\s*rate)+/ig.test(originalMessage);
       if (frameRatePrefixCheck == true) {
         updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
         client.reply(target, "@" + usernameToPing + " The framerate is currently " + frameRateToDisplay + "fps.", messageId);
       }
     }
-    let discordPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(discord)+/ig.test(originalMessage);
+    let discordPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*(discord)+/ig.test(originalMessage);
     if (discordPrefixCheck == true) {
       updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
       client.reply(target, "@" + usernameToPing + " Discord: " + globalConfig.discord_url, messageId);
     }
-    let githubPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(github)+|(source(\s*code)*)+/ig.test(message);
+    let githubPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((github)+|((source)+(\s*code)*)+)+/ig.test(message);
     if (githubPrefixCheck == true) {
       client.reply(target, "@" + usernameToPing + " " + globalConfig.github_message + " " + globalConfig.github_repo, messageId);
     }
     /*
-    let checkModerators = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((m+o+d+s+)+|(m+o+d+e+r+a+t+o+r+s+))+/ig.test(originalMessage);
+    let checkModerators = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((m+o+d+s+)+|(m+o+d+e+r+a+t+o+r+s+))+/ig.test(originalMessage);
     if (checkModerators == true) {
       if (globalConfig.enable_check_moderators == true) {
         console.log("Because Twitch killed the endpoint that I was using to get mods list, this command no longer works. Find another solution that doesn't require you to be the streamer to get the mods list because this makes absolutely no sense.");
       }
     }
     */
-    let checkFollowAge = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(f+o+l+o+w+\s*a+g+e+)+/ig.test(originalMessage);
+    let checkFollowAge = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*(f+o+l+o+w+\s*a+g+e+)+/ig.test(originalMessage);
     if (checkFollowAge == true) {
       if (globalConfig.enable_check_followage == true) {
         getTwitchUserFollowingChannelStatus(roomId, userId, usernameToPing, target, messageId, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
       }
     }
     if (inputMode == 2) {
-      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(syntax)+|(infor*m*a*t*i*o*n*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
+      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((inputs*)+|(syntax)+|(infor*m*a*t*i*o*n*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
           //console.log("Don't send the help message yet");
@@ -7951,8 +7951,8 @@ async function onMessageHandler(target, tags, message, self) {
           helpMessageCooldown = new Date().getTime() + globalConfig.help_message_cooldown_millis;
         }
       }
-      //let savedMacroHelpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((saving\s*macro\s*help)+|(saving\s*macros\s*help)+)+/ig.test(originalMessage);
-      let savedMacroHelpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((macro\s*help)+|(macros\s*help)+)+/ig.test(originalMessage);
+      //let savedMacroHelpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((saving\s*macro\s*help)+|(saving\s*macros\s*help)+)+/ig.test(originalMessage);
+      let savedMacroHelpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((macro\s*help)+|(macros\s*help)+)+/ig.test(originalMessage);
       if (savedMacroHelpPrefixCheck == true) {
         updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
         for (let helpMessageIndex = 0; helpMessageIndex < helpMessageSavingMacros.length; helpMessageIndex++) {
@@ -7969,13 +7969,13 @@ async function onMessageHandler(target, tags, message, self) {
         {
           // Advanced mode, inputs are enabled, and anyone can play
           if (messageWords.length > 0) {
-          let renameMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((rename\s*macro)+|(update\s*macro\s*name)+|(edit\s*macro\s*name)+|(update\s*name)+|(edit\s*name)+)+/ig.test(originalMessage); // 2 Parameters: Old Macro Name and New Macro Name
-          let createMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((create\s*macro)+|(save\s*macro)+|(store\s*macro)+|(update\s*macro)+|(edit\s*macro)+|(make\s*macro)+|(new\s*macro)+|(set\s*macro)+|(add\s*macro)+)+/ig.test(originalMessage); // 2 Parameters: Macro Name and Inputs
-          let toggleMacroEditabilityPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((toggle\s*macro\s*editability)+|(toggle\s*editability)+)+/ig.test(originalMessage); // Used to toggle can_macro_be_edited_by_anyone between true and false // 0 Parameters
-          let listAllMacrosSavedPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((list\s*all\s*macros)+|(show\s*all\s*macros)+|(view\s*all\s*macros)+|(display\s*all\s*macros)+|(all\s*macros)+|(list\s*saved\s*macros)+|(list\s*stored\s*macros)+|(show\s*saved\s*macros)+|(show\s*stored\s*macros)+|(view\s*saved\s*macros)+|(view\s*stored\s*macros)+|(display\s*saved\s*macros)+|(display\s*stored\s*macros)+|(saved\s*macros)+|(stored\s*macros)+|(list\s*all\s*saved\s*macros)+|(list\s*all\s*stored\s*macros)+|(show\s*all\s*saved\s*macros)+|(show\s*all\s*stored\s*macros)+|(view\s*all\s*saved\s*macros)+|(view\s*all\s*stored\s*macros)+|(display\s*all\s*saved\s*macros)+|(display\s*all\s*stored\s*macros)+|(all\s*saved\s*macros)+|(all\s*stored\s*macros)+|(list\s*all\s*macros\s*saved)+|(list\s*all\s*macros\s*stored)+|(show\s*all\s*macros\s*saved)+|(show\s*all\s*macros\s*stored)+|(view\s*all\s*macros\s*saved)+|(view\s*all\s*macros\s*stored)+|(display\s*all\s*macros\s*saved)+|(display\s*all\s*macros\s*stored)+|(all\s*macros\s*saved)+|(all\s*macros\s*stored)+)+/ig.test(originalMessage); // Used to list all macros saved // 0 Parameters
-          let showContentsOfSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((list\s*macro)+|(show\s*macro)+|(view\s*macro)+|(display\s*macro)+)+/ig.test(originalMessage); // 1 Parameter: Macro Name
-          let executeSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((exec\s*saved\s*macro)+|(execute\s*saved\s*macro)+|(play\s*saved\s*macro)+|(run\s*saved\s*macro)+|(exec\s*stored\s*macro)+|(execute\s*stored\s*macro)+|(play\s*stored\s*macro)+|(run\s*stored\s*macro)+|(exec\s*macro)+|(execute\s*macro)+|(play\s*macro)+|(run\s*macro)+)+/ig.test(originalMessage); // 2 Parameters: Macro Name and Times To Repeat (Times To Repeat is optional)
-          let listSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(list\s*settable\s*macro)+/ig.test(originalMessage);
+          let renameMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((rename\s*macro)+|(update\s*macro\s*name)+|(edit\s*macro\s*name)+|(update\s*name)+|(edit\s*name)+)+/ig.test(originalMessage); // 2 Parameters: Old Macro Name and New Macro Name
+          let createMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((create\s*macro)+|(save\s*macro)+|(store\s*macro)+|(update\s*macro)+|(edit\s*macro)+|(make\s*macro)+|(new\s*macro)+|(set\s*macro)+|(add\s*macro)+)+/ig.test(originalMessage); // 2 Parameters: Macro Name and Inputs
+          let toggleMacroEditabilityPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((toggle\s*macro\s*editability)+|(toggle\s*editability)+)+/ig.test(originalMessage); // Used to toggle can_macro_be_edited_by_anyone between true and false // 0 Parameters
+          let listAllMacrosSavedPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((list\s*all\s*macros)+|(show\s*all\s*macros)+|(view\s*all\s*macros)+|(display\s*all\s*macros)+|(all\s*macros)+|(list\s*saved\s*macros)+|(list\s*stored\s*macros)+|(show\s*saved\s*macros)+|(show\s*stored\s*macros)+|(view\s*saved\s*macros)+|(view\s*stored\s*macros)+|(display\s*saved\s*macros)+|(display\s*stored\s*macros)+|(saved\s*macros)+|(stored\s*macros)+|(list\s*all\s*saved\s*macros)+|(list\s*all\s*stored\s*macros)+|(show\s*all\s*saved\s*macros)+|(show\s*all\s*stored\s*macros)+|(view\s*all\s*saved\s*macros)+|(view\s*all\s*stored\s*macros)+|(display\s*all\s*saved\s*macros)+|(display\s*all\s*stored\s*macros)+|(all\s*saved\s*macros)+|(all\s*stored\s*macros)+|(list\s*all\s*macros\s*saved)+|(list\s*all\s*macros\s*stored)+|(show\s*all\s*macros\s*saved)+|(show\s*all\s*macros\s*stored)+|(view\s*all\s*macros\s*saved)+|(view\s*all\s*macros\s*stored)+|(display\s*all\s*macros\s*saved)+|(display\s*all\s*macros\s*stored)+|(all\s*macros\s*saved)+|(all\s*macros\s*stored)+)+/ig.test(originalMessage); // Used to list all macros saved // 0 Parameters
+          let showContentsOfSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((list\s*macro)+|(show\s*macro)+|(view\s*macro)+|(display\s*macro)+)+/ig.test(originalMessage); // 1 Parameter: Macro Name
+          let executeSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((exec\s*saved\s*macro)+|(execute\s*saved\s*macro)+|(play\s*saved\s*macro)+|(run\s*saved\s*macro)+|(exec\s*stored\s*macro)+|(execute\s*stored\s*macro)+|(play\s*stored\s*macro)+|(run\s*stored\s*macro)+|(exec\s*macro)+|(execute\s*macro)+|(play\s*macro)+|(run\s*macro)+)+/ig.test(originalMessage); // 2 Parameters: Macro Name and Times To Repeat (Times To Repeat is optional)
+          let listSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*(list\s*settable\s*macro)+/ig.test(originalMessage);
           //console.log("listSettablePrefixCheck = " + listSettablePrefixCheck);
           if (createMacroPrefixCheck == true) {
             if (globalConfig.use_macro_database == false) {
@@ -10214,7 +10214,7 @@ async function onMessageHandler(target, tags, message, self) {
               }
             }
           }
-          let setSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(set\s*settable\s*macro)+/ig.test(originalMessage);
+          let setSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*(set\s*settable\s*macro)+/ig.test(originalMessage);
           //console.log("setSettablePrefixCheck = " + setSettablePrefixCheck);
           if (setSettablePrefixCheck == true) {
             if (messageWords[1] == undefined) {
@@ -10383,7 +10383,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(processedSingleInput); 
             }
           }
-          let playSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(exec\s*settable\s*macro)+/ig.test(originalMessage);
+          let playSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*(exec\s*settable\s*macro)+/ig.test(originalMessage);
           //console.log("playSettablePrefixCheck = " + playSettablePrefixCheck);
           if (playSettablePrefixCheck == true) {
             let playSettableParametersToWrite = [controllerConfig.final_macro_preamble, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
@@ -11847,13 +11847,13 @@ async function onMessageHandler(target, tags, message, self) {
         if (userId == chatConfig.trusted_users[trustedUsersIndex]) {
           // Advanced mode, inputs are enabled, but only trusted users can play
           if (messageWords.length > 0) {
-          let renameMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((rename\s*macro)+|(update\s*macro\s*name)+|(edit\s*macro\s*name)+|(update\s*name)+|(edit\s*name)+)+/ig.test(originalMessage); // 2 Parameters: Old Macro Name and New Macro Name
-          let createMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((create\s*macro)+|(save\s*macro)+|(store\s*macro)+|(update\s*macro)+|(edit\s*macro)+|(make\s*macro)+|(new\s*macro)+|(set\s*macro)+|(add\s*macro)+)+/ig.test(originalMessage); // 2 Parameters: Macro Name and Inputs
-          let toggleMacroEditabilityPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((toggle\s*macro\s*editability)+|(toggle\s*editability)+)+/ig.test(originalMessage); // Used to toggle can_macro_be_edited_by_anyone between true and false // 0 Parameters
-          let listAllMacrosSavedPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((list\s*all\s*macros)+|(show\s*all\s*macros)+|(view\s*all\s*macros)+|(display\s*all\s*macros)+|(all\s*macros)+|(list\s*saved\s*macros)+|(list\s*stored\s*macros)+|(show\s*saved\s*macros)+|(show\s*stored\s*macros)+|(view\s*saved\s*macros)+|(view\s*stored\s*macros)+|(display\s*saved\s*macros)+|(display\s*stored\s*macros)+|(saved\s*macros)+|(stored\s*macros)+|(list\s*all\s*saved\s*macros)+|(list\s*all\s*stored\s*macros)+|(show\s*all\s*saved\s*macros)+|(show\s*all\s*stored\s*macros)+|(view\s*all\s*saved\s*macros)+|(view\s*all\s*stored\s*macros)+|(display\s*all\s*saved\s*macros)+|(display\s*all\s*stored\s*macros)+|(all\s*saved\s*macros)+|(all\s*stored\s*macros)+|(list\s*all\s*macros\s*saved)+|(list\s*all\s*macros\s*stored)+|(show\s*all\s*macros\s*saved)+|(show\s*all\s*macros\s*stored)+|(view\s*all\s*macros\s*saved)+|(view\s*all\s*macros\s*stored)+|(display\s*all\s*macros\s*saved)+|(display\s*all\s*macros\s*stored)+|(all\s*macros\s*saved)+|(all\s*macros\s*stored)+)+/ig.test(originalMessage); // Used to list all macros saved // 0 Parameters
-          let showContentsOfSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((list\s*macro)+|(show\s*macro)+|(view\s*macro)+|(display\s*macro)+)+/ig.test(originalMessage); // 1 Parameter: Macro Name
-          let executeSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((exec\s*saved\s*macro)+|(execute\s*saved\s*macro)+|(play\s*saved\s*macro)+|(run\s*saved\s*macro)+|(exec\s*stored\s*macro)+|(execute\s*stored\s*macro)+|(play\s*stored\s*macro)+|(run\s*stored\s*macro)+|(exec\s*macro)+|(execute\s*macro)+|(play\s*macro)+|(run\s*macro)+)+/ig.test(originalMessage); // 2 Parameters: Macro Name and Times To Repeat (Times To Repeat is optional)
-          let listSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(list\s*settable\s*macro)+/ig.test(originalMessage);
+          let renameMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((rename\s*macro)+|(update\s*macro\s*name)+|(edit\s*macro\s*name)+|(update\s*name)+|(edit\s*name)+)+/ig.test(originalMessage); // 2 Parameters: Old Macro Name and New Macro Name
+          let createMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((create\s*macro)+|(save\s*macro)+|(store\s*macro)+|(update\s*macro)+|(edit\s*macro)+|(make\s*macro)+|(new\s*macro)+|(set\s*macro)+|(add\s*macro)+)+/ig.test(originalMessage); // 2 Parameters: Macro Name and Inputs
+          let toggleMacroEditabilityPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((toggle\s*macro\s*editability)+|(toggle\s*editability)+)+/ig.test(originalMessage); // Used to toggle can_macro_be_edited_by_anyone between true and false // 0 Parameters
+          let listAllMacrosSavedPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((list\s*all\s*macros)+|(show\s*all\s*macros)+|(view\s*all\s*macros)+|(display\s*all\s*macros)+|(all\s*macros)+|(list\s*saved\s*macros)+|(list\s*stored\s*macros)+|(show\s*saved\s*macros)+|(show\s*stored\s*macros)+|(view\s*saved\s*macros)+|(view\s*stored\s*macros)+|(display\s*saved\s*macros)+|(display\s*stored\s*macros)+|(saved\s*macros)+|(stored\s*macros)+|(list\s*all\s*saved\s*macros)+|(list\s*all\s*stored\s*macros)+|(show\s*all\s*saved\s*macros)+|(show\s*all\s*stored\s*macros)+|(view\s*all\s*saved\s*macros)+|(view\s*all\s*stored\s*macros)+|(display\s*all\s*saved\s*macros)+|(display\s*all\s*stored\s*macros)+|(all\s*saved\s*macros)+|(all\s*stored\s*macros)+|(list\s*all\s*macros\s*saved)+|(list\s*all\s*macros\s*stored)+|(show\s*all\s*macros\s*saved)+|(show\s*all\s*macros\s*stored)+|(view\s*all\s*macros\s*saved)+|(view\s*all\s*macros\s*stored)+|(display\s*all\s*macros\s*saved)+|(display\s*all\s*macros\s*stored)+|(all\s*macros\s*saved)+|(all\s*macros\s*stored)+)+/ig.test(originalMessage); // Used to list all macros saved // 0 Parameters
+          let showContentsOfSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((list\s*macro)+|(show\s*macro)+|(view\s*macro)+|(display\s*macro)+)+/ig.test(originalMessage); // 1 Parameter: Macro Name
+          let executeSavedMacroPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((exec\s*saved\s*macro)+|(execute\s*saved\s*macro)+|(play\s*saved\s*macro)+|(run\s*saved\s*macro)+|(exec\s*stored\s*macro)+|(execute\s*stored\s*macro)+|(play\s*stored\s*macro)+|(run\s*stored\s*macro)+|(exec\s*macro)+|(execute\s*macro)+|(play\s*macro)+|(run\s*macro)+)+/ig.test(originalMessage); // 2 Parameters: Macro Name and Times To Repeat (Times To Repeat is optional)
+          let listSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*(list\s*settable\s*macro)+/ig.test(originalMessage);
           //console.log("listSettablePrefixCheck = " + listSettablePrefixCheck);
           if (createMacroPrefixCheck == true) {
             if (globalConfig.use_macro_database == false) {
@@ -14092,7 +14092,7 @@ async function onMessageHandler(target, tags, message, self) {
               }
             }
           }
-          let setSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(set\s*settable\s*macro)+/ig.test(originalMessage);
+          let setSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*(set\s*settable\s*macro)+/ig.test(originalMessage);
           //console.log("setSettablePrefixCheck = " + setSettablePrefixCheck);
           if (setSettablePrefixCheck == true) {
             if (messageWords[1] == undefined) {
@@ -14261,7 +14261,7 @@ async function onMessageHandler(target, tags, message, self) {
               //console.log(processedSingleInput); 
             }
           }
-          let playSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*(exec\s*settable\s*macro)+/ig.test(originalMessage);
+          let playSettablePrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*(exec\s*settable\s*macro)+/ig.test(originalMessage);
           //console.log("playSettablePrefixCheck = " + playSettablePrefixCheck);
           if (playSettablePrefixCheck == true) {
             let playSettableParametersToWrite = [controllerConfig.final_macro_preamble, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, controllerConfig.final_macro_preamble];
@@ -15732,7 +15732,7 @@ async function onMessageHandler(target, tags, message, self) {
         //messageInputs = messageInputs.split(/[\+\_\|\#\[\]\,\.\s]+/ig);
         //console.log(messageInputs);
       }
-      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(syntax)+|(infor*m*a*t*i*o*n*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
+      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((inputs*)+|(syntax)+|(infor*m*a*t*i*o*n*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
           //console.log("Don't send the help message yet");
@@ -18960,7 +18960,7 @@ function onConnectedHandler(addr, port) {
   console.log(new Date().toISOString() + " Main bot connected to " + addr + ":" + port);
   if (chatConfig.send_debug_channel_messages == true) {
     updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-    client.action(chatConfig.debug_channel, new Date().toISOString() + " Main bot OK");
+    client.action(chatConfig.debug_channel, new Date().toISOString() + " Twitch Plays Backend Main bot OK");
     waitForArduinoToBeReady = false;
   }
 }
@@ -18969,7 +18969,7 @@ function onConnectedChatLoggerHandler(addr, port) {
   console.log(new Date().toISOString() + " Chat logger bot connected to " + addr + ":" + port);
   if (chatConfig.send_debug_channel_messages == true) {
     updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-    chatLogger.action(chatConfig.debug_channel, new Date().toISOString() + " Chat logger bot OK");
+    chatLogger.action(chatConfig.debug_channel, new Date().toISOString() + " Twitch Plays Backend Chat logger bot OK");
   }
 }
 
@@ -20136,7 +20136,7 @@ function tidyUpAdvancedInputString(inputStringToProcess, sendToArduino, reverseI
 process.on("SIGINT", onSigInt);
 
 async function stopAllInputs() {
-  //console.log(new Date().toISOString() + " STARTING TO EXIT PROCESS");
+  //console.log(new Date().toISOString() + " TWITCH PLAYS BACKEND STARTING TO EXIT PROCESS");
   let neutralDataToWrite = [0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x85, 0x01];
   neutralDataToWrite[1] = neutralController[0];
   neutralDataToWrite[2] = neutralController[1];
@@ -20199,33 +20199,33 @@ async function stopAllInputs() {
       }
     });
   }
-  //console.log(new Date().toISOString() + " SLEEPING");
+  //console.log(new Date().toISOString() + " TWITCH PLAYS BACKEND SLEEPING");
   //await sleep(500); // Sleeping to make sure all async processes actually have enough time to end
-  //console.log(new Date().toISOString() + " DONE SLEEPING, EXITING PROCESS");
+  //console.log(new Date().toISOString() + " TWITCH PLAYS BACKEND DONE SLEEPING, EXITING PROCESS");
 }
 
 async function stopAllInputsAndQuit() {
-  console.log(new Date().toISOString() + " STARTING TO EXIT PROCESS");
+  console.log(new Date().toISOString() + " TWITCH PLAYS BACKEND STARTING TO EXIT PROCESS");
   if (client.readyState() === "OPEN") {
     if (chatConfig.send_debug_channel_messages == true) {
       updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-      client.action(chatConfig.debug_channel, new Date().toISOString() + " STARTING TO EXIT PROCESS");
+      client.action(chatConfig.debug_channel, new Date().toISOString() + " TWITCH PLAYS BACKEND STARTING TO EXIT PROCESS");
     }
   }
   await stopAllInputs();
-  console.log(new Date().toISOString() + " SLEEPING");
+  console.log(new Date().toISOString() + " TWITCH PLAYS BACKEND SLEEPING");
   if (client.readyState() === "OPEN") {
     if (chatConfig.send_debug_channel_messages == true) {
       updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-      client.action(chatConfig.debug_channel, new Date().toISOString() + " SLEEPING");
+      client.action(chatConfig.debug_channel, new Date().toISOString() + " TWITCH PLAYS BACKEND SLEEPING");
     }
   }
   await sleep(500); // Sleeping to make sure all async processes actually have enough time to end (serial port related stuff as well as twitch chat are async)
-  console.log(new Date().toISOString() + " DONE SLEEPING, EXITING PROCESS");
+  console.log(new Date().toISOString() + " TWITCH PLAYS BACKEND DONE SLEEPING, EXITING PROCESS");
   if (client.readyState() === "OPEN") {
     if (chatConfig.send_debug_channel_messages == true) {
       updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-      client.action(chatConfig.debug_channel, new Date().toISOString() + " DONE SLEEPING, EXITING PROCESS");
+      client.action(chatConfig.debug_channel, new Date().toISOString() + " TWITCH PLAYS BACKEND DONE SLEEPING, EXITING PROCESS");
     }
   }
   process.exit(0); // 0 will let Node.js know to terminate the process when no async operations are performing. Without mentioning, it will take the default value of 0.
@@ -21943,7 +21943,7 @@ if (globalConfig.use_discord_bot == true) {
   var discordClient = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
   
   discordClient.on("ready", () => {
-    console.log(new Date().toISOString() + " Discord bot OK");
+    console.log(new Date().toISOString() + " Twitch Plays Backend Discord bot OK");
   });
   
   discordClient.on("messageCreate", async (message) => {

@@ -129,7 +129,7 @@
       "led_color_state_on": "#00FF00FF",
       "led_color_state_off": "#FF0000FF",
       "led_behavior": "use_icon",
-      "send_status_change_message": true,
+      "send_status_change_message": false,
       "notes": "led_behavior is used to tell how the LED should be displayed, if it should use its own icon or if it should light up something else in the overlay, like the text that displays what input is currently being executed(?), as an example, it is only recommended to use integers for the scales led_label_scale and led_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
       "valid_behaviors": "use_label, use_icon, use_icon_and_label, use_current_input(?), use_current_input_with_color_change(?), all(?)"
     },

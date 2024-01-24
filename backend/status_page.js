@@ -127,7 +127,7 @@ function recalculateFont(newFontSizeMultiplier, newFontStrokeWeightMultiplier) {
 
 function setup() {
   noSmooth();
-  frameRate(60);
+  frameRate(10);
   createCanvas(1920, 1080);
   background("#00000000");
 
