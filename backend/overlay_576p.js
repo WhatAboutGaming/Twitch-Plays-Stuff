@@ -695,7 +695,7 @@ function getAbsoluteTimeAsISOStringFromHelpMessageString(helpMessageInputString,
 
 function setup() {
   noSmooth();
-  frameRate(30);
+  frameRate(60);
   createCanvas(1024, 576);
   background("#00000000");
   socket = io.connect();

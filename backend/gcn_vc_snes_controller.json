@@ -2372,7 +2372,7 @@
       "Sekct"
     ],
     "color_value": "#5600AE",
-    "is_blacklisted": true,
+    "is_blacklisted": false,
     "opposite_input_value": "0x04007F7F7F7F0000L",
     "opposite_input_name": "Select",
     "has_opposite": false,

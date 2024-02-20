@@ -7921,7 +7921,7 @@ async function onMessageHandler(target, tags, message, self) {
       }
     }
     if (inputMode == 2) {
-      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((inputs*)+|(syntax)+|(infor*m*a*t*i*o*n*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
+      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(syntax)+|(infor*m*a*t*i*o*n*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do(es)*|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do(es)*|to)*\s*(this)*\s*work\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do(es)*|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
           //console.log("Don't send the help message yet");
@@ -11728,30 +11728,36 @@ async function onMessageHandler(target, tags, message, self) {
                 updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
                 for (let splitInputsInMultipleStringsIndex = 0; splitInputsInMultipleStringsIndex < splitInputsInMultipleStrings.length; splitInputsInMultipleStringsIndex++) {
                   if (splitInputsInMultipleStringsIndex == 0) {
-                    if (isExecutingSavedMacro == false) {
-                      client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
-                    }
-                    if (isExecutingSavedMacro == true) {
-                      client.reply(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
+                    if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+                      if (isExecutingSavedMacro == false) {
+                        client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
+                      }
+                      if (isExecutingSavedMacro == true) {
+                        client.reply(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
+                      }
                     }
                   }
                   if (splitInputsInMultipleStringsIndex > 0 && splitInputsInMultipleStringsIndex != splitInputsInMultipleStrings.length - 1) {
-                    if (isExecutingSavedMacro == false) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
-                    }
-                    if (isExecutingSavedMacro == true) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                    if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+                      if (isExecutingSavedMacro == false) {
+                        client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                      }
+                      if (isExecutingSavedMacro == true) {
+                        client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                      }
                     }
                   }
                   if (splitInputsInMultipleStringsIndex == splitInputsInMultipleStrings.length - 1) {
                     precisionInputTotalTimesToLoop = macroParametersToWrite[4] + 1;
                     precisionInputTotalDuration = precisionInputTotalTimesToLoop * precisionInputSingleLoopDuration;
                     //precisionInputTotalDuration = precisionInputTotalTimesToLoop * innerLoopTotalDuration;
-                    if (isExecutingSavedMacro == false) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
-                    }
-                    if (isExecutingSavedMacro == true) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
+                    if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+                      if (isExecutingSavedMacro == false) {
+                        client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
+                      }
+                      if (isExecutingSavedMacro == true) {
+                        client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
+                      }
                     }
                   }
                 }
@@ -11766,14 +11772,16 @@ async function onMessageHandler(target, tags, message, self) {
                 precisionInputTotalDuration = precisionInputTotalTimesToLoop * precisionInputSingleLoopDuration;
                 //precisionInputTotalDuration = precisionInputTotalTimesToLoop * innerLoopTotalDuration;
                 precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/(\s*\*+)+/ig, "*");
-                updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                if (isExecutingSavedMacro == false) {
-                  client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
+                if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+                  updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  if (isExecutingSavedMacro == false) {
+                    client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
+                  }
+                  if (isExecutingSavedMacro == true) {
+                    client.reply(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
+                  }
+                  //client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2, messageId);
                 }
-                if (isExecutingSavedMacro == true) {
-                  client.reply(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
-                }
-                //client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2, messageId);
               }
               //let splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/.{100}/ig);
               //console.log(splitInputsInMultipleStrings);
@@ -15606,30 +15614,36 @@ async function onMessageHandler(target, tags, message, self) {
                 updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
                 for (let splitInputsInMultipleStringsIndex = 0; splitInputsInMultipleStringsIndex < splitInputsInMultipleStrings.length; splitInputsInMultipleStringsIndex++) {
                   if (splitInputsInMultipleStringsIndex == 0) {
-                    if (isExecutingSavedMacro == false) {
-                      client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
-                    }
-                    if (isExecutingSavedMacro == true) {
-                      client.reply(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
+                    if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+                      if (isExecutingSavedMacro == false) {
+                        client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
+                      }
+                      if (isExecutingSavedMacro == true) {
+                        client.reply(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
+                      }
                     }
                   }
                   if (splitInputsInMultipleStringsIndex > 0 && splitInputsInMultipleStringsIndex != splitInputsInMultipleStrings.length - 1) {
-                    if (isExecutingSavedMacro == false) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
-                    }
-                    if (isExecutingSavedMacro == true) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                    if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+                      if (isExecutingSavedMacro == false) {
+                        client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                      }
+                      if (isExecutingSavedMacro == true) {
+                        client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+                      }
                     }
                   }
                   if (splitInputsInMultipleStringsIndex == splitInputsInMultipleStrings.length - 1) {
                     precisionInputTotalTimesToLoop = macroParametersToWrite[4] + 1;
                     precisionInputTotalDuration = precisionInputTotalTimesToLoop * precisionInputSingleLoopDuration;
                     //precisionInputTotalDuration = precisionInputTotalTimesToLoop * innerLoopTotalDuration;
-                    if (isExecutingSavedMacro == false) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
-                    }
-                    if (isExecutingSavedMacro == true) {
-                      client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
+                    if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+                      if (isExecutingSavedMacro == false) {
+                        client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
+                      }
+                      if (isExecutingSavedMacro == true) {
+                        client.action(target, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
+                      }
                     }
                   }
                 }
@@ -15644,12 +15658,14 @@ async function onMessageHandler(target, tags, message, self) {
                 precisionInputTotalDuration = precisionInputTotalTimesToLoop * precisionInputSingleLoopDuration;
                 //precisionInputTotalDuration = precisionInputTotalTimesToLoop * innerLoopTotalDuration;
                 precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/(\s*\*+)+/ig, "*");
-                updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                if (isExecutingSavedMacro == false) {
-                  client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
-                }
-                if (isExecutingSavedMacro == true) {
-                  client.reply(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
+                if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+                  updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                  if (isExecutingSavedMacro == false) {
+                    client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
+                  }
+                  if (isExecutingSavedMacro == true) {
+                    client.reply(target, "@" + usernameToPing + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
+                  }
                 }
                 //client.reply(target, "@" + usernameToPing + " Your input was interpreted as " + precisionInputStringToDisplay2, messageId);
               }
@@ -15733,7 +15749,7 @@ async function onMessageHandler(target, tags, message, self) {
         //messageInputs = messageInputs.split(/[\+\_\|\#\[\]\,\.\s]+/ig);
         //console.log(messageInputs);
       }
-      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((inputs*)+|(syntax)+|(infor*m*a*t*i*o*n*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
+      let helpPrefixCheck = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]*\s*((inputs*)+|(syntax)+|(infor*m*a*t*i*o*n*)+|(set+ings*)+|(help)+|(hel\[)+|(hel\])+|(rules*)+|(co+m+ands*)+|(o+m+ands*)+|(cmds*)+|(cmnds*)+|(co+ntro+l+s*)+|(co+ntro+l+ers*)+|(o+ntro+l+s*)+|(o+ntro+l+ers*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do(es)*|to)*\s*play\s*(chat)*\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do(es)*|to)*\s*(this)*\s*work\s*\?*)+|((chat)*\s*(h[oi]w|hw[oi])\s*(can|do(es)*|to)*\s*(i|we)\s*play\s*(chat)*\s*\?*)+)+/ig.test(originalMessage);
       if (helpPrefixCheck == true) {
         if (helpMessageCooldown >= new Date().getTime()) {
           //console.log("Don't send the help message yet");
@@ -21397,30 +21413,36 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
         updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
         for (let splitInputsInMultipleStringsIndex = 0; splitInputsInMultipleStringsIndex < splitInputsInMultipleStrings.length; splitInputsInMultipleStringsIndex++) {
           if (splitInputsInMultipleStringsIndex == 0) {
-            if (isExecutingSavedMacro == false) {
-              client.reply(channel, "@" + username + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
-            }
-            if (isExecutingSavedMacro == true) {
-              client.reply(channel, "@" + username + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
+            if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+              if (isExecutingSavedMacro == false) {
+                client.reply(channel, "@" + username + " Your input was interpreted as " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
+              }
+              if (isExecutingSavedMacro == true) {
+                client.reply(channel, "@" + username + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex], messageId);
+              }
             }
           }
           if (splitInputsInMultipleStringsIndex > 0 && splitInputsInMultipleStringsIndex != splitInputsInMultipleStrings.length - 1) {
-            if (isExecutingSavedMacro == false) {
-              client.action(channel, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
-            }
-            if (isExecutingSavedMacro == true) {
-              client.action(channel, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+            if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+              if (isExecutingSavedMacro == false) {
+                client.action(channel, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+              }
+              if (isExecutingSavedMacro == true) {
+                client.action(channel, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex]);
+              }
             }
           }
           if (splitInputsInMultipleStringsIndex == splitInputsInMultipleStrings.length - 1) {
             precisionInputTotalTimesToLoop = macroParametersToWrite[4] + 1;
             precisionInputTotalDuration = precisionInputTotalTimesToLoop * precisionInputSingleLoopDuration;
             //precisionInputTotalDuration = precisionInputTotalTimesToLoop * innerLoopTotalDuration;
-            if (isExecutingSavedMacro == false) {
-              client.action(channel, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
-            }
-            if (isExecutingSavedMacro == true) {
-              client.action(channel, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
+            if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+              if (isExecutingSavedMacro == false) {
+                client.action(channel, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
+              }
+              if (isExecutingSavedMacro == true) {
+                client.action(channel, splitInputsInMultipleStrings[splitInputsInMultipleStringsIndex] + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.");
+              }
             }
           }
         }
@@ -21436,13 +21458,15 @@ function preTestMacroString(macroStringToPreTest, sendToArduino, reverseInputs, 
         //precisionInputTotalDuration = precisionInputTotalTimesToLoop * innerLoopTotalDuration;
         precisionInputStringToDisplay2 = precisionInputStringToDisplay2.replace(/(\s*\*+)+/ig, "*");
         updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-        if (isExecutingSavedMacro == false) {
-          client.reply(channel, "@" + username + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
+        if (globalConfig.enable_your_input_was_interpreted_as_reply_message == true) {
+          if (isExecutingSavedMacro == false) {
+            client.reply(channel, "@" + username + " Your input was interpreted as " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
+          }
+          if (isExecutingSavedMacro == true) {
+            client.reply(channel, "@" + username + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
+          }
+          //client.reply(channel, "@" + username + " Your input was interpreted as " + precisionInputStringToDisplay2, messageId);
         }
-        if (isExecutingSavedMacro == true) {
-          client.reply(channel, "@" + username + " Executing macro " + savedMacroNameToExecute + ", executed " + savedMacroTimesWasUsed + " times " + precisionInputStringToDisplay2 + ". Single Loop Duration: " + precisionInputSingleLoopDuration + controllerConfig.time_unit_short + " Total Duration: " + precisionInputTotalDuration + controllerConfig.time_unit_short + ". Type Stop or Wait to stop execution of inputs early.", messageId);
-        }
-        //client.reply(channel, "@" + username + " Your input was interpreted as " + precisionInputStringToDisplay2, messageId);
       }
       //let splitInputsInMultipleStrings = precisionInputStringToDisplay2.match(/.{100}/ig);
       //console.log(splitInputsInMultipleStrings);
