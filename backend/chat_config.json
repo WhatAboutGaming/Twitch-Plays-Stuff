@@ -28,7 +28,7 @@
   "change_user_color_before_sending_message": false,
   "check_chat_connection_periodically": false,
   "check_chat_connection_period_millis": 60000,
-  "send_ping_periodically": true,
+  "send_ping_periodically": false,
   "send_ping_period_millis": 60000,
   "send_ping_independently_from_check_chat_connection": true,
   "channels_to_listen": [
