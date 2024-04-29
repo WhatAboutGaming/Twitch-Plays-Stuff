@@ -8,11 +8,11 @@
     "secure": true
   },
   "identity": {
-    "username": "username",
-    "password": "oauth"
+    "username": "justinfan123",
+    "password": "OAUTHOAUTHOAUTHOAUTHOAUTHOAUTH"
   },
   "channels": [
-    "channel_name"
+    "justinfan123"
   ],
   "log_chat_as_moderator": true,
   "log_chat_as_receiver": true,
