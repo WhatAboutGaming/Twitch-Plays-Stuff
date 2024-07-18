@@ -9,7 +9,7 @@ Reference for PlayStation/PlayStation 2 controller:
 2)	http://store.curiousinventor.com/guides/PS2/
 3)	http://www.lynxmotion.com/images/files/ps2cmd01.txt
 4)	http://www.billporter.info/2010/06/05/playstation-2-controller-arduino-library-v1-0/
-5) http://procrastineering.blogspot.com/2010/12/simulated-ps2-controller-for.html (Autonomous Guitar Hero controller)
+5)  http://procrastineering.blogspot.com/2010/12/simulated-ps2-controller-for.html (Autonomous Guitar Hero controller)
 
 Reference for Nintendo 64 controller:
 
@@ -21,6 +21,11 @@ Reference for Nintendo 64 controller:
 6)	https://i.imgur.com/ZMwTdwp.png
 7)	https://dpedu.io/article/2015-03-11/nintendo-64-joystick-pinout-arduino
 8)	https://www.youtube.com/watch?v=0QLZCfqUeg4
+9)  https://nintenduino.wordpress.com/documentation/controller-reference/
+10)  https://nintenduino.files.wordpress.com/2013/12/untitled.png
+11)  https://nintenduino.files.wordpress.com/2013/12/protocolv1-0.png
+12)  https://bitbuilt.net/forums/index.php?threads/n64-controller-cnt-nus-required-components.3267/
+13)  https://bitbuilt.net/forums/index.php?attachments/bb_edition-png.10887/
 
 Reference for Gamecube controller:
 
@@ -34,5 +39,5 @@ Reference for Gamecube controller:
 
 Reference for SNES controller:
 
-1) https://github.com/marcosassis/gamepaduino/wiki/SNES-controller-interface
-2) https://www.repairfaq.org/REPAIR/F_SNES.html
+1)  https://github.com/marcosassis/gamepaduino/wiki/SNES-controller-interface
+2)  https://www.repairfaq.org/REPAIR/F_SNES.html
