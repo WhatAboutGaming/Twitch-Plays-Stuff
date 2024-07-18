@@ -17,6 +17,8 @@
   https://nintenduino.wordpress.com/documentation/controller-reference/
   https://nintenduino.files.wordpress.com/2013/12/untitled.png
   https://nintenduino.files.wordpress.com/2013/12/protocolv1-0.png
+  https://bitbuilt.net/forums/index.php?threads/n64-controller-cnt-nus-required-components.3267/
+  https://bitbuilt.net/forums/index.php?attachments/bb_edition-png.10887/
 */
 
 /*
