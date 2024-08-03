@@ -163,6 +163,8 @@ var globalConfig = {
   github_repo: "",
   run_id: -1,
   notes: "To test server: Set game_title as TEST RUN 0, set stream_title as TEST RUN 1, set next_game_title as TEST RUN 2, set main_database_name as test_database_main, set chatters_collection_name as test_database_chatters, set run_name as test_database_run_name, set global_database_name as test_database_global, set inputter_database_name as test_database_inputters, set macro_database_name as test_database_macro, set run_id as -1",
+  overlay_enable_hourly_beeps: false,
+  overlay_enable_secondary_beeps: false,
   overlay_header_text: "Restarting overlay",
   overlay_advanced_mode_help_message_to_display: "\n\n\n\n\n!help to learn how to play",
   overlay_text_rotation: [
@@ -262,6 +264,10 @@ var advancedModeHelpMessageToDisplay = globalConfig.overlay_advanced_mode_help_m
 
 var secondCurrent = 0;
 var secondOld = 0;
+var minuteCurrent = 0;
+var minuteOld = 0;
+var hourCurrent = 0;
+var hourOld = 0;
 var currentValueToDisplay = 0;
 
 var font;
@@ -271,6 +277,9 @@ var controllerMotorOnGraphics = [[0], [0], [0], [0]];
 var controllerMotorOffGraphics = [0, 0, 0, 0];
 var controllerLedOnGraphics = [0, 0, 0, 0];
 var controllerLedOffGraphics = [0, 0, 0, 0];
+
+var hourlyBeepSoundEffects = [0, 0];
+var secondaryBeepSoundEffects = [0, 0];
 
 var socket;
 var inputQueue = [];
@@ -409,6 +418,12 @@ function preload() {
   controllerLedOffGraphics[1] = loadImage("placeholder.png"); // LED 2 Off
   controllerLedOffGraphics[2] = loadImage("placeholder.png"); // LED 3 Off
   controllerLedOffGraphics[3] = loadImage("placeholder.png"); // LED 4 Off
+
+  hourlyBeepSoundEffects[0] = loadSound("watch_beep_1.mp3");
+  hourlyBeepSoundEffects[1] = loadSound("watch_beep_2.mp3");
+
+  secondaryBeepSoundEffects[0] = loadSound("watch_beep_1_short.mp3");
+  secondaryBeepSoundEffects[1] = loadSound("watch_beep_2_short.mp3");
   if (controllerConfig.use_controller_graphics == true) {
     controllerGraphics = loadImage(controllerConfig.controller_graphics);
   }
@@ -895,6 +910,8 @@ function draw() {
   let playTimeStringNoMillis = playTimeDays + "d " + playTimeHours + "h " + playTimeMinutes + "m " + playTimeSeconds + "s";
   //console.log(playTimeDays + "d" + playTimeHours + "h" + playTimeMinutes + "m" + playTimeSeconds + "s" + playTimeMillis + "ms");
   secondCurrent = new Date().getUTCSeconds();
+  minuteCurrent = new Date().getUTCMinutes();
+  hourCurrent = new Date().getUTCHours();
   //ttsAudioStatus = ttsAudio.isLoaded();
   //var inputToHighlight = 0;
   inputToHighlight = inputQueueLength - inputQueue.length;
@@ -1274,6 +1291,28 @@ function draw() {
 
   if (globalConfig.overlay_text_rotation.length > 0) {
     if (secondCurrent != secondOld) {
+      if (minuteCurrent != minuteOld) {
+        if (globalConfig.overlay_enable_secondary_beeps == true) {
+          if (minuteCurrent == 15 || minuteCurrent == 30 || minuteCurrent == 45) {
+            if (secondaryBeepSoundEffects.length > 0) {
+              let randomSecondaryBeepSoundEffectIndex = Math.floor(Math.random() * secondaryBeepSoundEffects.length);
+              //console.log(new Date().toISOString() + " randomSecondaryBeepSoundEffectIndex = " + randomSecondaryBeepSoundEffectIndex);
+              secondaryBeepSoundEffects[randomSecondaryBeepSoundEffectIndex].play();
+            }
+          }
+        }
+        if (globalConfig.overlay_enable_hourly_beeps == true) {
+          if (minuteCurrent == 0) {
+            if (hourCurrent != hourOld) {
+              if (hourlyBeepSoundEffects.length > 0) {
+                let randomHourlyBeepSoundEffectIndex = Math.floor(Math.random() * hourlyBeepSoundEffects.length);
+                //console.log(new Date().toISOString() + " randomHourlyBeepSoundEffectIndex = " + randomHourlyBeepSoundEffectIndex);
+                hourlyBeepSoundEffects[randomHourlyBeepSoundEffectIndex].play();
+              }
+            }
+          }
+        }
+      }
       if (secondCurrent % 3 == 0) {
         currentValueToDisplay++;
         if (currentValueToDisplay > globalConfig.overlay_text_rotation.length - 1) {
@@ -1800,6 +1839,8 @@ function draw() {
     //image(controllerGraphics, 40, 40, 13, 19, 13, 50, 13, 19); // Position X on Canvas, Position Y on Canvas, Width on Canvas, Height on Canvas, Origin X on Image, Origin Y on Image, Width on image, Height on Image    
   }
   secondOld = secondCurrent;
+  minuteOld = minuteCurrent;
+  hourOld = hourCurrent;
   isTtsBusyPrevious = isTtsBusy;
   //ttsAudioStatusPrevious = ttsAudioStatus;
 }

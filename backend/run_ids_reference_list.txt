@@ -1,0 +1,11 @@
+run_id -1 = TEST ONLY
+run_id 1 = Paper Mario TTYD (Wii)
+run_id 2 = Mario RPG (SNES)
+run_id 3 = Chrono Trigger (SNES)
+run_id 4 = ALTTP (SNES)
+run_id 5 = PS2 Test Stream (PS2)
+run_id 6 = Final Fantasy (NES)
+run_id 7 = KH2 Revisit (PS2)
+run_id 8 = Final Fantasy 4 (SNES)
+run_id 9 = Final Fantasy 6 (SNES)
+run_id 10 = KH2 Re-Revisit (PS2)

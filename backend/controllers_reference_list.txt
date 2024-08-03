@@ -1,0 +1,8 @@
+gcn.json contains gcn_controller.json (Normal GCN controller to be used with Gamecube games and Wii games that have native Gamecube controller support)
+gcn_rvl_sideways.json contains gcn_rvl_sideways_controller.json (This is an RVLoader controller (GCN to Wii))
+gcn_vc_nes.json contains gcn_vc_nes_controller.json (GCN controller to be used with NES Wii Virtual Console games)
+gcn_vc_snes.json contains gcn_vc_snes_controller.json (GCN controller to be used with Super NES Wii Virtual Console games)
+n64.json contains n64_controller.json (Normal N64 controller to be used with an actual N64 console)
+ps2.json contains ps2_controller.json (PS2 controller with full analog support (Uses analog sticks))
+ps2_digital.json contains ps2_controller_digital.json (PS2 controller but only digital (Does not use analog sticks))
+snes_controller.json does not have any associations (Because I never had any need to do stuff on actual snes because my snes is kinda unreliable)

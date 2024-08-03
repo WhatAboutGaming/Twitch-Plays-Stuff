@@ -1,0 +1,954 @@
+{
+  "com_port": "COM5",
+  "com_port_parameters": {
+    "autoOpen": true,
+    "baudRate": 500000
+  },
+  "time_unit": "milliseconds",
+  "time_unit_alternate": "seconds",
+  "time_unit_short": "ms",
+  "millis_to_seconds_conversion_threshold": 10,
+  "display_framerate": false,
+  "normal_delay": 266,
+  "max_delay": 65535,
+  "held_delay": 0,
+  "stick_minimum": 0,
+  "stick_maximum": 255,
+  "stick_center": 127,
+  "stick_limit": 0,
+  "initial_macro_preamble": 4,
+  "final_macro_preamble": 68,
+  "initial_macro_inner_loop": 69,
+  "final_macro_inner_loop": 133,
+  "advanced_input_macros_allowed": 64,
+  "advanced_input_macro_inner_loops_allowed": 64,
+  "max_duration_per_precision_input_millis": 65535,
+  "default_duration_per_precision_input_millis": 266,
+  "held_duration_per_precision_input_millis": 533,
+  "max_times_to_repeat_macro": 255,
+  "controller_object": "gcn_rvl_sideways_controller.json",
+  "simultaneous_different_basic_buttons_allowed": 5,
+  "use_vibration_and_led_data": false,
+  "vibration_negative_range_pixels": -5,
+  "vibration_positive_range_pixels": 5,
+  "vibration_options": [
+    {
+      "display_motor": false,
+      "enable_visual_vibration": false,
+      "motor_label_name": "Rumble",
+      "motor_label_state_on": "Rumble On",
+      "motor_label_state_off": "Rumble Off",
+      "motor_label_scale": 2,
+      "motor_label_position": [2, 525],
+      "motor_icon_on": ["assets\\color\\single_inverted_normal_0.png", "assets\\color\\single_inverted_normal_1.png", "assets\\color\\single_inverted_normal_2.png", "assets\\color\\single_inverted_rotated_0.png", "assets\\color\\single_inverted_rotated_1.png", "assets\\color\\single_inverted_rotated_2.png", "assets\\color\\single_normal_0.png", "assets\\color\\single_normal_1.png", "assets\\color\\single_normal_2.png", "assets\\color\\single_rotated_0.png", "assets\\color\\single_rotated_1.png", "assets\\color\\single_rotated_2.png"],
+      "motor_icon_off": "assets\\bw\\single_normal_bw_0.png",
+      "motor_icon_scale": 1,
+      "motor_icon_position": [2, 485],
+      "divisor_to_use_for_motor_icon": 1,
+      "motor_color_state_on": "#00FF00FF",
+      "motor_color_state_off": "#FF0000FF",
+      "motor_behavior": "vibrate_icon",
+      "send_status_change_message": false,
+      "notes": "motor_behavior is used to tell how the vibration should be displayed, if it should use its own icon or if it should vibrate something else in the overlay, like the text that displays what input is currently being executed, as an example, it is only recommended to use integers for the scales motor_label_scale and motor_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "vibrate_label, vibrate_icon, vibrate_icon_and_label, vibrate_current_input, vibrate_current_input_with_color_change, all(?)"
+    },
+    {
+      "display_motor": false,
+      "enable_visual_vibration": false,
+      "motor_label_name": "Motor 2",
+      "motor_label_state_on": "Motor 2 On",
+      "motor_label_state_off": "Motor 2 Off",
+      "motor_label_scale": 2,
+      "motor_label_position": [200, 220],
+      "motor_icon_on": ["placeholder.png"],
+      "motor_icon_off": "placeholder.png",
+      "motor_icon_scale": 2,
+      "motor_icon_position": [200, 220],
+      "divisor_to_use_for_motor_icon": 1,
+      "motor_color_state_on": "#00FF00FF",
+      "motor_color_state_off": "#FF0000FF",
+      "motor_behavior": "vibrate_icon",
+      "send_status_change_message": false,
+      "notes": "motor_behavior is used to tell how the vibration should be displayed, if it should use its own icon or if it should vibrate something else in the overlay, like the text that displays what input is currently being executed, as an example, it is only recommended to use integers for the scales motor_label_scale and motor_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "vibrate_label, vibrate_icon, vibrate_icon_and_label, vibrate_current_input, vibrate_current_input_with_color_change, all(?)"
+    },
+    {
+      "display_motor": false,
+      "enable_visual_vibration": false,
+      "motor_label_name": "Motor 3",
+      "motor_label_state_on": "Motor 3 On",
+      "motor_label_state_off": "Motor 3 Off",
+      "motor_label_scale": 2,
+      "motor_label_position": [200, 230],
+      "motor_icon_on": ["placeholder.png"],
+      "motor_icon_off": "placeholder.png",
+      "motor_icon_scale": 2,
+      "motor_icon_position": [200, 230],
+      "divisor_to_use_for_motor_icon": 1,
+      "motor_color_state_on": "#00FF00FF",
+      "motor_color_state_off": "#FF0000FF",
+      "motor_behavior": "vibrate_icon",
+      "send_status_change_message": false,
+      "notes": "motor_behavior is used to tell how the vibration should be displayed, if it should use its own icon or if it should vibrate something else in the overlay, like the text that displays what input is currently being executed, as an example, it is only recommended to use integers for the scales motor_label_scale and motor_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "vibrate_label, vibrate_icon, vibrate_icon_and_label, vibrate_current_input, vibrate_current_input_with_color_change, all(?)"
+    },
+    {
+      "display_motor": false,
+      "enable_visual_vibration": false,
+      "motor_label_name": "Motor 4",
+      "motor_label_state_on": "Motor 4 On",
+      "motor_label_state_off": "Motor 4 Off",
+      "motor_label_scale": 2,
+      "motor_label_position": [200, 240],
+      "motor_icon_on": ["placeholder.png"],
+      "motor_icon_off": "placeholder.png",
+      "motor_icon_scale": 2,
+      "motor_icon_position": [200, 240],
+      "divisor_to_use_for_motor_icon": 1,
+      "motor_color_state_on": "#00FF00FF",
+      "motor_color_state_off": "#FF0000FF",
+      "motor_behavior": "vibrate_icon",
+      "send_status_change_message": false,
+      "notes": "motor_behavior is used to tell how the vibration should be displayed, if it should use its own icon or if it should vibrate something else in the overlay, like the text that displays what input is currently being executed, as an example, it is only recommended to use integers for the scales motor_label_scale and motor_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "vibrate_label, vibrate_icon, vibrate_icon_and_label, vibrate_current_input, vibrate_current_input_with_color_change, all(?)"
+    }
+  ],
+  "led_options": [
+    {
+      "display_led": false,
+      "led_label_name": "Turbo",
+      "led_label_state_on": "Turbo On",
+      "led_label_state_off": "Turbo Off",
+      "led_label_scale": 2,
+      "led_label_position": [200, 250],
+      "led_icon_on": "placeholder.png",
+      "led_icon_off": "placeholder.png",
+      "led_icon_scale": 2,
+      "led_icon_position": [200, 250],
+      "divisor_to_use_for_led_icon": 1,
+      "led_color_state_on": "#00FF00FF",
+      "led_color_state_off": "#FF0000FF",
+      "led_behavior": "use_icon",
+      "send_status_change_message": false,
+      "notes": "led_behavior is used to tell how the LED should be displayed, if it should use its own icon or if it should light up something else in the overlay, like the text that displays what input is currently being executed(?), as an example, it is only recommended to use integers for the scales led_label_scale and led_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "use_label, use_icon, use_icon_and_label, use_current_input(?), use_current_input_with_color_change(?), all(?)"
+    },
+    {
+      "display_led": false,
+      "led_label_name": "Macro",
+      "led_label_state_on": "Macro On",
+      "led_label_state_off": "Macro Off",
+      "led_label_scale": 2,
+      "led_label_position": [200, 260],
+      "led_icon_on": "placeholder.png",
+      "led_icon_off": "placeholder.png",
+      "led_icon_scale": 2,
+      "led_icon_position": [200, 260],
+      "divisor_to_use_for_led_icon": 1,
+      "led_color_state_on": "#00FF00FF",
+      "led_color_state_off": "#FF0000FF",
+      "led_behavior": "use_icon",
+      "send_status_change_message": false,
+      "notes": "led_behavior is used to tell how the LED should be displayed, if it should use its own icon or if it should light up something else in the overlay, like the text that displays what input is currently being executed(?), as an example, it is only recommended to use integers for the scales led_label_scale and led_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "use_label, use_icon, use_icon_and_label, use_current_input(?), use_current_input_with_color_change(?), all(?)"
+    },
+    {
+      "display_led": false,
+      "led_label_name": "LED 3",
+      "led_label_state_on": "LED 3 On",
+      "led_label_state_off": "LED 3 Off",
+      "led_label_scale": 2,
+      "led_label_position": [200, 270],
+      "led_icon_on": "placeholder.png",
+      "led_icon_off": "placeholder.png",
+      "led_icon_scale": 2,
+      "led_icon_position": [200, 270],
+      "divisor_to_use_for_led_icon": 1,
+      "led_color_state_on": "#00FF00FF",
+      "led_color_state_off": "#FF0000FF",
+      "led_behavior": "use_icon",
+      "send_status_change_message": false,
+      "notes": "led_behavior is used to tell how the LED should be displayed, if it should use its own icon or if it should light up something else in the overlay, like the text that displays what input is currently being executed(?), as an example, it is only recommended to use integers for the scales led_label_scale and led_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "use_label, use_icon, use_icon_and_label, use_current_input(?), use_current_input_with_color_change(?), all(?)"
+    },
+    {
+      "display_led": false,
+      "led_label_name": "LED 4",
+      "led_label_state_on": "LED 4 On",
+      "led_label_state_off": "LED 4 Off",
+      "led_label_scale": 2,
+      "led_label_position": [200, 280],
+      "led_icon_on": "placeholder.png",
+      "led_icon_off": "placeholder.png",
+      "led_icon_scale": 2,
+      "led_icon_position": [200, 280],
+      "divisor_to_use_for_led_icon": 1,
+      "led_color_state_on": "#00FF00FF",
+      "led_color_state_off": "#FF0000FF",
+      "led_behavior": "use_icon",
+      "send_status_change_message": false,
+      "notes": "led_behavior is used to tell how the LED should be displayed, if it should use its own icon or if it should light up something else in the overlay, like the text that displays what input is currently being executed(?), as an example, it is only recommended to use integers for the scales led_label_scale and led_icon_scale, it is recommended that icon is scaled to 10x using nearest neighbor, then the program does the rest, downside is that it makes the files larger and they also use up more RAM when the page is loaded, also takes slightly longer to load, but I think loading speeds are pretty much inperceptible",
+      "valid_behaviors": "use_label, use_icon, use_icon_and_label, use_current_input(?), use_current_input_with_color_change(?), all(?)"
+    }
+  ],
+  "controller_graphics": "gcn_controller_graphics.png",
+  "use_controller_graphics": false,
+  "help_message_basic": [
+    "Valid inputs are A, B, One, Two, Plus (or Start), Minus (or Select) (Buttons), Up, Down, Left, Right (D Pad), PUp, PDown, PLeft, PRight (Short for PointerUp, PointerDown, PointerLeft, PointerRight, moves the pointer around the screen), and Shake (Shakes the controller). It's exactly what you'd see if you looked at a Wii Remote controller! Typos work too!",
+    "Typing 1, 2, + or - DOES NOT WORK, you have to type One, Two, Plus or Minus to press said buttons, unfortunately. It's an issue that I never thought I would come across, because numbers and + - are already reserved for other functionalities, so I had to map those buttons as the words One, Two, Plus and Minus. I apologize for the inconvenience.",
+    "Up to {{simultaneous_different_basic_buttons_allowed}} different inputs can be executed at the same time by using + to combine inputs. Example: B+Up+PRight will press the B Button, press Up on the D Pad and move the pointer to the right. It is not needed to start your message with ! mark.",
+    "Normal duration of inputs is {{normal_delay}} {{time_unit}}, but you can end your input with - to execute the inputs indefinitely until the next input comes. Alternatively, you can type Wait or Stop to stop the execution of a held input. Maximum duration for an input is {{max_delay}} {{time_unit}}.",
+    "Example: A+Shake+Right- will hold the Button A, shake the controller, and will press Right on the D Pad. Commands are NOT case sensitive: left and lEft will both press Left on the D Pad.",
+    "You can type Basic or Advanced to vote to change input modes. The majority of votes needs at least 75% of votes to have the input mode changed to their side, votes are removed from the pool after 5 minutes. After that, you'll have to vote again to have your vote readded to the pool.",
+    "Alternatively, you can spam votes to make sure your vote always stays in the pool. You can switch sides whenever you want. Basic mode executes inputs are they are received from chat, it is limited for some tasks, while advanced can be used to do a sequence of very precise inputs. Current mode is Basic mode. You can also find this help message in the stream description."
+  ],
+  "simultaneous_different_advanced_buttons_allowed": 5,
+  "help_message_advanced": [
+    "Valid inputs are A, B, One, Two, Plus (or Start), Minus (or Select) (Buttons), Up, Down, Left, Right (D Pad), PUp, PDown, PLeft, PRight (Short for PointerUp, PointerDown, PointerLeft, PointerRight, moves the pointer around the screen), and Shake (Shakes the controller). It's exactly what you'd see if you looked at a Wii Remote controller! Typos work too!",
+    "Typing 1, 2, + or - DOES NOT WORK, you have to type One, Two, Plus or Minus to press said buttons, unfortunately. It's an issue that I never thought I would come across, because numbers and + - are already reserved for other functionalities, so I had to map those buttons as the words One, Two, Plus and Minus. I apologize for the inconvenience.",
+    "Up to {{simultaneous_different_advanced_buttons_allowed}} different inputs can be executed at the same time by using + to combine inputs. Example: B+Up+PRight will press the B Button, press Up on the D Pad and move the pointer to the right. It is not needed to start your message with ! mark. Commands are NOT case sensitive: left and lEft will both press Left on the D Pad.",
+    "Normal duration of inputs is {{default_duration_per_precision_input_millis}} {{time_unit}}. You can separate multiple inputs by using spaces or commas to execute multiple inputs in rapid succession.",
+    "Example: Up+Right+B;2000 A+Shake+Down;1000 *5 Will press Up and Right on the D Pad and press the B Button for 2000 {{time_unit}} (2 {{time_unit_alternate}}), then press the A button, shake the controller, and press Down on the D Pad for 1000 {{time_unit}} (1 {{time_unit_alternate}}), and *5 means the input will be executed once, then it will be repeated 5 times. There is no delay between inputs.",
+    "You can use square brackets to make smaller loops. Example: [A+B;1000 One+Two;500*4] Plus [Up+Right Up+Left*2] 2 will press A+B then One+Two 4 times, then will press Plus, then will press Up+Right then Up+Left 2 times, and everything will be repeated 2 times.",
+    "There is no delay between inputs, but sometimes you'll need a delay between inputs, you can use Wait or Stop to add a delay between inputs. Example: A Wait *{{max_times_to_repeat_macro}} will press the A Button for {{default_duration_per_precision_input_millis}} {{time_unit}} then wait for another {{default_duration_per_precision_input_millis}} {{time_unit}}, and will repeat that macro {{max_times_to_repeat_macro}} times, basically mashing the A Button {{max_times_to_repeat_macro}}+1 times. Macros can be repeated up to {{max_times_to_repeat_macro}} times. Up to {{advanced_input_macros_allowed}} inputs can be chained in a macro.",
+    "You can execute commands backwards if you start your message with Invert. Example: Invert A B One Two will execute commands as Two One B A. You can invert directions if you start you message with Opposite. Example: Opposite Up Down Left Right will execute commands as Down Up Right Left.",
+    "You can use both Invert and Opposite at the same time. Example: Opposite Invert A+Up B+Down One+Left Two+Right Plus Up Down will execute commands as Up Down Plus Two+Left One+Right B+Up A+Down.",
+    "Maximum duration for an input is {{max_duration_per_precision_input_millis}} {{time_unit}}. You can type Basic or Advanced to vote to change input modes. The majority of votes needs at least 75% of votes to have the input mode changed to their side, votes are removed from the pool after 5 minutes. After that, you'll have to vote again to have your vote readded to the pool.",
+    "Alternatively, you can spam votes to make sure your vote always stays in the pool. You can switch sides whenever you want. Basic mode executes inputs are they are received from chat, it is limited for some tasks, while advanced can be used to do a sequence of very precise inputs. Current mode is Advanced mode.",
+    "You can learn how to save and execute saved macros (and more!) by using the command !macrohelp. You can also find this help message in the stream description."
+  ],
+  "blacklisted_combos": [
+    {
+      "blacklisted_combo_input_string": "One+Two+Home",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x38007F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Reset controller 1",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "One",
+          "component_input_value": "0x20007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Two",
+          "component_input_value": "0x10007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Home",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x0B037F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Reset controller 2",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Plus+Shake+Home",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x0E027F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Reset system",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x07037F7F7F7F0000L",
+      "blacklisted_combo_input_description": "RVLoader Safe Menu",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Shake+Two+Up",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x14107F7F7F7F0000L",
+      "blacklisted_combo_input_description": "RVLoader Volume +",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Two",
+          "component_input_value": "0x10007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Up",
+          "component_input_value": "0x00107F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Shake+Two+Down",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x14207F7F7F7F0000L",
+      "blacklisted_combo_input_description": "RVLoader Volume -",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Two",
+          "component_input_value": "0x10007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Down",
+          "component_input_value": "0x00207F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Shake+One+Up",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x24107F7F7F7F0000L",
+      "blacklisted_combo_input_description": "RVLoader Brightness +",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "One",
+          "component_input_value": "0x20007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Up",
+          "component_input_value": "0x00107F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Shake+One+Down",
+      "blacklisted_combo_input_size": 3,
+      "blacklisted_combo_input_value": "0x24207F7F7F7F0000L",
+      "blacklisted_combo_input_description": "RVLoader Brightness -",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "One",
+          "component_input_value": "0x20007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Down",
+          "component_input_value": "0x00207F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake+Home",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x0F037F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Reset system 2",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake+B",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x47037F7F7F7F0000L",
+      "blacklisted_combo_input_description": "RVLoader VGA Mode",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Plus+Shake+B+Up",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x46127F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 1",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Up",
+          "component_input_value": "0x00107F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Plus+Shake+B+Down",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x46227F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 2",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Down",
+          "component_input_value": "0x00207F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Plus+Shake+B+Right",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x46427F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 3",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Right",
+          "component_input_value": "0x00407F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Plus+Shake+B+Left",
+      "blacklisted_combo_input_size": 4,
+      "blacklisted_combo_input_value": "0x46827F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 4",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Left",
+          "component_input_value": "0x00807F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Plus+Shake+B+Up+Right",
+      "blacklisted_combo_input_size": 5,
+      "blacklisted_combo_input_value": "0x46527F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 5",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Up",
+          "component_input_value": "0x00107F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Right",
+          "component_input_value": "0x00407F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Plus+Shake+B+Down+Right",
+      "blacklisted_combo_input_size": 5,
+      "blacklisted_combo_input_value": "0x46627F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 6",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Down",
+          "component_input_value": "0x00207F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Right",
+          "component_input_value": "0x00407F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Plus+Shake+B+Up+Left",
+      "blacklisted_combo_input_size": 5,
+      "blacklisted_combo_input_value": "0x46927F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 7",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Up",
+          "component_input_value": "0x00107F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Left",
+          "component_input_value": "0x00807F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Plus+Shake+B+Down+Left",
+      "blacklisted_combo_input_size": 5,
+      "blacklisted_combo_input_value": "0x46A27F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 8",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Down",
+          "component_input_value": "0x00207F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Left",
+          "component_input_value": "0x00807F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Plus+Shake+B+Up+Down+Right+Left",
+      "blacklisted_combo_input_size": 7,
+      "blacklisted_combo_input_value": "0x46F27F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 9",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Up",
+          "component_input_value": "0x00107F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Down",
+          "component_input_value": "0x00207F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Right",
+          "component_input_value": "0x00407F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Left",
+          "component_input_value": "0x00807F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake+Home+Two+One+B+A",
+      "blacklisted_combo_input_size": 8,
+      "blacklisted_combo_input_value": "0xFF037F7F7F7F0000L",
+      "blacklisted_combo_input_description": "Turn system off 10",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Two",
+          "component_input_value": "0x10007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "One",
+          "component_input_value": "0x20007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "B",
+          "component_input_value": "0x40007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "A",
+          "component_input_value": "0x80007F7F7F7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake+Home+PUp",
+      "blacklisted_combo_input_size": 5,
+      "blacklisted_combo_input_value": "0x0F037F7F7F000000L",
+      "blacklisted_combo_input_description": "Reset game 1",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "PUp",
+          "component_input_value": "0x00007F7F7F000000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake+Home+PDown",
+      "blacklisted_combo_input_size": 5,
+      "blacklisted_combo_input_value": "0x0F037F7F7FFF0000L",
+      "blacklisted_combo_input_description": "Reset game 2",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "PDown",
+          "component_input_value": "0x00007F7F7FFF0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake+Home+PLeft",
+      "blacklisted_combo_input_size": 5,
+      "blacklisted_combo_input_value": "0x0F037F7F007F0000L",
+      "blacklisted_combo_input_description": "Reset game 3",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "PLeft",
+          "component_input_value": "0x00007F7F007F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake+Home+PRight",
+      "blacklisted_combo_input_size": 5,
+      "blacklisted_combo_input_value": "0x0F037F7FFF7F0000L",
+      "blacklisted_combo_input_description": "Reset game 4",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "PRight",
+          "component_input_value": "0x00007F7FFF7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake+Home+PUp+PLeft",
+      "blacklisted_combo_input_size": 6,
+      "blacklisted_combo_input_value": "0x0F037F7F00000000L",
+      "blacklisted_combo_input_description": "Reset game 5",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "PUp",
+          "component_input_value": "0x00007F7F7F000000L"
+        },
+        {
+          "component_input_alias": "PLeft",
+          "component_input_value": "0x00007F7F007F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake+Home+PDown+PLeft",
+      "blacklisted_combo_input_size": 6,
+      "blacklisted_combo_input_value": "0x0F037F7F00FF0000L",
+      "blacklisted_combo_input_description": "Reset game 6",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "PDown",
+          "component_input_value": "0x00007F7F7FFF0000L"
+        },
+        {
+          "component_input_alias": "PLeft",
+          "component_input_value": "0x00007F7F007F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake+Home+PUp+PRight",
+      "blacklisted_combo_input_size": 6,
+      "blacklisted_combo_input_value": "0x0F037F7FFF000000L",
+      "blacklisted_combo_input_description": "Reset game 7",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "PUp",
+          "component_input_value": "0x00007F7F7F000000L"
+        },
+        {
+          "component_input_alias": "PRight",
+          "component_input_value": "0x00007F7FFF7F0000L"
+        }
+      ]
+    },
+    {
+      "blacklisted_combo_input_string": "Minus+Plus+Shake+Home+PDown+PRight",
+      "blacklisted_combo_input_size": 6,
+      "blacklisted_combo_input_value": "0x0F037F7FFFFF0000L",
+      "blacklisted_combo_input_description": "Reset game 8",
+      "blacklisted_combo_input_components": [
+        {
+          "component_input_alias": "Minus",
+          "component_input_value": "0x01017F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Plus",
+          "component_input_value": "0x02027F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Shake",
+          "component_input_value": "0x04007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "Home",
+          "component_input_value": "0x08007F7F7F7F0000L"
+        },
+        {
+          "component_input_alias": "PDown",
+          "component_input_value": "0x00007F7F7FFF0000L"
+        },
+        {
+          "component_input_alias": "PRight",
+          "component_input_value": "0x00007F7FFF7F0000L"
+        }
+      ]
+    }
+  ]
+}

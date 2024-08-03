@@ -4996,6 +4996,8 @@
     "input_value": "0x00207F7F7F7F0000L",
     "input_name": "O",
     "input_alias": [
+      "Ball",
+      "Sphere",
       "O",
       "ᄋ",
       "0",
@@ -5018,6 +5020,9 @@
     "input_value": "0x00407F7F7F7F0000L",
     "input_name": "X",
     "input_alias": [
+      "Times",
+      "Multiplication",
+      "MultiplicationSign",
       "X",
       "Ecs",
       "Eks",
@@ -5039,6 +5044,8 @@
     "input_value": "0x00807F7F7F7F0000L",
     "input_name": "Sq",
     "input_alias": [
+      "Box",
+      "Cube",
       "Q",
       "Sq",
       "[]",

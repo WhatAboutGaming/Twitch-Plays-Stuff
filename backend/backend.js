@@ -3541,6 +3541,7 @@ function getTwitchUserFollowingChannelStatus(broadcasterId, userId, username, ch
             let userFollowTimeDelta = currentTime - userFollowedAtMillis;
             let userFollowTimeYears = (parseInt(userFollowTimeDelta / 31557600000)).toString(); // 31557600000 is 365.25 days in milliseconds
             let userFollowTimeDays = (parseInt(userFollowTimeDelta / 86400000) % 365.25).toString(); // One year has about 365.25 days
+            userFollowTimeDays = parseInt(userFollowTimeDays);
             let userFollowTimeHours = (parseInt(userFollowTimeDelta / 3600000) % 24).toString().padStart(2, "0");
             let userFollowTimeMinutes = (parseInt(userFollowTimeDelta / 60000) % 60).toString().padStart(2, "0");
             let userFollowTimeSeconds = (parseInt(userFollowTimeDelta / 1000) % 60).toString().padStart(2, "0");
@@ -4532,7 +4533,7 @@ async function onMessageHandler(target, tags, message, self) {
       /(d+o+)+\s+(y+o+\w*)+\s+(w+a+n+\w+)+\s*(t*o*)*\s*(b*e*c*o*m*e*)*\s+(p+o+p+u+l+a+r+\w*[^\s]*|f+a+m+o+u+s+\W*[^\s]*)+\s+((b+u+y+)+|(b+e+s+t+)+|(g+e+t+)+)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+\s+(a+n+d+)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+\s+(\w+)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(a+f+i+l+i+a+t+e+)+\s+(f+o+\w*)+\s+(f+r+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(s+u+\w+e+r+\w*)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+\s+(s+u+b+\w*)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(h+e+l+o+[^\s]*)+\s+(i+f+)+\s+(y+o+\w*)+\s+(n+e+d+)+\s+(r+e+a+l+)\s+(f+r+e+)+\s+(a+n+d+)+\s+(h+i+g+h+)+\s+(q+u+a+l+i+t+y+)+\s+(s+e+r+v+i+c+e+s*)+\s+(t+\w*)+\s+(i+n+c+r+e+a+s+e+)+\s+(y+o+\w*)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(h+e+l+o+[^\s]*)+\s+(i+f+)+\s+(y+o+\w*)+\s+(n+e+d+)+\s+(r+e+a+l+)\s+(f+r+e+)+\s+(a+n+d+)+\s+(h+i+[gq]+h+)+\s+(q+u+a+l+i+t+y+)+\s+(s+e+r+v+i+c+e+s*)+\s+(t+\w*)+\s+(i+n+c+r+e+a+s+e+)+\s+(y+o+\w*)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((c+u+t+)+|(b+i+t+)+|(u+)+|(s+h+o*r+t+u*r+l+)+)+\s*(\.+|d+o+t+)*\s*((l+y+)+|(t+v+)+|(c+o+m*)+|(p+l+u+s*)+|(t+o+)+|(a+t+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(b+i+g+)+\s*(\.+|d+o+t+)*\s*((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(c+h+i+l+p+|b+i+g+\s*((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+)+\s*(\.+|d+o+t+)*\s*(c+o+m*|i+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -4603,6 +4604,7 @@ async function onMessageHandler(target, tags, message, self) {
       /((\.+|d+o+t+)+\s*(s+t+o+r+e+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /((((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+((a+n+d+)*|(\,+)*)*\s*((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+\s*((a+n+d+)*|(\,+)*)*\s*((v+i+e+w+\w*)+|(f+[o0]+l+[o0]+w+\w*)+|(s+u+b+\w*)+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // the combination of the words "view(ers)", "follow(ers)" and "view(ers)" in any order (but slightly different)
       /((t+)+\s*(\.+|d+o+t+)+\s*(c+o+m*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // t.co links? bruh if you post that of course you are getting banned, you can never tell what a t.co link is
+      /((v+a+l+[\s\-\_]*k+[\s\-\_]*[\w\,]*[\s\-\_]*b+e+a+c+[ht]+)+\s*(\.+|d+o+t+)*\s*(c+o+m*)*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // valkonbeact.com code: 9cp03 (idk what this link is, it's probably another csgo scam or something)
       /((a+l+)+\s*(f+o+\w*)+\s*(y+\w*)\s*((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(((u+p+(\s*g*r*a*d*e*)*)+|(u+p+(\s*d*a*t*e*)*)+)+\s*(y+\w*)\s*((s+t+r+m+)+|(s+t+r+e+a+m+)+|(s+t+r+a+e+m+)+|(s+t+r+e+m+)+|(s+t+r+a+m+)+|(c+h+a+n+e+l+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(p+r+o+m+o+((t*i*n*g*)*|(t*e*)*)*)\s+(t+w+[li1\!\|]+t+c+h+s*)+\s+(c+h+a+n+e+l+s*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // <3 The   best service in promoting Twitch channels -  STREAMSKILL. pro\en ! Get a Free test of 20 viewers for 1 hour only with us! <3 (PART 1)
@@ -4614,7 +4616,10 @@ async function onMessageHandler(target, tags, message, self) {
       /(\d*)*\s*(h+o+u+r)+((\s+(o+n+l+y+)+)*\s+(w+i+t+h*)+\s+(u+s+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // <3 The   best service in promoting Twitch channels -  STREAMSKILL. pro\en ! Get a Free test of 20 viewers for 1 hour only with us! <3 (PART 5)
       /(h+i+)*\s*(((I+)+\s+(a+m+)+)+|((I+'+m+)+)+)+\s+(a)+\s+(s+m+[aeiouy]+l+)+\s+(s+t+r+e*a*m+i*n*g*e*r*)+(\s+(b+y+)+\s+(t+h+e+)+)*\s+(n+a+m+e*d*)+\s+([\w\-\_]+)+\s+(g+i+v+e+)+(\s+(m+e+)+)*\s+(a+)+\s+(f+o+l+o+w+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Hi I am a small streamer by the name XsaveXgoodX give me a follow I'm live rn I'm 19 and playing black ops 3 it would be much appreciated (Is this even a spam bot? I'm not sure)
       /(((c+h*e+[ck]+)+)+(\s+((m+y+)+)+)*\s+((l+i+v+e+)+)+\s+((g+i+v+e+\s*a*w+a+y+)+)+\s+((t+w+[li1\!\|]+t+c+h+s*)+)+\s*((f+o+l+o+w+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Ceck my live giveaway twitch followers
-      /((b+e+s+t+)+|(b+u+y+)+)+\s+(v+i+e+w+\w*)+\s+(\w+)+\s+(f+o+l+o+w+\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")) // Best Viewers and Followers on StreamBoo .com (  u.to/yp_QIA )
+      /((b+e+s+t+)+|(b+u+y+)+|(c+h+e+a+p)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*\s*((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Best Viewers and Followers on StreamBoo .com (  u.to/yp_QIA )
+      /((b+e+s+t+)+|(b+u+y+)+|(c+h+e+a+p)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // [Wed 2024-05-29T15:16:56Z]  <rickyboi999838893> Best viewers on cutt.ly/Pey3i71C
+      /((h+i+[gq]+h+)+\s+(q+u+a+l+i+t+y+)\s*([\w\,]*)*\s*)*((b+e+s+t+)+|(b+u+y+)+|(c+h+e+a+p)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*\s*((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // [Mon 2024-06-10T19:14:03Z]  <fafixfan> Hiqh quality and Cheap Viewers on  u.to/vRi7IA
+      /((h+i+[gq]+h+)+\s+(q+u+a+l+i+t+y+)\s*([\w\,]*)*\s*)*((b+e+s+t+)+|(b+u+y+)+|(c+h+e+a+p)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")) // [Mon 2024-06-10T19:14:03Z]  <fafixfan> Hiqh quality and Cheap Viewers on  u.to/vRi7IA
     ];
     let multiMessageSpamBotTypeA = [/((i+t+)+\s*(i+s+)|(i+t+\W*s+))+\s+(n+i+c+e+)+\s+(t+o+)+\s+(m+e+t+)+\s+(y+\w*)+\s+(\w+\W*v+e+)+\s+(w+a+t+c+h+e+d+)+\s+(y+\w*)+\s+([^\s]*)+\s+(t+w+\w*t+c+h+)\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(y+\w*)+\s+(s+i+r+\W*)+\s+(h+a+v+e+)+\s+(f+l+o+w+\W*)+\s+(i+t+\W*s+)+\s+(a+w+e+s+\w+m+e\W*)+\s+(\w+)+\s+(l+i+k+e+)+\s+(y+\w*)+\s+(s+t+r+e+a+m+\w*\W*\w*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
@@ -4823,7 +4828,7 @@ async function onMessageHandler(target, tags, message, self) {
       if (globalConfig.send_introductory_messages_to_new_users_using_twitch_tags == true) {
         if (isFirstTwitchMessage == true) {
           if (isSingleMessageSpamBot == true) {
-            console.log("BAN THAT MOTHERFUCKER");
+            console.log("BAN THAT MOTHERFUCKER A");
             //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
             banTwitchUser(roomId, userId, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
             if (globalConfig.send_messages_to_moderated_user == true) {
@@ -4930,7 +4935,7 @@ async function onMessageHandler(target, tags, message, self) {
         if (isFirstTwitchMessage == false) {
           if (isSingleMessageSpamBot == true) {
             /*
-            console.log("BAN THAT MOTHERFUCKER");
+            console.log("BAN THAT MOTHERFUCKER B");
             //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
             banTwitchUser(roomId, userId, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
             if (globalConfig.send_messages_to_moderated_user == true) {
@@ -5040,7 +5045,7 @@ async function onMessageHandler(target, tags, message, self) {
         if (isReturningChatter == true) {
           if (isSingleMessageSpamBot == true) {
             /*
-            console.log("BAN THAT MOTHERFUCKER");
+            console.log("BAN THAT MOTHERFUCKER C");
             //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
             banTwitchUser(roomId, userId, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
             if (globalConfig.send_messages_to_moderated_user == true) {
@@ -5148,7 +5153,7 @@ async function onMessageHandler(target, tags, message, self) {
         if (isReturningChatter == false) {
           if (isSingleMessageSpamBot == true) {
             /*
-            console.log("BAN THAT MOTHERFUCKER");
+            console.log("BAN THAT MOTHERFUCKER D");
             //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
             banTwitchUser(roomId, userId, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
             if (globalConfig.send_messages_to_moderated_user == true) {
@@ -6040,7 +6045,7 @@ async function onMessageHandler(target, tags, message, self) {
                     if (databaseToReadFromResult.is_account_blacklisted == true) {
                       if (databaseToReadFromResult.is_banned == false) {
                         if (globalConfig.enable_silent_timeout == true) {
-                          //console.log("Silently timeout or delete message");
+                          console.log("Silently timeout or delete message A");
                           deleteTwitchMessage(roomId, databaseToReadFromResult.last_message_sent_id, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
                           logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
                           logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
@@ -6108,7 +6113,7 @@ async function onMessageHandler(target, tags, message, self) {
                       }
                     }
                     if (databaseToReadFromResult.is_spam_bot == true) {
-                      console.log("BAN THAT MOTHERFUCKER");
+                      console.log("BAN THAT MOTHERFUCKER E");
                       //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
                       banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
                       logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
@@ -6938,7 +6943,7 @@ async function onMessageHandler(target, tags, message, self) {
                     if (databaseToReadFromResult.is_account_blacklisted == true) {
                       if (databaseToReadFromResult.is_banned == false) {
                         if (globalConfig.enable_silent_timeout == true) {
-                          //console.log("Silently timeout or delete message");
+                          console.log("Silently timeout or delete message B");
                           deleteTwitchMessage(roomId, databaseToReadFromResult.last_message_sent_id, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
                           logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
                           logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "message_deleted", null, null, null, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Message deleted silently.", new Date().getTime());
@@ -7055,21 +7060,23 @@ async function onMessageHandler(target, tags, message, self) {
                       }
                     }
                     if (databaseToReadFromResult.is_spam_bot == true) {
-                      // this should never happen tho lol
-                      console.log("BAN THAT MOTHERFUCKER AGAIN");
-                      //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
-                      logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
-                      if (globalConfig.send_messages_to_moderated_user == true) {
-                        client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot.", databaseToReadFromResult.last_message_sent_id);
-                      }
-                      if (globalConfig.send_whispers_to_moderated_user == true) {
-                        sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                        sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
-                      }
-                      if (chatConfig.send_debug_channel_messages == true) {
-                        client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
+                      if (globalConfig.ban_user_again_if_user_is_still_marked_as_spambot == true) {
+                        // this should never happen tho lol
+                        console.log("BAN THAT MOTHERFUCKER AGAIN");
+                        //updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        banTwitchUser(roomId, databaseToReadFromResult.user_id, null, "You were banned because you got detected as spam bot.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        logModbotActionToDatabase(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
+                        logModbotActionToTextFile(databaseToReadFromResult, roomId, originalMessage, "ban", null, "You were banned because you got detected as spam bot.", "You sent: " + originalMessage, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.", new Date().getTime());
+                        if (globalConfig.send_messages_to_moderated_user == true) {
+                          client.reply(target, "@" + databaseToReadFromResult.last_username_to_ping + " You were banned because you got detected as spam bot.", databaseToReadFromResult.last_message_sent_id);
+                        }
+                        if (globalConfig.send_whispers_to_moderated_user == true) {
+                          sendTwitchWhisper(databaseToReadFromResult.user_id, "You were banned because you got detected as spam bot. This whisper was sent from the channel " + target.replace(/\#+/ig, "") + ". It is possible your account may have been compromised and is being used to send malicious links to multiple streams.", twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                          sendTwitchWhisper(databaseToReadFromResult.user_id, "You sent: " + originalMessage, twitchCredentials, twitchJsonEncodedBotAppAccessToken);
+                        }
+                        if (chatConfig.send_debug_channel_messages == true) {
+                          client.action(chatConfig.debug_channel, new Date().toISOString() + " [MODBOT] user_id=" + databaseToReadFromResult.user_id + ", last_username_to_ping=" + databaseToReadFromResult.last_username_to_ping + ", last_message_sent_id=" + databaseToReadFromResult.last_message_sent_id + ", last_message_sent=" + databaseToReadFromResult.last_message_sent + ", last_message_sent_at=" + databaseToReadFromResult.last_message_sent_at_iso_timestamp + ", last_message_length=" + databaseToReadFromResult.last_message_length + ", is_first_twitch_message=" + databaseToReadFromResult.is_first_twitch_message + ", is_returning_chatter=" + databaseToReadFromResult.is_returning_chatter + ", is_account_blacklisted=" + databaseToReadFromResult.is_account_blacklisted + ", is_banned=" + databaseToReadFromResult.is_banned + ", is_first_message_spam_bot=" + databaseToReadFromResult.is_first_message_spam_bot + ", is_spam_bot=" + databaseToReadFromResult.is_spam_bot + ", roomId=" + roomId + ", target=" + target + " Banned, detected as spam bot.");
+                        }
                       }
                     }
                     if (databaseToReadFromResult.is_first_message_spam_bot == true) {
@@ -20232,28 +20239,34 @@ async function stopAllInputs() {
 
 async function stopAllInputsAndQuit() {
   console.log(new Date().toISOString() + " TWITCH PLAYS BACKEND STARTING TO EXIT PROCESS");
+  /*
   if (client.readyState() === "OPEN") {
     if (chatConfig.send_debug_channel_messages == true) {
       updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
       client.action(chatConfig.debug_channel, new Date().toISOString() + " TWITCH PLAYS BACKEND STARTING TO EXIT PROCESS");
     }
   }
+  */
   await stopAllInputs();
   console.log(new Date().toISOString() + " TWITCH PLAYS BACKEND SLEEPING");
+  /*
   if (client.readyState() === "OPEN") {
     if (chatConfig.send_debug_channel_messages == true) {
       updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
       client.action(chatConfig.debug_channel, new Date().toISOString() + " TWITCH PLAYS BACKEND SLEEPING");
     }
   }
+  */
   await sleep(500); // Sleeping to make sure all async processes actually have enough time to end (serial port related stuff as well as twitch chat are async)
   console.log(new Date().toISOString() + " TWITCH PLAYS BACKEND DONE SLEEPING, EXITING PROCESS");
+  /*
   if (client.readyState() === "OPEN") {
     if (chatConfig.send_debug_channel_messages == true) {
       updateTwitchUserRandomChatColor(twitchCredentials, twitchJsonEncodedBotAppAccessToken);
       client.action(chatConfig.debug_channel, new Date().toISOString() + " TWITCH PLAYS BACKEND DONE SLEEPING, EXITING PROCESS");
     }
   }
+  */
   process.exit(0); // 0 will let Node.js know to terminate the process when no async operations are performing. Without mentioning, it will take the default value of 0.
 }
 
@@ -21680,6 +21693,17 @@ function logModeVotesToDatabase(modeVoteDataObject, modeVotesObjectArray, newMod
   if (globalConfig.log_mode_votes_to_database == false) {
     return;
   }
+  for (let modeVotesObjectArrayIndex = 0; modeVotesObjectArrayIndex < modeVotesObjectArray.length; modeVotesObjectArrayIndex++) {
+    //console.log(new Date(millisTimestamp).toISOString() + " [MODE VOTE DATABASE] HERE'S modeVotesObjectArray AT INDEX " + modeVotesObjectArrayIndex);
+    //console.log(modeVotesObjectArray[modeVotesObjectArrayIndex]);
+    modeVotesObjectArray[modeVotesObjectArrayIndex].run_name = modeVotesObjectArray[modeVotesObjectArrayIndex].run_name.replace(/({{channel_id}})+/ig, roomId);
+    //console.log(modeVotesObjectArray[modeVotesObjectArrayIndex]);
+  }
+  //console.log(newModeVoteObject.run_name);
+  newModeVoteObject.run_name = newModeVoteObject.run_name.replace(/({{channel_id}})+/ig, roomId);
+  //console.log(newModeVoteObject.run_name);
+  //console.log(new Date(millisTimestamp).toISOString() + " [MODE VOTE DATABASE] Here's the data");
+  //console.log(newModeVoteObject);
   let playTimeTotal = millisTimestamp - runStartTime;
   let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
   let playTimeHours = (parseInt(playTimeTotal / 3600000) % 24).toString().padStart(2, "0");
@@ -21709,7 +21733,19 @@ function logModeVotesToDatabase(modeVoteDataObject, modeVotesObjectArray, newMod
     play_time_total_millis: playTimeTotal,
     play_time_total_string: playTimeString
   };
-
+  /*
+  for (let modeVotesObjectArrayIndex = 0; modeVotesObjectArrayIndex < dataToAddToDatabase.mode_votes_object_array.length; modeVotesObjectArrayIndex++) {
+    //console.log(new Date(millisTimestamp).toISOString() + " [MODE VOTE DATABASE] HERE'S dataToAddToDatabase.mode_votes_object_array AT INDEX " + modeVotesObjectArrayIndex);
+    //console.log(dataToAddToDatabase.mode_votes_object_array[modeVotesObjectArrayIndex]);
+    dataToAddToDatabase.mode_votes_object_array[modeVotesObjectArrayIndex].run_name = dataToAddToDatabase.mode_votes_object_array[modeVotesObjectArrayIndex].run_name.replace(/({{channel_id}})+/ig, roomId);
+    //console.log(dataToAddToDatabase.mode_votes_object_array[modeVotesObjectArrayIndex]);
+  }
+  */
+  //console.log(dataToAddToDatabase.new_mode_vote_object.run_name);
+  //dataToAddToDatabase.new_mode_vote_object.run_name = dataToAddToDatabase.new_mode_vote_object.run_name.replace(/({{channel_id}})+/ig, roomId);
+  //console.log(dataToAddToDatabase.new_mode_vote_object.run_name);
+  //console.log(new Date(millisTimestamp).toISOString() + " [MODE VOTE DATABASE] Here's the data");
+  //console.log(dataToAddToDatabase);
   mongoClient.connect(mongoUrl, {
     useUnifiedTopology: true
   }, function(err, db) {
@@ -21731,6 +21767,12 @@ function logModeVotesToDatabase(modeVoteDataObject, modeVotesObjectArray, newMod
 function logModeChangesToDatabase(modeVoteDataObject, modeVotesObjectArray, modeChangeReason, currentInputMode, previousInputMode, roomId, runName, runId, millisTimestamp) {
   if (globalConfig.log_input_mode_changes_to_database == false) {
     return;
+  }
+  for (let modeVotesObjectArrayIndex = 0; modeVotesObjectArrayIndex < modeVotesObjectArray.length; modeVotesObjectArrayIndex++) {
+    //console.log(new Date(millisTimestamp).toISOString() + " [MODE CHANGE DATABASE] HERE'S modeVotesObjectArray AT INDEX " + modeVotesObjectArrayIndex);
+    //console.log(modeVotesObjectArray[modeVotesObjectArrayIndex]);
+    modeVotesObjectArray[modeVotesObjectArrayIndex].run_name = modeVotesObjectArray[modeVotesObjectArrayIndex].run_name.replace(/({{channel_id}})+/ig, roomId);
+    //console.log(modeVotesObjectArray[modeVotesObjectArrayIndex]);
   }
   let playTimeTotal = millisTimestamp - runStartTime;
   let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
@@ -21754,7 +21796,16 @@ function logModeChangesToDatabase(modeVoteDataObject, modeVotesObjectArray, mode
     play_time_total_millis: playTimeTotal,
     play_time_total_string: playTimeString
   };
-
+  /*
+  for (let modeVotesObjectArrayIndex = 0; modeVotesObjectArrayIndex < dataToAddToDatabase.mode_votes_object_array.length; modeVotesObjectArrayIndex++) {
+    //console.log(new Date(millisTimestamp).toISOString() + " [MODE CHANGE DATABASE] HERE'S dataToAddToDatabase.mode_votes_object_array AT INDEX " + modeVotesObjectArrayIndex);
+    //console.log(dataToAddToDatabase.mode_votes_object_array[modeVotesObjectArrayIndex]);
+    dataToAddToDatabase.mode_votes_object_array[modeVotesObjectArrayIndex].run_name = dataToAddToDatabase.mode_votes_object_array[modeVotesObjectArrayIndex].run_name.replace(/({{channel_id}})+/ig, roomId);
+    //console.log(dataToAddToDatabase.mode_votes_object_array[modeVotesObjectArrayIndex]);
+  }
+  */
+  //console.log(new Date(millisTimestamp).toISOString() + " [MODE CHANGE DATABASE] Here's the data");
+  //console.log(dataToAddToDatabase);
   mongoClient.connect(mongoUrl, {
     useUnifiedTopology: true
   }, function(err, db) {
@@ -21851,6 +21902,17 @@ function logModeVotesToTextFile(modeVoteDataObject, modeVotesObjectArray, newMod
   if (globalConfig.log_mode_votes_to_text_file == false) {
     return;
   }
+  for (let modeVotesObjectArrayIndex = 0; modeVotesObjectArrayIndex < modeVotesObjectArray.length; modeVotesObjectArrayIndex++) {
+    //console.log(new Date(millisTimestamp).toISOString() + " [MODE VOTE DATABASE] HERE'S modeVotesObjectArray AT INDEX " + modeVotesObjectArrayIndex);
+    //console.log(modeVotesObjectArray[modeVotesObjectArrayIndex]);
+    modeVotesObjectArray[modeVotesObjectArrayIndex].run_name = modeVotesObjectArray[modeVotesObjectArrayIndex].run_name.replace(/({{channel_id}})+/ig, roomId);
+    //console.log(modeVotesObjectArray[modeVotesObjectArrayIndex]);
+  }
+  //console.log(newModeVoteObject.run_name);
+  newModeVoteObject.run_name = newModeVoteObject.run_name.replace(/({{channel_id}})+/ig, roomId);
+  //console.log(newModeVoteObject.run_name);
+  //console.log(new Date(millisTimestamp).toISOString() + " [MODE VOTE DATABASE] Here's the data");
+  //console.log(newModeVoteObject);
   // modeVoteType can be one of the 3 options
   // 1) added: A sender has never voted before and now added their fresh vote to the array
   // 2) updated: A sender has updated or changed their vote to either switch modes or to keep that vote fresh
@@ -21884,12 +21946,20 @@ function logModeVotesToTextFile(modeVoteDataObject, modeVotesObjectArray, newMod
     play_time_total_millis: playTimeTotal,
     play_time_total_string: playTimeString
   };
+  //console.log(new Date(millisTimestamp).toISOString() + " SOMEONE VOTED");
+  //console.log(dataToAddToDatabase);
   writeToTextFile("mode_votes", "mode_vote_logs", JSON.stringify(dataToAddToDatabase), roomId, millisTimestamp);
 }
 
 function logModeChangesToTextFile(modeVoteDataObject, modeVotesObjectArray, modeChangeReason, currentInputMode, previousInputMode, roomId, runName, runId, millisTimestamp) {
   if (globalConfig.log_input_mode_changes_to_text_file == false) {
     return;
+  }
+  for (let modeVotesObjectArrayIndex = 0; modeVotesObjectArrayIndex < modeVotesObjectArray.length; modeVotesObjectArrayIndex++) {
+    //console.log(new Date(millisTimestamp).toISOString() + " [MODE CHANGE DATABASE] HERE'S modeVotesObjectArray AT INDEX " + modeVotesObjectArrayIndex);
+    //console.log(modeVotesObjectArray[modeVotesObjectArrayIndex]);
+    modeVotesObjectArray[modeVotesObjectArrayIndex].run_name = modeVotesObjectArray[modeVotesObjectArrayIndex].run_name.replace(/({{channel_id}})+/ig, roomId);
+    //console.log(modeVotesObjectArray[modeVotesObjectArrayIndex]);
   }
   let playTimeTotal = millisTimestamp - runStartTime;
   let playTimeDays = (parseInt(playTimeTotal / 86400000)).toString().padStart(2, "0");
@@ -21913,6 +21983,8 @@ function logModeChangesToTextFile(modeVoteDataObject, modeVotesObjectArray, mode
     play_time_total_millis: playTimeTotal,
     play_time_total_string: playTimeString
   };
+  //console.log(new Date(millisTimestamp).toISOString() + " THE MODE HAS CHANGED");
+  //console.log(dataToAddToDatabase);
   writeToTextFile("input_mode_changes", "input_mode_change_logs", JSON.stringify(dataToAddToDatabase), roomId, millisTimestamp);
 }
 
