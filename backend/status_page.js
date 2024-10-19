@@ -94,12 +94,17 @@ var textSizeToUse = fontDefaultSize * fontSizeMultiplier;
 var textDefaultLeadingToUse = ((fontDefaultLeading * fontSizeMultiplier) - fontDefaultLeading1px) + fontStrokeWeight;
 var textStrokeLeadingToUse = ((fontStrokeLeading * fontSizeMultiplier) - fontStrokeLeading1px) + fontStrokeWeight;
 
+var currentTimeToCompareAgainstServerTime = new Date().getTime();
+var serverCurrentTime = new Date().getTime();
+var timeDriftMillis = 0;
+
 var chatConnectionStatus = {
   chat_logger_ready_state: "CLOSED",
   client_ready_state: "CLOSED",
   client_reconnect_attempts: 0,
   chat_logger_reconnect_attempts: 0,
-  server_start_time: new Date().getTime()
+  server_start_time: new Date().getTime(),
+  server_current_time: new Date().getTime()
 };
 
 var restartBackendButton;
@@ -133,7 +138,15 @@ function setup() {
 
   socket = io.connect();
   socket.on("chat_connection_status", function(data) {
+    currentTimeToCompareAgainstServerTime = new Date().getTime();
     chatConnectionStatus = data;
+    //serverCurrentTime = chatConnectionStatus.server_current_time;
+    timeDriftMillis = currentTimeToCompareAgainstServerTime - chatConnectionStatus.server_current_time;
+    //console.log("currentTimeToCompareAgainstServerTime = " + currentTimeToCompareAgainstServerTime);
+    //console.log("chatConnectionStatus.server_current_time = " + chatConnectionStatus.server_current_time);
+    //console.log("timeDriftMillis = " + timeDriftMillis);
+    //console.log("RECEIVED chatConnectionStatus");
+    //console.log(chatConnectionStatus);
   });
   
   restartBackendButton = createButton("RESTART BACKEND");
@@ -161,6 +174,10 @@ function draw() {
   fill("#FFFFFFFF");
   textLeading(textDefaultLeadingToUse);
   let uptimeTotal = new Date().getTime() - chatConnectionStatus.server_start_time;
+  //console.log("A uptimeTotal = " + uptimeTotal);
+  uptimeTotal = uptimeTotal - timeDriftMillis;
+  //console.log("B uptimeTotal = " + uptimeTotal);
+  //console.log("timeDriftMillis = " + timeDriftMillis);
   let uptimeDays = (parseInt(uptimeTotal / 86400000)).toString().padStart(2, "0");
   let uptimeHours = (parseInt(uptimeTotal / 3600000) % 24).toString().padStart(2, "0");
   let uptimeMinutes = (parseInt(uptimeTotal / 60000) % 60).toString().padStart(2, "0");
