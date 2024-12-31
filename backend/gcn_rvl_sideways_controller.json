@@ -25088,6 +25088,8 @@
     "input_value": "0x00007F7F7F7F0002L",
     "input_name": "Wait",
     "input_alias": [
+      "Xtop",
+      "Xtahp",
       "Ayop",
       "Wyop",
       "Syop",
