@@ -1,5 +1,5 @@
 {
-  "com_port": "COM5",
+  "com_port": "COM4",
   "com_port_parameters": {
     "autoOpen": true,
     "baudRate": 500000

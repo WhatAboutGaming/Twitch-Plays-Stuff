@@ -4618,6 +4618,7 @@ function checkRunStartTime() {
   if (new Date().getTime() >= runStartTime) {
     stopCheckingRunStartTime = true;
     acceptInputs = true;
+    acceptInputsFromAnyone = true;
     console.log(new Date().getTime() + " is greater or equals than " + runStartTime);
 
     chatConnectionStatus = {
@@ -4635,6 +4636,8 @@ function checkRunStartTime() {
     chatConfig = JSON.parse(fs.readFileSync(globalConfig.chat_config, "utf8")); // Contains chat settings, what account to use, what oauth, what channels to join
     twitchCredentials = JSON.parse(fs.readFileSync("twitch_credentials.json", "utf8")); // Contains Twitch Credentials used to generate OAuth 2.0 Tokens as well as the Channel ID, which is used to update channel information such as stream title
     updateNeutralControllerData();
+    acceptInputs = true;
+    acceptInputsFromAnyone = true;
 
     runStartTime = globalConfig.run_start_time;
     nextRunStartTime = globalConfig.next_run_start_time;
@@ -5092,8 +5095,10 @@ async function onMessageHandler(target, tags, message, self) {
       //console.log("Test 100"),
       /(l+e+t+[\'\’]*\s*[UuSs]*)+\s*(c+o+n+e+c+t+)+\s*(\w*)\s*(d+i+s+c+o+r+d+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // [Sat 2024-11-09T15:38:46Z]  <wumight4> Hey streamer 👋,I’ve been really enjoying your content, which is why I’m part of your squad. I noticed you’re facing some challenges with growing your channel and leveling up. I’d love to share ideas and help elevate your stream. Let’s connect on Discord: Femight7. (Let's connect on Discord)
       //console.log("Test 101"),
-      /(l+e+t+[\'\’]*\s*[UuSs]*)+\s*(c+o+n+e+c+t+)+\s*(\w*)\s*(d+i+s+c+o+r+d+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")) // [Sat 2024-11-09T15:38:46Z]  <wumight4> Hey streamer 👋,I’ve been really enjoying your content, which is why I’m part of your squad. I noticed you’re facing some challenges with growing your channel and leveling up. I’d love to share ideas and help elevate your stream. Let’s connect on Discord: Femight7. (growing your channel)
+      /(l+e+t+[\'\’]*\s*[UuSs]*)+\s*(c+o+n+e+c+t+)+\s*(\w*)\s*(d+i+s+c+o+r+d+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // [Sat 2024-11-09T15:38:46Z]  <wumight4> Hey streamer 👋,I’ve been really enjoying your content, which is why I’m part of your squad. I noticed you’re facing some challenges with growing your channel and leveling up. I’d love to share ideas and help elevate your stream. Let’s connect on Discord: Femight7. (growing your channel)
       //console.log("Test 102")
+      /(t+r+y+)+\s+(n+o+t+)*\s*(t+o+)*\s*(c+u+m+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")) // [Mon 2025-04-07T15:38:06Z] <hurkandonmez> TRY NOT TO CUM IN 1 MINUTE😰❤️‍🔥  https://cutt.ly/4rdy7eMa  @uJVVZFWI (Try not to cum)
+      //console.log("Test 103")
     ];
     let multiMessageSpamBotTypeA = [
       /((i+t+)+\s*(i+s+)|(i+t+\W*s+))+\s+(n+i+c+e+)+\s+(t+o+)+\s+(m+e+t+)+\s+(y+\w*)+\s+(\w+\W*v+e+)+\s+(w+a+t+c+h+e+d+)+\s+(y+\w*)+\s+([^\s]*)+\s+(t+w+\w*t+c+h+)\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
