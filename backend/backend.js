@@ -8420,7 +8420,7 @@ async function onMessageHandler(target, tags, message, self) {
       }
     }
     */
-    let checkFollowAge = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*(f+o+l+o+w+\s*a+g+e+)+/ig.test(originalMessage);
+    let checkFollowAge = /^[!\"#$%&'()*+,\-./:;%=%?@\[\\\]^_`{|}~¡¦¨«¬­¯°±»½⅔¾⅝⅞∅ⁿ№★†‡‹›¿‰℅æßçñ¹⅓¼⅛²⅜³⁴₱€¢£¥—–·„“”‚‘’•√π÷×¶∆′″§Π♣♠♥♪♦∞≠≈©®™✓‛‟❛❜❝❞❟❠❮❯⹂〝〞〟＂🙶🙷🙸󠀢⍻✅✔𐄂🗸‱]+\s*((f+o+l+o+w+\s*a+g+e+)+|(w+a+t+c+h+\s*(uptim[er]|upti[er]m|up\s*tim[er]|up\s*ti[er]m|tim[er]|ti[er]m)+)+)+/ig.test(originalMessage);
     if (checkFollowAge == true) {
       if (globalConfig.enable_check_followage == true) {
         getTwitchUserFollowingChannelStatus(roomId, userId, usernameToPing, target, messageId, twitchCredentials, twitchJsonEncodedBotAppAccessToken);

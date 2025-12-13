@@ -141,7 +141,7 @@ function setup() {
     currentTimeToCompareAgainstServerTime = new Date().getTime();
     chatConnectionStatus = data;
     //serverCurrentTime = chatConnectionStatus.server_current_time;
-    timeDriftMillis = currentTimeToCompareAgainstServerTime - chatConnectionStatus.server_current_time;
+    //timeDriftMillis = currentTimeToCompareAgainstServerTime - chatConnectionStatus.server_current_time;
     //console.log("currentTimeToCompareAgainstServerTime = " + currentTimeToCompareAgainstServerTime);
     //console.log("chatConnectionStatus.server_current_time = " + chatConnectionStatus.server_current_time);
     //console.log("timeDriftMillis = " + timeDriftMillis);
@@ -175,7 +175,7 @@ function draw() {
   textLeading(textDefaultLeadingToUse);
   let uptimeTotal = new Date().getTime() - chatConnectionStatus.server_start_time;
   //console.log("A uptimeTotal = " + uptimeTotal);
-  uptimeTotal = uptimeTotal - timeDriftMillis;
+  //uptimeTotal = uptimeTotal - timeDriftMillis;
   //console.log("B uptimeTotal = " + uptimeTotal);
   //console.log("timeDriftMillis = " + timeDriftMillis);
   let uptimeDays = (parseInt(uptimeTotal / 86400000)).toString().padStart(2, "0");
