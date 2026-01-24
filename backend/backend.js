@@ -4899,7 +4899,7 @@ async function onMessageHandler(target, tags, message, self) {
       //console.log("Test 2"),
       /(h+e+y+[^\s]*)+\s+(n+i+c+e+)+\s+(s+t+r+e+a+m+[^\s]*)+\s+(y+\w*)+\s+(s+h+\w*)+\s+(f+o+\w*)+\s+(s+u+r+e+)+\s+(j+o+i+n+)+\s+(\w*)\s+(s+t+r+e+a+m+[^\s]*)+\s+(c+o+m+u+n+i+t+y+)+\s+(\w*)\s+(j+u+s+t+)+\s+(f+o+u+n+d+)+\s+(\w*)\s+(d+\s*i+\s*s+\s*c+\s*o+\s*r*\s*d*)+\s+(y+e+s+t+e+r+d+a+y+)+\s+([^\s]*)\s+(c+h*e+[ck]+)+\s+(i+t+)+\s+(o+u+t+)+\s*([^\s]*)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       //console.log("Test 3"),
-      /(d+o+)+\s+((y+o+)+|(u+\s*r*)+\s*\w*\s*[\'\’]*\s*\w*)+\s+(w+a+n+\w+)+\s*(t*o*)*\s*(b*e*c*o*m*e*)*\s+(p+o+p+u+l+a+r+\w*[^\s]*|f+a+m+o+u+s+\W*[^\s]*)+\s+((b+u+y+)+|(b+e+s+t+)+|(g+e+t+)+)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+\s+(a+n+d+)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+\s+(\w+)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
+      /(d+o+)+\s+((y+o+)+|(u+\s*r*)+\s*\w*\s*[\'\’]*\s*\w*)+\s+(w+a+n+\w+)+\s*(t*o*)*\s*(b*e*c*o*m*e*)*\s+(p+o+p+u+l+a+r+\w*[^\s]*|f+a+m+o+u+s+\W*[^\s]*)+\s+((b+u+y+)+|(t+o+p+)+|(b+e+s+t+)+|(c+h+e+a+p+)+|(g+e+t+)+)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+\s+(a+n+d+)+\s+((f+[o0]+l+[o0]+w+\w*)|((s*u*b*\s*\-*\s*)*p+r+i+m+e+\w*(\s*\-*\s*s*u*b*)*\w*(\s*\-*\s*s*u*b*)*)|(v+i+e+w+\w*))+\s+(\w+)/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       //console.log("Test 4"),
       /(a+f+i+l+i+a+t+e+)+\s+(f+o+\w*)+\s+(f+r+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       //console.log("Test 5"),
@@ -5083,13 +5083,13 @@ async function onMessageHandler(target, tags, message, self) {
       //console.log("Test 94"),
       /(((c+h*e+[ck]+)+)+(\s+((m+y+)+)+)*\s+((l+i+v+e+)+)+\s+((g+i+v+e+\s*a*w+a+y+)+)+\s+((t+w+[li1\!\|]+t+c+h+s*)+)+\s*((f+o+l+o+w+\w*)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Ceck my live giveaway twitch followers
       //console.log("Test 95"),
-      /((b+e+s+t+)+|(b+u+y+)+|(c+h+e+a+p)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*\s*((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Best Viewers and Followers on StreamBoo .com (  u.to/yp_QIA )
+      /((b+u+y+)+|(t+o+p+)+|(b+e+s+t+)+|(c+h+e+a+p+)+|(g+e+t+)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*\s*((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Best Viewers and Followers on StreamBoo .com (  u.to/yp_QIA )
       //console.log("Test 96"),
-      /((b+e+s+t+)+|(b+u+y+)+|(c+h+e+a+p)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // [Wed 2024-05-29T15:16:56Z]  <rickyboi999838893> Best viewers on cutt.ly/Pey3i71C
+      /((b+u+y+)+|(t+o+p+)+|(b+e+s+t+)+|(c+h+e+a+p+)+|(g+e+t+)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // [Wed 2024-05-29T15:16:56Z]  <rickyboi999838893> Best viewers on cutt.ly/Pey3i71C
       //console.log("Test 97"),
-      /((h+i+[gq]+h+)+\s+(q+u+a+l+i+t+y+)\s*([\w\,]*)*\s*)*((b+e+s+t+)+|(b+u+y+)+|(c+h+e+a+p)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*\s*((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // [Mon 2024-06-10T19:14:03Z]  <fafixfan> Hiqh quality and Cheap Viewers on  u.to/vRi7IA
+      /((h+i+[gq]+h+)+\s+(q+u+a+l+i+t+y+)\s*([\w\,]*)*\s*)*((b+u+y+)+|(t+o+p+)+|(b+e+s+t+)+|(c+h+e+a+p+)+|(g+e+t+)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*\s*((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // [Mon 2024-06-10T19:14:03Z]  <fafixfan> Hiqh quality and Cheap Viewers on  u.to/vRi7IA
       //console.log("Test 98"),
-      /((h+i+[gq]+h+)+\s+(q+u+a+l+i+t+y+)\s*([\w\,]*)*\s*)*((b+e+s+t+)+|(b+u+y+)+|(c+h+e+a+p)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // [Mon 2024-06-10T19:14:03Z]  <fafixfan> Hiqh quality and Cheap Viewers on  u.to/vRi7IA
+      /((h+i+[gq]+h+)+\s+(q+u+a+l+i+t+y+)\s*([\w\,]*)*\s*)*((b+u+y+)+|(t+o+p+)+|(b+e+s+t+)+|(c+h+e+a+p+)+|(g+e+t+)+)+\s+((v+i+e+w+\w*)+|(f+o+l+o+w+\w*)+)+\s*([\w\,]*)*/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // [Mon 2024-06-10T19:14:03Z]  <fafixfan> Hiqh quality and Cheap Viewers on  u.to/vRi7IA
       //console.log("Test 99"),
       /((r*e*m+o+v+e+)+|(n+o+)+)+\s*(\w*)\s*(s*p+a+c+e+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")), // Remove the space / No Space
       //console.log("Test 100"),
@@ -5116,7 +5116,7 @@ async function onMessageHandler(target, tags, message, self) {
       /(h+e+y+)+\s+(t+h+e+r+e+\W*)+\s+(((w+h+a+t+)+|(h+w+a+t+)+)+\W*i*s+\s*n+e+w+)+\s+(\w+)+\s+(c+h*e+[ck]+e+d+)+\s+(o+u+t+)+\s+(y+\w*)+\s+([^\s]*)+\s+(c+h+a+n+e+l+\w*)+\s+(h+e+r+e+)+\s+(\w+)+\s+(t+w+\w*t+c+h+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /^(a*b+o+u+t+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
       /(k+e+p+)+(\s*(i+t+)*\s*)*(u+p+)+\s+(t+h+e+)+\s+(g+o+d+)+\s+(s+t+r+e+a+m\w*\W*\w*)+\s+(m+a+n+)+\s+((\w+\W*\s*a+m+)|(\w+\W*\s*m+))+\s+(g+o+i+n+g*)+\s+(t+o+)+\s+(d+o+)+\s+(a+n+i+m+a+t+e+d+)+\s+(b+r+b+\W*)+\s+(i+n+t+r+o\W*)+\s+(a+n+d+)+\s+(o+f+l+i+n+e+)+\s+(s+c+r+e+n+)+\s+(f+o+r+)+\s+(y+\w*)+\s+(c+h+a+n+e+l+\w*\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
-      /(t+a+k+e+)+\s+(\w+)+\s+(l+o+k+)+\s+((a*t*|i*n*|o*n*)*\s*(t+h+e+)+)+\s+(u+r+l+)+\s+(\w*)+\s+(m+y+)+\s+(a+c+o+u+n+t+\W*\w*)+\s+(i+m+a+g+e+)+\s+(p+r+o+b+a+b+l+y+)+\s+(t+h+e+)+\s+(((b+u+y+)|(b+e+s+t+)|(g+e+t+))+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
+      /(t+a+k+e+)+\s+(\w+)+\s+(l+o+k+)+\s+((a*t*|i*n*|o*n*)*\s*(t+h+e+)+)+\s+(u+r+l+)+\s+(\w*)+\s+(m+y+)+\s+(a+c+o+u+n+t+\W*\w*)+\s+(i+m+a+g+e+)+\s+(p+r+o+b+a+b+l+y+)+\s+(t+h+e+)+\s+(((b+u+y+)+|(t+o+p+)+|(b+e+s+t+)+|(c+h+e+a+p+)+|(g+e+t+)+)+\W*)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, ""))
     ];
     let multiMessageSpamBotTypeC = [
       /((h+e+y+)+\s+((w+h+a+t+)+|(h+w+a+t+)+)+\W*i*s+\s*((u+p+)+|(n+e+w+)+)+)+/ig.test(replaceCyrillicsWithLatin.normalize("NFD").replace(/[\u007E-\uFFFF]+/ig, "")),
